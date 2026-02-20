@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机抽号 V3.0</title>
+    <style>
+        /* 启动屏幕样式 - 黑底白字，无虚化 */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        .splash-title {
+            font-size: 72px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+        .splash-sub {
+            font-size: 28px;
+            color: #ffffff;
+            margin-bottom: 40px;
+        }
+        .splash-footer {
+            position: absolute;
+            bottom: 30px;
+            font-size: 20px;
+            color: #ffffff;
+            font-weight: 400;
+        }
+        /* 隐藏启动屏幕 */
+        .splash-hidden {
+            display: none !important;
+        }
+        /* 主界面样式 */
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: none;
+            position: relative;
+        }
+        /* 标题区域 */
+        .title-container {
+            margin-bottom: 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 5px;
+            cursor: pointer;
+            font-size: 32px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .sub-title {
+            font-size: 14px;
+            color: #888;
+            letter-spacing: 1px;
+            font-weight: normal;
+            margin-top: 0;
+            cursor: pointer;
+            display: inline-block;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* 设置按钮 - 圆角方框白底黑字 */
+        .settings-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: white;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 6px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            -webkit-tap-highlight-color: transparent;
+            transition: all 0.2s;
+        }
+        .settings-btn:hover {
+            background-color: #f5f5f5;
+            border-color: #ccc;
+        }
+        .settings-btn:active {
+            background-color: #e8e8e8;
+        }
+        .input-group {
+            margin: 20px 0;
+        }
+        label {
+            display: inline-block;
+            width: 120px;
+            text-align: right;
+            margin-right: 10px;
+            vertical-align: middle;
+            font-weight: bold;
+        }
+        .number-display {
+            display: inline-block;
+            width: 60px;
+            height: 40px;
+            line-height: 40px;
+            background-color: #4a90e2;
+            color: white;
+            font-size: 24px;
+            text-align: center;
+            border-radius: 5px;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        #edit-btn {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            vertical-align: middle;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #result {
+            font-size: 48px;
+            color: #333;
+            margin: 30px 0;
+            height: 60px;
+            line-height: 60px;
+            cursor: pointer;
+            user-select: none;
+        }
+        #draw-btn {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #draw-btn:disabled {
+            background-color: #eeeeee;
+            cursor: not-allowed;
+        }
+        .mode-indicator {
+            margin-top: 15px;
+            color: #666;
+            font-size: 14px;
+            font-style: italic;
+            min-height: 20px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #4a90e2;
+        }
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #ffffff;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 20px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .close:hover {
+            color: black;
+        }
+        #history-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            text-align: left;
+        }
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .history-number {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .history-time {
+            color: #666;
+            font-size: 12px;
+        }
+        .history-actions {
+            display: flex;
+            gap: 5px;
+        }
+        .history-btn {
+            padding: 4px 8px;
+            font-size: 12px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .delete-btn {
+            background-color: #ff6b6b;
+            color: white;
+        }
+        .add-btn {
+            background-color: #4a90e2;
+            color: white;
+            margin-bottom: 10px;
+        }
+        .clear-btn {
+            background-color: #ffa726;
+            color: white;
+            margin-top: 10px;
+            padding: 8px 16px;
+            font-size: 14px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .setup-modal-content {
+            background-color: #ffffff;
+            margin: 10% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .setup-input {
+            width: 100px;
+            padding: 10px;
+            font-size: 18px;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px solid #4a90e2;
+            border-radius: 5px;
+        }
+        .setup-btn {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .setup-btn:hover {
+            background-color: #3a7bc8;
+        }
+        .hint {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+        /* 设置弹窗样式 */
+        .settings-modal-content {
+            background-color: #ffffff;
+            margin: 10% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            text-align: left;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .settings-label {
+            font-size: 16px;
+            color: #333;
+        }
+        /* 调试弹窗样式 */
+        .debug-modal-content {
+            background-color: #ffffff;
+            margin: 10% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .debug-close {
+            color: #aaa;
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 20px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .debug-close:hover {
+            color: black;
+        }
+        /* 密码容器样式 */
+        .password-container {
+            position: relative;
+            width: 150px;
+            margin: 20px auto;
+            height: 60px;
+        }
+        #debug-password {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #4a90e2;
+            border-radius: 5px;
+            letter-spacing: 8px;
+            font-family: monospace;
+            background-color: transparent;
+            color: transparent;
+            caret-color: #4a90e2;
+            z-index: 2;
+            box-sizing: border-box;
+        }
+        .password-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #4a90e2;
+            border-radius: 5px;
+            letter-spacing: 8px;
+            font-family: monospace;
+            background-color: white;
+            color: #333;
+            z-index: 1;
+            box-sizing: border-box;
+            pointer-events: none;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .mask-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #333;
+            margin: 0 4px;
+        }
+        .debug-btn {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .debug-btn:hover {
+            background-color: #3a7bc8;
+        }
+        .debug-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .error-message {
+            color: #ff4444;
+            font-size: 14px;
+            margin-top: 10px;
+            height: 20px;
+        }
+        .lock-message {
+            color: #ff9800;
+            font-size: 14px;
+            margin-top: 10px;
+            height: 20px;
+        }
+        .attempts-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .add-number-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .add-number-input {
+            width: 60px;
+            padding: 5px;
+            font-size: 16px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 启动屏幕 -->
+    <div class="splash-screen" id="splash">
+        <div class="splash-title">随机抽号 V3.0</div>
+        <div class="splash-sub">启动中...</div>
+        <div class="splash-footer">luckynum.us.ci</div>
+    </div>
+
+    <!-- 首次使用设置弹窗 -->
+    <div id="setup-modal" class="modal">
+        <div class="setup-modal-content">
+            <h2>欢迎使用随机抽号系统</h2>
+            <p>请输入班级人数</p>
+            <input type="number" id="setup-class-size" class="setup-input" min="1" max="999" placeholder="班级人数">
+            <br>
+            <button id="setup-save-btn" class="setup-btn">确定</button>
+            <div class="hint">此设置将保存在您的浏览器中</div>
+        </div>
+    </div>
+
+    <!-- 设置弹窗 -->
+    <div id="settings-modal" class="modal">
+        <div class="settings-modal-content">
+            <span class="close" id="settings-close">&times;</span>
+            <h2 style="text-align: center;">设置</h2>
+            
+            <div class="settings-item">
+                <span class="settings-label">不重复抽选</span>
+                <label class="switch">
+                    <input type="checkbox" id="settings-no-repeat-switch" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="settings-item">
+                <span class="settings-label">滚动抽选</span>
+                <label class="switch">
+                    <input type="checkbox" id="settings-scroll-switch" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 标题区域 -->
+        <div class="title-container">
+            <h1 id="title">随机抽号 V3.0</h1>
+            <div class="sub-title" id="url-text">luckynum.us.ci</div>
+            <button class="settings-btn" id="settings-btn">设置</button>
+        </div>
+        
+        <div class="input-group">
+            <label for="class-size">班级人数：</label>
+            <span id="class-size-display" class="number-display">?</span>
+            <button id="edit-btn">编辑</button>
+            <input type="number" id="class-size-input" style="display:none; width:60px; text-align:center">
+        </div>
+        
+        <div class="input-group">
+            <div id="result">?</div>
+            <button id="draw-btn">抽号</button>
+            <div id="mode-indicator" class="mode-indicator"></div>
+        </div>
+    </div>
+
+    <!-- 开发者调试弹窗 -->
+    <div id="debug-modal" class="modal">
+        <div class="debug-modal-content">
+            <span class="debug-close" id="debug-close-btn">&times;</span>
+            <h2>开发者调试模式</h2>
+            <p>请输入调试密码</p>
+            
+            <div class="password-container">
+                <input type="text" id="debug-password" class="debug-password-input" maxlength="4" autocomplete="off" inputmode="numeric" pattern="\d*">
+                <div id="password-mask" class="password-mask"></div>
+            </div>
+            
+            <br>
+            <button id="debug-submit-btn" class="debug-btn">验证</button>
+            <div id="debug-error" class="error-message"></div>
+            <div id="debug-lock" class="lock-message"></div>
+            <div id="debug-attempts" class="attempts-info"></div>
+        </div>
+    </div>
+
+    <!-- 历史记录弹窗 -->
+    <div id="history-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="history-close">&times;</span>
+            <h2>已抽取的学号</h2>
+            
+            <div class="add-number-container">
+                <input type="number" id="add-number-input" class="add-number-input" min="1" max="999" placeholder="学号">
+                <button id="add-number-btn" class="history-btn add-btn">添加</button>
+            </div>
+            
+            <div id="history-list"></div>
+            
+            <button id="clear-history-btn" class="clear-btn">清空历史记录</button>
+        </div>
+    </div>
+
+    <script>
+        // 初始化变量
+        let classSize = 0;
+        let noRepeatMode = true;      // 不重复开关状态
+        let scrollMode = true;        // 滚动抽选开关状态
+        let drawnNumbers = []; 
+        
+        // 开发者模式触发条件
+        let titleClickCount = 0;
+        let urlClickCount = 0;
+        let titleClickTimer = null;
+        let urlClickTimer = null;
+        let titleReady = false;
+        
+        // 锁定相关变量
+        let wrongAttempts = 0; 
+        let lockUntil = 0; 
+        let lockTimer = null; 
+        
+        // 密码
+        const CORRECT_PASSWORD = "3001";
+        
+        // DOM 元素
+        const splash = document.getElementById('splash');
+        const setupModal = document.getElementById('setup-modal');
+        const setupClassSizeInput = document.getElementById('setup-class-size');
+        const setupSaveBtn = document.getElementById('setup-save-btn');
+        const classSizeDisplay = document.getElementById('class-size-display');
+        const classSizeInput = document.getElementById('class-size-input');
+        const editBtn = document.getElementById('edit-btn');
+        const resultDisplay = document.getElementById('result');
+        const drawBtn = document.getElementById('draw-btn');
+        const modeIndicator = document.getElementById('mode-indicator');
+        const title = document.getElementById('title');
+        const urlText = document.getElementById('url-text');
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const settingsClose = document.getElementById('settings-close');
+        const settingsNoRepeatSwitch = document.getElementById('settings-no-repeat-switch');
+        const settingsScrollSwitch = document.getElementById('settings-scroll-switch');
+        
+        const debugModal = document.getElementById('debug-modal');
+        const debugPasswordInput = document.getElementById('debug-password');
+        const passwordMask = document.getElementById('password-mask');
+        const debugSubmitBtn = document.getElementById('debug-submit-btn');
+        const debugError = document.getElementById('debug-error');
+        const debugLock = document.getElementById('debug-lock');
+        const debugAttempts = document.getElementById('debug-attempts');
+        const debugCloseBtn = document.getElementById('debug-close-btn');
+        
+        const historyModal = document.getElementById('history-modal');
+        const historyClose = document.getElementById('history-close');
+        const historyList = document.getElementById('history-list');
+        const addNumberInput = document.getElementById('add-number-input');
+        const addNumberBtn = document.getElementById('add-number-btn');
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+        
+        // 密码掩码更新
+        function updatePasswordMask() {
+            const value = debugPasswordInput.value;
+            const maxLength = 4;
+            let maskHtml = '';
+            
+            for (let i = 0; i < value.length; i++) {
+                maskHtml += '<span class="mask-dot"></span>';
+            }
+            
+            if (value.length === 0) {
+                maskHtml = '<span style="color: #999; letter-spacing: normal; font-size: 16px;">请输入</span>';
+            } else {
+                for (let i = value.length; i < maxLength; i++) {
+                    maskHtml += '<span style="display: inline-block; width: 20px;"></span>';
+                }
+            }
+            
+            passwordMask.innerHTML = maskHtml;
+        }
+        
+        // 页面加载
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                splash.classList.add('splash-hidden');
+                document.querySelector('.container').style.display = 'block';
+                checkFirstTimeUse();
+            }, 1200);
+        });
+
+        // 从localStorage加载数据
+        function loadFromLocalStorage() {
+            try {
+                const sizeData = localStorage.getItem('randomDraw_classSize');
+                if (sizeData) {
+                    classSize = parseInt(sizeData);
+                }
+                
+                const drawnData = localStorage.getItem('randomDraw_drawnNumbers');
+                if (drawnData) {
+                    const parsedData = JSON.parse(drawnData);
+                    if (Array.isArray(parsedData)) {
+                        if (parsedData.length > 0 && typeof parsedData[0] === 'object') {
+                            drawnNumbers = parsedData;
+                        } else {
+                            drawnNumbers = parsedData.map(number => ({
+                                number: number,
+                                timestamp: Date.now()
+                            }));
+                            saveToLocalStorage();
+                        }
+                    } else {
+                        drawnNumbers = [];
+                    }
+                }
+                
+                // 加载不重复开关状态
+                const repeatData = localStorage.getItem('randomDraw_noRepeatMode');
+                if (repeatData !== null) {
+                    noRepeatMode = repeatData === 'true';
+                }
+                settingsNoRepeatSwitch.checked = noRepeatMode;
+                
+                // 加载滚动抽选开关状态
+                const scrollData = localStorage.getItem('randomDraw_scrollMode');
+                if (scrollData !== null) {
+                    scrollMode = scrollData === 'true';
+                }
+                settingsScrollSwitch.checked = scrollMode;
+                
+            } catch (error) {
+                console.error('从localStorage加载数据时出错:', error);
+                classSize = 0;
+                drawnNumbers = [];
+                noRepeatMode = true;
+                scrollMode = true;
+                settingsNoRepeatSwitch.checked = true;
+                settingsScrollSwitch.checked = true;
+            }
+        }
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('randomDraw_classSize', classSize);
+                localStorage.setItem('randomDraw_drawnNumbers', JSON.stringify(drawnNumbers));
+                localStorage.setItem('randomDraw_noRepeatMode', noRepeatMode);
+                localStorage.setItem('randomDraw_scrollMode', scrollMode);
+            } catch (error) {
+                console.error('保存数据到localStorage时出错:', error);
+                alert('保存数据时出错，请检查浏览器设置。');
+            }
+        }
+
+        // 检查首次使用
+        function checkFirstTimeUse() {
+            if (!classSize || classSize <= 0) {
+                setupModal.style.display = 'block';
+                setupClassSizeInput.focus();
+            }
+        }
+
+        // 重置开发者触发状态
+        function resetDeveloperTrigger() {
+            titleClickCount = 0;
+            urlClickCount = 0;
+            titleReady = false;
+            if (titleClickTimer) {
+                clearTimeout(titleClickTimer);
+                titleClickTimer = null;
+            }
+            if (urlClickTimer) {
+                clearTimeout(urlClickTimer);
+                urlClickTimer = null;
+            }
+        }
+
+        // 锁定相关函数
+        function isLocked() {
+            return Date.now() < lockUntil;
+        }
+
+        function updateLockMessage() {
+            if (isLocked()) {
+                const remainingSeconds = Math.ceil((lockUntil - Date.now()) / 1000);
+                debugLock.textContent = `系统已锁定，请等待${remainingSeconds}秒`;
+                debugSubmitBtn.disabled = true;
+                debugPasswordInput.disabled = true;
+            } else {
+                debugLock.textContent = '';
+                debugSubmitBtn.disabled = false;
+                debugPasswordInput.disabled = false;
+            }
+        }
+
+        function startLockTimer() {
+            if (lockTimer) {
+                clearInterval(lockTimer);
+            }
+            lockTimer = setInterval(function() {
+                if (!isLocked()) {
+                    clearInterval(lockTimer);
+                    updateLockMessage();
+                    updateAttemptsInfo();
+                } else {
+                    updateLockMessage();
+                }
+            }, 1000);
+        }
+
+        function loadLockState() {
+            try {
+                const attemptsData = localStorage.getItem('randomDraw_wrongAttempts');
+                const lockData = localStorage.getItem('randomDraw_lockUntil');
+                if (attemptsData) {
+                    wrongAttempts = parseInt(attemptsData);
+                }
+                if (lockData) {
+                    lockUntil = parseInt(lockData);
+                    if (isLocked()) {
+                        startLockTimer();
+                    }
+                }
+            } catch (error) {
+                console.error('加载锁定状态时出错:', error);
+            }
+        }
+
+        function saveLockState() {
+            try {
+                localStorage.setItem('randomDraw_wrongAttempts', wrongAttempts);
+                localStorage.setItem('randomDraw_lockUntil', lockUntil);
+            } catch (error) {
+                console.error('保存锁定状态时出错:', error);
+            }
+        }
+
+        function updateAttemptsInfo() {
+            if (wrongAttempts > 0) {
+                debugAttempts.textContent = `错误尝试: ${wrongAttempts}/5`;
+            } else {
+                debugAttempts.textContent = '';
+            }
+        }
+
+        // 显示调试弹窗
+        function showDebugModal() {
+            if (isLocked()) {
+                updateLockMessage();
+            }
+            debugModal.style.display = 'block';
+            debugPasswordInput.focus();
+            updatePasswordMask();
+            updateAttemptsInfo();
+            updateLockMessage();
+        }
+
+        // 显示历史记录
+        function showHistory() {
+            historyList.innerHTML = '';
+            if (drawnNumbers.length === 0) {
+                historyList.innerHTML = '<div class="history-item">暂无抽取记录</div>';
+            } else {
+                drawnNumbers.slice().reverse().forEach((item, index) => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    
+                    const infoDiv = document.createElement('div');
+                    infoDiv.className = 'history-info';
+                    
+                    const numberSpan = document.createElement('span');
+                    numberSpan.className = 'history-number';
+                    numberSpan.textContent = '学号: ' + item.number;
+                    
+                    const timeSpan = document.createElement('span');
+                    timeSpan.className = 'history-time';
+                    timeSpan.textContent = formatDateTime(item.timestamp);
+                    
+                    infoDiv.appendChild(numberSpan);
+                    infoDiv.appendChild(timeSpan);
+                    
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'history-actions';
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'history-btn delete-btn';
+                    deleteBtn.textContent = '删除';
+                    deleteBtn.onclick = function() {
+                        const actualIndex = drawnNumbers.length - 1 - index;
+                        drawnNumbers.splice(actualIndex, 1);
+                        saveToLocalStorage();
+                        showHistory();
+                    };
+                    
+                    actionsDiv.appendChild(deleteBtn);
+                    historyItem.appendChild(infoDiv);
+                    historyItem.appendChild(actionsDiv);
+                    historyList.appendChild(historyItem);
+                });
+            }
+            historyModal.style.display = 'block';
+        }
+
+        function formatDateTime(timestamp) {
+            const date = new Date(timestamp);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+
+        // 事件监听器
+        function setupEventListeners() {
+            setupSaveBtn.addEventListener('click', function() {
+                const newSize = parseInt(setupClassSizeInput.value);
+                if (isNaN(newSize) || newSize < 1 || newSize > 999) {
+                    alert('请输入有效的班级人数（1-999）！');
+                    setupClassSizeInput.focus();
+                    return;
+                }
+                classSize = newSize;
+                saveToLocalStorage();
+                setupModal.style.display = 'none';
+                updateDisplay();
+            });
+
+            setupClassSizeInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') setupSaveBtn.click();
+            });
+
+            editBtn.addEventListener('click', toggleEditMode);
+
+            classSizeInput.addEventListener('blur', saveClassSize);
+            classSizeInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') saveClassSize();
+            });
+
+            drawBtn.addEventListener('click', drawNumber);
+
+            // 设置按钮点击事件
+            settingsBtn.addEventListener('click', function() {
+                settingsModal.style.display = 'block';
+            });
+
+            settingsClose.addEventListener('click', function() {
+                settingsModal.style.display = 'none';
+            });
+
+            // 不重复开关变化事件
+            settingsNoRepeatSwitch.addEventListener('change', function() {
+                noRepeatMode = this.checked;
+                saveToLocalStorage();
+                updateDisplay();
+            });
+
+            // 滚动抽选开关变化事件
+            settingsScrollSwitch.addEventListener('change', function() {
+                scrollMode = this.checked;
+                saveToLocalStorage();
+            });
+
+            // 全局点击重置开发者触发
+            document.addEventListener('click', function(event) {
+                if (event.target !== title && event.target !== urlText) {
+                    resetDeveloperTrigger();
+                }
+            });
+
+            // 标题点击
+            title.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                if (titleClickTimer) clearTimeout(titleClickTimer);
+                
+                titleClickCount++;
+                
+                titleClickTimer = setTimeout(() => {
+                    titleClickCount = 0;
+                    titleReady = false;
+                }, 5000);
+                
+                if (titleClickCount >= 10) {
+                    titleReady = true;
+                    titleClickCount = 0;
+                }
+            });
+
+            // 网址点击
+            urlText.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                if (!titleReady) {
+                    return;
+                }
+                
+                if (urlClickTimer) clearTimeout(urlClickTimer);
+                
+                urlClickCount++;
+                
+                urlClickTimer = setTimeout(() => {
+                    urlClickCount = 0;
+                    titleReady = false;
+                }, 5000);
+                
+                if (urlClickCount >= 3) {
+                    showDebugModal();
+                    urlClickCount = 0;
+                    titleReady = false;
+                    if (urlClickTimer) clearTimeout(urlClickTimer);
+                    if (titleClickTimer) clearTimeout(titleClickTimer);
+                }
+            });
+
+            // 密码输入处理
+            debugPasswordInput.addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, '');
+                if (this.value.length > 4) {
+                    this.value = this.value.slice(0, 4);
+                }
+                updatePasswordMask();
+            });
+
+            debugPasswordInput.addEventListener('keypress', function(e) {
+                const key = e.key;
+                if (!/^\d$/.test(key) && key !== 'Enter' && key !== 'Backspace' && key !== 'Delete' && key !== 'ArrowLeft' && key !== 'ArrowRight') {
+                    e.preventDefault();
+                }
+                
+                if (e.key === 'Enter') {
+                    debugSubmitBtn.click();
+                }
+            });
+
+            // 调试提交
+            debugSubmitBtn.addEventListener('click', function() {
+                if (isLocked()) {
+                    updateLockMessage();
+                    return;
+                }
+
+                const password = debugPasswordInput.value;
+
+                if (password === CORRECT_PASSWORD) {
+                    wrongAttempts = 0;
+                    saveLockState();
+                    debugModal.style.display = 'none';
+                    debugPasswordInput.value = '';
+                    updatePasswordMask();
+                    debugError.textContent = '';
+                    debugLock.textContent = '';
+                    showHistory();
+                } else {
+                    wrongAttempts++;
+                    if (wrongAttempts >= 5) {
+                        lockUntil = Date.now() + 60 * 1000;
+                        saveLockState();
+                        startLockTimer();
+                    }
+                    saveLockState();
+                    updateAttemptsInfo();
+                    debugError.textContent = '密码错误';
+                    debugPasswordInput.value = '';
+                    updatePasswordMask();
+                    debugPasswordInput.focus();
+                    updateLockMessage();
+                }
+            });
+
+            // 调试窗口关闭按钮
+            debugCloseBtn.addEventListener('click', function() {
+                debugModal.style.display = 'none';
+                debugPasswordInput.value = '';
+                updatePasswordMask();
+                debugError.textContent = '';
+                debugLock.textContent = '';
+            });
+
+            // 历史记录窗口关闭按钮
+            historyClose.addEventListener('click', function() {
+                historyModal.style.display = 'none';
+            });
+
+            addNumberBtn.addEventListener('click', function() {
+                const number = parseInt(addNumberInput.value);
+                if (isNaN(number) || number < 1 || number > classSize) {
+                    alert('请输入有效的学号（1-' + classSize + '）！');
+                    addNumberInput.focus();
+                    return;
+                }
+                if (noRepeatMode) {
+                    const existing = drawnNumbers.find(item => item.number === number);
+                    if (existing) {
+                        alert('该学号已经在历史记录中！');
+                        addNumberInput.focus();
+                        return;
+                    }
+                }
+                drawnNumbers.push({
+                    number: number,
+                    timestamp: Date.now()
+                });
+                saveToLocalStorage();
+                addNumberInput.value = '';
+                showHistory();
+            });
+
+            addNumberInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') addNumberBtn.click();
+            });
+
+            clearHistoryBtn.addEventListener('click', function() {
+                if (confirm('确定要清空所有历史记录吗？')) {
+                    drawnNumbers = [];
+                    saveToLocalStorage();
+                    showHistory();
+                }
+            });
+
+            // 点击弹窗外部关闭
+            window.addEventListener('click', function(event) {
+                if (event.target === historyModal) {
+                    historyModal.style.display = 'none';
+                }
+                if (event.target === setupModal) {
+                    setupClassSizeInput.focus();
+                }
+                if (event.target === debugModal) {
+                    debugPasswordInput.focus();
+                }
+                if (event.target === settingsModal) {
+                    settingsModal.style.display = 'none';
+                }
+            });
+
+            window.addEventListener('beforeunload', function() {
+                if (titleClickTimer) clearTimeout(titleClickTimer);
+                if (urlClickTimer) clearTimeout(urlClickTimer);
+                if (lockTimer) clearInterval(lockTimer);
+            });
+        }
+
+        function toggleEditMode() {
+            if (classSizeInput.style.display === 'none') {
+                classSizeInput.style.display = 'inline-block';
+                classSizeDisplay.style.display = 'none';
+                editBtn.textContent = '保存';
+                classSizeInput.value = classSize;
+                classSizeInput.focus();
+                drawBtn.disabled = true;
+            } else {
+                saveClassSize();
+            }
+        }
+
+        function saveClassSize() {
+            let newSize = parseInt(classSizeInput.value);
+            if (isNaN(newSize) || newSize < 1) {
+                alert('请输入有效的班级人数！');
+                classSizeInput.value = classSize;
+                return;
+            }
+            classSize = newSize;
+            if (noRepeatMode && drawnNumbers.length > 0) {
+                drawnNumbers = drawnNumbers.filter(item => item.number <= classSize);
+            }
+            classSizeInput.style.display = 'none';
+            classSizeDisplay.style.display = 'inline-block';
+            editBtn.textContent = '编辑';
+            drawBtn.disabled = false;
+            saveToLocalStorage();
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            if (classSize > 0) {
+                classSizeDisplay.textContent = classSize;
+                
+                // 不重复模式下检查是否需要重置
+                if (noRepeatMode && drawnNumbers.length >= classSize) {
+                    drawnNumbers = [];
+                    saveToLocalStorage();
+                }
+                
+                drawBtn.disabled = false;
+                
+                // 只有不重复开关开启时显示提示
+                if (noRepeatMode) {
+                    modeIndicator.textContent = "不重复抽选已开启";
+                } else {
+                    modeIndicator.textContent = "";
+                }
+            } else {
+                classSizeDisplay.textContent = '?';
+                drawBtn.disabled = true;
+                modeIndicator.textContent = "";
+            }
+        }
+
+        // 滚动抽选函数
+        async function scrollDraw() {
+            const scrollCount = 10;
+            const scrollInterval = 80; // 毫秒
+            
+            for (let i = 0; i < scrollCount; i++) {
+                // 生成随机数但不记录
+                const tempNumber = Math.floor(Math.random() * classSize) + 1;
+                resultDisplay.textContent = tempNumber;
+                
+                // 等待一段时间
+                await new Promise(resolve => setTimeout(resolve, scrollInterval));
+            }
+            
+            // 第11个为最终结果
+            return Math.floor(Math.random() * classSize) + 1;
+        }
+
+        async function drawNumber() {
+            if (classSize === 0) {
+                alert('请先设置班级人数！');
+                setupModal.style.display = 'block';
+                setupClassSizeInput.focus();
+                return;
+            }
+            
+            let finalNumber;
+            
+            // 滚动抽选逻辑
+            if (scrollMode) {
+                finalNumber = await scrollDraw();
+            } else {
+                finalNumber = Math.floor(Math.random() * classSize) + 1;
+            }
+            
+            // 不重复抽选逻辑
+            if (noRepeatMode) {
+                // 获取已抽取的学号列表
+                const drawnNumberList = drawnNumbers.map(item => item.number);
+                
+                // 如果所有号码都已被抽取，重置
+                if (drawnNumberList.length >= classSize) {
+                    drawnNumbers = [];
+                }
+                
+                // 重新获取可用的号码
+                const availableNumbers = [];
+                const currentDrawnList = drawnNumbers.map(item => item.number);
+                
+                for (let i = 1; i <= classSize; i++) {
+                    if (!currentDrawnList.includes(i)) {
+                        availableNumbers.push(i);
+                    }
+                }
+                
+                // 如果当前生成的号码不可用，重新生成
+                if (availableNumbers.length > 0 && !availableNumbers.includes(finalNumber)) {
+                    finalNumber = availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
+                }
+            }
+            
+            // 记录最终结果
+            drawnNumbers.push({
+                number: finalNumber,
+                timestamp: Date.now()
+            });
+            
+            resultDisplay.textContent = finalNumber;
+            saveToLocalStorage();
+        }
+
+        // 初始化
+        loadFromLocalStorage();
+        loadLockState();
+        setupEventListeners();
+        updateDisplay();
+    </script>
+</body>
+</html>
