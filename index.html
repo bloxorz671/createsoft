@@ -777,8 +777,8 @@
         // 图片链接
         const imageUrl = 'https://ss-mpvolc.meipian.me/users/499047829/00f34565027946def57924297af9bb3bmpand__jpg.heic~tplv-s1ctq42ewb-s2-cC-q%3A0%3A0%3A0%3A0%3Aq0.jpg';
         
-        // 网页版链接 - 已修改为 luckynum.top
-        const webVersionLink = 'https://luckynum.top/online';
+        // 网页版链接 - 已修改为 http://
+        const webVersionLink = 'http://luckynum.top/online';
         
         // 下载链接 - 已修改为 luckynum.top
         const phoneDownloadLink = 'http://luckynum.top/%E9%9A%8F%E6%9C%BA%E6%8A%BD%E5%8F%B7Android1.0.0.apk';
@@ -1282,7 +1282,7 @@
                 document.getElementById('deviceUnsupportedModal').classList.remove('active');
               };
               
-              // 网页版导航函数（在当前标签页打开）- 已修改为 luckynum.top
+              // 网页版导航函数（在当前标签页打开）- 已修改为 http://
               window.navigateToWebVersion = function(event) {
                 event.preventDefault();
                 window.location.href = '${webVersionLink}';
@@ -1384,12 +1384,12 @@
           <div class="system-support">银河麒麟/统信UOS</div>
         </div>
 
-        <!-- 网页版卡片 - 在当前标签页打开，已修改为 luckynum.top -->
+        <!-- 网页版卡片 - 在当前标签页打开，已修改为 http:// -->
         <div class="download-card">
           <div class="image-wrapper">
             <img class="web-icon" src="https://ss-mpvolc.meipian.me/users/499047829/a706d29df933a1805e0683c43a9821f2mpand__jpg.heic~tplv-s1ctq42ewb-s2-cC-q:750:0:0:0:q80.webp" alt="网页版">
           </div>
-          <a href="https://luckynum.top/online" class="download-btn web-btn" onclick="navigateToWebVersion(event)">访问网页版</a>
+          <a href="http://luckynum.top/online" class="download-btn web-btn" onclick="navigateToWebVersion(event)">访问网页版</a>
           <!-- 网页版不需要密码提示，但为了保持卡片高度一致，留一个空行 -->
           <div style="height: 2.5rem;"></div>
           <div class="accent-line"></div>
@@ -1475,10 +1475,10 @@
         });
       }
 
-      // 网页版导航函数（在当前标签页打开）- 已修改为 luckynum.top
+      // 网页版导航函数（在当前标签页打开）- 已修改为 http://
       window.navigateToWebVersion = function(event) {
         event.preventDefault();
-        window.location.href = 'https://luckynum.top/online';
+        window.location.href = 'http://luckynum.top/online';
       };
 
       // 执行设备检测
