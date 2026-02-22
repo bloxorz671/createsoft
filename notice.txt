@@ -1,2 +1,4 @@
-Head=开发者提示
-Message=我们的网址已变更为www.luckynum.top，由于网址变更部分版本没来得及更新，我们深感抱歉。旧网址已无法使用，请互相告知。
+Head=
+Message=
+Board=
+
