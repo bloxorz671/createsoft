@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件拆分合并器 · 纯净版</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #eef4fa 0%, #dee9f5 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            max-width: 950px;
+            width: 100%;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 64px;
+            padding: 30px;
+            box-shadow: 0 30px 60px -20px #1a2f4e;
+            border: 1px solid rgba(255,255,255,0.7);
+            transition: all 0.2s;
+        }
+        .title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            text-align: center;
+            background: linear-gradient(145deg, #162b44, #1f4465);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 32px;
+            letter-spacing: -0.02em;
+        }
+        /* 主菜单两个大按钮 */
+        .menu-row {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .menu-btn {
+            flex: 1 1 280px;
+            border: none;
+            background: white;
+            border-radius: 60px;
+            padding: 40px 30px;
+            box-shadow: 0 30px 40px -20px #12345666;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s;
+            border: 2px solid rgba(255,255,255,0.8);
+            text-align: left;
+        }
+        .menu-btn:active { transform: scale(0.98); }
+        .menu-split {
+            background: linear-gradient(145deg, #223a5e, #142c47);
+        }
+        .menu-merge {
+            background: linear-gradient(145deg, #1c5f5a, #0b423e);
+        }
+        .menu-btn:hover {
+            box-shadow: 0 40px 50px -10px #0a1e32;
+        }
+        .main-text {
+            font-size: 4rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .sub-text {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.9);
+            margin-top: 16px;
+            border-top: 2px solid rgba(255,255,255,0.2);
+            padding-top: 16px;
+        }
+        .workspace {
+            margin-top: 20px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .back-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: #2b4b78;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 20px;
+            border-radius: 40px;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+        .back-btn:hover {
+            background: #ecf3fc;
+        }
+        .panel {
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(4px);
+            border-radius: 48px;
+            padding: 28px 24px;
+            border: 1px solid white;
+        }
+        .option-line {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+            background: #e3edf8;
+            padding: 18px 24px;
+            border-radius: 60px;
+        }
+        .radio-group {
+            display: flex;
+            gap: 20px;
+        }
+        .radio-item {
+            background: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .param-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 5px 20px 5px 15px;
+            border-radius: 40px;
+        }
+        .param-input input {
+            border: none;
+            background: #f0f5fd;
+            padding: 10px 16px;
+            border-radius: 40px;
+            width: 120px;
+            font-size: 1rem;
+            border: 1px solid #c1d6f0;
+        }
+        .param-input input:focus {
+            outline: 2px solid #2a4e7a;
+        }
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 8px 18px;
+            border-radius: 40px;
+        }
+        .toggle-switch input {
+            width: 20px;
+            height: 20px;
+            accent-color: #1f4465;
+        }
+        .file-zone {
+            border: 2px dashed #98b9dd;
+            border-radius: 40px;
+            padding: 30px;
+            text-align: center;
+            background: #f0f7ff;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .file-zone:hover {
+            background: #e3efff;
+            border-color: #1f4465;
+        }
+        .action-btn {
+            background: #1f4465;
+            border: none;
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 600;
+            padding: 18px 40px;
+            border-radius: 60px;
+            box-shadow: 0 12px 20px -8px #1f446580;
+            cursor: pointer;
+            margin: 10px 0;
+            border: 1px solid #ffffff60;
+        }
+        .action-btn:active { transform: scale(0.98); }
+        .action-btn.small {
+            font-size: 1.1rem;
+            padding: 12px 28px;
+        }
+        .file-grid {
+            background: #eaf1fa;
+            border-radius: 36px;
+            padding: 20px;
+            max-height: 320px;
+            overflow-y: auto;
+            margin: 20px 0 10px;
+        }
+        .file-row {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 10px 16px;
+            border-radius: 50px;
+            margin-bottom: 8px;
+            gap: 12px;
+        }
+        .file-index {
+            background: #1f4465;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .file-name {
+            flex: 1;
+            word-break: break-word;
+            font-size: 0.95rem;
+        }
+        .file-size {
+            color: #476788;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            margin-right: 5px;
+        }
+        .download-single, .delete-single {
+            background: #2b5f8a;
+            border: none;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        .delete-single {
+            background: #b13e3e;
+        }
+        .small-btn {
+            background: white;
+            border: 1px solid #acccf0;
+            padding: 12px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .warning-banner {
+            background: #fff0d9;
+            border-radius: 40px;
+            padding: 12px 25px;
+            color: #a35100;
+            border-left: 8px solid #f1a23d;
+            margin: 15px 0 0;
+            font-weight: 500;
+        }
+        .info-text {
+            color: #1f4465;
+            font-size: 0.95rem;
+            margin: 5px 0 10px;
+            background: #e9f0fc;
+            padding: 8px 20px;
+            border-radius: 40px;
+            display: inline-block;
+        }
+        .flex-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        .mt-2 {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="card" id="appCard">
+    <!-- 主标题 -->
+    <div class="title">文件拆分合并器</div>
+
+    <!-- 主菜单 (两个大按钮) 初始可见 -->
+    <div id="mainMenu" class="menu-row">
+        <button class="menu-btn menu-split" id="gotoSplitBtn">
+            <div class="main-text">拆分</div>
+            <div class="sub-text">将无法发送的大文件拆分为小文件</div>
+        </button>
+        <button class="menu-btn menu-merge" id="gotoMergeBtn">
+            <div class="main-text">合并</div>
+            <div class="sub-text">将收到被拆分发送的文件重新合并为大文件查看</div>
+        </button>
+    </div>
+
+    <!-- 拆分工作区 (初始隐藏) -->
+    <div id="splitWorkspace" class="workspace hidden">
+        <div class="back-bar">
+            <button class="back-btn" id="backFromSplit">← 返回</button>
+        </div>
+        <div class="panel">
+            <!-- 拆分参数行 -->
+            <div class="option-line">
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" name="splitMode" id="splitModeSize" value="size" checked> <label for="splitModeSize">按大小</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" name="splitMode" id="splitModeCount" value="count"> <label for="splitModeCount">按个数</label>
+                    </div>
+                </div>
+                <div class="param-input" id="sizeParamBlock">
+                    <span>MB/块</span>
+                    <input type="number" id="chunkSizeInput" value="20" step="0.5" min="1">
+                </div>
+                <div class="param-input hidden" id="countParamBlock">
+                    <span>块数</span>
+                    <input type="number" id="chunkCountInput" value="4" min="2" max="100">
+                </div>
+                <div class="toggle-switch">
+                    <span>自动下载</span>
+                    <input type="checkbox" id="autoDownloadCheckbox">
+                </div>
+            </div>
+
+            <!-- 动态碎片数量提示 (超过10个时显示) -->
+            <div id="fragWarning" class="warning-banner" style="display: none;"></div>
+
+            <!-- 文件选择区 -->
+            <div class="file-zone" id="splitDropArea">
+                <span style="font-size: 2rem;">+</span>
+                <p>点击或拖拽选择要拆分的单个文件</p>
+            </div>
+            <input type="file" id="splitFileInput" style="display: none;">
+
+            <!-- 拆分按钮 -->
+            <div style="text-align: center;">
+                <button class="action-btn" id="executeSplitBtn">执行拆分</button>
+            </div>
+
+            <!-- 拆分结果列表 (含全部下载、单独下载) -->
+            <div id="splitResultArea" class="file-grid" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="font-weight: 600;">碎片列表</span>
+                    <button class="small-btn" id="downloadAllBtn">全部下载</button>
+                </div>
+                <div id="splitResultList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 合并工作区 (初始隐藏) -->
+    <div id="mergeWorkspace" class="workspace hidden">
+        <div class="back-bar">
+            <button class="back-btn" id="backFromMerge">← 返回</button>
+        </div>
+        <div class="panel">
+            <div style="margin-bottom: 16px; font-weight: 600;">已选文件块 (可多次添加)</div>
+            <div class="file-zone" id="mergeDropZone">
+                <span style="font-size: 2rem;">+</span>
+                <p>点击或拖拽添加碎片文件 (part0, part1...)</p>
+            </div>
+            <input type="file" id="mergeFileInput" multiple style="display: none;">
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0;">
+                <button class="small-btn" id="selectMergeBtn">选择文件块</button>
+                <button class="small-btn" id="continueMergeBtn">继续添加</button>
+                <button class="small-btn" id="clearMergeBtn">清空列表</button>
+            </div>
+
+            <!-- 已选列表展示区 (带单个删除) -->
+            <div id="mergeListContainer" class="file-grid" style="display: none;">
+                <div id="mergeFileList"></div>
+            </div>
+            <div id="mergeWarningMsg" class="warning-banner" style="display: none;">检测到序号不连续，请确认所有碎片齐全</div>
+
+            <div style="text-align: center; margin-top: 16px;">
+                <button class="action-btn small" id="executeMergeBtn">合并所有块</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 无底部说明 -->
+</div>
+
+<script>
+    (function() {
+        // ---------- 核心变量 ----------
+        let currentSplitFile = null;               // 当前拆分选择的文件
+        let splitChunks = [];                       // 存储拆分后的碎片 { blob, index, name, size }
+        let mergeFiles = [];                         // 合并模式已选文件列表
+
+        // DOM
+        const mainMenu = document.getElementById('mainMenu');
+        const splitWorkspace = document.getElementById('splitWorkspace');
+        const mergeWorkspace = document.getElementById('mergeWorkspace');
+
+        // 拆分相关
+        const splitModeSize = document.getElementById('splitModeSize');
+        const splitModeCount = document.getElementById('splitModeCount');
+        const sizeParamBlock = document.getElementById('sizeParamBlock');
+        const countParamBlock = document.getElementById('countParamBlock');
+        const chunkSizeInput = document.getElementById('chunkSizeInput');
+        const chunkCountInput = document.getElementById('chunkCountInput');
+        const autoDownloadCheck = document.getElementById('autoDownloadCheckbox');
+        const splitDropArea = document.getElementById('splitDropArea');
+        const splitFileInput = document.getElementById('splitFileInput');
+        const executeSplitBtn = document.getElementById('executeSplitBtn');
+        const splitResultArea = document.getElementById('splitResultArea');
+        const splitResultList = document.getElementById('splitResultList');
+        const downloadAllBtn = document.getElementById('downloadAllBtn');
+        const fragWarning = document.getElementById('fragWarning');
+
+        // 合并相关
+        const mergeDropZone = document.getElementById('mergeDropZone');
+        const mergeFileInput = document.getElementById('mergeFileInput');
+        const selectMergeBtn = document.getElementById('selectMergeBtn');
+        const continueMergeBtn = document.getElementById('continueMergeBtn');
+        const clearMergeBtn = document.getElementById('clearMergeBtn');
+        const mergeListContainer = document.getElementById('mergeListContainer');
+        const mergeFileList = document.getElementById('mergeFileList');
+        const mergeWarningMsg = document.getElementById('mergeWarningMsg');
+        const executeMergeBtn = document.getElementById('executeMergeBtn');
+        const backFromSplit = document.getElementById('backFromSplit');
+        const backFromMerge = document.getElementById('backFromMerge');
+        const gotoMergeBtn = document.getElementById('gotoMergeBtn');
+        const gotoSplitBtn = document.getElementById('gotoSplitBtn');
+
+        // ---------- 辅助函数 ----------
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024, sizes = ['B','KB','MB','GB'];
+            const i = Math.floor(Math.log(bytes)/Math.log(k));
+            return parseFloat((bytes/Math.pow(k,i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function extractPartNumber(name) {
+            const match = name.match(/\.part(\d+)(?:\.|$)/i);
+            if (match && match[1]) return parseInt(match[1], 10);
+            const fallback = name.match(/(\d+)/g);
+            return fallback ? parseInt(fallback[fallback.length-1], 10) : 0;
+        }
+
+        // 计算预期碎片数量 (根据当前模式和文件大小)
+        function calculateExpectedChunkCount(fileSize) {
+            if (!fileSize && fileSize !== 0) return 0;
+            if (splitModeSize.checked) {
+                let mb = parseFloat(chunkSizeInput.value);
+                if (isNaN(mb) || mb <= 0) mb = 20;
+                const chunkBytes = mb * 1024 * 1024;
+                return Math.ceil(fileSize / chunkBytes);
+            } else {
+                let count = parseInt(chunkCountInput.value);
+                if (isNaN(count) || count < 2) count = 2;
+                return count;
+            }
+        }
+
+        // 更新碎片数量警告
+        function updateFragmentWarning() {
+            if (!currentSplitFile) {
+                fragWarning.style.display = 'none';
+                return;
+            }
+            const total = currentSplitFile.size;
+            const estimated = calculateExpectedChunkCount(total);
+            if (estimated > 10) {
+                let advice = '';
+                if (splitModeSize.checked) {
+                    advice = `当前按大小拆分将产生 ${estimated} 个碎片，建议增大单个碎片大小以减少个数。`;
+                } else {
+                    advice = `当前按个数拆分将产生 ${estimated} 个碎片，碎片过多容易导致丢失或损坏，建议减少个数。`;
+                }
+                fragWarning.textContent = '⚠️ 文件碎片过多，容易导致丢失和损坏。' + advice;
+                fragWarning.style.display = 'block';
+            } else {
+                fragWarning.style.display = 'none';
+            }
+        }
+
+        // ---------- 界面切换 ----------
+        function showMainMenu() {
+            mainMenu.classList.remove('hidden');
+            splitWorkspace.classList.add('hidden');
+            mergeWorkspace.classList.add('hidden');
+        }
+        function showSplit() {
+            mainMenu.classList.add('hidden');
+            splitWorkspace.classList.remove('hidden');
+            mergeWorkspace.classList.add('hidden');
+            updateFragmentWarning(); 
+        }
+        function showMerge() {
+            mainMenu.classList.add('hidden');
+            mergeWorkspace.classList.remove('hidden');
+            splitWorkspace.classList.add('hidden');
+            renderMergeList();
+        }
+
+        gotoSplitBtn.addEventListener('click', showSplit);
+        gotoMergeBtn.addEventListener('click', showMerge);
+        backFromSplit.addEventListener('click', showMainMenu);
+        backFromMerge.addEventListener('click', showMainMenu);
+
+        // ---------- 拆分模式切换 ----------
+        function updateSplitParam() {
+            if (splitModeSize.checked) {
+                sizeParamBlock.classList.remove('hidden');
+                countParamBlock.classList.add('hidden');
+            } else {
+                sizeParamBlock.classList.add('hidden');
+                countParamBlock.classList.remove('hidden');
+            }
+            updateFragmentWarning();
+        }
+        splitModeSize.addEventListener('change', updateSplitParam);
+        splitModeCount.addEventListener('change', updateSplitParam);
+        // 输入变化时实时更新警告
+        chunkSizeInput.addEventListener('input', updateFragmentWarning);
+        chunkCountInput.addEventListener('input', updateFragmentWarning);
+
+        updateSplitParam(); // 初始化
+
+        // ---------- 拆分：选择文件 ----------
+        splitDropArea.addEventListener('click', () => splitFileInput.click());
+        splitDropArea.addEventListener('dragover', e => e.preventDefault());
+        splitDropArea.addEventListener('drop', e => {
+            e.preventDefault();
+            if (e.dataTransfer.files.length > 0) handleSplitFileSelection(e.dataTransfer.files[0]);
+        });
+        splitFileInput.addEventListener('change', e => {
+            if (e.target.files.length > 0) handleSplitFileSelection(e.target.files[0]);
+        });
+
+        function handleSplitFileSelection(file) {
+            currentSplitFile = file;
+            splitDropArea.innerHTML = `<span style="font-size:2rem;">📄</span><p><strong>${file.name}</strong> (${formatSize(file.size)})</p><p style="font-size:0.9rem;">点击或拖拽更换</p>`;
+            splitResultArea.style.display = 'none';
+            splitChunks = [];
+            updateFragmentWarning();
+        }
+
+        // ---------- 执行拆分 ----------
+        executeSplitBtn.addEventListener('click', () => {
+            if (!currentSplitFile) {
+                alert('请先选择文件');
+                return;
+            }
+
+            const totalSize = currentSplitFile.size;
+            let chunks = [];
+
+            if (splitModeSize.checked) {
+                let mb = parseFloat(chunkSizeInput.value);
+                if (isNaN(mb) || mb <= 0) mb = 20;
+                const chunkBytes = mb * 1024 * 1024;
+                let index = 0;
+                for (let start = 0; start < totalSize; start += chunkBytes) {
+                    const end = Math.min(start + chunkBytes, totalSize);
+                    chunks.push({
+                        blob: currentSplitFile.slice(start, end),
+                        index: index,
+                        name: `${currentSplitFile.name}.part${index}`,
+                        size: end - start
+                    });
+                    index++;
+                }
+            } else {
+                let count = parseInt(chunkCountInput.value);
+                if (isNaN(count) || count < 2) count = 2;
+                const chunkSize = Math.ceil(totalSize / count);
+                for (let i = 0; i < count; i++) {
+                    const start = i * chunkSize;
+                    const end = Math.min(start + chunkSize, totalSize);
+                    if (start >= totalSize) break;
+                    chunks.push({
+                        blob: currentSplitFile.slice(start, end),
+                        index: i,
+                        name: `${currentSplitFile.name}.part${i}`,
+                        size: end - start
+                    });
+                }
+            }
+
+            // 去重：基于索引去重 (同一个文件不应该有相同index)
+            const uniqueMap = new Map();
+            chunks.forEach(c => {
+                if (!uniqueMap.has(c.index)) {
+                    uniqueMap.set(c.index, c);
+                }
+            });
+            const uniqueChunks = Array.from(uniqueMap.values()).sort((a,b) => a.index - b.index);
+
+            if (uniqueChunks.length !== chunks.length) {
+                alert('检测到重复的碎片索引，已自动去重。');
+            }
+
+            splitChunks = uniqueChunks;
+
+            // 自动下载 (如果开关开启) - 只下载不重复的文件
+            if (autoDownloadCheck.checked) {
+                for (let c of splitChunks) {
+                    const a = document.createElement('a');
+                    a.href = window.URL.createObjectURL(c.blob);
+                    a.download = c.name;
+                    a.click();
+                    window.URL.revokeObjectURL(a.href);
+                }
+            }
+
+            // 渲染列表
+            renderSplitList();
+
+            // 检查碎片数量警告 (再次确认)
+            if (splitChunks.length > 10) {
+                // 已经通过updateFragmentWarning显示了, 但拆分后再强调一下
+                if (!splitModeSize.checked) {
+                    // 按个数拆分已经选了, 但提示仍在
+                }
+            }
+        });
+
+        function renderSplitList() {
+            let html = '';
+            splitChunks.forEach(c => {
+                html += `<div class="file-row">
+                    <span class="file-index">${c.index}</span>
+                    <span class="file-name">${c.name}</span>
+                    <span class="file-size">${formatSize(c.size)}</span>
+                    <button class="download-single" data-index="${c.index}">下载</button>
+                </div>`;
+            });
+            splitResultList.innerHTML = html;
+            splitResultArea.style.display = 'block';
+
+            // 绑定单个下载
+            document.querySelectorAll('.download-single').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = e.target.getAttribute('data-index');
+                    const chunk = splitChunks.find(c => c.index == idx);
+                    if (chunk) {
+                        const a = document.createElement('a');
+                        a.href = window.URL.createObjectURL(chunk.blob);
+                        a.download = chunk.name;
+                        a.click();
+                        window.URL.revokeObjectURL(a.href);
+                    }
+                });
+            });
+        }
+
+        // 全部下载按钮
+        downloadAllBtn.addEventListener('click', () => {
+            if (splitChunks.length === 0) return;
+            for (let c of splitChunks) {
+                const a = document.createElement('a');
+                a.href = window.URL.createObjectURL(c.blob);
+                a.download = c.name;
+                a.click();
+                window.URL.revokeObjectURL(a.href);
+            }
+        });
+
+        // ---------- 合并模式 ----------
+        function renderMergeList() {
+            if (mergeFiles.length === 0) {
+                mergeListContainer.style.display = 'none';
+                mergeWarningMsg.style.display = 'none';
+                return;
+            }
+            mergeListContainer.style.display = 'block';
+
+            const sorted = [...mergeFiles].sort((a,b) => extractPartNumber(a.name) - extractPartNumber(b.name));
+            let html = '<div style="margin-bottom:10px; font-weight:600;">已选碎片（按序号排序）</div>';
+            sorted.forEach((f, idx) => {
+                const part = extractPartNumber(f.name);
+                html += `<div class="file-row" data-file-id="${f.name}|${f.size}|${f.lastModified}">
+                    <span class="file-index">${part}</span>
+                    <span class="file-name">${f.name}</span>
+                    <span class="file-size">${formatSize(f.size)}</span>
+                    <button class="delete-single" data-key="${f.name}|${f.size}|${f.lastModified}">删除</button>
+                </div>`;
+            });
+            mergeFileList.innerHTML = html;
+
+            // 绑定删除事件
+            document.querySelectorAll('.delete-single').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const key = e.target.getAttribute('data-key');
+                    mergeFiles = mergeFiles.filter(f => `${f.name}|${f.size}|${f.lastModified}` !== key);
+                    renderMergeList();
+                });
+            });
+
+            // 检查序号连续
+            const indices = sorted.map(f => extractPartNumber(f.name));
+            let gap = false;
+            for (let i=0; i<indices.length-1; i++) {
+                if (indices[i+1] - indices[i] !== 1) { gap = true; break; }
+            }
+            mergeWarningMsg.style.display = gap ? 'block' : 'none';
+        }
+
+        function addMergeFiles(fileList) {
+            if (!fileList || fileList.length === 0) return;
+            const existingKeys = new Set(mergeFiles.map(f => `${f.name}|${f.size}|${f.lastModified}`));
+            let addedCount = 0;
+            let duplicateCount = 0;
+            for (let i=0; i<fileList.length; i++) {
+                const f = fileList[i];
+                const key = `${f.name}|${f.size}|${f.lastModified}`;
+                if (!existingKeys.has(key)) {
+                    mergeFiles.push(f);
+                    existingKeys.add(key);
+                    addedCount++;
+                } else {
+                    duplicateCount++;
+                }
+            }
+            if (duplicateCount > 0) {
+                alert(`检测到 ${duplicateCount} 个重复碎片，已自动忽略。`);
+            }
+            if (addedCount > 0) {
+                renderMergeList();
+            }
+        }
+
+        function clearMerge() {
+            if (mergeFiles.length > 0 && confirm('清空所有已选文件块？')) {
+                mergeFiles = [];
+                mergeFileInput.value = '';
+                renderMergeList();
+            }
+        }
+
+        selectMergeBtn.addEventListener('click', () => {
+            mergeFileInput.value = '';
+            mergeFileInput.click();
+        });
+        continueMergeBtn.addEventListener('click', () => {
+            mergeFileInput.value = '';
+            mergeFileInput.click();
+        });
+        mergeFileInput.addEventListener('change', (e) => {
+            addMergeFiles(e.target.files);
+        });
+
+        clearMergeBtn.addEventListener('click', clearMerge);
+
+        mergeDropZone.addEventListener('click', () => mergeFileInput.click());
+        mergeDropZone.addEventListener('dragover', e => e.preventDefault());
+        mergeDropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            if (e.dataTransfer.files.length) addMergeFiles(e.dataTransfer.files);
+        });
+
+        // 执行合并
+        executeMergeBtn.addEventListener('click', async function() {
+            if (mergeFiles.length === 0) {
+                alert('请先添加需要合并的文件块');
+                return;
+            }
+
+            if (!confirm('确保所有被拆分的文件块已经选齐？点击确定合并。')) {
+                return;
+            }
+
+            const sorted = [...mergeFiles].sort((a,b) => extractPartNumber(a.name) - extractPartNumber(b.name));
+            const firstName = sorted[0].name;
+            let originalName = firstName.replace(/\.part\d+(\.[^.]*)?$/, '$1');
+            if (originalName === firstName) originalName = firstName.replace(/\.part\d+$/, '') || 'merged_file';
+
+            try {
+                const chunks = [];
+                for (let f of sorted) chunks.push(await f.arrayBuffer());
+                const mergedBlob = new Blob(chunks, { type: 'application/octet-stream' });
+                const url = window.URL.createObjectURL(mergedBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = originalName;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                setTimeout(() => alert('合并完成'), 100);
+            } catch (err) {
+                alert('合并出错: ' + err.message);
+            }
+        });
+
+        // 初始化: 显示主菜单
+        showMainMenu();
+    })();
+</script>
+</body>
+</html>
