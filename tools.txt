@@ -1,0 +1,4 @@
+﻿"""name=测试
+icon=https://ss-mpvolc.meipian.me/users/499047829/a706d29df933a1805e0683c43a9821f2mpand__jpg.heic~tplv-s1ctq42ewb-s2-cC-q:750:0:0:0:q80.webp
+link=luckynum.top
+introduction=名字下方的小字简介"""

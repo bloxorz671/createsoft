@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>更多工具 · 简洁卡片集</title>
+    <style>
+        /* 干净简洁的全局样式 —— 无任何 emoji，纯黑白灰 + 极淡蓝点缀 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f8fafc;   /* 极浅灰蓝底 */
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1280px;
+            width: 100%;
+        }
+
+        /* 大标题 —— 更多工具，纯粹文字 */
+        .page-title {
+            font-size: 2.8rem;
+            font-weight: 500;        /* 中等字重，干净利落 */
+            letter-spacing: -0.02em;
+            color: #1a1e24;
+            margin-bottom: 2.2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(0,0,0,0.05);
+        }
+
+        /* 网格卡片区 */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.8rem;
+        }
+
+        /* 卡片 — 无阴影、轻边框、纯白底 */
+        .tool-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 1.6rem 1.4rem 1.5rem 1.4rem;
+            transition: border 0.2s, background 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .tool-card:hover {
+            border-color: #b0c4de;
+            background: #fdfdfd;
+        }
+
+        /* 图标区域 —— 完全由用户提供的图片链接决定，无emoji后备 */
+        .icon-area {
+            width: 56px;
+            height: 56px;
+            margin-bottom: 1.2rem;
+            border-radius: 16px;      /* 微圆角，不抢眼 */
+            background: #f1f4f9;       /* 仅当图片缺失或加载前的占位 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0;              /* 避免占位文字 */
+        }
+        .icon-area img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 14px;        /* 图片本身也带点圆润 */
+            object-fit: contain;
+        }
+
+        /* 工具名称 */
+        .tool-name {
+            font-size: 1.5rem;
+            font-weight: 520;
+            line-height: 1.3;
+            color: #0b1e2e;
+            margin-bottom: 0.25rem;
+        }
+
+        /* 简介 —— 名字下方小字 */
+        .tool-intro {
+            font-size: 0.9rem;
+            color: #5e6f8d;
+            line-height: 1.45;
+            margin-bottom: 1.2rem;
+            flex: 1;                   /* 把底部按钮往下推 */
+        }
+
+        /* 启动按钮 —— 干净、无边框、悬浮淡背景 */
+        .tool-link {
+            display: inline-block;
+            padding: 0.55rem 1.4rem;
+            background: transparent;
+            border: 1px solid #dde3ed;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            font-weight: 450;
+            color: #1e2b3f;
+            text-decoration: none;
+            transition: background 0.15s, border-color 0.15s;
+            margin-top: 0.5rem;
+            align-self: flex-start;    /* 左对齐，不拉伸 */
+        }
+
+        .tool-link:hover {
+            background: #eaf0f8;
+            border-color: #9fb0cc;
+            color: #0a1a2a;
+        }
+
+        /* 无数据 / 加载中提示 */
+        .status-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3.5rem;
+            background: #f1f5f9;
+            border-radius: 30px;
+            color: #2d3a4f;
+            font-size: 1.15rem;
+            border: 1px solid #d9e2ef;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 大标题：更多工具 (无任何装饰) -->
+        <h1 class="page-title">更多工具</h1>
+
+        <!-- 工具卡片网格 -->
+        <div id="toolsGrid" class="tools-grid">
+            <div class="status-message">🔍 正在加载工具列表……</div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // --- 配置 ---
+            const DATA_URL = 'https://luckynum.top/tools.txt';  // 您指定的数据地址
+
+            // --- 工具函数：解析每一条工具数据 (严格按题目格式) ---
+            function parseToolEntry(block) {
+                // 去除首尾多余空白，并按行拆分
+                const lines = block.split('\n').map(line => line.trim()).filter(line => line !== '');
+                let name = '';
+                let icon = '';
+                let link = '';
+                let introduction = '';
+
+                for (let line of lines) {
+                    // 使用正则提取 字段名=字段值 (值可能包含空格、标点，但不含emoji)
+                    // 注意: 字段名只能是 name, icon, link, introduction
+                    const match = line.match(/^(name|icon|link|introduction)\s*=\s*(.*)$/);
+                    if (match) {
+                        const field = match[1];
+                        const value = match[2].trim();   // 保留原始字符，但不含emoji
+                        if (field === 'name') name = value;
+                        else if (field === 'icon') icon = value;
+                        else if (field === 'link') link = value;
+                        else if (field === 'introduction') introduction = value;
+                    }
+                }
+
+                // 只返回至少包含name的记录（题目中name应该都有，但防呆）
+                return (name || icon || link || introduction) ? { name, icon, link, introduction } : null;
+            }
+
+            // --- 主函数：获取并渲染 ---
+            async function loadAndRenderTools() {
+                const grid = document.getElementById('toolsGrid');
+                if (!grid) return;
+
+                try {
+                    // 1. 发起请求 (设置简单头部避免缓存)
+                    const response = await fetch(DATA_URL, {
+                        method: 'GET',
+                        headers: { 'Cache-Control': 'no-cache' },
+                        mode: 'cors'  // 注意：如果跨域未配置可能会失败，届时会catch
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status} — 无法获取工具数据`);
+                    }
+
+                    const text = await response.text();
+
+                    // 2. 解析文本：按每对 """ 分割 (假定格式严格)
+                    // 分割前先处理：可能文件开头有空白，用正则全局匹配 """(.*?)"""  (非贪婪)
+                    const tripleQuoteRegex = /"""(.*?)"""/gs;
+                    let matches = [];
+                    let match;
+                    while ((match = tripleQuoteRegex.exec(text)) !== null) {
+                        // match[1] 是三个引号之间的内容
+                        if (match[1].trim().length > 0) {
+                            matches.push(match[1].trim());
+                        }
+                    }
+
+                    // 如果没有匹配到任何三引号块，尝试另一种朴素分割：按连续两个换行？但忠实于题目描述就用三引号
+                    // 万一用户文件内没有使用三个引号，可以加后备逻辑，但这里严格按题目给的格式
+                    let tools = [];
+                    if (matches.length === 0) {
+                        // 极简后备：如果完全没匹配到"""，就把整个文本当做一个块试试？但很可能格式不对。
+                        // 为了稳健，尝试按空行分割后再解析行内键值？但题目明确用"""包裹，所以保留提示。
+                        console.warn('未找到三引号包裹的数据块，尝试按空行分割处理（兼容模式）');
+                        // 简易后备：按连续两个以上换行分割
+                        const blocks = text.split(/\n\s*\n\s*\n/).filter(b => b.trim().length > 0);
+                        for (let blk of blocks) {
+                            const tool = parseToolEntry(blk);
+                            if (tool) tools.push(tool);
+                        }
+                    } else {
+                        // 标准情况：解析每个三引号内的内容
+                        for (let content of matches) {
+                            const tool = parseToolEntry(content);
+                            if (tool) tools.push(tool);
+                        }
+                    }
+
+                    // 3. 渲染卡片
+                    if (tools.length === 0) {
+                        grid.innerHTML = `<div class="status-message">📋 暂无有效工具数据，请检查 tools.txt 格式</div>`;
+                        return;
+                    }
+
+                    // 生成所有卡片 HTML (保证没有任何 emoji 字符)
+                    let cardsHtml = '';
+                    for (let t of tools) {
+                        // 对每个字段进行转义，防止XSS，同时保留空格和字符（但不引入emoji）
+                        const safeName = escapeHtml(t.name || '未命名工具');
+                        const safeIntro = escapeHtml(t.introduction || ' ');  // 若无简介就放一个空格占位
+                        const safeIcon = t.icon ? escapeHtml(t.icon) : '';
+                        const safeLink = t.link ? escapeHtml(t.link) : '#';   // 没链接就置空
+
+                        // 卡片结构 —— 完全按照 name / icon / link / introduction 显示
+                        // 注意：icon 是图片网址，如果网址无效或无法加载会显示背景色占位，不会出现 emoji
+                        // 额外：如果icon为空，就不输出img，只显示纯色块(无文字)
+                        cardsHtml += `
+                            <div class="tool-card">
+                                <div class="icon-area">
+                                    ${safeIcon ? `<img src="${safeIcon}" alt="${safeName} icon" loading="lazy" onerror="this.style.display='none'">` : ''}
+                                </div>
+                                <div class="tool-name">${safeName}</div>
+                                <div class="tool-intro">${safeIntro}</div>
+                                <a href="${safeLink}" class="tool-link" target="_blank" rel="noopener noreferrer">点击马上打开</a>
+                            </div>
+                        `;
+                    }
+
+                    grid.innerHTML = cardsHtml;
+
+                } catch (error) {
+                    console.error('加载或解析失败:', error);
+                    // 友好显示错误（仍然不带 emoji，只用文字说明）
+                    let errorMsg = `加载失败: ${error.message}。请确保：<br>1. 地址 ${DATA_URL} 可访问且允许跨域<br>2. 文件内容严格遵循格式：每对"""包裹一个工具，包含 name= icon= link= introduction=`;
+                    grid.innerHTML = `<div class="status-message" style="color:#5f4b3a; background:#fef4f0;">⚠️ ${errorMsg}</div>`;
+                }
+            }
+
+            // 极简的HTML转义函数 (防止注入，同时保留文字干净)
+            function escapeHtml(unsafe) {
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            // 执行
+            loadAndRenderTools();
+        })();
+    </script>
+</body>
+</html>
