@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>初二五班 · 作业提交</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #ffffff;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 1.5rem;
+            line-height: 1.5;
+            color: #1e293b; /* 深灰蓝字，温和不刺眼 */
+        }
+
+        /* 优雅窄容器，让所有内容自然靠上 */
+        .container {
+            width: 100%;
+            max-width: 700px;
+            margin-top: 10vh;       /* 标题自然置顶，但保留一点呼吸 */
+        }
+
+        /* 标题区 */
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            color: #0f172a;
+            margin-bottom: 1.2rem;
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        /* 副标题/说明文字——红字，柔和但清晰 */
+        .notice {
+            color: #b91c1c;          /* 稳重的深红 */
+            font-size: 1.3rem;
+            font-weight: 400;
+            text-align: center;
+            max-width: 550px;
+            margin: 0 auto 2.8rem auto;
+            background-color: #fff8f8;  /* 极浅红底，增加温度且不跳出 */
+            padding: 0.9rem 1.8rem;
+            border-radius: 60px;         /* 圆润的胶囊，增加美观度 */
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(185, 28, 28, 0.15);
+        }
+
+        /* 按钮容器，用于优雅居中 */
+        .button-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 0.8rem;
+        }
+
+        /* 圆角按钮 · 干净 · 微细节 */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e3a5f;          /* 深海军蓝，典雅沉稳 */
+            color: white;
+            text-decoration: none;
+            font-size: 1.8rem;
+            font-weight: 480;
+            padding: 1rem 3.8rem;
+            border: none;
+            border-radius: 60px;           /* 圆角明显，现代感 */
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 30, 60, 0.15);
+            letter-spacing: 0.3px;
+            line-height: 1.2;
+            min-width: 240px;
+        }
+
+        /* 悬停时加深 + 阴影微涨 */
+        .btn:hover {
+            background-color: #112b44;
+            box-shadow: 0 8px 18px rgba(0, 30, 60, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* 点击下沉效果 */
+        .btn:active {
+            background-color: #0a1f31;
+            transform: translateY(2px);
+            box-shadow: 0 2px 8px rgba(0, 30, 60, 0.2);
+            transition: 0.05s;
+        }
+
+        /* 焦点指示器 —— 无特殊符号，只有极细外环 */
+        .btn:focus-visible {
+            outline: 2px solid #1e3a5f;
+            outline-offset: 4px;
+        }
+
+        /* 完全没有任何 ::before / ::after 内容 */
+        .btn::before,
+        .btn::after {
+            display: none;
+            content: none;
+        }
+
+        /* 可选：添加一点点极简的班级装饰线条，但不含任何符号，只提升层次 */
+        .class-line {
+            width: 80px;
+            height: 3px;
+            background: #d9e2ef;
+            margin: 1.2rem auto 0 auto;
+            border-radius: 30px;
+            opacity: 0.6;
+        }
+
+        /* 让整体更细腻：给红字区域加一点优雅过渡 */
+        .notice {
+            backdrop-filter: blur(2px);
+        }
+
+        /* 手机小屏调整字体大小 */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            .notice {
+                font-size: 1.1rem;
+                padding: 0.7rem 1rem;
+            }
+            .btn {
+                font-size: 1.5rem;
+                padding: 0.8rem 2.5rem;
+                min-width: 200px;
+            }
+            .container {
+                margin-top: 6vh;
+            }
+        }
+
+        /* 保证没有任何特殊符号（★※✿等）出现在任何地方 */
+        /* 连分割线都是纯色块，没有任何编码字符 */
+    </style>
+    <!-- 引入 Inter 字体，使字体更美观，但不产生任何符号 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- 标题置顶 (在container内靠上) -->
+        <h1>初二五班 作业提交</h1>
+
+        <!-- 红色提示区，圆润卡片样式 -->
+        <div class="notice">
+            如果你不是广州市第四十一中学初二五班的学生，请退出本网页
+        </div>
+
+        <!-- 圆角按钮区域 -->
+        <div class="button-wrapper">
+            <a href="https://qr03.cn/A8JkXm" class="btn" target="_blank" rel="noopener noreferrer">
+                去提交
+            </a>
+        </div>
+
+        <!-- 纯粹的美术装饰：一条极细中性线，不代表任何符号，仅增加层次 -->
+        <div class="class-line" aria-hidden="true"></div>
+    </div>
+
+    <!-- 没有任何特殊符号或隐藏字符 -->
+</body>
+</html>
