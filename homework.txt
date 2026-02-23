@@ -1,0 +1,5 @@
+"""
+sub=数学
+name=录制讲题视频
+link=https://qr03.cn/A8JkXm
+"""
