@@ -5,3 +5,10 @@ link=https://qr03.cn/A8JkXm
 more=本作业将在2月25日停止收集，请尽快提交
 more_colour[255,0,0]
 """
+"""
+sub=测试
+name=测试
+link=www.luckynum.top
+more=这是测试的…
+more_colour[0,0,0]
+"""
