@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>luckynum.topåå°</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f5f5f5;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 12px;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin: 0 0 20px 0;
+        }
+        
+        /* è§£éåºå */
+        .unlock-section {
+            background: #f8f9fa;
+            border-radius: 24px;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .unlock-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+        }
+        .unlock-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .unlock-subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .password-input {
+            width: 100%;
+            padding: 18px 16px;
+            font-size: 20px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 60px;
+            font-family: monospace;
+            letter-spacing: 4px;
+            margin-bottom: 16px;
+            background: white;
+        }
+        .password-input:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+        .unlock-btn {
+            width: 100%;
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 60px;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .unlock-btn:active {
+            background: #1565c0;
+        }
+        .unlock-btn:disabled {
+            background: #ccc;
+        }
+        .zip-info {
+            background: #f0f0f0;
+            padding: 12px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            color: #666;
+            display: inline-block;
+        }
+        .zip-info code {
+            background: white;
+            padding: 4px 8px;
+            border-radius: 20px;
+            color: #1976d2;
+        }
+        .error-message {
+            color: #d32f2f;
+            font-size: 14px;
+            margin-top: 12px;
+            min-height: 20px;
+        }
+        
+        /* ä¸»åå®¹åºå */
+        .main-content {
+            display: none;
+        }
+        
+        /* é«çº§æ¨¡å¼å¼å³ */
+        .advanced-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .2s;
+            border-radius: 22px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .2s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #1976d2;
+        }
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+        .toggle-label {
+            font-size: 15px;
+            color: #333;
+        }
+        
+        /* æä»¶éæ©åºå */
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 16px 0;
+        }
+        .file-btn {
+            background: white;
+            border: 1px solid #e0e0e0;
+            padding: 16px 8px;
+            border-radius: 20px;
+            font-size: 15px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .file-btn:active {
+            background: #f5f5f5;
+        }
+        .file-btn.active {
+            background: #e3f2fd;
+            border-color: #1976d2;
+            color: #1976d2;
+            font-weight: 500;
+        }
+        .selected-file {
+            margin: 12px 0;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 30px;
+            font-size: 14px;
+            color: #666;
+        }
+        .selected-file strong {
+            color: #1976d2;
+            font-family: monospace;
+        }
+        
+        /* ä¸ä¼ åºå */
+        .upload-section {
+            background: #f8f9fa;
+            border: 2px dashed #ccc;
+            border-radius: 24px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .upload-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 15px;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .upload-btn:active {
+            background: #f5f5f5;
+        }
+        .upload-hint {
+            font-size: 13px;
+            color: #999;
+            margin-top: 8px;
+        }
+        
+        /* é«çº§æ¨¡å¼åºå */
+        .advanced-section {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .path-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+        .path-display {
+            flex: 1;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .action-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+        .file-list {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #eee;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        .file-item.folder:before {
+            content: "ð ";
+        }
+        .file-item.file:before {
+            content: "ð ";
+        }
+        .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .item-btn {
+            background: none;
+            border: 1px solid transparent;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .item-btn.edit {
+            color: #1976d2;
+        }
+        .item-btn.delete {
+            color: #d32f2f;
+        }
+        .new-file-row {
+            display: flex;
+            gap: 8px;
+        }
+        .new-file-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+        
+        /* ç¼è¾å¨åºå */
+        .editor-header {
+            margin: 16px 0 8px 0;
+        }
+        .file-badge {
+            background: #f0f0f0;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-family: monospace;
+            display: inline-block;
+        }
+        textarea {
+            width: 100%;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            background: #fafafa;
+            min-height: 250px;
+            margin: 12px 0;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #1976d2;
+            background: white;
+        }
+        
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .status {
+            flex: 1;
+            padding: 12px 16px;
+            background: #f5f5f5;
+            border-radius: 30px;
+            font-size: 13px;
+            color: #666;
+        }
+        .status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status.error {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        .save-btn {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 500;
+            min-width: 80px;
+        }
+        .save-btn:active {
+            background: #1565c0;
+        }
+        .save-btn:disabled {
+            background: #ccc;
+        }
+        
+        .footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+        }
+        
+        /* å é¤å¼¹çª */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 24px;
+            max-width: 320px;
+            width: 90%;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 30px;
+            font-size: 15px;
+        }
+        .modal-btn.cancel {
+            background: #f5f5f5;
+        }
+        .modal-btn.confirm {
+            background: #d32f2f;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>â¡ luckynum.top</h1>
+
+    <!-- è§£éåºå -->
+    <div class="unlock-section" id="unlockSection">
+        <div class="unlock-icon">ð</div>
+        <div class="unlock-title">è¯·è¾å¥è§£åå¯ç </div>
+        <div class="unlock-subtitle">ä» token.zip è¯»åä»¤ç</div>
+        
+        <input type="password" id="passwordInput" class="password-input" 
+               placeholder="è¾å¥å¯ç " autocomplete="off">
+        
+        <button class="unlock-btn" id="unlockBtn">è§£é</button>
+        
+        <div class="zip-info">
+            ð¦ <code>token.zip</code> å·²ä¸ä¼ å°ä»åº
+        </div>
+        
+        <div id="errorMessage" class="error-message"></div>
+    </div>
+
+    <!-- ä¸»åå®¹åºå -->
+    <div class="main-content" id="mainContent">
+        <!-- é«çº§æ¨¡å¼å¼å³ -->
+        <div class="advanced-toggle">
+            <label class="toggle-switch">
+                <input type="checkbox" id="advancedToggle">
+                <span class="slider"></span>
+            </label>
+            <span class="toggle-label">é«çº§æ¨¡å¼</span>
+        </div>
+
+        <!-- æä»¶ä¸ä¼ åºå -->
+        <div class="upload-section" id="uploadSection">
+            <input type="file" id="fileUpload" style="display: none;">
+            <button class="upload-btn" id="uploadBtn">éæ©æä»¶ä¸ä¼ </button>
+            <div class="upload-hint" id="uploadStatus"></div>
+        </div>
+
+        <!-- æä»¶éæ©åºåï¼æ®éæ¨¡å¼ï¼ -->
+        <div id="normalMode">
+            <div class="file-grid">
+                <button class="file-btn" data-file="homework.txt">ð åäºäºç­</button>
+                <button class="file-btn" data-file="tools.txt">ð ï¸ å·¥å·</button>
+                <button class="file-btn" data-file="notice.txt">ð¢ å¬å</button>
+                <button class="file-btn" data-file="index.html">ð  ä¸»é¡µ</button>
+                <button class="file-btn" data-file="online.html">ð ç½é¡µç</button>
+            </div>
+            <div class="selected-file" id="selectedFile">
+                å½åæªéæ©æä»¶
+            </div>
+        </div>
+
+        <!-- é«çº§æ¨¡å¼åºå -->
+        <div class="advanced-section" id="advancedMode">
+            <div class="path-bar">
+                <span class="path-display" id="currentPath">/</span>
+                <button class="action-btn" id="refreshBtn">å·æ°</button>
+                <button class="action-btn" id="goRootBtn">æ ¹ç®å½</button>
+            </div>
+            
+            <div class="file-list" id="fileList">
+                <div style="padding: 20px; text-align: center; color: #999;">å è½½ä¸­...</div>
+            </div>
+            
+            <div class="new-file-row">
+                <input type="text" class="new-file-input" id="newFileName" placeholder="æä»¶å">
+                <button class="action-btn" id="createFileBtn">æ°å»ºæä»¶</button>
+                <button class="action-btn" id="createFolderBtn">æ°å»ºæä»¶å¤¹</button>
+            </div>
+        </div>
+
+        <!-- ç¼è¾å¨åºå -->
+        <div class="editor-header">
+            <span class="file-badge" id="currentFileBadge">æªéæ©æä»¶</span>
+        </div>
+        
+        <textarea id="fileContent" placeholder="éæ©æä»¶åå¼å§ç¼è¾" disabled></textarea>
+
+        <div class="action-bar">
+            <div class="status" id="statusMessage">å°±ç»ª</div>
+            <button class="save-btn" id="updateBtn" disabled>ä¿å­</button>
+        </div>
+    </div>
+
+    <!-- å é¤ç¡®è®¤å¼¹çª -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <h3 style="margin:0 0 12px 0;">ç¡®è®¤å é¤</h3>
+            <p id="deleteMessage" style="color:#666;"></p>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" id="cancelDelete">åæ¶</button>
+                <button class="modal-btn confirm" id="confirmDelete">å é¤</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        token.zip Â· è¾å¥å¯ç è§£é
+    </div>
+</div>
+
+<script>
+    (function() {
+        const OWNER = 'bloxorz671';
+        const REPO = 'createsoft';
+        const BRANCH = 'main';
+        const ZIP_PATH = 'token.zip';  // ä»token.zipè¯»å
+        
+        // æä»¶æ¾ç¤ºåç§°æ å°
+        const FILE_DISPLAY_NAMES = {
+            'homework.txt': 'åäºäºç­',
+            'tools.txt': 'å·¥å·',
+            'notice.txt': 'å¬å',
+            'index.html': 'ä¸»é¡µ',
+            'online.html': 'ç½é¡µç'
+        };
+        
+        const SUPPORTED_FILES = Object.keys(FILE_DISPLAY_NAMES);
+
+        // å¨å±åé
+        let currentToken = '';
+        let currentFile = 'homework.txt';
+        let currentFileSha = null;
+        let currentPath = '';
+        let fileToDelete = null;
+
+        // DOM åç´ 
+        const unlockSection = document.getElementById('unlockSection');
+        const mainContent = document.getElementById('mainContent');
+        const passwordInput = document.getElementById('passwordInput');
+        const unlockBtn = document.getElementById('unlockBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const fileContent = document.getElementById('fileContent');
+        const updateBtn = document.getElementById('updateBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const currentFileBadge = document.getElementById('currentFileBadge');
+        const selectedFile = document.getElementById('selectedFile');
+        const fileBtns = document.querySelectorAll('.file-btn');
+        const advancedToggle = document.getElementById('advancedToggle');
+        const advancedMode = document.getElementById('advancedMode');
+        const normalMode = document.getElementById('normalMode');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileUpload = document.getElementById('fileUpload');
+        const uploadStatus = document.getElementById('uploadStatus');
+
+        // è§£éæé®ç¹å»
+        unlockBtn.addEventListener('click', async () => {
+            const password = passwordInput.value.trim();
+            
+            if (!password) {
+                errorMessage.textContent = 'è¯·è¾å¥å¯ç ';
+                return;
+            }
+
+            unlockBtn.disabled = true;
+            unlockBtn.textContent = 'éªè¯ä¸­...';
+            errorMessage.textContent = '';
+
+            try {
+                // ä¸è½½ZIPæä»¶
+                const response = await fetch(`https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${ZIP_PATH}`);
+                if (!response.ok) {
+                    throw new Error('token.zip ä¸å­å¨ï¼è¯·ç¡®è®¤å·²ä¸ä¼ ');
+                }
+                
+                const zipData = await response.arrayBuffer();
+                
+                // ç¨å¯ç è§£å¯ZIP
+                const zip = await JSZip.loadAsync(zipData, {
+                    password: password
+                });
+                
+                // æ¥æ¾token.txt
+                const tokenFile = zip.file('token.txt');
+                if (!tokenFile) {
+                    throw new Error('ZIPä¸­æ²¡ææ¾å°token.txt');
+                }
+                
+                // è¯»åä»¤ç
+                const token = await tokenFile.async('string');
+                currentToken = token.trim();
+                
+                if (!currentToken) {
+                    throw new Error('ä»¤çåå®¹ä¸ºç©º');
+                }
+
+                // è§£éæå
+                unlockSection.style.display = 'none';
+                mainContent.style.display = 'block';
+                
+                // è®¾ç½®å½åæä»¶
+                setCurrentFile('homework.txt');
+                
+                statusMessage.textContent = 'è§£éæå';
+                statusMessage.className = 'status success';
+
+            } catch (error) {
+                console.error(error);
+                if (error.message.includes('password')) {
+                    errorMessage.textContent = 'å¯ç éè¯¯';
+                } else {
+                    errorMessage.textContent = error.message;
+                }
+                unlockBtn.disabled = false;
+                unlockBtn.textContent = 'è§£é';
+            }
+        });
+
+        // å¯ç è¾å¥æ¡åè½¦
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                unlockBtn.click();
+            }
+        });
+
+        // è®¾ç½®å½åæä»¶
+        function setCurrentFile(filename) {
+            if (!SUPPORTED_FILES.includes(filename)) return;
+            
+            currentFile = filename;
+            
+            // æ´æ°UI
+            fileBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.file === filename);
+            });
+            
+            currentFileBadge.textContent = filename + ' ' + (FILE_DISPLAY_NAMES[filename] || '');
+            selectedFile.innerHTML = `å½åéä¸­ï¼<strong>${filename}</strong> ${FILE_DISPLAY_NAMES[filename] || ''}`;
+            
+            // å è½½æä»¶åå®¹
+            loadFileContent();
+        }
+
+        // æä»¶æé®ç¹å»
+        fileBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                setCurrentFile(btn.dataset.file);
+            });
+        });
+
+        // å è½½æä»¶åå®¹
+        async function loadFileContent() {
+            if (!currentToken || !currentFile) return;
+            
+            fileContent.disabled = true;
+            updateBtn.disabled = true;
+            
+            try {
+                const response = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${currentFile}`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Accept': 'application/vnd.github+json'
+                    }
+                });
+                
+                if (response.status === 404) {
+                    // æä»¶ä¸å­å¨
+                    fileContent.value = '';
+                    fileContent.disabled = false;
+                    updateBtn.disabled = false;
+                    currentFileSha = null;
+                    statusMessage.textContent = 'æ°æä»¶';
+                    statusMessage.className = 'status';
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // è§£ç åå®¹
+                const content = atob(data.content.replace(/\n/g, ''));
+                fileContent.value = content;
+                currentFileSha = data.sha;
+                
+                fileContent.disabled = false;
+                updateBtn.disabled = false;
+                statusMessage.textContent = 'å·²å è½½';
+                statusMessage.className = 'status success';
+                
+            } catch (error) {
+                console.error('å è½½å¤±è´¥:', error);
+                statusMessage.textContent = 'å è½½å¤±è´¥';
+                statusMessage.className = 'status error';
+                fileContent.value = '';
+            }
+        }
+
+        // ä¿å­æä»¶
+        updateBtn.addEventListener('click', async () => {
+            if (!currentToken || !currentFile) return;
+            
+            const content = fileContent.value;
+            const encoded = btoa(unescape(encodeURIComponent(content)));
+            
+            const body = {
+                message: `æ´æ° ${currentFile}`,
+                content: encoded,
+                branch: BRANCH
+            };
+            
+            if (currentFileSha) {
+                body.sha = currentFileSha;
+            }
+            
+            updateBtn.disabled = true;
+            updateBtn.textContent = 'ä¿å­ä¸­';
+            
+            try {
+                const response = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${currentFile}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github+json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                currentFileSha = data.content.sha;
+                
+                statusMessage.textContent = 'ä¿å­æå';
+                statusMessage.className = 'status success';
+                
+            } catch (error) {
+                console.error('ä¿å­å¤±è´¥:', error);
+                statusMessage.textContent = 'ä¿å­å¤±è´¥';
+                statusMessage.className = 'status error';
+            } finally {
+                updateBtn.disabled = false;
+                updateBtn.textContent = 'ä¿å­';
+            }
+        });
+
+        // é«çº§æ¨¡å¼å¼å³
+        advancedToggle.addEventListener('change', function() {
+            if (this.checked) {
+                advancedMode.style.display = 'block';
+                normalMode.style.display = 'none';
+                loadDirectory('');
+            } else {
+                advancedMode.style.display = 'none';
+                normalMode.style.display = 'block';
+            }
+        });
+
+        // å è½½ç®å½ï¼é«çº§æ¨¡å¼ï¼
+        async function loadDirectory(path = '') {
+            if (!currentToken) return;
+            
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '<div style="padding:20px; text-align:center;">å è½½ä¸­...</div>';
+            
+            try {
+                const response = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                
+                if (!response.ok) throw new Error();
+                
+                const items = await response.json();
+                
+                if (!Array.isArray(items)) {
+                    // å¦ææ¯åä¸ªæä»¶
+                    fileList.innerHTML = `
+                        <div class="file-item file">
+                            <span>${items.name}</span>
+                            <div class="item-actions">
+                                <button class="item-btn edit" onclick="window.editFile('${items.path}')">ç¼è¾</button>
+                                <button class="item-btn delete" onclick="window.deleteFile('${items.path}', '${items.sha}')">å é¤</button>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // æåºï¼æä»¶å¤¹å¨åï¼æä»¶å¨å
+                items.sort((a, b) => {
+                    if (a.type !== b.type) {
+                        return a.type === 'dir' ? -1 : 1;
+                    }
+                    return a.name.localeCompare(b.name);
+                });
+                
+                let html = '';
+                items.forEach(item => {
+                    const itemClass = item.type === 'dir' ? 'folder' : 'file';
+                    const actions = item.type === 'file' ? `
+                        <div class="item-actions">
+                            <button class="item-btn edit" onclick="window.editFile('${item.path}')">ç¼è¾</button>
+                            <button class="item-btn delete" onclick="window.deleteFile('${item.path}', '${item.sha}')">å é¤</button>
+                        </div>
+                    ` : `
+                        <div class="item-actions">
+                            <button class="item-btn edit" onclick="window.openFolder('${item.path}')">æå¼</button>
+                        </div>
+                    `;
+                    
+                    html += `
+                        <div class="file-item ${itemClass}">
+                            <span>${item.name}</span>
+                            ${actions}
+                        </div>
+                    `;
+                });
+                
+                fileList.innerHTML = html || '<div style="padding:20px; text-align:center;">ç©ºç®å½</div>';
+                document.getElementById('currentPath').textContent = '/' + path;
+                currentPath = path;
+                
+            } catch (error) {
+                fileList.innerHTML = '<div style="padding:20px; text-align:center; color:#d32f2f;">å è½½å¤±è´¥</div>';
+            }
+        }
+
+        // å¨å±æ¹æ³
+        window.editFile = function(path) {
+            advancedToggle.checked = false;
+            advancedMode.style.display = 'none';
+            normalMode.style.display = 'block';
+            
+            const filename = path.split('/').pop();
+            if (SUPPORTED_FILES.includes(filename)) {
+                setCurrentFile(filename);
+            } else {
+                currentFile = path;
+                currentFileBadge.textContent = path;
+                selectedFile.innerHTML = `<strong>${path}</strong>`;
+                loadFileContent();
+            }
+        };
+
+        window.deleteFile = function(path, sha) {
+            fileToDelete = { path, sha };
+            document.getElementById('deleteMessage').textContent = `ç¡®å®è¦å é¤ "${path}" åï¼`;
+            document.getElementById('deleteModal').style.display = 'flex';
+        };
+
+        window.openFolder = function(path) {
+            loadDirectory(path);
+        };
+
+        // å·æ°
+        document.getElementById('refreshBtn').addEventListener('click', () => loadDirectory(currentPath));
+        document.getElementById('goRootBtn').addEventListener('click', () => loadDirectory(''));
+
+        // æ°å»ºæä»¶
+        document.getElementById('createFileBtn').addEventListener('click', async () => {
+            const name = document.getElementById('newFileName').value.trim();
+            if (!name) return;
+            
+            const path = currentPath ? `${currentPath}/${name}` : name;
+            
+            try {
+                await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `åå»º ${name}`,
+                        content: btoa(' '),
+                        branch: BRANCH
+                    })
+                });
+                
+                document.getElementById('newFileName').value = '';
+                loadDirectory(currentPath);
+                
+            } catch (error) {
+                alert('åå»ºå¤±è´¥');
+            }
+        });
+
+        // æ°å»ºæä»¶å¤¹
+        document.getElementById('createFolderBtn').addEventListener('click', async () => {
+            const name = document.getElementById('newFileName').value.trim();
+            if (!name) return;
+            
+            const path = currentPath ? `${currentPath}/${name}/.gitkeep` : `${name}/.gitkeep`;
+            
+            try {
+                await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `åå»ºæä»¶å¤¹ ${name}`,
+                        content: btoa(''),
+                        branch: BRANCH
+                    })
+                });
+                
+                document.getElementById('newFileName').value = '';
+                loadDirectory(currentPath);
+                
+            } catch (error) {
+                alert('åå»ºå¤±è´¥');
+            }
+        });
+
+        // ä¸ä¼ æä»¶
+        uploadBtn.addEventListener('click', () => {
+            fileUpload.click();
+        });
+
+        fileUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            uploadStatus.textContent = 'ä¸ä¼ ä¸­...';
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const content = e.target.result.split(',')[1];
+                
+                try {
+                    const path = currentPath ? `${currentPath}/${file.name}` : file.name;
+                    
+                    await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${currentToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: `ä¸ä¼  ${file.name}`,
+                            content: content,
+                            branch: BRANCH
+                        })
+                    });
+                    
+                    uploadStatus.textContent = 'ä¸ä¼ æå';
+                    setTimeout(() => { uploadStatus.textContent = ''; }, 3000);
+                    
+                    if (advancedToggle.checked) {
+                        loadDirectory(currentPath);
+                    }
+                    
+                } catch (error) {
+                    uploadStatus.textContent = 'ä¸ä¼ å¤±è´¥';
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // å é¤ç¡®è®¤
+        document.getElementById('cancelDelete').addEventListener('click', () => {
+            document.getElementById('deleteModal').style.display = 'none';
+            fileToDelete = null;
+        });
+
+        document.getElementById('confirmDelete').addEventListener('click', async () => {
+            if (!fileToDelete) return;
+            
+            try {
+                await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${fileToDelete.path}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `å é¤ ${fileToDelete.path}`,
+                        sha: fileToDelete.sha,
+                        branch: BRANCH
+                    })
+                });
+                
+                document.getElementById('deleteModal').style.display = 'none';
+                loadDirectory(currentPath);
+                
+            } catch (error) {
+                alert('å é¤å¤±è´¥');
+            }
+        });
+    })();
+</script>
+</body>
+</html>
