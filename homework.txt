@@ -2,6 +2,6 @@
 sub=数学
 name=录制讲题视频
 link=https://qr03.cn/A8JkXm
-more=本作业还有1天将停止收集，请尽快提交
+more=今天是开放提交最后一天，请尽快提交。
 more_colour[255,0,0]
 """
