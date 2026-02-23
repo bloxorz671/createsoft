@@ -7,7 +7,6 @@
     <title>luckynum.top后台</title>
     <!-- 强制浏览器使用UTF-8渲染 -->
     <script>
-        // 强制设置文档编码
         document.charset = 'UTF-8';
         document.characterSet = 'UTF-8';
     </script>
@@ -68,7 +67,7 @@
         }
         #tokenInput:focus {
             outline: none;
-            border-color: #999;
+            border-color: #1976d2;
         }
         .advanced-toggle {
             margin-top: 12px;
@@ -157,8 +156,8 @@
         }
         .file-btn.active {
             background: #e6e6e6;
-            border-color: #999;
-            color: #000;
+            border-color: #1976d2;
+            color: #1976d2;
             font-weight: 500;
         }
         .selected-file-display {
@@ -172,7 +171,7 @@
             display: inline-block;
         }
         .selected-file-display strong {
-            color: #333;
+            color: #1976d2;
             font-family: monospace;
         }
         
@@ -362,7 +361,7 @@
         /* 上传区域 */
         .upload-section {
             background: #fafafa;
-            border: 1px dashed #ccc;
+            border: 1px dashed #1976d2;
             border-radius: 6px;
             padding: 16px;
             margin-bottom: 20px;
@@ -370,7 +369,7 @@
         }
         .upload-label {
             font-weight: 500;
-            color: #555;
+            color: #1976d2;
             margin-bottom: 12px;
             font-size: 14px;
             text-align: left;
@@ -385,28 +384,48 @@
             display: none;
         }
         .upload-btn {
-            background: white;
-            border: 1px solid #ddd;
-            padding: 8px 20px;
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 10px 24px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            color: #333;
             transition: 0.2s;
             display: inline-block;
         }
         .upload-btn:hover {
-            background: #f5f5f5;
-            border-color: #999;
+            background: #1565c0;
         }
         .upload-hint {
             font-size: 13px;
-            color: #999;
+            color: #666;
         }
         #uploadStatus {
             font-size: 13px;
-            color: #666;
+            color: #1976d2;
             margin-top: 8px;
+            min-height: 20px;
+        }
+        .upload-progress {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin-top: 8px;
+            display: none;
+        }
+        .upload-progress-bar {
+            height: 100%;
+            background: #1976d2;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .file-size-warning {
+            color: #d32f2f;
+            font-size: 12px;
+            margin-top: 4px;
         }
         
         .editor-header {
@@ -439,6 +458,10 @@
         }
         .download-current-btn:hover {
             background: #1b5e20;
+        }
+        .download-current-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
         textarea {
             width: 100%;
@@ -548,7 +571,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.5);
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -557,9 +580,9 @@
             background: white;
             padding: 24px;
             border-radius: 8px;
-            max-width: 360px;
+            max-width: 400px;
             width: 90%;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
         .modal-content h3 {
             margin: 0 0 12px 0;
@@ -571,6 +594,11 @@
             color: #666;
             font-size: 14px;
             margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .modal-content .warning-text {
+            color: #d32f2f;
+            font-weight: 500;
         }
         .modal-buttons {
             display: flex;
@@ -579,6 +607,10 @@
         }
         .btn-icon {
             margin-right: 4px;
+        }
+        .small-text {
+            font-size: 12px;
+            color: #999;
         }
     </style>
 </head>
@@ -606,12 +638,16 @@
 
     <!-- 文件上传区域 -->
     <div class="upload-section">
-        <div class="upload-label">上传文件到当前目录</div>
+        <div class="upload-label">📤 上传文件到当前目录</div>
         <div class="upload-area">
             <input type="file" id="fileUpload">
-            <label for="fileUpload" class="upload-btn">选择文件</label>
-            <span class="upload-hint">或拖拽文件到这里</span>
+            <button class="upload-btn" id="uploadBtn">选择文件</button>
+            <span class="upload-hint">支持最大 100MB 的文件</span>
+            <div class="upload-progress" id="uploadProgress">
+                <div class="upload-progress-bar" id="uploadProgressBar"></div>
+            </div>
             <div id="uploadStatus"></div>
+            <div id="fileSizeWarning" class="file-size-warning"></div>
         </div>
     </div>
 
@@ -678,23 +714,38 @@
         <button class="save-btn" id="updateBtn" disabled>保存</button>
     </div>
 
-    <!-- 删除确认弹窗 -->
+    <!-- 删除文件确认弹窗 -->
     <div class="modal" id="deleteModal">
         <div class="modal-content">
-            <h3>确认删除</h3>
-            <p id="deleteMessage">确定要删除吗？</p>
+            <h3>⚠️ 确认删除文件</h3>
+            <p id="deleteMessage">确定要删除这个文件吗？</p>
+            <p class="small-text">此操作不可恢复，文件将被永久删除。</p>
             <div class="modal-buttons">
                 <button class="advanced-btn" id="cancelDelete">取消</button>
-                <button class="advanced-btn danger" id="confirmDelete">删除</button>
+                <button class="advanced-btn danger" id="confirmDelete">确认删除</button>
             </div>
         </div>
     </div>
 
-    <!-- 文件夹删除确认弹窗（特殊提示） -->
+    <!-- 删除文件确认弹窗 (普通模式) -->
+    <div class="modal" id="deleteFileModal">
+        <div class="modal-content">
+            <h3>⚠️ 确认删除文件</h3>
+            <p id="deleteFileMessage">确定要删除这个文件吗？</p>
+            <p class="small-text">此操作不可恢复，文件将被永久删除。</p>
+            <div class="modal-buttons">
+                <button class="advanced-btn" id="cancelFileDelete">取消</button>
+                <button class="advanced-btn danger" id="confirmFileDelete">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 文件夹删除确认弹窗 -->
     <div class="modal" id="deleteFolderModal">
         <div class="modal-content">
             <h3>⚠️ 确认删除文件夹</h3>
-            <p id="deleteFolderMessage">删除文件夹将删除其中所有内容！</p>
+            <p id="deleteFolderMessage" class="warning-text">删除文件夹将永久删除其中所有内容！</p>
+            <p class="small-text">此操作不可恢复，文件夹内所有文件将被永久删除。</p>
             <div class="modal-buttons">
                 <button class="advanced-btn" id="cancelFolderDelete">取消</button>
                 <button class="advanced-btn danger" id="confirmFolderDelete">强制删除</button>
@@ -703,7 +754,7 @@
     </div>
 
     <div class="footer-note">
-        <code>bloxorz671/createsoft</code> Token不会保存
+        <code>bloxorz671/createsoft</code> Token不会保存 · 支持文件大小 ≤ 100MB
     </div>
 </div>
 
@@ -717,6 +768,7 @@
         const OWNER = 'bloxorz671';
         const REPO = 'createsoft';
         const BRANCH = 'main';
+        const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB 限制
         
         // 文件映射表
         const FILE_DISPLAY_NAMES = {
@@ -738,6 +790,7 @@
         let currentItems = [];
         let fileToDelete = null;
         let folderToDelete = null;
+        let fileToDeleteSimple = null; // 普通模式待删除文件
 
         // ---------- DOM 元素 ----------
         const tokenInput = document.getElementById('tokenInput');
@@ -760,18 +813,30 @@
         const createFileBtn = document.getElementById('createFileBtn');
         const createFolderBtn = document.getElementById('createFolderBtn');
         const newFileName = document.getElementById('newFileName');
+        
+        // 删除弹窗
         const deleteModal = document.getElementById('deleteModal');
         const cancelDelete = document.getElementById('cancelDelete');
         const confirmDelete = document.getElementById('confirmDelete');
         const deleteMessage = document.getElementById('deleteMessage');
+        
+        const deleteFileModal = document.getElementById('deleteFileModal');
+        const cancelFileDelete = document.getElementById('cancelFileDelete');
+        const confirmFileDelete = document.getElementById('confirmFileDelete');
+        const deleteFileMessage = document.getElementById('deleteFileMessage');
+        
         const deleteFolderModal = document.getElementById('deleteFolderModal');
         const cancelFolderDelete = document.getElementById('cancelFolderDelete');
         const confirmFolderDelete = document.getElementById('confirmFolderDelete');
         const deleteFolderMessage = document.getElementById('deleteFolderMessage');
         
         // 上传相关
+        const uploadBtn = document.getElementById('uploadBtn');
         const fileUpload = document.getElementById('fileUpload');
         const uploadStatus = document.getElementById('uploadStatus');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const uploadProgressBar = document.getElementById('uploadProgressBar');
+        const fileSizeWarning = document.getElementById('fileSizeWarning');
 
         // ---------- 辅助函数 ----------
         function setStatus(message, type = 'info') {
@@ -800,19 +865,39 @@
             }
         }
 
-        // Base64 编码
+        // Base64 编码 - 优化版，支持大文件
         function base64Encode(str) {
             try {
                 const bytes = new TextEncoder().encode(str);
+                // 分块处理，避免卡死
+                const chunkSize = 1024 * 1024; // 1MB chunks
                 let binary = '';
-                for (let i = 0; i < bytes.length; i++) {
-                    binary += String.fromCharCode(bytes[i]);
+                
+                for (let i = 0; i < bytes.length; i += chunkSize) {
+                    const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+                    for (let j = 0; j < chunk.length; j++) {
+                        binary += String.fromCharCode(chunk[j]);
+                    }
+                    // 让浏览器有机会处理其他事件
+                    if (i % (chunkSize * 10) === 0) {
+                        setTimeout(() => {}, 0);
+                    }
                 }
+                
                 return btoa(binary);
             } catch (e) {
                 console.error('Base64编码失败:', e);
-                return '';
+                throw new Error('文件编码失败，可能文件过大');
             }
+        }
+
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
         // 下载文件
@@ -836,29 +921,70 @@
             }
         });
 
-        // 文件上传
+        // 触发文件选择
+        uploadBtn.addEventListener('click', () => {
+            fileUpload.click();
+        });
+
+        // 文件选择处理
+        fileUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // 检查文件大小
+            if (file.size > MAX_FILE_SIZE) {
+                fileSizeWarning.textContent = `❌ 文件过大：${formatFileSize(file.size)} > 100MB 限制`;
+                uploadStatus.textContent = '';
+                return;
+            }
+            
+            if (file.size > 50 * 1024 * 1024) {
+                fileSizeWarning.textContent = `⚠️ 文件较大：${formatFileSize(file.size)}，上传可能需要较长时间`;
+            } else {
+                fileSizeWarning.textContent = '';
+            }
+            
+            uploadStatus.textContent = `准备上传: ${file.name} (${formatFileSize(file.size)})`;
+            await uploadFile(file);
+        });
+
+        // 文件上传 - 优化版，支持大文件
         async function uploadFile(file) {
             if (!currentToken) {
-                uploadStatus.textContent = '请先连接';
+                uploadStatus.textContent = '❌ 请先连接';
                 return;
             }
 
+            uploadProgress.style.display = 'block';
+            uploadProgressBar.style.width = '0%';
+            
             const reader = new FileReader();
+            
             reader.onload = async function(e) {
-                const content = e.target.result;
-                const encodedContent = base64Encode(content);
-                
-                const path = currentPath ? `${currentPath}/${file.name}` : file.name;
-                
-                const body = {
-                    message: `上传 ${file.name}`,
-                    content: encodedContent,
-                    branch: BRANCH
-                };
-
-                uploadStatus.textContent = '上传中...';
-
                 try {
+                    uploadStatus.textContent = '⏳ 正在编码文件...';
+                    
+                    // 分块处理文件内容
+                    const content = e.target.result;
+                    
+                    // 显示进度
+                    uploadProgressBar.style.width = '30%';
+                    
+                    uploadStatus.textContent = '⏳ 正在编码文件... 30%';
+                    
+                    const encodedContent = base64Encode(content);
+                    
+                    uploadProgressBar.style.width = '60%';
+                    uploadStatus.textContent = '⏳ 正在上传到 GitHub... 60%';
+                    
+                    const path = currentPath ? `${currentPath}/${file.name}` : file.name;
+                    
+                    const body = {
+                        message: `上传 ${file.name}`,
+                        content: encodedContent,
+                        branch: BRANCH
+                    };
+
                     const response = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
                         method: 'PUT',
                         headers: {
@@ -868,53 +994,42 @@
                         body: JSON.stringify(body)
                     });
 
+                    uploadProgressBar.style.width = '90%';
+
                     if (!response.ok) {
-                        throw new Error('上传失败');
+                        const error = await response.json();
+                        throw new Error(error.message || '上传失败');
                     }
 
-                    uploadStatus.textContent = '上传成功';
+                    uploadProgressBar.style.width = '100%';
+                    uploadStatus.textContent = '✅ 上传成功！';
+                    
                     if (advancedToggle.checked) {
                         loadDirectory(currentPath);
                     }
                     
                     setTimeout(() => {
                         uploadStatus.textContent = '';
+                        uploadProgress.style.display = 'none';
+                        uploadProgressBar.style.width = '0%';
+                        fileSizeWarning.textContent = '';
                     }, 3000);
                     
                 } catch (error) {
-                    uploadStatus.textContent = '上传失败';
                     console.error(error);
+                    uploadStatus.textContent = `❌ 上传失败: ${error.message}`;
+                    uploadProgress.style.display = 'none';
+                    fileSizeWarning.textContent = '';
                 }
             };
+
+            reader.onerror = function() {
+                uploadStatus.textContent = '❌ 读取文件失败';
+                uploadProgress.style.display = 'none';
+            };
+
             reader.readAsBinaryString(file);
         }
-
-        // 拖拽上传
-        const uploadArea = document.querySelector('.upload-area');
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.background = '#f0f0f0';
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.background = '';
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.background = '';
-            const file = e.dataTransfer.files[0];
-            if (file) {
-                uploadFile(file);
-            }
-        });
-
-        fileUpload.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                uploadFile(file);
-            }
-        });
 
         // ---------- 文件选择相关 ----------
         function resetFileButtons() {
@@ -1143,6 +1258,33 @@
             }
         }
 
+        // ---------- 普通模式：删除文件 ----------
+        async function deleteSimpleFile(path, sha) {
+            try {
+                const body = {
+                    message: `删除 ${path}`,
+                    sha: sha,
+                    branch: BRANCH
+                };
+                
+                await fetchFromGitHub(path, 'DELETE', body);
+                setStatus('删除成功', 'success');
+                deleteFileModal.style.display = 'none';
+                
+                // 清空编辑器
+                fileContentArea.value = '';
+                currentFileSha = null;
+                currentFile = '';
+                currentFileBadge.textContent = '未选择文件';
+                downloadCurrentBtn.style.display = 'none';
+                setStatus('文件已删除', 'success');
+                
+            } catch (error) {
+                setStatus('删除失败', 'error');
+                deleteFileModal.style.display = 'none';
+            }
+        }
+
         // ---------- 高级模式：删除文件夹 ----------
         async function deleteFolder(path) {
             try {
@@ -1186,7 +1328,6 @@
 
         // ---------- 暴露全局方法 ----------
         window.editFile = function(path) {
-            // 不关闭高级模式，只切换内容
             const filename = path.split('/').pop();
             if (SUPPORTED_FILES.includes(filename)) {
                 currentFile = filename;
@@ -1210,15 +1351,23 @@
             downloadFileItem(path, sha);
         };
 
+        // 高级模式删除文件（带确认弹窗）
         window.deleteFile = function(path, sha) {
             fileToDelete = { path, sha };
             deleteMessage.textContent = `确定要删除文件 "${path}" 吗？`;
             deleteModal.style.display = 'flex';
         };
 
+        // 普通模式删除文件（通过删除按钮触发）
+        window.deleteSimpleFile = function(path, sha) {
+            fileToDeleteSimple = { path, sha };
+            deleteFileMessage.textContent = `确定要删除文件 "${path}" 吗？`;
+            deleteFileModal.style.display = 'flex';
+        };
+
         window.deleteFolder = function(path, sha) {
             folderToDelete = { path, sha };
-            deleteFolderMessage.textContent = `确定要删除文件夹 "${path}" 吗？\n这将删除其中所有文件！`;
+            deleteFolderMessage.textContent = `确定要删除文件夹 "${path}" 吗？\n这将永久删除其中所有文件！`;
             deleteFolderModal.style.display = 'flex';
         };
 
@@ -1226,7 +1375,44 @@
             loadDirectory(path);
         };
 
-        // ---------- 事件绑定 ----------
+        // ---------- 删除确认事件绑定 ----------
+        // 高级模式文件删除确认
+        cancelDelete.addEventListener('click', () => {
+            deleteModal.style.display = 'none';
+            fileToDelete = null;
+        });
+
+        confirmDelete.addEventListener('click', () => {
+            if (fileToDelete) {
+                deleteItem(fileToDelete.path, fileToDelete.sha);
+            }
+        });
+
+        // 普通模式文件删除确认
+        cancelFileDelete.addEventListener('click', () => {
+            deleteFileModal.style.display = 'none';
+            fileToDeleteSimple = null;
+        });
+
+        confirmFileDelete.addEventListener('click', () => {
+            if (fileToDeleteSimple) {
+                deleteSimpleFile(fileToDeleteSimple.path, fileToDeleteSimple.sha);
+            }
+        });
+
+        // 文件夹删除确认
+        cancelFolderDelete.addEventListener('click', () => {
+            deleteFolderModal.style.display = 'none';
+            folderToDelete = null;
+        });
+
+        confirmFolderDelete.addEventListener('click', () => {
+            if (folderToDelete) {
+                deleteFolder(folderToDelete.path);
+            }
+        });
+
+        // ---------- 其他事件绑定 ----------
         loadBtn.addEventListener('click', async () => {
             const token = tokenInput.value.trim();
             if (!token) {
@@ -1292,30 +1478,6 @@
         createFileBtn.addEventListener('click', () => createItem(false));
         createFolderBtn.addEventListener('click', () => createItem(true));
 
-        // 文件删除确认
-        cancelDelete.addEventListener('click', () => {
-            deleteModal.style.display = 'none';
-            fileToDelete = null;
-        });
-
-        confirmDelete.addEventListener('click', () => {
-            if (fileToDelete) {
-                deleteItem(fileToDelete.path, fileToDelete.sha);
-            }
-        });
-
-        // 文件夹删除确认
-        cancelFolderDelete.addEventListener('click', () => {
-            deleteFolderModal.style.display = 'none';
-            folderToDelete = null;
-        });
-
-        confirmFolderDelete.addEventListener('click', () => {
-            if (folderToDelete) {
-                deleteFolder(folderToDelete.path);
-            }
-        });
-
         fileButtons.forEach(btn => {
             btn.addEventListener('click', () => setCurrentFile(btn.dataset.file));
         });
@@ -1328,22 +1490,30 @@
             if (!currentToken || !currentFile) return;
             
             const content = fileContentArea.value;
-            const encodedContent = base64Encode(content);
             
-            const body = {
-                message: `更新 ${currentFile}`,
-                content: encodedContent,
-                branch: BRANCH
-            };
-            
-            if (currentFileSha) {
-                body.sha = currentFileSha;
+            // 检查文件大小
+            const contentSize = new Blob([content]).size;
+            if (contentSize > MAX_FILE_SIZE) {
+                setStatus(`文件过大 (${formatFileSize(contentSize)} > 100MB)`, 'error');
+                return;
             }
             
             updateBtn.disabled = true;
             updateBtn.textContent = '保存中';
             
             try {
+                const encodedContent = base64Encode(content);
+                
+                const body = {
+                    message: `更新 ${currentFile}`,
+                    content: encodedContent,
+                    branch: BRANCH
+                };
+                
+                if (currentFileSha) {
+                    body.sha = currentFileSha;
+                }
+                
                 await fetchFromGitHub(currentFile, 'PUT', body);
                 setStatus('保存成功', 'success');
             } catch (error) {
