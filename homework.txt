@@ -2,6 +2,4 @@
 sub=数学
 name=录制讲题视频
 link=https://qr03.cn/A8JkXm
-【Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.119 Safari/537.36
-】
 """
