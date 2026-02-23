@@ -4,11 +4,17 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>luckynum.top Admin</title>
+    <title>luckynum.top后台</title>
+    <!-- 强制浏览器使用UTF-8渲染 -->
+    <script>
+        // 强制设置文档编码
+        document.charset = 'UTF-8';
+        document.characterSet = 'UTF-8';
+    </script>
     <style>
         * {
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
         }
         body {
             background: #f5f5f5;
@@ -170,7 +176,7 @@
             font-family: monospace;
         }
         
-        /* é«çº§éç½®åºå */
+        /* 高级配置区域 */
         .advanced-section {
             background: #fafafa;
             border: 1px solid #e0e0e0;
@@ -280,11 +286,11 @@
             color: #1976d2;
         }
         .file-item.folder:before {
-            content: "ð ";
+            content: "📁 ";
             opacity: 0.7;
         }
         .file-item.file:before {
-            content: "ð ";
+            content: "📄 ";
             opacity: 0.7;
         }
         .file-actions {
@@ -336,7 +342,7 @@
             border-color: #999;
         }
         
-        /* ä¸ä¼ åºå */
+        /* 上传区域 */
         .upload-section {
             background: #fafafa;
             border: 1px dashed #ccc;
@@ -540,133 +546,137 @@
 </head>
 <body>
 <div class="container">
-    <h1>luckynum.top Admin</h1>
+    <h1>luckynum.top后台</h1>
 
-    <!-- Token è¾å¥åºå -->
+    <!-- Token 输入区域 -->
     <div class="token-section">
-        <div class="token-label">GitHub Access Token</div>
+        <div class="token-label">GitHub 访问令牌</div>
         <div class="token-input-wrapper">
             <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
-            <button class="connect-btn" id="loadBtn">Connect</button>
+            <button class="connect-btn" id="loadBtn">连接</button>
         </div>
         
-        <!-- é«çº§éç½®å¼å³ -->
+        <!-- 高级配置开关 -->
         <div class="advanced-toggle">
             <label class="toggle-switch">
                 <input type="checkbox" id="advancedToggle">
                 <span class="slider"></span>
             </label>
-            <label for="advancedToggle" class="toggle-label">Advanced Mode</label>
+            <label for="advancedToggle" class="toggle-label">高级模式 浏览/新建/删除</label>
         </div>
     </div>
 
-    <!-- æä»¶ä¸ä¼ åºå -->
+    <!-- 文件上传区域 -->
     <div class="upload-section">
-        <div class="upload-label">Upload File</div>
+        <div class="upload-label">上传文件到当前目录</div>
         <div class="upload-area">
             <input type="file" id="fileUpload">
-            <label for="fileUpload" class="upload-btn">Choose File</label>
-            <span class="upload-hint">or drag and drop</span>
+            <label for="fileUpload" class="upload-btn">选择文件</label>
+            <span class="upload-hint">或拖拽文件到这里</span>
             <div id="uploadStatus"></div>
         </div>
     </div>
 
-    <!-- æä»¶éæ©åºå (æ®éæ¨¡å¼) -->
+    <!-- 文件选择区域 (普通模式) -->
     <div class="file-selector-section" id="fileSelectorSection" style="display: none;">
-        <div class="file-selector-label">Select File</div>
+        <div class="file-selector-label">选择文件</div>
         
-        <!-- æä»¶éæ©æé® -->
+        <!-- 文件选择按钮 -->
         <div class="file-buttons">
-            <button class="file-btn" data-file="homework.txt">Homework</button>
-            <button class="file-btn" data-file="tools.txt">Tools</button>
-            <button class="file-btn" data-file="notice.txt">Notice</button>
-            <button class="file-btn" data-file="index.html">Homepage</button>
-            <button class="file-btn" data-file="online.html">Web Version</button>
+            <button class="file-btn" data-file="homework.txt">初二五班电子作业</button>
+            <button class="file-btn" data-file="tools.txt">更多工具</button>
+            <button class="file-btn" data-file="notice.txt">公告通知</button>
+            <button class="file-btn" data-file="index.html">主页面</button>
+            <button class="file-btn" data-file="online.html">网页版</button>
         </div>
         
-        <!-- å½åéä¸­æä»¶æ¾ç¤º -->
+        <!-- 当前选中文件显示 -->
         <div class="selected-file-display" id="selectedFileDisplay">
-            No file selected
+            未选择文件
         </div>
     </div>
 
-    <!-- é«çº§éç½®åºå -->
+    <!-- 高级配置区域 -->
     <div class="advanced-section" id="advancedSection" style="display: none;">
         <div class="advanced-header">
-            <div class="advanced-title">File Manager</div>
-            <button class="advanced-close" id="closeAdvanced">Ã</button>
+            <div class="advanced-title">文件管理器</div>
+            <button class="advanced-close" id="closeAdvanced">×</button>
         </div>
         
         <div class="repo-browser">
             <div class="browser-header">
                 <div class="path-display" id="currentPath">/</div>
                 <div class="browser-toolbar">
-                    <button class="advanced-btn" id="refreshBtn">Refresh</button>
-                    <button class="advanced-btn" id="goRootBtn">Root</button>
+                    <button class="advanced-btn" id="refreshBtn">刷新</button>
+                    <button class="advanced-btn" id="goRootBtn">根目录</button>
                 </div>
             </div>
             
-            <!-- æä»¶åè¡¨ -->
+            <!-- 文件列表 -->
             <div id="fileList" class="file-list">
-                <div style="padding: 20px; text-align: center; color: #999;">Loading...</div>
+                <div style="padding: 20px; text-align: center; color: #999;">加载中...</div>
             </div>
             
-            <!-- æ°å»ºæä»¶è¡¨å -->
+            <!-- 新建文件表单 -->
             <div class="new-file-form">
-                <input type="text" id="newFileName" placeholder="File name">
-                <button class="advanced-btn primary" id="createFileBtn">New File</button>
-                <button class="advanced-btn" id="createFolderBtn">New Folder</button>
+                <input type="text" id="newFileName" placeholder="文件名">
+                <button class="advanced-btn primary" id="createFileBtn">新建</button>
+                <button class="advanced-btn" id="createFolderBtn">文件夹</button>
             </div>
         </div>
     </div>
 
-    <!-- ç¼è¾å¨åºå -->
+    <!-- 编辑器区域 -->
     <div class="editor-header">
-        <span class="file-badge" id="currentFileBadge">No file selected</span>
+        <span class="file-badge" id="currentFileBadge">未选择文件</span>
     </div>
-    <textarea id="fileContent" placeholder="Select a file to edit" rows="18" disabled></textarea>
+    <textarea id="fileContent" placeholder="选择文件后编辑" rows="18" disabled></textarea>
 
     <div class="action-bar">
-        <div id="statusMessage" class="status">Waiting for connection</div>
-        <button class="save-btn" id="updateBtn" disabled>Save</button>
+        <div id="statusMessage" class="status">等待连接</div>
+        <button class="save-btn" id="updateBtn" disabled>保存</button>
     </div>
 
-    <!-- å é¤ç¡®è®¤å¼¹çª -->
+    <!-- 删除确认弹窗 -->
     <div class="modal" id="deleteModal">
         <div class="modal-content">
-            <h3>Confirm Delete</h3>
-            <p id="deleteMessage">Are you sure?</p>
+            <h3>确认删除</h3>
+            <p id="deleteMessage">确定要删除吗？</p>
             <div class="modal-buttons">
-                <button class="advanced-btn" id="cancelDelete">Cancel</button>
-                <button class="advanced-btn danger" id="confirmDelete">Delete</button>
+                <button class="advanced-btn" id="cancelDelete">取消</button>
+                <button class="advanced-btn danger" id="confirmDelete">删除</button>
             </div>
         </div>
     </div>
 
     <div class="footer-note">
-        <code>bloxorz671/createsoft</code> Token is not saved
+        <code>bloxorz671/createsoft</code> Token不会保存
     </div>
 </div>
 
 <script>
+    // 强制修复编码
+    document.charset = 'UTF-8';
+    document.characterSet = 'UTF-8';
+    
     (function() {
-        // ---------- åºå®éç½® ----------
+        // ---------- 固定配置 ----------
         const OWNER = 'bloxorz671';
         const REPO = 'createsoft';
         const BRANCH = 'main';
         
-        // æä»¶æ å°è¡¨
+        // 文件映射表
         const FILE_DISPLAY_NAMES = {
-            'homework.txt': 'Homework',
-            'tools.txt': 'Tools',
-            'notice.txt': 'Notice',
-            'index.html': 'Homepage',
-            'online.html': 'Web Version'
+            'homework.txt': '初二五班电子作业',
+            'tools.txt': '更多工具',
+            'notice.txt': '公告通知',
+            'index.html': '主页面',
+            'online.html': '网页版'
         };
         
         const SUPPORTED_FILES = Object.keys(FILE_DISPLAY_NAMES);
 
-        // ---------- å¨å±åé ----------
+        // ---------- 全局变量 ----------
         let currentFileSha = null;
         let currentToken = '';
         let currentFile = '';
@@ -675,7 +685,7 @@
         let currentItems = [];
         let fileToDelete = null;
 
-        // ---------- DOM åç´  ----------
+        // ---------- DOM 元素 ----------
         const tokenInput = document.getElementById('tokenInput');
         const loadBtn = document.getElementById('loadBtn');
         const updateBtn = document.getElementById('updateBtn');
@@ -700,11 +710,11 @@
         const confirmDelete = document.getElementById('confirmDelete');
         const deleteMessage = document.getElementById('deleteMessage');
         
-        // ä¸ä¼ ç¸å³
+        // 上传相关
         const fileUpload = document.getElementById('fileUpload');
         const uploadStatus = document.getElementById('uploadStatus');
 
-        // ---------- è¾å©å½æ° ----------
+        // ---------- 辅助函数 ----------
         function setStatus(message, type = 'info') {
             statusDiv.textContent = message;
             statusDiv.className = 'status';
@@ -715,7 +725,7 @@
             }
         }
 
-        // Base64 è§£ç 
+        // Base64 解码 - 修复中文乱码
         function base64Decode(base64) {
             try {
                 base64 = base64.replace(/\n/g, '');
@@ -726,12 +736,12 @@
                 }
                 return new TextDecoder('utf-8').decode(bytes);
             } catch (e) {
-                console.error('Base64 decode error:', e);
+                console.error('Base64解码失败:', e);
                 return '';
             }
         }
 
-        // Base64 ç¼ç 
+        // Base64 编码 - 修复中文乱码
         function base64Encode(str) {
             try {
                 const bytes = new TextEncoder().encode(str);
@@ -741,15 +751,15 @@
                 }
                 return btoa(binary);
             } catch (e) {
-                console.error('Base64 encode error:', e);
+                console.error('Base64编码失败:', e);
                 return '';
             }
         }
 
-        // æä»¶ä¸ä¼ 
+        // 文件上传
         async function uploadFile(file) {
             if (!currentToken) {
-                uploadStatus.textContent = 'Please connect first';
+                uploadStatus.textContent = '请先连接';
                 return;
             }
 
@@ -761,12 +771,12 @@
                 const path = currentPath ? `${currentPath}/${file.name}` : file.name;
                 
                 const body = {
-                    message: `Upload ${file.name}`,
+                    message: `上传 ${file.name}`,
                     content: encodedContent,
                     branch: BRANCH
                 };
 
-                uploadStatus.textContent = 'Uploading...';
+                uploadStatus.textContent = '上传中...';
 
                 try {
                     const response = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
@@ -779,10 +789,10 @@
                     });
 
                     if (!response.ok) {
-                        throw new Error('Upload failed');
+                        throw new Error('上传失败');
                     }
 
-                    uploadStatus.textContent = 'Upload successful';
+                    uploadStatus.textContent = '上传成功';
                     if (advancedSection.style.display === 'block') {
                         loadDirectory(currentPath);
                     }
@@ -792,14 +802,14 @@
                     }, 3000);
                     
                 } catch (error) {
-                    uploadStatus.textContent = 'Upload failed';
+                    uploadStatus.textContent = '上传失败';
                     console.error(error);
                 }
             };
             reader.readAsBinaryString(file);
         }
 
-        // ææ½ä¸ä¼ 
+        // 拖拽上传
         const uploadArea = document.querySelector('.upload-area');
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -826,14 +836,14 @@
             }
         });
 
-        // ---------- æä»¶éæ©ç¸å³ ----------
+        // ---------- 文件选择相关 ----------
         function resetFileButtons() {
             fileButtons.forEach(btn => btn.classList.remove('active'));
         }
 
         function setCurrentFile(filename) {
             if (!SUPPORTED_FILES.includes(filename)) {
-                console.error('Unsupported file:', filename);
+                console.error('不支持的文件:', filename);
                 return;
             }
             
@@ -858,7 +868,7 @@
             }
         }
 
-        // ---------- API è°ç¨ ----------
+        // ---------- API 调用 ----------
         async function fetchFromGitHub(path = '', method = 'GET', body = null) {
             let url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
             if (method === 'GET') {
@@ -891,14 +901,14 @@
         async function loadSelectedFile() {
             if (!currentToken || !currentFile) return;
 
-            setStatus('Loading', 'info');
+            setStatus('加载中', 'info');
             fileContentArea.disabled = true;
             updateBtn.disabled = true;
 
             try {
                 const response = await fetchFromGitHub(currentFile);
                 if (response.status === 404) {
-                    setStatus('File not found', 'info');
+                    setStatus('文件不存在', 'info');
                     fileContentArea.value = '';
                     fileContentArea.disabled = false;
                     updateBtn.disabled = false;
@@ -909,7 +919,7 @@
                 
                 const data = await response.json();
                 if (data.type !== 'file') {
-                    throw new Error('Not a file');
+                    throw new Error('不是一个文件');
                 }
                 
                 currentFileSha = data.sha;
@@ -917,21 +927,21 @@
                 fileContentArea.disabled = false;
                 updateBtn.disabled = false;
                 isFileLoaded = true;
-                setStatus('Loaded', 'success');
+                setStatus('加载成功', 'success');
             } catch (error) {
-                setStatus('Load failed', 'error');
+                setStatus('加载失败', 'error');
                 fileContentArea.value = '';
             }
         }
 
-        // ---------- é«çº§æ¨¡å¼ï¼æµè§ä»åº ----------
+        // ---------- 高级模式：浏览仓库 ----------
         async function loadDirectory(path = '') {
             try {
-                fileListDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">Loading...</div>';
+                fileListDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">加载中...</div>';
                 const response = await fetchFromGitHub(path);
                 
                 if (response.status === 404) {
-                    fileListDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">Path not found</div>';
+                    fileListDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">路径不存在</div>';
                     return;
                 }
                 
@@ -942,8 +952,8 @@
                         <div class="file-item file">
                             <span>${data.name}</span>
                             <div class="file-actions">
-                                <button class="file-action-btn edit" onclick="window.editFile('${data.path}')">Edit</button>
-                                <button class="file-action-btn delete" onclick="window.deleteFile('${data.path}', '${data.sha}')">Delete</button>
+                                <button class="file-action-btn edit" onclick="window.editFile('${data.path}')">编辑</button>
+                                <button class="file-action-btn delete" onclick="window.deleteFile('${data.path}', '${data.sha}')">删除</button>
                             </div>
                         </div>
                     `;
@@ -964,12 +974,12 @@
                     const itemClass = item.type === 'dir' ? 'folder' : 'file';
                     const actions = item.type === 'file' ? `
                         <div class="file-actions">
-                            <button class="file-action-btn edit" onclick="window.editFile('${item.path}')">Edit</button>
-                            <button class="file-action-btn delete" onclick="window.deleteFile('${item.path}', '${item.sha}')">Delete</button>
+                            <button class="file-action-btn edit" onclick="window.editFile('${item.path}')">编辑</button>
+                            <button class="file-action-btn delete" onclick="window.deleteFile('${item.path}', '${item.sha}')">删除</button>
                         </div>
                     ` : `
                         <div class="file-actions">
-                            <button class="file-action-btn edit" onclick="window.openFolder('${item.path}')">Open</button>
+                            <button class="file-action-btn edit" onclick="window.openFolder('${item.path}')">打开</button>
                         </div>
                     `;
                     
@@ -981,20 +991,20 @@
                     `;
                 }
                 
-                fileListDiv.innerHTML = html || '<div style="padding: 20px; text-align: center;">Empty directory</div>';
+                fileListDiv.innerHTML = html || '<div style="padding: 20px; text-align: center;">空目录</div>';
                 currentPathDisplay.textContent = '/' + path;
                 currentPath = path;
                 
             } catch (error) {
-                fileListDiv.innerHTML = `<div style="padding: 20px; text-align: center; color: #999;">Load failed</div>`;
+                fileListDiv.innerHTML = `<div style="padding: 20px; text-align: center; color: #999;">加载失败</div>`;
             }
         }
 
-        // ---------- é«çº§æ¨¡å¼ï¼åå»ºæä»¶/æä»¶å¤¹ ----------
+        // ---------- 高级模式：创建文件/文件夹 ----------
         async function createItem(isFolder = false) {
             const name = newFileName.value.trim();
             if (!name) {
-                setStatus('Please enter a name', 'error');
+                setStatus('请输入名称', 'error');
                 return;
             }
             
@@ -1006,40 +1016,40 @@
             try {
                 const content = isFolder ? '' : ' ';
                 const body = {
-                    message: `Create ${name}`,
+                    message: `创建 ${name}`,
                     content: isFolder ? '' : base64Encode(content),
                     branch: BRANCH
                 };
                 
                 await fetchFromGitHub(path, 'PUT', body);
-                setStatus('Created', 'success');
+                setStatus('创建成功', 'success');
                 newFileName.value = '';
                 loadDirectory(currentPath);
             } catch (error) {
-                setStatus('Create failed', 'error');
+                setStatus('创建失败', 'error');
             }
         }
 
-        // ---------- é«çº§æ¨¡å¼ï¼å é¤æä»¶ ----------
+        // ---------- 高级模式：删除文件 ----------
         async function deleteItem(path, sha) {
             try {
                 const body = {
-                    message: `Delete ${path}`,
+                    message: `删除 ${path}`,
                     sha: sha,
                     branch: BRANCH
                 };
                 
                 await fetchFromGitHub(path, 'DELETE', body);
-                setStatus('Deleted', 'success');
+                setStatus('删除成功', 'success');
                 deleteModal.style.display = 'none';
                 loadDirectory(currentPath);
             } catch (error) {
-                setStatus('Delete failed', 'error');
+                setStatus('删除失败', 'error');
                 deleteModal.style.display = 'none';
             }
         }
 
-        // ---------- æ´é²å¨å±æ¹æ³ ----------
+        // ---------- 暴露全局方法 ----------
         window.editFile = function(path) {
             advancedToggle.checked = false;
             advancedSection.style.display = 'none';
@@ -1058,7 +1068,7 @@
 
         window.deleteFile = function(path, sha) {
             fileToDelete = { path, sha };
-            deleteMessage.textContent = `Delete ${path}?`;
+            deleteMessage.textContent = `删除 ${path} ？`;
             deleteModal.style.display = 'flex';
         };
 
@@ -1066,16 +1076,16 @@
             loadDirectory(path);
         };
 
-        // ---------- äºä»¶ç»å® ----------
+        // ---------- 事件绑定 ----------
         loadBtn.addEventListener('click', async () => {
             const token = tokenInput.value.trim();
             if (!token) {
-                setStatus('Please enter token', 'error');
+                setStatus('请输入 Token', 'error');
                 return;
             }
             
             loadBtn.disabled = true;
-            loadBtn.textContent = 'Verifying';
+            loadBtn.textContent = '验证中';
             
             try {
                 const testResponse = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}`, {
@@ -1083,11 +1093,11 @@
                 });
                 
                 if (!testResponse.ok) {
-                    throw new Error('Invalid token');
+                    throw new Error('Token 无效');
                 }
                 
                 currentToken = token;
-                setStatus('Connected', 'success');
+                setStatus('连接成功', 'success');
                 
                 if (advancedToggle.checked) {
                     advancedSection.style.display = 'block';
@@ -1099,10 +1109,10 @@
                     setCurrentFile('homework.txt');
                 }
             } catch (error) {
-                setStatus('Connection failed', 'error');
+                setStatus('连接失败', 'error');
             } finally {
                 loadBtn.disabled = false;
-                loadBtn.textContent = 'Connect';
+                loadBtn.textContent = '连接';
             }
         });
 
@@ -1158,7 +1168,7 @@
             const encodedContent = base64Encode(content);
             
             const body = {
-                message: `Update ${currentFile}`,
+                message: `更新 ${currentFile}`,
                 content: encodedContent,
                 branch: BRANCH
             };
@@ -1168,21 +1178,21 @@
             }
             
             updateBtn.disabled = true;
-            updateBtn.textContent = 'Saving';
+            updateBtn.textContent = '保存中';
             
             try {
                 await fetchFromGitHub(currentFile, 'PUT', body);
-                setStatus('Saved', 'success');
+                setStatus('保存成功', 'success');
             } catch (error) {
-                setStatus('Save failed', 'error');
+                setStatus('保存失败', 'error');
             } finally {
                 updateBtn.disabled = false;
-                updateBtn.textContent = 'Save';
+                updateBtn.textContent = '保存';
             }
         });
 
-        // åå§ç¶æ
-        setStatus('Enter token to connect', 'info');
+        // 初始状态
+        setStatus('输入 Token 后连接', 'info');
     })();
 </script>
 </body>
