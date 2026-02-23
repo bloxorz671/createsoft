@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>初二五班电子作业提交</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #ffffff;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 1.5rem;
+            line-height: 1.5;
+            color: #1e293b;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 5vh;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            color: #0f172a;
+            margin-bottom: 1.2rem;
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .notice {
+            color: #b91c1c;
+            font-size: 1.3rem;
+            font-weight: 400;
+            text-align: center;
+            max-width: 550px;
+            margin: 0 auto 2.8rem auto;
+            background-color: #fff8f8;
+            padding: 0.9rem 1.8rem;
+            border-radius: 60px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(185, 28, 28, 0.15);
+        }
+
+        /* 大按钮样式 - 当没有作业时显示 */
+        .big-button-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 1.5rem 0 2rem 0;
+        }
+
+        .big-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e3a5f;
+            color: white;
+            text-decoration: none;
+            font-size: 1.8rem;
+            font-weight: 480;
+            padding: 1rem 3.8rem;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 30, 60, 0.15);
+            letter-spacing: 0.3px;
+            line-height: 1.2;
+            min-width: 240px;
+        }
+
+        .big-btn:hover {
+            background-color: #112b44;
+            box-shadow: 0 8px 18px rgba(0, 30, 60, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .big-btn:active {
+            background-color: #0a1f31;
+            transform: translateY(2px);
+            box-shadow: 0 2px 8px rgba(0, 30, 60, 0.2);
+        }
+
+        /* 作业列表区域 - 当有作业时显示 */
+        .homework-section {
+            margin: 2rem 0 3rem 0;
+            width: 100%;
+        }
+
+        .homework-item {
+            display: flex;
+            flex-direction: column;
+            padding: 1.2rem 1.5rem;
+            background-color: #f9fafc;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+            border: 1px solid #e9edf4;
+            transition: box-shadow 0.2s;
+        }
+
+        .homework-item:hover {
+            box-shadow: 0 6px 14px rgba(0, 20, 40, 0.06);
+        }
+
+        .homework-row {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .subject-tag {
+            font-size: 1.2rem;
+            font-weight: 500;
+            min-width: 90px;
+            padding: 0.3rem 0;
+            margin-right: 1.5rem;
+            text-align: center;
+            border-radius: 40px;
+            background-color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        /* 科目颜色 */
+        .subject-chinese {
+            color: #c44536;  /* 橙色偏红，清晰 */
+            border-left: 4px solid #e67e22;
+            background: #fff5eb;
+        }
+        .subject-math {
+            color: #1e6f9f;  /* 深蓝色 */
+            border-left: 4px solid #2980b9;
+            background: #ebf5ff;
+        }
+        .subject-english {
+            color: #2e7d5e;  /* 墨绿 */
+            border-left: 4px solid #27ae60;
+            background: #eafaf2;
+        }
+        .subject-other {
+            color: #3c4b5a;
+            border-left: 4px solid #95a5a6;
+            background: #f0f2f4;
+        }
+
+        .homework-name {
+            flex: 1;
+            font-size: 1.3rem;
+            font-weight: 450;
+            color: #1e2b3a;
+            padding: 0 0.5rem;
+            word-break: break-word;
+        }
+
+        .homework-link {
+            display: inline-block;
+            background: #2c3e50;
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 450;
+            padding: 0.6rem 2rem;
+            border-radius: 40px;
+            transition: background-color 0.15s, transform 0.1s;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
+            margin-left: 1rem;
+        }
+
+        .homework-link:hover {
+            background: #1a2b3c;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .homework-link:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* UA 提示信息样式 */
+        .ua-message {
+            margin-top: 0.8rem;
+            margin-left: 0;
+            font-size: 0.95rem;
+            padding: 0.3rem 0;
+            width: 100%;
+            text-align: left;
+            border-top: 1px dashed #e0e6ed;
+            padding-top: 0.8rem;
+        }
+
+        .ua-confirmed {
+            color: #2e7d32;  /* 绿色 */
+            font-weight: 450;
+        }
+
+        .ua-waiting {
+            color: #b91c1c;  /* 红色 */
+            font-weight: 400;
+        }
+
+        .class-line {
+            width: 80px;
+            height: 3px;
+            background: #d9e2ef;
+            margin: 2rem auto 0 auto;
+            border-radius: 30px;
+            opacity: 0.6;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2.2rem; }
+            .notice { font-size: 1.1rem; padding: 0.7rem 1rem; }
+            
+            .homework-row {
+                flex-wrap: wrap;
+            }
+            .subject-tag {
+                min-width: 70px;
+                font-size: 1rem;
+                margin-right: 0.8rem;
+            }
+            .homework-name {
+                font-size: 1.1rem;
+                margin: 0.3rem 0;
+                flex: 1 1 100%;
+                order: 2;
+                padding-left: 0;
+                padding-bottom: 0.5rem;
+            }
+            .homework-link {
+                margin-left: auto;
+                font-size: 1rem;
+                padding: 0.4rem 1.2rem;
+                order: 3;
+            }
+            .ua-message {
+                font-size: 0.85rem;
+                margin-top: 0.5rem;
+            }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>初二五班电子作业提交</h1>
+
+        <div class="notice">
+            如果你不是广州市第四十一中学初二五班的学生，请退出本网页
+        </div>
+
+        <!-- 作业内容将动态渲染到这里 -->
+        <div id="homeworkContainer"></div>
+
+        <!-- 大按钮容器（默认隐藏，无作业时显示） -->
+        <div id="bigButtonContainer" class="big-button-wrapper" style="display: none;">
+            <a href="https://qr03.cn/A8JkXm" class="big-btn" target="_blank" rel="noopener noreferrer">
+                去提交
+            </a>
+        </div>
+
+        <div class="class-line" aria-hidden="true"></div>
+    </div>
+
+    <script>
+        (function() {
+            // 获取当前浏览器的 UA
+            const currentUA = navigator.userAgent;
+            
+            // 解析RGB颜色字符串 [r,g,b] 或 [r, g, b]
+            function parseRgbColor(colorStr) {
+                if (!colorStr) return null;
+                // 匹配 [数字,数字,数字] 格式，允许空格
+                const match = colorStr.match(/\[\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\]/);
+                if (match) {
+                    const r = parseInt(match[1]);
+                    const g = parseInt(match[2]);
+                    const b = parseInt(match[3]);
+                    // 验证数值范围
+                    if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
+                        return `rgb(${r}, ${g}, ${b})`;
+                    }
+                }
+                return null;
+            }
+
+            // 解析作业函数：输入文件内容字符串，返回作业对象数组
+            function parseHomework(text) {
+                const items = [];
+                // 按 """ 分割
+                const rawBlocks = text.split(/"""/);
+                
+                for (let i = 0; i < rawBlocks.length; i++) {
+                    let block = rawBlocks[i].trim();
+                    if (block === '') continue;
+                    
+                    const lines = block.split('\n');
+                    let sub = '', name = '', link = '';
+                    let uaList = [];
+                    let hasUaBracket = false;
+                    let more = '';           // more= 后面的内容
+                    let moreColor = null;     // 解析后的颜色值
+                    
+                    for (let line of lines) {
+                        line = line.trim();
+                        
+                        // 检查是否是UA标记开始：以【开头
+                        if (line.startsWith('【')) {
+                            hasUaBracket = true;
+                            // 提取【】中的内容
+                            const match = line.match(/【(.*?)】/);
+                            if (match && match[1]) {
+                                // 如果有内容，按空行分割
+                                const uaContent = match[1];
+                                const uaParts = uaContent.split(/\n\s*\n/);
+                                for (let part of uaParts) {
+                                    part = part.trim();
+                                    if (part) {
+                                        uaList.push(part);
+                                    }
+                                }
+                            }
+                            continue;
+                        }
+                        
+                        // 检查 more_colour[,,]
+                        const colorMatch = line.match(/more_colour\s*\[\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\]/);
+                        if (colorMatch) {
+                            const r = parseInt(colorMatch[1]);
+                            const g = parseInt(colorMatch[2]);
+                            const b = parseInt(colorMatch[3]);
+                            if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
+                                moreColor = `rgb(${r}, ${g}, ${b})`;
+                            }
+                            continue;
+                        }
+                        
+                        // 常规字段解析
+                        if (line.startsWith('sub=')) {
+                            sub = line.substring(4).trim();
+                        } else if (line.startsWith('name=')) {
+                            name = line.substring(5).trim();
+                        } else if (line.startsWith('link=')) {
+                            link = line.substring(5).trim();
+                        } else if (line.startsWith('more=')) {
+                            more = line.substring(5).trim();
+                        }
+                    }
+                    
+                    // 只要有一个字段非空就认为是一条作业
+                    if (sub || name || link || hasUaBracket || more) {
+                        items.push({ 
+                            sub, 
+                            name, 
+                            link,
+                            uaList: uaList,
+                            hasUaBracket: hasUaBracket,
+                            more: more,
+                            moreColor: moreColor
+                        });
+                    }
+                }
+                return items;
+            }
+
+            // 根据科目返回样式类
+            function getSubjectClass(sub) {
+                if (!sub) return 'subject-other';
+                const subLower = sub.trim().toLowerCase();
+                if (subLower.includes('语文')) return 'subject-chinese';
+                if (subLower.includes('数学')) return 'subject-math';
+                if (subLower.includes('英语')) return 'subject-english';
+                return 'subject-other';
+            }
+
+            // 获取科目显示文本
+            function getSubjectText(sub) {
+                return sub || '作业';
+            }
+
+            // 检查当前UA是否在UA列表中
+            function isUaConfirmed(uaList) {
+                if (!uaList || uaList.length === 0) return false;
+                return uaList.some(ua => ua.trim() === currentUA);
+            }
+
+            // 渲染作业列表到 container
+            function renderHomework(items) {
+                const container = document.getElementById('homeworkContainer');
+                const bigBtnContainer = document.getElementById('bigButtonContainer');
+                
+                if (!container) return;
+
+                // 清空
+                container.innerHTML = '';
+
+                if (items.length === 0) {
+                    // 无作业：隐藏作业区，显示大按钮
+                    container.style.display = 'none';
+                    if (bigBtnContainer) {
+                        bigBtnContainer.style.display = 'flex';
+                    }
+                } else {
+                    // 有作业：显示作业列表，隐藏大按钮
+                    container.style.display = 'block';
+                    if (bigBtnContainer) {
+                        bigBtnContainer.style.display = 'none';
+                    }
+
+                    // 创建作业列表元素
+                    const section = document.createElement('div');
+                    section.className = 'homework-section';
+
+                    items.forEach(item => {
+                        const subjectClass = getSubjectClass(item.sub);
+                        const subjectDisplay = getSubjectText(item.sub);
+                        
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'homework-item';
+
+                        // 第一行：科目标签 + 作业名 + 按钮
+                        const rowDiv = document.createElement('div');
+                        rowDiv.className = 'homework-row';
+
+                        // 科目标签
+                        const subSpan = document.createElement('span');
+                        subSpan.className = `subject-tag ${subjectClass}`;
+                        subSpan.textContent = subjectDisplay;
+
+                        // 作业名
+                        const nameSpan = document.createElement('span');
+                        nameSpan.className = 'homework-name';
+                        nameSpan.textContent = item.name || '未命名作业';
+
+                        // 提交链接按钮
+                        const linkBtn = document.createElement('a');
+                        linkBtn.className = 'homework-link';
+                        linkBtn.href = item.link || '#';
+                        linkBtn.target = '_blank';
+                        linkBtn.rel = 'noopener noreferrer';
+                        linkBtn.textContent = '去提交';
+
+                        if (!item.link) {
+                            linkBtn.style.opacity = '0.5';
+                            linkBtn.style.pointerEvents = 'none';
+                            linkBtn.style.cursor = 'default';
+                            linkBtn.textContent = '无链接';
+                        }
+
+                        rowDiv.appendChild(subSpan);
+                        rowDiv.appendChild(nameSpan);
+                        rowDiv.appendChild(linkBtn);
+                        itemDiv.appendChild(rowDiv);
+
+                        // 第二行：提示信息
+                        // 优先级：more= 内容 > UA提示 > 无显示
+                        if (item.more) {
+                            // 有more=内容，显示它
+                            const msgDiv = document.createElement('div');
+                            msgDiv.className = 'ua-message';
+                            msgDiv.textContent = item.more;
+                            if (item.moreColor) {
+                                msgDiv.style.color = item.moreColor;
+                            }
+                            itemDiv.appendChild(msgDiv);
+                        } else if (item.hasUaBracket) {
+                            // 没有more但有UA标记，显示UA提示
+                            const msgDiv = document.createElement('div');
+                            msgDiv.className = 'ua-message';
+                            
+                            if (item.uaList && item.uaList.length > 0 && isUaConfirmed(item.uaList)) {
+                                msgDiv.className += ' ua-confirmed';
+                                msgDiv.textContent = '管理员已确认本设备提交的内容';
+                            } else {
+                                msgDiv.className += ' ua-waiting';
+                                msgDiv.textContent = '你的作业正在等待确认，或者你还未提交作业';
+                            }
+                            
+                            itemDiv.appendChild(msgDiv);
+                        }
+                        // 否则不显示任何小字
+                        
+                        section.appendChild(itemDiv);
+                    });
+
+                    container.appendChild(section);
+                }
+            }
+
+            // 读取 homework.txt
+            function loadHomework() {
+                fetch('./homework.txt')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`无法读取文件 (${response.status})`);
+                        }
+                        return response.text();
+                    })
+                    .then(text => {
+                        console.log('Raw text:', text);
+                        const items = parseHomework(text);
+                        console.log('Parsed items:', items);
+                        renderHomework(items);
+                    })
+                    .catch(error => {
+                        console.warn('读取 homework.txt 失败，视为空文件。', error);
+                        renderHomework([]);
+                    });
+            }
+
+            // 执行加载
+            loadHomework();
+        })();
+    </script>
+</body>
+</html>
