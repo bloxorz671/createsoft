@@ -698,7 +698,7 @@
         <div class="upload-area">
             <input type="file" id="fileUpload">
             <button class="upload-btn" id="uploadBtn" disabled>选择文件</button>
-            <span class="upload-hint">支持最大 100MB 的文件，内存占用 < 5MB</span>
+            <span class="upload-hint">支持最大 100MB 的文件，内存占用 < 10MB</span>
             
             <div class="file-info" id="fileInfo" style="display: none;">
                 <div class="file-info-row">
@@ -824,7 +824,7 @@
     </div>
 
     <div class="footer-note">
-        <code>bloxorz671/createsoft</code> Token不会保存 · 流式上传内存<5MB
+        <code>bloxorz671/createsoft</code> Token不会保存 · 使用原生FileReader
     </div>
 </div>
 
@@ -858,7 +858,6 @@
         
         let selectedFile = null;
         let uploadStartTime = null;
-        let uploadedBytes = 0;
 
         // DOM 元素
         const tokenInput = document.getElementById('tokenInput');
@@ -959,15 +958,19 @@
             }
         }
 
-        // ---------- 修复的Base64编码函数 ----------
-        function arrayBufferToBase64(buffer) {
-            let binary = '';
-            const bytes = new Uint8Array(buffer);
-            const len = bytes.byteLength;
-            for (let i = 0; i < len; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-            return btoa(binary);
+        // ---------- 修复的Base64编码函数（使用原生方法）----------
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    // FileReader返回的data: URL格式是 "data:application/octet-stream;base64,XXXX"
+                    // 我们需要提取base64部分
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
         }
 
         // ---------- 分片上传核心函数 ----------
@@ -979,33 +982,28 @@
             }
 
             uploadStartTime = Date.now();
-            uploadedBytes = 0;
             progressContainer.style.display = 'block';
             uploadStatus.className = 'upload-status';
             
             try {
-                // 准备分片上传
                 const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
                 let base64Chunks = [];
                 
-                uploadStatus.textContent = '⏳ 开始读取文件...';
+                uploadStatus.textContent = '⏳ 开始处理文件...';
                 
                 for (let i = 0; i < totalChunks; i++) {
                     const start = i * CHUNK_SIZE;
                     const end = Math.min(start + CHUNK_SIZE, file.size);
-                    const chunk = file.slice(start, end);
+                    const chunkBlob = file.slice(start, end);
                     
-                    // 读取分片为ArrayBuffer
-                    const arrayBuffer = await readChunkAsArrayBuffer(chunk);
-                    
-                    // 转换为Base64
-                    const chunkBase64 = arrayBufferToBase64(arrayBuffer);
+                    // 使用FileReader将blob转为base64
+                    const chunkBase64 = await blobToBase64(chunkBlob);
                     base64Chunks.push(chunkBase64);
                     
-                    uploadedBytes += arrayBuffer.byteLength;
-                    updateProgress(uploadedBytes, file.size);
+                    const loaded = (i + 1) * CHUNK_SIZE;
+                    updateProgress(Math.min(loaded, file.size), file.size);
                     
-                    uploadStatus.textContent = `⏳ 处理分片 ${i+1}/${totalChunks} (${formatFileSize(uploadedBytes)} / ${formatFileSize(file.size)})`;
+                    uploadStatus.textContent = `⏳ 处理分片 ${i+1}/${totalChunks}`;
                     
                     // 让浏览器有机会处理其他事件
                     await new Promise(resolve => setTimeout(resolve, 10));
@@ -1063,15 +1061,6 @@
             }
         }
 
-        function readChunkAsArrayBuffer(chunk) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result);
-                reader.onerror = (e) => reject(e.target.error);
-                reader.readAsArrayBuffer(chunk);
-            });
-        }
-
         function resetUploadUI() {
             setTimeout(() => {
                 progressContainer.style.display = 'none';
@@ -1084,7 +1073,6 @@
                 uploadBtn.disabled = !currentToken;
                 uploadBtn.textContent = '选择文件';
                 fileUpload.value = '';
-                uploadedBytes = 0;
             }, 3000);
         }
 
