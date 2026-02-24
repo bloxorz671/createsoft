@@ -54,7 +54,32 @@
             border: 1px solid rgba(185, 28, 28, 0.15);
         }
 
-        /* 大按钮样式 - 当没有作业时显示 */
+        /* 加载中提示样式 */
+        .loading-message {
+            text-align: center;
+            font-size: 1.3rem;
+            color: #64748b;
+            margin: 3rem 0;
+            padding: 1rem;
+            background-color: #f8fafc;
+            border-radius: 60px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* 空状态提示样式 - 当没有作业时显示 */
+        .empty-message {
+            text-align: center;
+            font-size: 1.3rem;
+            color: #475569;
+            margin: 3rem 0;
+            padding: 2rem;
+            background-color: #f8fafc;
+            border-radius: 30px;
+            border: 1px dashed #94a3b8;
+            line-height: 1.6;
+        }
+
+        /* 大按钮样式 - 当没有作业时原本显示，现在被空状态提示替代，保留样式但可能不再使用 */
         .big-button-wrapper {
             display: flex;
             justify-content: center;
@@ -264,10 +289,20 @@
             如果你不是广州市第四十一中学初二五班的学生，请退出本网页
         </div>
 
-        <!-- 作业内容将动态渲染到这里 -->
-        <div id="homeworkContainer"></div>
+        <!-- 加载中提示容器 -->
+        <div id="loadingContainer" class="loading-message" style="display: block;">
+            正在获取作业信息...
+        </div>
 
-        <!-- 大按钮容器（默认隐藏，无作业时显示） -->
+        <!-- 作业内容将动态渲染到这里 -->
+        <div id="homeworkContainer" style="display: none;"></div>
+
+        <!-- 空状态提示容器（无作业时显示） -->
+        <div id="emptyContainer" class="empty-message" style="display: none;">
+            当前暂无需要通过此网页提交的作业或管理员未发布新的作业
+        </div>
+
+        <!-- 大按钮容器 - 不再使用，保留但隐藏 -->
         <div id="bigButtonContainer" class="big-button-wrapper" style="display: none;">
             <a href="https://qr03.cn/A8JkXm" class="big-btn" target="_blank" rel="noopener noreferrer">
                 去提交
@@ -399,28 +434,41 @@
                 return uaList.some(ua => ua.trim() === currentUA);
             }
 
+            // 更新UI显示状态
+            function setLoadingState(isLoading) {
+                const loadingEl = document.getElementById('loadingContainer');
+                const homeworkEl = document.getElementById('homeworkContainer');
+                const emptyEl = document.getElementById('emptyContainer');
+                
+                if (isLoading) {
+                    loadingEl.style.display = 'block';
+                    homeworkEl.style.display = 'none';
+                    emptyEl.style.display = 'none';
+                }
+            }
+
             // 渲染作业列表到 container
             function renderHomework(items) {
-                const container = document.getElementById('homeworkContainer');
-                const bigBtnContainer = document.getElementById('bigButtonContainer');
+                const loadingEl = document.getElementById('loadingContainer');
+                const homeworkEl = document.getElementById('homeworkContainer');
+                const emptyEl = document.getElementById('emptyContainer');
                 
-                if (!container) return;
+                if (!homeworkEl) return;
 
-                // 清空
-                container.innerHTML = '';
+                // 隐藏加载提示
+                loadingEl.style.display = 'none';
 
                 if (items.length === 0) {
-                    // 无作业：隐藏作业区，显示大按钮
-                    container.style.display = 'none';
-                    if (bigBtnContainer) {
-                        bigBtnContainer.style.display = 'flex';
-                    }
+                    // 无作业：显示空状态提示，隐藏作业区
+                    homeworkEl.style.display = 'none';
+                    emptyEl.style.display = 'block';
                 } else {
-                    // 有作业：显示作业列表，隐藏大按钮
-                    container.style.display = 'block';
-                    if (bigBtnContainer) {
-                        bigBtnContainer.style.display = 'none';
-                    }
+                    // 有作业：显示作业列表，隐藏空状态提示
+                    homeworkEl.style.display = 'block';
+                    emptyEl.style.display = 'none';
+
+                    // 清空并重新渲染
+                    homeworkEl.innerHTML = '';
 
                     // 创建作业列表元素
                     const section = document.createElement('div');
@@ -498,13 +546,25 @@
                         section.appendChild(itemDiv);
                     });
 
-                    container.appendChild(section);
+                    homeworkEl.appendChild(section);
                 }
             }
 
-            // 读取 homework.txt
+            // 读取 homework.txt（禁用缓存）
             function loadHomework() {
-                fetch('./homework.txt')
+                // 显示加载状态
+                setLoadingState(true);
+                
+                // 添加时间戳禁用缓存
+                const url = './homework.txt?t=' + new Date().getTime();
+                
+                fetch(url, {
+                    cache: 'no-store',  // 强制不使用缓存
+                    headers: {
+                        'Pragma': 'no-cache',
+                        'Cache-Control': 'no-cache'
+                    }
+                })
                     .then(response => {
                         if (!response.ok) {
                             throw new Error(`无法读取文件 (${response.status})`);
@@ -519,12 +579,13 @@
                     })
                     .catch(error => {
                         console.warn('读取 homework.txt 失败，视为空文件。', error);
+                        // 出错时当作空文件处理，显示空状态提示
                         renderHomework([]);
                     });
             }
 
-            // 执行加载
-            loadHomework();
+            // 页面加载完成后立即执行
+            window.addEventListener('load', loadHomework);
         })();
     </script>
 </body>
