@@ -1,9 +1,7 @@
 """name=文件拆分合并器
 icon=filecut.webp
 link=文件拆分合并器
-download=文件拆分合并器.html
 introduction=将大文件切成多个小文件以便于发送上传
-
 """
 
 
