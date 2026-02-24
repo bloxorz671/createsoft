@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>luckynum.top后台</title>
-    <!-- 百度统计代码（保留） -->
+    <!-- 百度统计代码（已部署） -->
     <script>
     var _hmt = _hmt || [];
     (function() {
@@ -43,68 +43,26 @@
             font-weight: 500;
         }
         
-        /* HITS 统计卡片 */
-        .hits-card {
-            background: linear-gradient(135deg, #2c3e50, #3498db);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            box-shadow: 0 4px 20px rgba(44,62,80,0.3);
-        }
-        .hits-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        .hits-icon {
-            font-size: 40px;
-            background: rgba(255,255,255,0.15);
-            width: 70px;
-            height: 70px;
-            border-radius: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .hits-info h3 {
-            font-size: 18px;
-            font-weight: 400;
-            margin: 0 0 10px 0;
-            opacity: 0.9;
-        }
-        .hits-badges {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .hits-badges img {
-            height: 24px;
-            border-radius: 12px;
-        }
-        .hits-note {
-            font-size: 13px;
-            opacity: 0.7;
-            margin-top: 8px;
-        }
-        
-        /* 百度统计备用（保留但不显示随机数） */
-        .baidu-stats {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-bottom: 20px;
-            padding: 10px;
-            background: #f5f5f5;
+        /* 百度统计说明 */
+        .baidu-note {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
             border-radius: 8px;
-            font-size: 13px;
-            color: #666;
+            padding: 16px 20px;
+            margin-bottom: 30px;
+            color: #0d47a1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+        }
+        .baidu-note .icon {
+            font-size: 24px;
+        }
+        .baidu-note a {
+            color: #0d47a1;
+            text-decoration: underline;
+            margin-left: 4px;
         }
         
         .token-section {
@@ -749,29 +707,10 @@
 <div class="container">
     <h1>luckynum.top后台</h1>
 
-    <!-- HITS 真实统计卡片 -->
-    <div class="hits-card">
-        <div class="hits-left">
-            <div class="hits-icon">👁️</div>
-            <div class="hits-info">
-                <h3>网站访问统计 (HITS)</h3>
-                <div class="hits-badges">
-                    <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fbloxorz671.github.io%2Fcreatesoft%2Fdevsetting.html&count_bg=%233498db&title_bg=%232c3e50&title=今日&edge_flat=false"/>
-                    <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fbloxorz671.github.io%2Fcreatesoft%2Fdevsetting.html&count_bg=%232ecc71&title_bg=%232c3e50&title=累计&edge_flat=false"/>
-                </div>
-                <div class="hits-note">每刷新一次增加计数，数据实时更新</div>
-            </div>
-        </div>
-        <div>
-            <a href="https://hits.seeyoufarm.com" target="_blank" style="color: white; opacity: 0.8; font-size: 13px; text-decoration: none;">Hits</a>
-        </div>
-    </div>
-
-    <!-- 百度统计备用（仅保留说明） -->
-    <div class="baidu-stats">
-        <span>📊 百度统计已部署</span>
-        <span>|</span>
-        <span>数据在后台查看</span>
+    <!-- 百度统计说明（已删除HITS） -->
+    <div class="baidu-note">
+        <span class="icon">📊</span>
+        <span>百度统计已部署，详细数据请登录 <a href="https://tongji.baidu.com" target="_blank">百度统计后台</a> 查看</span>
     </div>
 
     <div class="token-section">
