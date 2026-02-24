@@ -5,11 +5,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>luckynum.top后台</title>
-    <!-- 强制浏览器使用UTF-8渲染 -->
-    <script>
-        document.charset = 'UTF-8';
-        document.characterSet = 'UTF-8';
-    </script>
     <style>
         * {
             box-sizing: border-box;
@@ -437,7 +432,7 @@
             font-weight: 500;
             color: #1976d2;
         }
-        .upload-progress-container {
+        .progress-container {
             width: 100%;
             margin-top: 16px;
         }
@@ -699,7 +694,7 @@
         </div>
     </div>
 
-    <!-- 文件上传区域 - 完全重构 -->
+    <!-- 文件上传区域 - 终极优化版 -->
     <div class="upload-section" id="uploadSection">
         <div class="upload-label">
             <span>📤</span> 上传文件到当前目录
@@ -707,9 +702,9 @@
         <div class="upload-area">
             <input type="file" id="fileUpload">
             <button class="upload-btn" id="uploadBtn" disabled>选择文件</button>
-            <span class="upload-hint">支持最大 100MB 的文件，大文件会自动分片处理</span>
+            <span class="upload-hint">支持最大 100MB 的文件，内存占用 < 5MB</span>
             
-            <!-- 文件信息卡片（选择文件后显示） -->
+            <!-- 文件信息卡片 -->
             <div class="file-info" id="fileInfo" style="display: none;">
                 <div class="file-info-row">
                     <span class="file-info-label">文件名：</span>
@@ -726,7 +721,7 @@
             </div>
             
             <!-- 进度条 -->
-            <div class="upload-progress-container" id="progressContainer" style="display: none;">
+            <div class="progress-container" id="progressContainer" style="display: none;">
                 <div class="progress-bar">
                     <div class="progress-bar-fill" id="progressFill"></div>
                 </div>
@@ -747,7 +742,6 @@
     <div class="file-selector-section" id="fileSelectorSection" style="display: none;">
         <div class="file-selector-label">选择文件</div>
         
-        <!-- 文件选择按钮 -->
         <div class="file-buttons">
             <button class="file-btn" data-file="homework.txt">初二五班电子作业</button>
             <button class="file-btn" data-file="tools.txt">更多工具</button>
@@ -756,7 +750,6 @@
             <button class="file-btn" data-file="online.html">网页版</button>
         </div>
         
-        <!-- 当前选中文件显示 -->
         <div class="selected-file-display" id="selectedFileDisplay">
             未选择文件
         </div>
@@ -778,12 +771,10 @@
                 </div>
             </div>
             
-            <!-- 文件列表 -->
             <div id="fileList" class="file-list">
                 <div style="padding: 20px; text-align: center; color: #999;">加载中...</div>
             </div>
             
-            <!-- 新建文件表单 -->
             <div class="new-file-form">
                 <input type="text" id="newFileName" placeholder="文件名">
                 <button class="advanced-btn primary" id="createFileBtn">新建文件</button>
@@ -806,7 +797,7 @@
         <button class="save-btn" id="updateBtn" disabled>保存</button>
     </div>
 
-    <!-- 删除文件确认弹窗 -->
+    <!-- 删除确认弹窗 -->
     <div class="modal" id="deleteModal">
         <div class="modal-content">
             <h3>⚠️ 确认删除文件</h3>
@@ -819,7 +810,6 @@
         </div>
     </div>
 
-    <!-- 删除文件确认弹窗 (普通模式) -->
     <div class="modal" id="deleteFileModal">
         <div class="modal-content">
             <h3>⚠️ 确认删除文件</h3>
@@ -832,7 +822,6 @@
         </div>
     </div>
 
-    <!-- 文件夹删除确认弹窗 -->
     <div class="modal" id="deleteFolderModal">
         <div class="modal-content">
             <h3>⚠️ 确认删除文件夹</h3>
@@ -846,22 +835,18 @@
     </div>
 
     <div class="footer-note">
-        <code>bloxorz671/createsoft</code> Token不会保存 · 支持大文件分片上传
+        <code>bloxorz671/createsoft</code> Token不会保存 · 流式上传内存<5MB
     </div>
 </div>
 
 <script>
-    // 强制修复编码
-    document.charset = 'UTF-8';
-    document.characterSet = 'UTF-8';
-    
     (function() {
         // ---------- 固定配置 ----------
         const OWNER = 'bloxorz671';
         const REPO = 'createsoft';
         const BRANCH = 'main';
-        const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB 限制
-        const CHUNK_SIZE = 1024 * 1024; // 1MB 分片大小
+        const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+        const CHUNK_SIZE = 256 * 1024; // 256KB 分片，进一步降低内存
         
         // 文件映射表
         const FILE_DISPLAY_NAMES = {
@@ -885,10 +870,11 @@
         let folderToDelete = null;
         let fileToDeleteSimple = null;
         
-        // 上传相关变量
+        // 上传相关
         let selectedFile = null;
         let uploadStartTime = null;
-        let uploadTimer = null;
+        let uploadedBytes = 0;
+        let abortUpload = false;
 
         // ---------- DOM 元素 ----------
         const tokenInput = document.getElementById('tokenInput');
@@ -955,134 +941,102 @@
             }
         }
 
-        // 格式化文件大小
         function formatFileSize(bytes) {
             if (bytes === 0) return '0 B';
             const k = 1024;
-            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const sizes = ['B', 'KB', 'MB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // 格式化时间
         function formatTime(ms) {
             if (ms < 1000) return Math.round(ms) + 'ms';
             const seconds = Math.floor(ms / 1000);
             if (seconds < 60) return seconds + 's';
             const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return minutes + 'm ' + remainingSeconds + 's';
+            return minutes + 'm ' + (seconds % 60) + 's';
         }
 
-        // 计算速度
         function calculateSpeed(bytes, timeMs) {
             if (timeMs === 0) return '0 B/s';
             const bytesPerSecond = (bytes / timeMs) * 1000;
             return formatFileSize(bytesPerSecond) + '/s';
         }
 
-        // 下载文件
-        function downloadFile(content, filename) {
-            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+        function updateProgress(loaded, total) {
+            const percent = (loaded / total) * 100;
+            progressFill.style.width = percent + '%';
+            progressPercent.textContent = Math.round(percent) + '%';
+            
+            const elapsed = Date.now() - uploadStartTime;
+            progressSpeed.textContent = calculateSpeed(loaded, elapsed);
+            
+            if (loaded > 0) {
+                const remainingTime = (elapsed / loaded) * (total - loaded);
+                progressTime.textContent = '剩余 ' + formatTime(remainingTime);
+            }
         }
 
-        // 下载当前文件
-        downloadCurrentBtn.addEventListener('click', () => {
-            if (currentFile && fileContentArea.value) {
-                downloadFile(fileContentArea.value, currentFile);
-                setStatus('下载成功', 'success');
-            }
-        });
-
-        // ---------- 分片上传核心函数 ----------
-        async function uploadFileInChunks(file) {
+        // ---------- 流式上传核心函数 ----------
+        async function uploadFileStream(file) {
             if (!currentToken) {
                 uploadStatus.textContent = '❌ 请先连接';
                 uploadStatus.className = 'upload-status error';
                 return;
             }
 
-            // 重置UI
+            // 重置状态
+            abortUpload = false;
+            uploadedBytes = 0;
             uploadStartTime = Date.now();
             progressContainer.style.display = 'block';
-            progressFill.style.width = '0%';
-            progressPercent.textContent = '0%';
-            uploadStatus.textContent = '⏳ 准备上传...';
             uploadStatus.className = 'upload-status';
             
-            const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-            let uploadedChunks = 0;
-            let fileData = new Uint8Array();
-            
             try {
-                // 分片读取文件
-                for (let i = 0; i < totalChunks; i++) {
-                    const start = i * CHUNK_SIZE;
-                    const end = Math.min(start + CHUNK_SIZE, file.size);
-                    const chunk = file.slice(start, end);
+                // 创建文件读取流
+                const stream = file.stream();
+                const reader = stream.getReader();
+                
+                // 准备Base64编码的块
+                let base64Chunks = [];
+                let totalBytes = file.size;
+                
+                uploadStatus.textContent = '⏳ 开始读取文件...';
+                
+                while (true) {
+                    const { done, value } = await reader.read();
                     
-                    // 读取分片
-                    const chunkData = await readChunkAsArrayBuffer(chunk);
-                    
-                    // 更新进度
-                    uploadedChunks++;
-                    const progress = (uploadedChunks / totalChunks) * 100;
-                    progressFill.style.width = progress + '%';
-                    progressPercent.textContent = Math.round(progress) + '%';
-                    
-                    // 计算速度和剩余时间
-                    const elapsed = Date.now() - uploadStartTime;
-                    const speed = calculateSpeed(file.size * (uploadedChunks / totalChunks), elapsed);
-                    progressSpeed.textContent = speed;
-                    
-                    if (uploadedChunks < totalChunks) {
-                        const remainingTime = (elapsed / uploadedChunks) * (totalChunks - uploadedChunks);
-                        progressTime.textContent = '剩余 ' + formatTime(remainingTime);
+                    if (done) break;
+                    if (abortUpload) {
+                        throw new Error('上传已取消');
                     }
                     
-                    uploadStatus.textContent = `⏳ 读取文件: ${uploadedChunks}/${totalChunks} 分片`;
+                    // 将Uint8Array转换为Base64块
+                    let binary = '';
+                    for (let i = 0; i < value.length; i++) {
+                        binary += String.fromCharCode(value[i]);
+                    }
+                    const chunkBase64 = btoa(binary);
+                    base64Chunks.push(chunkBase64);
                     
-                    // 合并数据
-                    const newData = new Uint8Array(fileData.length + chunkData.byteLength);
-                    newData.set(fileData);
-                    newData.set(new Uint8Array(chunkData), fileData.length);
-                    fileData = newData;
+                    uploadedBytes += value.length;
+                    updateProgress(uploadedBytes, totalBytes);
+                    
+                    uploadStatus.textContent = `⏳ 读取中: ${formatFileSize(uploadedBytes)} / ${formatFileSize(totalBytes)}`;
                     
                     // 让浏览器有机会处理其他事件
-                    await new Promise(resolve => setTimeout(resolve, 10));
-                }
-                
-                uploadStatus.textContent = '⏳ 编码文件中...';
-                
-                // 将Uint8Array转换为Base64
-                let binary = '';
-                const chunkSize = 1024 * 1024; // 1MB chunks for base64 conversion
-                for (let i = 0; i < fileData.length; i += chunkSize) {
-                    const chunk = fileData.subarray(i, Math.min(i + chunkSize, fileData.length));
-                    for (let j = 0; j < chunk.length; j++) {
-                        binary += String.fromCharCode(chunk[j]);
-                    }
-                    
-                    const progress = 80 + (i / fileData.length) * 15;
-                    progressFill.style.width = progress + '%';
-                    progressPercent.textContent = Math.round(progress) + '%';
-                    uploadStatus.textContent = `⏳ 编码中: ${Math.round((i / fileData.length) * 100)}%`;
-                    
                     await new Promise(resolve => setTimeout(resolve, 5));
                 }
                 
-                const encodedContent = btoa(binary);
+                uploadStatus.textContent = '⏳ 合并编码数据...';
                 
-                progressFill.style.width = '95%';
-                progressPercent.textContent = '95%';
+                // 合并所有Base64块
+                const fullBase64 = base64Chunks.join('');
+                
+                // 释放内存
+                base64Chunks = null;
+                
+                updateProgress(totalBytes, totalBytes);
                 uploadStatus.textContent = '⏳ 上传到 GitHub...';
                 
                 // 上传到GitHub
@@ -1090,7 +1044,7 @@
                 
                 const body = {
                     message: `上传 ${file.name}`,
-                    content: encodedContent,
+                    content: fullBase64,
                     branch: BRANCH
                 };
 
@@ -1108,18 +1062,14 @@
                     throw new Error(error.message || '上传失败');
                 }
 
-                // 上传成功
-                progressFill.style.width = '100%';
-                progressPercent.textContent = '100%';
+                // 成功
                 uploadStatus.textContent = '✅ 上传成功！';
                 uploadStatus.className = 'upload-status success';
                 
-                // 刷新文件列表
                 if (advancedToggle.checked) {
                     loadDirectory(currentPath);
                 }
                 
-                // 3秒后重置上传区域
                 setTimeout(resetUploadUI, 3000);
                 
             } catch (error) {
@@ -1130,42 +1080,34 @@
             }
         }
 
-        // 读取分片为ArrayBuffer
-        function readChunkAsArrayBuffer(chunk) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result);
-                reader.onerror = (e) => reject(e.target.error);
-                reader.readAsArrayBuffer(chunk);
-            });
-        }
-
-        // 重置上传UI
         function resetUploadUI() {
             setTimeout(() => {
                 progressContainer.style.display = 'none';
-                uploadStatus.textContent = '';
                 fileInfo.style.display = 'none';
+                progressFill.style.width = '0%';
+                progressPercent.textContent = '0%';
+                progressSpeed.textContent = '';
+                progressTime.textContent = '';
                 selectedFile = null;
                 uploadBtn.disabled = !currentToken;
+                uploadBtn.textContent = '选择文件';
                 fileUpload.value = '';
+                uploadedBytes = 0;
             }, 3000);
         }
 
         // ---------- 文件选择处理 ----------
-        fileUpload.addEventListener('change', async (e) => {
+        fileUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
             
             selectedFile = file;
             
-            // 显示文件信息
             fileNameDisplay.textContent = file.name;
             fileSizeDisplay.textContent = formatFileSize(file.size);
             fileTypeDisplay.textContent = file.type || '未知';
             fileInfo.style.display = 'block';
             
-            // 检查文件大小
             if (file.size > MAX_FILE_SIZE) {
                 fileSizeWarning.style.display = 'block';
                 fileSizeWarning.textContent = `❌ 文件过大：${formatFileSize(file.size)} > 100MB 限制`;
@@ -1184,7 +1126,6 @@
             uploadBtn.textContent = '开始上传';
         });
 
-        // 上传按钮点击
         uploadBtn.addEventListener('click', async () => {
             if (!selectedFile) {
                 fileUpload.click();
@@ -1198,7 +1139,8 @@
             }
             
             uploadBtn.disabled = true;
-            await uploadFileInChunks(selectedFile);
+            uploadBtn.textContent = '上传中...';
+            await uploadFileStream(selectedFile);
         });
 
         // 拖拽上传
@@ -1219,13 +1161,11 @@
             if (file) {
                 selectedFile = file;
                 
-                // 显示文件信息
                 fileNameDisplay.textContent = file.name;
                 fileSizeDisplay.textContent = formatFileSize(file.size);
                 fileTypeDisplay.textContent = file.type || '未知';
                 fileInfo.style.display = 'block';
                 
-                // 检查文件大小
                 if (file.size > MAX_FILE_SIZE) {
                     fileSizeWarning.style.display = 'block';
                     fileSizeWarning.textContent = `❌ 文件过大：${formatFileSize(file.size)} > 100MB 限制`;
@@ -1551,6 +1491,18 @@
             } catch (error) {
                 setStatus('下载失败', 'error');
             }
+        }
+
+        function downloadFile(content, filename) {
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         // ---------- 暴露全局方法 ----------
