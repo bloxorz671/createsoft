@@ -109,8 +109,8 @@
         /* 科目标签容器 - 用于定位时间提示 */
         .subject-container {
             position: relative;
-            margin-right: 1.5rem;
-            min-width: 90px;
+            margin-right: 0.5rem;  /* 减小右边距，让作业名更靠近科目 */
+            min-width: 100px;       /* 增加最小宽度，让标签更方正 */
         }
 
         /* 时间提示 - 显示在科目标签正上方 */
@@ -132,12 +132,13 @@
         .subject-tag {
             font-size: 1.2rem;
             font-weight: 500;
-            min-width: 90px;
-            padding: 0.3rem 0;
+            min-width: 100px;       /* 增加最小宽度 */
+            padding: 0.5rem 0.8rem;  /* 增加左右内边距，让标签更方正 */
             text-align: center;
-            border-radius: 40px;
+            border-radius: 30px;     /* 减小圆角，不再是圆形 */
             background-color: white;
             box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            white-space: nowrap;     /* 防止文字换行 */
         }
 
         /* 科目颜色 */
@@ -169,6 +170,7 @@
             color: #1e2b3a;
             padding: 0 0.5rem;
             word-break: break-word;
+            margin-left: 0;           /* 移除左边距，让作业名更靠近科目 */
         }
 
         /* 正常可点击按钮样式 */
@@ -256,12 +258,13 @@
                 flex-wrap: wrap;
             }
             .subject-container {
-                min-width: 70px;
-                margin-right: 0.8rem;
+                min-width: 85px;
+                margin-right: 0.3rem;
             }
             .subject-tag {
-                min-width: 70px;
+                min-width: 85px;
                 font-size: 1rem;
+                padding: 0.4rem 0.5rem;
             }
             .time-hint {
                 font-size: 0.6rem;
@@ -274,6 +277,7 @@
                 order: 2;
                 padding-left: 0;
                 padding-bottom: 0.5rem;
+                margin-left: 0;
             }
             .homework-link, .homework-link-disabled {
                 margin-left: auto;
