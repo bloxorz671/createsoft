@@ -188,6 +188,7 @@
             word-break: break-word;
         }
 
+        /* 正常可点击按钮样式 */
         .homework-link {
             display: inline-block;
             background: #2c3e50;
@@ -201,6 +202,7 @@
             box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
             white-space: nowrap;
             margin-left: 1rem;
+            cursor: pointer;
         }
 
         .homework-link:hover {
@@ -214,7 +216,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* 已截止按钮样式 */
+        /* 禁用按钮样式 - 用于待开始、已截止或无链接 */
         .homework-link-disabled {
             display: inline-block;
             background: #94a3b8;  /* 灰色 */
@@ -352,6 +354,32 @@
                 return null;
             }
 
+            // 解析日期时间字符串 "2026/2/24 00:00"
+            function parseDateTime(dateTimeStr) {
+                if (!dateTimeStr) return null;
+                // 支持格式: YYYY/M/D H:mm 或 YYYY/MM/DD HH:mm
+                const parts = dateTimeStr.split(' ');
+                if (parts.length !== 2) return null;
+                
+                const datePart = parts[0];
+                const timePart = parts[1];
+                
+                const dateParts = datePart.split('/');
+                if (dateParts.length !== 3) return null;
+                
+                const year = parseInt(dateParts[0]);
+                const month = parseInt(dateParts[1]) - 1; // 月份从0开始
+                const day = parseInt(dateParts[2]);
+                
+                const timeParts = timePart.split(':');
+                if (timeParts.length !== 2) return null;
+                
+                const hour = parseInt(timeParts[0]);
+                const minute = parseInt(timeParts[1]);
+                
+                return new Date(year, month, day, hour, minute, 0);
+            }
+
             // 解析作业函数：输入文件内容字符串，返回作业对象数组
             function parseHomework(text) {
                 const items = [];
@@ -368,6 +396,8 @@
                     let hasUaBracket = false;
                     let more = '';           // more= 后面的内容
                     let moreColor = null;     // 解析后的颜色值
+                    let startTimeStr = '';    // 开始时间字符串
+                    let endTimeStr = '';       // 结束时间字符串
                     
                     for (let line of lines) {
                         line = line.trim();
@@ -412,11 +442,19 @@
                             link = line.substring(5).trim();
                         } else if (line.startsWith('more=')) {
                             more = line.substring(5).trim();
+                        } else if (line.startsWith('start_time=')) {
+                            startTimeStr = line.substring(11).trim();
+                        } else if (line.startsWith('end_time=')) {
+                            endTimeStr = line.substring(9).trim();
                         }
                     }
                     
+                    // 解析时间
+                    const startTime = parseDateTime(startTimeStr);
+                    const endTime = parseDateTime(endTimeStr);
+                    
                     // 只要有一个字段非空就认为是一条作业
-                    if (sub || name || link || hasUaBracket || more) {
+                    if (sub || name || link || hasUaBracket || more || startTimeStr || endTimeStr) {
                         items.push({ 
                             sub, 
                             name, 
@@ -424,7 +462,9 @@
                             uaList: uaList,
                             hasUaBracket: hasUaBracket,
                             more: more,
-                            moreColor: moreColor
+                            moreColor: moreColor,
+                            startTime: startTime,
+                            endTime: endTime
                         });
                     }
                 }
@@ -450,6 +490,29 @@
             function isUaConfirmed(uaList) {
                 if (!uaList || uaList.length === 0) return false;
                 return uaList.some(ua => ua.trim() === currentUA);
+            }
+
+            // 获取按钮状态和文字
+            function getButtonState(item) {
+                const now = new Date();
+                
+                // 如果没有链接，直接返回已截止
+                if (!item.link || item.link.trim() === '') {
+                    return { disabled: true, text: '已截止' };
+                }
+                
+                // 如果有开始时间且当前时间在开始时间之前
+                if (item.startTime && now < item.startTime) {
+                    return { disabled: true, text: '待开始' };
+                }
+                
+                // 如果有结束时间且当前时间在结束时间之后
+                if (item.endTime && now > item.endTime) {
+                    return { disabled: true, text: '已截止' };
+                }
+                
+                // 其他情况：可点击
+                return { disabled: false, text: '去提交' };
             }
 
             // 更新UI显示状态
@@ -513,21 +576,24 @@
                         nameSpan.className = 'homework-name';
                         nameSpan.textContent = item.name || '未命名作业';
 
-                        // 提交链接按钮 - 根据link是否为空决定样式和文字
+                        // 获取按钮状态
+                        const buttonState = getButtonState(item);
+                        
+                        // 创建按钮
                         let linkBtn;
-                        if (item.link && item.link.trim() !== '') {
-                            // 有链接：正常可点击按钮
+                        if (buttonState.disabled) {
+                            // 禁用状态
+                            linkBtn = document.createElement('span');
+                            linkBtn.className = 'homework-link-disabled';
+                            linkBtn.textContent = buttonState.text;
+                        } else {
+                            // 可点击状态
                             linkBtn = document.createElement('a');
                             linkBtn.className = 'homework-link';
                             linkBtn.href = item.link;
                             linkBtn.target = '_blank';
                             linkBtn.rel = 'noopener noreferrer';
-                            linkBtn.textContent = '去提交';
-                        } else {
-                            // 无链接：灰色不可点击按钮，文字为"已截止"
-                            linkBtn = document.createElement('span');
-                            linkBtn.className = 'homework-link-disabled';
-                            linkBtn.textContent = '已截止';
+                            linkBtn.textContent = buttonState.text;
                         }
 
                         rowDiv.appendChild(subSpan);
