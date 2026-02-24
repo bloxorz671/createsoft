@@ -214,6 +214,24 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
+        /* 已截止按钮样式 */
+        .homework-link-disabled {
+            display: inline-block;
+            background: #94a3b8;  /* 灰色 */
+            color: #e2e8f0;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 450;
+            padding: 0.6rem 2rem;
+            border-radius: 40px;
+            cursor: default;
+            box-shadow: none;
+            white-space: nowrap;
+            margin-left: 1rem;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
         /* UA 提示信息样式 */
         .ua-message {
             margin-top: 0.8rem;
@@ -265,7 +283,7 @@
                 padding-left: 0;
                 padding-bottom: 0.5rem;
             }
-            .homework-link {
+            .homework-link, .homework-link-disabled {
                 margin-left: auto;
                 font-size: 1rem;
                 padding: 0.4rem 1.2rem;
@@ -495,19 +513,21 @@
                         nameSpan.className = 'homework-name';
                         nameSpan.textContent = item.name || '未命名作业';
 
-                        // 提交链接按钮
-                        const linkBtn = document.createElement('a');
-                        linkBtn.className = 'homework-link';
-                        linkBtn.href = item.link || '#';
-                        linkBtn.target = '_blank';
-                        linkBtn.rel = 'noopener noreferrer';
-                        linkBtn.textContent = '去提交';
-
-                        if (!item.link) {
-                            linkBtn.style.opacity = '0.5';
-                            linkBtn.style.pointerEvents = 'none';
-                            linkBtn.style.cursor = 'default';
-                            linkBtn.textContent = '无链接';
+                        // 提交链接按钮 - 根据link是否为空决定样式和文字
+                        let linkBtn;
+                        if (item.link && item.link.trim() !== '') {
+                            // 有链接：正常可点击按钮
+                            linkBtn = document.createElement('a');
+                            linkBtn.className = 'homework-link';
+                            linkBtn.href = item.link;
+                            linkBtn.target = '_blank';
+                            linkBtn.rel = 'noopener noreferrer';
+                            linkBtn.textContent = '去提交';
+                        } else {
+                            // 无链接：灰色不可点击按钮，文字为"已截止"
+                            linkBtn = document.createElement('span');
+                            linkBtn.className = 'homework-link-disabled';
+                            linkBtn.textContent = '已截止';
                         }
 
                         rowDiv.appendChild(subSpan);
