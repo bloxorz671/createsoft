@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>luckynum.top后台</title>
     <style>
+        /* 样式保持不变，和上一版相同 */
         * {
             box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -170,7 +171,6 @@
             font-family: monospace;
         }
         
-        /* 高级配置区域 */
         .advanced-section {
             background: #fafafa;
             border: 1px solid #e0e0e0;
@@ -353,7 +353,6 @@
             border-color: #1976d2;
         }
         
-        /* 上传区域 - 完全重构 */
         .upload-section {
             background: #fafafa;
             border: 2px dashed #1976d2;
@@ -676,7 +675,6 @@
 <div class="container">
     <h1>luckynum.top后台</h1>
 
-    <!-- Token 输入区域 -->
     <div class="token-section">
         <div class="token-label">GitHub 访问令牌</div>
         <div class="token-input-wrapper">
@@ -684,7 +682,6 @@
             <button class="connect-btn" id="loadBtn">连接</button>
         </div>
         
-        <!-- 高级配置开关 -->
         <div class="advanced-toggle">
             <label class="toggle-switch">
                 <input type="checkbox" id="advancedToggle">
@@ -694,7 +691,6 @@
         </div>
     </div>
 
-    <!-- 文件上传区域 - 终极优化版 -->
     <div class="upload-section" id="uploadSection">
         <div class="upload-label">
             <span>📤</span> 上传文件到当前目录
@@ -704,7 +700,6 @@
             <button class="upload-btn" id="uploadBtn" disabled>选择文件</button>
             <span class="upload-hint">支持最大 100MB 的文件，内存占用 < 5MB</span>
             
-            <!-- 文件信息卡片 -->
             <div class="file-info" id="fileInfo" style="display: none;">
                 <div class="file-info-row">
                     <span class="file-info-label">文件名：</span>
@@ -720,7 +715,6 @@
                 </div>
             </div>
             
-            <!-- 进度条 -->
             <div class="progress-container" id="progressContainer" style="display: none;">
                 <div class="progress-bar">
                     <div class="progress-bar-fill" id="progressFill"></div>
@@ -732,13 +726,11 @@
                 </div>
             </div>
             
-            <!-- 状态显示 -->
             <div class="upload-status" id="uploadStatus"></div>
             <div class="file-size-warning" id="fileSizeWarning"></div>
         </div>
     </div>
 
-    <!-- 文件选择区域 (普通模式) -->
     <div class="file-selector-section" id="fileSelectorSection" style="display: none;">
         <div class="file-selector-label">选择文件</div>
         
@@ -755,7 +747,6 @@
         </div>
     </div>
 
-    <!-- 高级配置区域 -->
     <div class="advanced-section" id="advancedSection" style="display: none;">
         <div class="advanced-header">
             <div class="advanced-title">📁 文件管理器</div>
@@ -783,7 +774,6 @@
         </div>
     </div>
 
-    <!-- 编辑器区域 -->
     <div class="editor-header">
         <span class="file-badge" id="currentFileBadge">未选择文件</span>
         <button class="download-current-btn" id="downloadCurrentBtn" style="display: none;">
@@ -797,7 +787,6 @@
         <button class="save-btn" id="updateBtn" disabled>保存</button>
     </div>
 
-    <!-- 删除确认弹窗 -->
     <div class="modal" id="deleteModal">
         <div class="modal-content">
             <h3>⚠️ 确认删除文件</h3>
@@ -841,14 +830,12 @@
 
 <script>
     (function() {
-        // ---------- 固定配置 ----------
         const OWNER = 'bloxorz671';
         const REPO = 'createsoft';
         const BRANCH = 'main';
         const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
-        const CHUNK_SIZE = 256 * 1024; // 256KB 分片，进一步降低内存
+        const CHUNK_SIZE = 1024 * 1024; // 1MB 分片
         
-        // 文件映射表
         const FILE_DISPLAY_NAMES = {
             'homework.txt': '初二五班电子作业',
             'tools.txt': '更多工具',
@@ -859,7 +846,6 @@
         
         const SUPPORTED_FILES = Object.keys(FILE_DISPLAY_NAMES);
 
-        // ---------- 全局变量 ----------
         let currentFileSha = null;
         let currentToken = '';
         let currentFile = '';
@@ -870,13 +856,11 @@
         let folderToDelete = null;
         let fileToDeleteSimple = null;
         
-        // 上传相关
         let selectedFile = null;
         let uploadStartTime = null;
         let uploadedBytes = 0;
-        let abortUpload = false;
 
-        // ---------- DOM 元素 ----------
+        // DOM 元素
         const tokenInput = document.getElementById('tokenInput');
         const loadBtn = document.getElementById('loadBtn');
         const updateBtn = document.getElementById('updateBtn');
@@ -898,7 +882,6 @@
         const createFolderBtn = document.getElementById('createFolderBtn');
         const newFileName = document.getElementById('newFileName');
         
-        // 上传相关 DOM
         const uploadSection = document.getElementById('uploadSection');
         const uploadBtn = document.getElementById('uploadBtn');
         const fileUpload = document.getElementById('fileUpload');
@@ -914,7 +897,6 @@
         const progressTime = document.getElementById('progressTime');
         const fileSizeWarning = document.getElementById('fileSizeWarning');
         
-        // 删除弹窗
         const deleteModal = document.getElementById('deleteModal');
         const cancelDelete = document.getElementById('cancelDelete');
         const confirmDelete = document.getElementById('confirmDelete');
@@ -930,7 +912,7 @@
         const confirmFolderDelete = document.getElementById('confirmFolderDelete');
         const deleteFolderMessage = document.getElementById('deleteFolderMessage');
 
-        // ---------- 辅助函数 ----------
+        // 辅助函数
         function setStatus(message, type = 'info') {
             statusDiv.textContent = message;
             statusDiv.className = 'status';
@@ -977,55 +959,56 @@
             }
         }
 
-        // ---------- 流式上传核心函数 ----------
-        async function uploadFileStream(file) {
+        // ---------- 修复的Base64编码函数 ----------
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
+
+        // ---------- 分片上传核心函数 ----------
+        async function uploadFileInChunks(file) {
             if (!currentToken) {
                 uploadStatus.textContent = '❌ 请先连接';
                 uploadStatus.className = 'upload-status error';
                 return;
             }
 
-            // 重置状态
-            abortUpload = false;
-            uploadedBytes = 0;
             uploadStartTime = Date.now();
+            uploadedBytes = 0;
             progressContainer.style.display = 'block';
             uploadStatus.className = 'upload-status';
             
             try {
-                // 创建文件读取流
-                const stream = file.stream();
-                const reader = stream.getReader();
-                
-                // 准备Base64编码的块
+                // 准备分片上传
+                const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
                 let base64Chunks = [];
-                let totalBytes = file.size;
                 
                 uploadStatus.textContent = '⏳ 开始读取文件...';
                 
-                while (true) {
-                    const { done, value } = await reader.read();
+                for (let i = 0; i < totalChunks; i++) {
+                    const start = i * CHUNK_SIZE;
+                    const end = Math.min(start + CHUNK_SIZE, file.size);
+                    const chunk = file.slice(start, end);
                     
-                    if (done) break;
-                    if (abortUpload) {
-                        throw new Error('上传已取消');
-                    }
+                    // 读取分片为ArrayBuffer
+                    const arrayBuffer = await readChunkAsArrayBuffer(chunk);
                     
-                    // 将Uint8Array转换为Base64块
-                    let binary = '';
-                    for (let i = 0; i < value.length; i++) {
-                        binary += String.fromCharCode(value[i]);
-                    }
-                    const chunkBase64 = btoa(binary);
+                    // 转换为Base64
+                    const chunkBase64 = arrayBufferToBase64(arrayBuffer);
                     base64Chunks.push(chunkBase64);
                     
-                    uploadedBytes += value.length;
-                    updateProgress(uploadedBytes, totalBytes);
+                    uploadedBytes += arrayBuffer.byteLength;
+                    updateProgress(uploadedBytes, file.size);
                     
-                    uploadStatus.textContent = `⏳ 读取中: ${formatFileSize(uploadedBytes)} / ${formatFileSize(totalBytes)}`;
+                    uploadStatus.textContent = `⏳ 处理分片 ${i+1}/${totalChunks} (${formatFileSize(uploadedBytes)} / ${formatFileSize(file.size)})`;
                     
                     // 让浏览器有机会处理其他事件
-                    await new Promise(resolve => setTimeout(resolve, 5));
+                    await new Promise(resolve => setTimeout(resolve, 10));
                 }
                 
                 uploadStatus.textContent = '⏳ 合并编码数据...';
@@ -1036,7 +1019,7 @@
                 // 释放内存
                 base64Chunks = null;
                 
-                updateProgress(totalBytes, totalBytes);
+                updateProgress(file.size, file.size);
                 uploadStatus.textContent = '⏳ 上传到 GitHub...';
                 
                 // 上传到GitHub
@@ -1080,6 +1063,15 @@
             }
         }
 
+        function readChunkAsArrayBuffer(chunk) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e.target.error);
+                reader.readAsArrayBuffer(chunk);
+            });
+        }
+
         function resetUploadUI() {
             setTimeout(() => {
                 progressContainer.style.display = 'none';
@@ -1096,7 +1088,7 @@
             }, 3000);
         }
 
-        // ---------- 文件选择处理 ----------
+        // 文件选择处理
         fileUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -1140,10 +1132,9 @@
             
             uploadBtn.disabled = true;
             uploadBtn.textContent = '上传中...';
-            await uploadFileStream(selectedFile);
+            await uploadFileInChunks(selectedFile);
         });
 
-        // 拖拽上传
         uploadSection.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadSection.classList.add('dragover');
@@ -1185,7 +1176,7 @@
             }
         });
 
-        // ---------- 文件选择相关 ----------
+        // 文件选择相关
         function resetFileButtons() {
             fileButtons.forEach(btn => btn.classList.remove('active'));
         }
@@ -1218,7 +1209,7 @@
             }
         }
 
-        // ---------- API 调用 ----------
+        // API 调用
         async function fetchFromGitHub(path = '', method = 'GET', body = null) {
             let url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
             if (method === 'GET') {
@@ -1275,7 +1266,6 @@
                 
                 currentFileSha = data.sha;
                 
-                // Base64解码
                 const base64 = data.content.replace(/\n/g, '');
                 const binary = atob(base64);
                 const bytes = new Uint8Array(binary.length);
@@ -1296,7 +1286,7 @@
             }
         }
 
-        // ---------- 高级模式：浏览仓库 ----------
+        // 高级模式：浏览仓库
         async function loadDirectory(path = '') {
             try {
                 fileListDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">加载中...</div>';
@@ -1371,7 +1361,7 @@
             }
         }
 
-        // ---------- 高级模式：创建文件/文件夹 ----------
+        // 创建文件/文件夹
         async function createItem(isFolder = false) {
             const name = newFileName.value.trim();
             if (!name) {
@@ -1401,7 +1391,7 @@
             }
         }
 
-        // ---------- 高级模式：删除文件 ----------
+        // 删除文件
         async function deleteItem(path, sha) {
             try {
                 const body = {
@@ -1420,7 +1410,7 @@
             }
         }
 
-        // ---------- 普通模式：删除文件 ----------
+        // 普通模式删除文件
         async function deleteSimpleFile(path, sha) {
             try {
                 const body = {
@@ -1446,7 +1436,7 @@
             }
         }
 
-        // ---------- 高级模式：删除文件夹 ----------
+        // 删除文件夹
         async function deleteFolder(path) {
             try {
                 const response = await fetchFromGitHub(path);
@@ -1471,7 +1461,7 @@
             }
         }
 
-        // ---------- 下载文件项 ----------
+        // 下载文件项
         async function downloadFileItem(path, sha) {
             try {
                 const response = await fetchFromGitHub(path);
@@ -1505,7 +1495,7 @@
             URL.revokeObjectURL(url);
         }
 
-        // ---------- 暴露全局方法 ----------
+        // 全局方法
         window.editFile = function(path) {
             const filename = path.split('/').pop();
             if (SUPPORTED_FILES.includes(filename)) {
@@ -1552,7 +1542,7 @@
             loadDirectory(path);
         };
 
-        // ---------- 删除确认事件绑定 ----------
+        // 删除确认事件绑定
         cancelDelete.addEventListener('click', () => {
             deleteModal.style.display = 'none';
             fileToDelete = null;
@@ -1586,7 +1576,7 @@
             }
         });
 
-        // ---------- 其他事件绑定 ----------
+        // 其他事件绑定
         loadBtn.addEventListener('click', async () => {
             const token = tokenInput.value.trim();
             if (!token) {
