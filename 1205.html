@@ -31,13 +31,9 @@
             position: relative;
         }
 
-        /* 头部区域 - 包含标题和刷新按钮 */
+        /* 头部区域 - 只包含标题 */
         .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
             margin-bottom: 1rem;
-            position: relative;
         }
 
         h1 {
@@ -47,27 +43,46 @@
             color: #0f172a;
             line-height: 1.2;
             margin: 0;
-            flex: 1;
         }
 
-        /* 刷新按钮 - 放置在右上角 */
+        .notice {
+            color: #b91c1c;
+            font-size: 1.1rem;
+            font-weight: 400;
+            text-align: center;
+            max-width: 550px;
+            margin: 1.5rem auto 1rem auto;
+            background-color: #fff8f8;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(185, 28, 28, 0.15);
+        }
+
+        /* 刷新按钮容器 - 在提示文字下方另起一行 */
+        .refresh-container {
+            display: flex;
+            justify-content: center;
+            margin: 0 auto 1.5rem auto;
+            width: 100%;
+        }
+
         .refresh-btn {
             background: #f1f5f9;
             border: 1px solid #cbd5e1;
             border-radius: 40px;
-            padding: 0.5rem 1.2rem;
-            font-size: 1rem;
+            padding: 0.6rem 2rem;
+            font-size: 1.1rem;
             font-weight: 500;
             color: #334155;
             cursor: pointer;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.4rem;
+            gap: 0.5rem;
             transition: all 0.2s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             white-space: nowrap;
-            margin-left: 1rem;
         }
 
         .refresh-btn:hover {
@@ -89,26 +104,12 @@
             stroke-linejoin: round;
         }
 
-        .notice {
-            color: #b91c1c;
-            font-size: 1.1rem;
-            font-weight: 400;
-            text-align: center;
-            max-width: 550px;
-            margin: 1.5rem auto 2rem auto;
-            background-color: #fff8f8;
-            padding: 0.8rem 1.5rem;
-            border-radius: 60px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-            border: 1px solid rgba(185, 28, 28, 0.15);
-        }
-
         /* 加载中提示样式 */
         .loading-message {
             text-align: center;
             font-size: 1.2rem;
             color: #64748b;
-            margin: 3rem 0;
+            margin: 2rem 0;
             padding: 1rem;
             background-color: #f8fafc;
             border-radius: 60px;
@@ -120,7 +121,7 @@
             text-align: center;
             font-size: 1.2rem;
             color: #475569;
-            margin: 3rem 0;
+            margin: 2rem 0;
             padding: 2rem;
             background-color: #f8fafc;
             border-radius: 30px;
@@ -130,7 +131,7 @@
 
         /* 作业列表区域 */
         .homework-section {
-            margin: 2rem 0 3rem 0;
+            margin: 1rem 0 3rem 0;
             width: 100%;
         }
 
@@ -153,7 +154,7 @@
             display: flex;
             align-items: center;
             width: 100%;
-            flex-wrap: wrap; /* 允许换行 */
+            flex-wrap: wrap;
         }
 
         /* 科目标签容器 */
@@ -202,7 +203,7 @@
             position: relative;
             flex: 1;
             display: flex;
-            flex-direction: column;  /* 改为纵向排列，让时间提示在作业名上方 */
+            flex-direction: column;
             min-width: 200px;
             margin: 0 0.5rem;
         }
@@ -315,15 +316,19 @@
                 font-size: 1.8rem;
             }
             
-            .refresh-btn {
-                padding: 0.4rem 1rem;
-                font-size: 0.9rem;
-            }
-            
             .notice {
                 font-size: 1rem;
                 padding: 0.7rem 1rem;
-                margin: 1rem auto 1.5rem auto;
+                margin: 1rem auto 0.8rem auto;
+            }
+            
+            .refresh-container {
+                margin: 0 auto 1.2rem auto;
+            }
+            
+            .refresh-btn {
+                padding: 0.5rem 1.8rem;
+                font-size: 1rem;
             }
             
             .homework-item {
@@ -356,12 +361,11 @@
                 min-width: auto;
             }
             
-            /* 移动端让时间提示和作业名有足够间距 */
             .time-hint {
                 font-size: 0.65rem;
                 padding: 0 0 4px 0;
                 margin-bottom: 4px;
-                white-space: normal;  /* 允许换行 */
+                white-space: normal;
                 line-height: 1.4;
             }
             
@@ -392,8 +396,8 @@
             }
             
             .refresh-btn {
-                padding: 0.3rem 0.8rem;
-                font-size: 0.8rem;
+                padding: 0.4rem 1.5rem;
+                font-size: 0.9rem;
             }
             
             .time-hint {
@@ -411,9 +415,18 @@
 </head>
 <body>
     <div class="container">
-        <!-- 头部：标题 + 刷新按钮 -->
+        <!-- 头部：只包含标题 -->
         <div class="header">
             <h1>初二五班电子作业提交</h1>
+        </div>
+
+        <!-- 提示文字 -->
+        <div class="notice">
+            如果你不是广州市第四十一中学初二五班的学生，请退出本网页
+        </div>
+
+        <!-- 刷新按钮 - 在提示文字下方另起一行，居中显示 -->
+        <div class="refresh-container">
             <button class="refresh-btn" id="refreshBtn" title="刷新作业列表">
                 <svg viewBox="0 0 24 24" width="18" height="18">
                     <path d="M23 4v6h-6M1 20v-6h6" />
@@ -421,10 +434,6 @@
                 </svg>
                 刷新
             </button>
-        </div>
-
-        <div class="notice">
-            如果你不是广州市第四十一中学初二五班的学生，请退出本网页
         </div>
 
         <!-- 加载中提示容器 -->
