@@ -691,11 +691,12 @@
         </div>
     </div>
 
+    <!-- 上传区域 - 修复按钮状态 -->
     <div class="upload-section" id="uploadSection">
         <div class="upload-label">📤 上传文件</div>
         <div class="upload-area">
             <input type="file" id="fileUpload">
-            <button class="upload-btn" id="uploadBtn" disabled>选择文件</button>
+            <button class="upload-btn" id="uploadBtn">选择文件</button>
             <div class="file-info" id="fileInfo" style="display: none;">
                 <div><span class="file-info-label">文件名：</span><span id="fileNameDisplay"></span></div>
                 <div><span class="file-info-label">大小：</span><span id="fileSizeDisplay"></span></div>
@@ -769,12 +770,13 @@
         const REPO = 'createsoft';
         const BRANCH = 'main';
         const MAX_FILE_SIZE = 100 * 1024 * 1024;
-        const CHUNK_SIZE = 1024 * 1024; // 1MB
+        const CHUNK_SIZE = 512 * 1024; // 512KB 分片
 
         let currentToken = '';
         let currentFile = '';
         let currentFileSha = null;
         let currentPath = '';
+        let selectedFile = null;
 
         // DOM 元素
         const tokenInput = document.getElementById('tokenInput');
@@ -847,14 +849,13 @@
                 progressFill.style.width = progress + '%';
                 progressPercent.textContent = Math.round(progress) + '%';
                 
-                // 让出事件循环
-                await new Promise(r => setTimeout(r, 10));
+                await new Promise(r => setTimeout(r, 5));
             }
             
             return chunks;
         }
 
-        // 合并ArrayBuffer并转为Base64
+        // 合并并转为Base64
         function chunksToBase64(chunks) {
             const totalLength = chunks.reduce((acc, chunk) => acc + chunk.byteLength, 0);
             const combined = new Uint8Array(totalLength);
@@ -866,8 +867,11 @@
             }
             
             let binary = '';
-            for (let i = 0; i < combined.length; i++) {
-                binary += String.fromCharCode(combined[i]);
+            for (let i = 0; i < combined.length; i += 1024) {
+                const end = Math.min(i + 1024, combined.length);
+                for (let j = i; j < end; j++) {
+                    binary += String.fromCharCode(combined[j]);
+                }
             }
             
             return btoa(binary);
@@ -884,19 +888,16 @@
             progressContainer.style.display = 'block';
             
             try {
-                // 分片读取
                 const chunks = await readFileInChunks(file);
                 
                 uploadStatus.textContent = '编码文件中...';
                 
-                // 转换为Base64
                 const base64 = chunksToBase64(chunks);
                 
                 uploadStatus.textContent = '上传中...';
                 progressFill.style.width = '95%';
                 progressPercent.textContent = '95%';
                 
-                // 上传到GitHub
                 const path = currentPath ? `${currentPath}/${file.name}` : file.name;
                 const response = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
                     method: 'PUT',
@@ -911,22 +912,33 @@
                     })
                 });
 
-                if (!response.ok) throw new Error('上传失败');
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.message || '上传失败');
+                }
 
                 progressFill.style.width = '100%';
                 progressPercent.textContent = '100%';
                 uploadStatus.textContent = '上传成功';
+                uploadStatus.className = 'upload-status success';
                 
-                setTimeout(() => {
-                    progressContainer.style.display = 'none';
-                    fileInfo.style.display = 'none';
-                    uploadStatus.textContent = '';
-                }, 3000);
+                setTimeout(resetUpload, 3000);
                 
             } catch (error) {
-                uploadStatus.textContent = '上传失败';
+                uploadStatus.textContent = '上传失败: ' + error.message;
+                uploadStatus.className = 'upload-status error';
                 console.error(error);
             }
+        }
+
+        function resetUpload() {
+            progressContainer.style.display = 'none';
+            fileInfo.style.display = 'none';
+            uploadStatus.textContent = '';
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = '选择文件';
+            selectedFile = null;
+            fileUpload.value = '';
         }
 
         // 文件选择
@@ -939,19 +951,29 @@
                 return;
             }
             
+            selectedFile = file;
             fileNameDisplay.textContent = file.name;
             fileSizeDisplay.textContent = formatSize(file.size);
             fileInfo.style.display = 'block';
-            
-            uploadBtn.onclick = () => uploadFile(file);
+            uploadBtn.textContent = '开始上传';
+            uploadBtn.disabled = false;
         });
 
         uploadBtn.addEventListener('click', () => {
             if (!currentToken) {
-                alert('请先连接');
+                uploadStatus.textContent = '请先连接';
+                uploadStatus.className = 'upload-status error';
                 return;
             }
-            fileUpload.click();
+            
+            if (!selectedFile) {
+                fileUpload.click();
+                return;
+            }
+            
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = '上传中...';
+            uploadFile(selectedFile);
         });
 
         // 连接
@@ -961,6 +983,9 @@
                 setStatus('请输入Token', 'error');
                 return;
             }
+            
+            loadBtn.disabled = true;
+            loadBtn.textContent = '验证中';
             
             try {
                 const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}`, {
@@ -972,6 +997,10 @@
                 currentToken = token;
                 setStatus('连接成功', 'success');
                 
+                // 修复：上传按钮状态更新
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = '选择文件';
+                
                 if (advancedToggle.checked) {
                     advancedSection.style.display = 'block';
                     fileSelectorSection.style.display = 'none';
@@ -979,50 +1008,23 @@
                 } else {
                     advancedSection.style.display = 'none';
                     fileSelectorSection.style.display = 'block';
+                    setCurrentFile('homework.txt');
                 }
             } catch (error) {
                 setStatus('连接失败', 'error');
+                uploadBtn.disabled = true;
+            } finally {
+                loadBtn.disabled = false;
+                loadBtn.textContent = '连接';
             }
         });
 
-        // 加载目录
-        async function loadDirectory(path = '') {
-            try {
-                const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
-                const items = await res.json();
-                
-                let html = '';
-                for (const item of items) {
-                    html += `
-                        <div class="file-item ${item.type}">
-                            <span>${item.name}</span>
-                            <div class="file-actions">
-                                <button class="file-action-btn edit" onclick="window.editFile('${item.path}')">编辑</button>
-                                <button class="file-action-btn delete" onclick="window.deleteFile('${item.path}', '${item.sha}')">删除</button>
-                            </div>
-                        </div>
-                    `;
-                }
-                fileListDiv.innerHTML = html;
-            } catch (error) {
-                fileListDiv.innerHTML = '加载失败';
-            }
-        }
-
-        // 全局方法
-        window.editFile = function(path) {
-            currentFile = path;
-            currentFileBadge.textContent = path;
+        function setCurrentFile(filename) {
+            currentFile = filename;
+            currentFileBadge.textContent = filename;
+            selectedFileDisplay.innerHTML = `<strong>${filename}</strong>`;
             loadFile();
-        };
-
-        window.deleteFile = function(path, sha) {
-            fileToDelete = { path, sha };
-            deleteMessage.textContent = `删除 ${path}？`;
-            deleteModal.style.display = 'flex';
-        };
+        }
 
         // 加载文件
         async function loadFile() {
@@ -1032,8 +1034,16 @@
                 const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${currentFile}`, {
                     headers: { 'Authorization': `Bearer ${currentToken}` }
                 });
-                const data = await res.json();
                 
+                if (res.status === 404) {
+                    fileContent.value = '';
+                    fileContent.disabled = false;
+                    updateBtn.disabled = false;
+                    currentFileSha = null;
+                    return;
+                }
+                
+                const data = await res.json();
                 currentFileSha = data.sha;
                 const base64 = data.content.replace(/\n/g, '');
                 const binary = atob(base64);
@@ -1081,6 +1091,53 @@
                 setStatus('保存失败', 'error');
             }
         });
+
+        // 加载目录
+        async function loadDirectory(path = '') {
+            try {
+                const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                const items = await res.json();
+                
+                let html = '';
+                for (const item of items) {
+                    const itemClass = item.type === 'dir' ? 'folder' : 'file';
+                    html += `
+                        <div class="file-item ${itemClass}">
+                            <span>${item.name}</span>
+                            <div class="file-actions">
+                                ${item.type === 'file' ? 
+                                    `<button class="file-action-btn edit" onclick="window.editFile('${item.path}')">编辑</button>` +
+                                    `<button class="file-action-btn delete" onclick="window.deleteFile('${item.path}', '${item.sha}')">删除</button>`
+                                    : `<button class="file-action-btn edit" onclick="window.openFolder('${item.path}')">打开</button>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                }
+                fileListDiv.innerHTML = html;
+            } catch (error) {
+                fileListDiv.innerHTML = '加载失败';
+            }
+        }
+
+        // 全局方法
+        window.editFile = function(path) {
+            currentFile = path;
+            currentFileBadge.textContent = path;
+            loadFile();
+        };
+
+        window.deleteFile = function(path, sha) {
+            fileToDelete = { path, sha };
+            deleteMessage.textContent = `删除 ${path}？`;
+            deleteModal.style.display = 'flex';
+        };
+
+        window.openFolder = function(path) {
+            loadDirectory(path);
+        };
 
         // 删除确认
         cancelDelete.addEventListener('click', () => {
@@ -1132,6 +1189,7 @@
         });
 
         refreshBtn.addEventListener('click', () => loadDirectory(currentPath));
+        
         createFileBtn.addEventListener('click', async () => {
             const name = newFileName.value.trim();
             if (!name) return;
@@ -1158,11 +1216,12 @@
 
         fileButtons.forEach(btn => {
             btn.addEventListener('click', () => {
-                currentFile = btn.dataset.file;
-                currentFileBadge.textContent = btn.dataset.file;
-                loadFile();
+                setCurrentFile(btn.dataset.file);
             });
         });
+
+        // 初始状态
+        uploadBtn.disabled = true;  // 初始禁用
     })();
 </script>
 </body>
