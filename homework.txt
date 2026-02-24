@@ -9,7 +9,7 @@ end_time=1616/1/1 00:00
 """
 """
 sub=数学
-name=录制讲题视频（备用链接）
+name=录制讲题视频（备用链接）（视频小于100M优先放这个）
 link=https://account.wps.cn/v1/mobilelogin?cb=https%3A%2F%2Fyunbiz.wps.cn%2Fc%2Fcollect%2Fc3OG8DI77C9
 more=截止时间已延长到25日23:59分，请尽快提交
 more_colour[0,150,0]
@@ -18,7 +18,7 @@ end_time=2026/2/25 23:59
 """
 """
 sub=数学
-name=录制讲题视频（备用链接2）
+name=录制讲题视频（备用链接2）（第一个传不进去就放这个）
 link=https://send2me.cn/hU983hXi/TJOKFgqcJRprGA
 more=截止时间已延长到25日23:59分，请尽快提交
 more_colour[0,150,150]
