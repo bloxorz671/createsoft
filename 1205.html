@@ -106,54 +106,38 @@
             width: 100%;
         }
 
-        /* 科目标签容器 - 用于定位时间提示 */
+        /* 科目标签容器 */
         .subject-container {
             position: relative;
-            margin-right: 0.5rem;  /* 减小右边距，让作业名更靠近科目 */
-            min-width: 100px;       /* 增加最小宽度，让标签更方正 */
-        }
-
-        /* 时间提示 - 显示在科目标签正上方 */
-        .time-hint {
-            position: absolute;
-            top: -22px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 0.7rem;
-            color: #64748b;
-            font-weight: 400;
-            white-space: nowrap;
-            background-color: transparent;
-            padding: 2px 0;
-            letter-spacing: 0.3px;
+            margin-right: 0.3rem;  /* 只保留一个字母的宽度（约0.3rem） */
+            min-width: 100px;
         }
 
         .subject-tag {
             font-size: 1.2rem;
             font-weight: 500;
-            min-width: 100px;       /* 增加最小宽度 */
-            padding: 0.5rem 0.8rem;  /* 增加左右内边距，让标签更方正 */
+            min-width: 100px;
+            padding: 0.5rem 0.8rem;
             text-align: center;
-            border-radius: 30px;     /* 减小圆角，不再是圆形 */
+            border-radius: 30px;
             background-color: white;
             box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-            white-space: nowrap;     /* 防止文字换行 */
+            white-space: nowrap;
         }
 
         /* 科目颜色 */
         .subject-chinese {
-            color: #c44536;  /* 橙色偏红，清晰 */
+            color: #c44536;
             border-left: 4px solid #e67e22;
             background: #fff5eb;
         }
         .subject-math {
-            color: #1e6f9f;  /* 深蓝色 */
+            color: #1e6f9f;
             border-left: 4px solid #2980b9;
             background: #ebf5ff;
         }
         .subject-english {
-            color: #2e7d5e;  /* 墨绿 */
+            color: #2e7d5e;
             border-left: 4px solid #27ae60;
             background: #eafaf2;
         }
@@ -163,14 +147,35 @@
             background: #f0f2f4;
         }
 
-        .homework-name {
+        /* 作业名容器 - 用于定位时间提示 */
+        .name-container {
+            position: relative;
             flex: 1;
+            display: flex;
+            align-items: center;
+            min-width: 0;  /* 防止flex溢出 */
+        }
+
+        /* 时间提示 - 显示在作业名称正上方 */
+        .time-hint {
+            position: absolute;
+            top: -22px;
+            left: 0;
+            font-size: 0.7rem;
+            color: #64748b;
+            font-weight: 400;
+            white-space: nowrap;
+            background-color: transparent;
+            padding: 2px 0;
+            letter-spacing: 0.3px;
+        }
+
+        .homework-name {
             font-size: 1.3rem;
             font-weight: 450;
             color: #1e2b3a;
-            padding: 0 0.5rem;
             word-break: break-word;
-            margin-left: 0;           /* 移除左边距，让作业名更靠近科目 */
+            width: 100%;
         }
 
         /* 正常可点击按钮样式 */
@@ -201,10 +206,10 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* 禁用按钮样式 - 用于待开始、已截止或无链接 */
+        /* 禁用按钮样式 */
         .homework-link-disabled {
             display: inline-block;
-            background: #94a3b8;  /* 灰色 */
+            background: #94a3b8;
             color: #e2e8f0;
             text-decoration: none;
             font-size: 1.2rem;
@@ -232,12 +237,12 @@
         }
 
         .ua-confirmed {
-            color: #2e7d32;  /* 绿色 */
+            color: #2e7d32;
             font-weight: 450;
         }
 
         .ua-waiting {
-            color: #b91c1c;  /* 红色 */
+            color: #b91c1c;
             font-weight: 400;
         }
 
@@ -259,25 +264,24 @@
             }
             .subject-container {
                 min-width: 85px;
-                margin-right: 0.3rem;
+                margin-right: 0.2rem;
             }
             .subject-tag {
                 min-width: 85px;
                 font-size: 1rem;
                 padding: 0.4rem 0.5rem;
             }
+            .name-container {
+                flex: 1 1 100%;
+                order: 2;
+                margin-top: 0.8rem;
+            }
             .time-hint {
-                font-size: 0.6rem;
                 top: -18px;
+                font-size: 0.6rem;
             }
             .homework-name {
                 font-size: 1.1rem;
-                margin: 0.3rem 0;
-                flex: 1 1 100%;
-                order: 2;
-                padding-left: 0;
-                padding-bottom: 0.5rem;
-                margin-left: 0;
             }
             .homework-link, .homework-link-disabled {
                 margin-left: auto;
@@ -324,16 +328,14 @@
             // 获取当前浏览器的 UA
             const currentUA = navigator.userAgent;
             
-            // 解析RGB颜色字符串 [r,g,b] 或 [r, g, b]
+            // 解析RGB颜色字符串
             function parseRgbColor(colorStr) {
                 if (!colorStr) return null;
-                // 匹配 [数字,数字,数字] 格式，允许空格
                 const match = colorStr.match(/\[\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\]/);
                 if (match) {
                     const r = parseInt(match[1]);
                     const g = parseInt(match[2]);
                     const b = parseInt(match[3]);
-                    // 验证数值范围
                     if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
                         return `rgb(${r}, ${g}, ${b})`;
                     }
@@ -341,10 +343,9 @@
                 return null;
             }
 
-            // 解析日期时间字符串 "2026/2/24 00:00"
+            // 解析日期时间字符串
             function parseDateTime(dateTimeStr) {
                 if (!dateTimeStr) return null;
-                // 支持格式: YYYY/M/D H:mm 或 YYYY/MM/DD HH:mm
                 const parts = dateTimeStr.split(' ');
                 if (parts.length !== 2) return null;
                 
@@ -355,7 +356,7 @@
                 if (dateParts.length !== 3) return null;
                 
                 const year = parseInt(dateParts[0]);
-                const month = parseInt(dateParts[1]) - 1; // 月份从0开始
+                const month = parseInt(dateParts[1]) - 1;
                 const day = parseInt(dateParts[2]);
                 
                 const timeParts = timePart.split(':');
@@ -367,21 +368,9 @@
                 return new Date(year, month, day, hour, minute, 0);
             }
 
-            // 格式化日期时间为显示字符串
-            function formatDateTime(date) {
-                if (!date) return '';
-                const year = date.getFullYear();
-                const month = date.getMonth() + 1;
-                const day = date.getDate();
-                const hour = date.getHours().toString().padStart(2, '0');
-                const minute = date.getMinutes().toString().padStart(2, '0');
-                return `${year}/${month}/${day} ${hour}:${minute}`;
-            }
-
-            // 解析作业函数：输入文件内容字符串，返回作业对象数组
+            // 解析作业函数
             function parseHomework(text) {
                 const items = [];
-                // 按 """ 分割
                 const rawBlocks = text.split(/"""/);
                 
                 for (let i = 0; i < rawBlocks.length; i++) {
@@ -392,21 +381,18 @@
                     let sub = '', name = '', link = '';
                     let uaList = [];
                     let hasUaBracket = false;
-                    let more = '';           // more= 后面的内容
-                    let moreColor = null;     // 解析后的颜色值
-                    let startTimeStr = '';    // 开始时间字符串
-                    let endTimeStr = '';       // 结束时间字符串
+                    let more = '';
+                    let moreColor = null;
+                    let startTimeStr = '';
+                    let endTimeStr = '';
                     
                     for (let line of lines) {
                         line = line.trim();
                         
-                        // 检查是否是UA标记开始：以【开头
                         if (line.startsWith('【')) {
                             hasUaBracket = true;
-                            // 提取【】中的内容
                             const match = line.match(/【(.*?)】/);
                             if (match && match[1]) {
-                                // 如果有内容，按空行分割
                                 const uaContent = match[1];
                                 const uaParts = uaContent.split(/\n\s*\n/);
                                 for (let part of uaParts) {
@@ -419,7 +405,6 @@
                             continue;
                         }
                         
-                        // 检查 more_colour[,,]
                         const colorMatch = line.match(/more_colour\s*\[\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\]/);
                         if (colorMatch) {
                             const r = parseInt(colorMatch[1]);
@@ -431,7 +416,6 @@
                             continue;
                         }
                         
-                        // 常规字段解析
                         if (line.startsWith('sub=')) {
                             sub = line.substring(4).trim();
                         } else if (line.startsWith('name=')) {
@@ -447,11 +431,9 @@
                         }
                     }
                     
-                    // 解析时间
                     const startTime = parseDateTime(startTimeStr);
                     const endTime = parseDateTime(endTimeStr);
                     
-                    // 只要有一个字段非空就认为是一条作业
                     if (sub || name || link || hasUaBracket || more || startTimeStr || endTimeStr) {
                         items.push({ 
                             sub, 
@@ -471,7 +453,6 @@
                 return items;
             }
 
-            // 根据科目返回样式类
             function getSubjectClass(sub) {
                 if (!sub) return 'subject-other';
                 const subLower = sub.trim().toLowerCase();
@@ -481,55 +462,45 @@
                 return 'subject-other';
             }
 
-            // 获取科目显示文本
             function getSubjectText(sub) {
                 return sub || '作业';
             }
 
-            // 检查当前UA是否在UA列表中
             function isUaConfirmed(uaList) {
                 if (!uaList || uaList.length === 0) return false;
                 return uaList.some(ua => ua.trim() === currentUA);
             }
 
-            // 获取按钮状态和文字
             function getButtonState(item) {
                 const now = new Date();
                 
-                // 如果没有链接，直接返回已截止
                 if (!item.link || item.link.trim() === '') {
                     return { disabled: true, text: '已截止' };
                 }
                 
-                // 如果有开始时间且当前时间在开始时间之前
                 if (item.startTime && now < item.startTime) {
                     return { disabled: true, text: '待开始' };
                 }
                 
-                // 如果有结束时间且当前时间在结束时间之后
                 if (item.endTime && now > item.endTime) {
                     return { disabled: true, text: '已截止' };
                 }
                 
-                // 其他情况：可点击
                 return { disabled: false, text: '去提交' };
             }
 
-            // 获取科目上方要显示的时间提示
+            // 获取时间提示（显示在作业名称上方）
             function getTimeHint(item) {
                 const now = new Date();
                 
-                // 如果没有开始时间和结束时间，不显示提示
                 if (!item.startTime && !item.endTime) {
                     return null;
                 }
                 
-                // 未开始：显示开始时间
                 if (item.startTime && now < item.startTime) {
                     return `开始：${item.startTimeStr}`;
                 }
                 
-                // 进行中或已结束：显示截止时间
                 if (item.endTime) {
                     return `截止：${item.endTimeStr}`;
                 }
@@ -537,7 +508,6 @@
                 return null;
             }
 
-            // 更新UI显示状态
             function setLoadingState(isLoading) {
                 const loadingEl = document.getElementById('loadingContainer');
                 const homeworkEl = document.getElementById('homeworkContainer');
@@ -550,7 +520,6 @@
                 }
             }
 
-            // 渲染作业列表到 container
             function renderHomework(items) {
                 const loadingEl = document.getElementById('loadingContainer');
                 const homeworkEl = document.getElementById('homeworkContainer');
@@ -558,22 +527,16 @@
                 
                 if (!homeworkEl) return;
 
-                // 隐藏加载提示
                 loadingEl.style.display = 'none';
 
                 if (items.length === 0) {
-                    // 无作业：显示空状态提示，隐藏作业区
                     homeworkEl.style.display = 'none';
                     emptyEl.style.display = 'block';
                 } else {
-                    // 有作业：显示作业列表，隐藏空状态提示
                     homeworkEl.style.display = 'block';
                     emptyEl.style.display = 'none';
-
-                    // 清空并重新渲染
                     homeworkEl.innerHTML = '';
 
-                    // 创建作业列表元素
                     const section = document.createElement('div');
                     section.className = 'homework-section';
 
@@ -584,46 +547,44 @@
                         const itemDiv = document.createElement('div');
                         itemDiv.className = 'homework-item';
 
-                        // 第一行：科目标签容器 + 作业名 + 按钮
                         const rowDiv = document.createElement('div');
                         rowDiv.className = 'homework-row';
 
-                        // 科目标签容器（用于定位时间提示）
+                        // 科目标签容器
                         const subjectContainer = document.createElement('div');
                         subjectContainer.className = 'subject-container';
 
-                        // 获取时间提示
-                        const timeHint = getTimeHint(item);
-                        if (timeHint) {
-                            const hintDiv = document.createElement('div');
-                            hintDiv.className = 'time-hint';
-                            hintDiv.textContent = timeHint;
-                            subjectContainer.appendChild(hintDiv);
-                        }
-
-                        // 科目标签
                         const subSpan = document.createElement('span');
                         subSpan.className = `subject-tag ${subjectClass}`;
                         subSpan.textContent = subjectDisplay;
                         subjectContainer.appendChild(subSpan);
 
-                        // 作业名
+                        // 作业名容器（带时间提示）
+                        const nameContainer = document.createElement('div');
+                        nameContainer.className = 'name-container';
+
+                        // 时间提示（显示在作业名称上方）
+                        const timeHint = getTimeHint(item);
+                        if (timeHint) {
+                            const hintDiv = document.createElement('div');
+                            hintDiv.className = 'time-hint';
+                            hintDiv.textContent = timeHint;
+                            nameContainer.appendChild(hintDiv);
+                        }
+
                         const nameSpan = document.createElement('span');
                         nameSpan.className = 'homework-name';
                         nameSpan.textContent = item.name || '未命名作业';
+                        nameContainer.appendChild(nameSpan);
 
-                        // 获取按钮状态
                         const buttonState = getButtonState(item);
                         
-                        // 创建按钮
                         let linkBtn;
                         if (buttonState.disabled) {
-                            // 禁用状态
                             linkBtn = document.createElement('span');
                             linkBtn.className = 'homework-link-disabled';
                             linkBtn.textContent = buttonState.text;
                         } else {
-                            // 可点击状态
                             linkBtn = document.createElement('a');
                             linkBtn.className = 'homework-link';
                             linkBtn.href = item.link;
@@ -633,14 +594,11 @@
                         }
 
                         rowDiv.appendChild(subjectContainer);
-                        rowDiv.appendChild(nameSpan);
+                        rowDiv.appendChild(nameContainer);
                         rowDiv.appendChild(linkBtn);
                         itemDiv.appendChild(rowDiv);
 
-                        // 第二行：提示信息
-                        // 优先级：more= 内容 > UA提示 > 无显示
                         if (item.more) {
-                            // 有more=内容，显示它
                             const msgDiv = document.createElement('div');
                             msgDiv.className = 'ua-message';
                             msgDiv.textContent = item.more;
@@ -649,7 +607,6 @@
                             }
                             itemDiv.appendChild(msgDiv);
                         } else if (item.hasUaBracket) {
-                            // 没有more但有UA标记，显示UA提示
                             const msgDiv = document.createElement('div');
                             msgDiv.className = 'ua-message';
                             
@@ -663,7 +620,6 @@
                             
                             itemDiv.appendChild(msgDiv);
                         }
-                        // 否则不显示任何小字
                         
                         section.appendChild(itemDiv);
                     });
@@ -672,16 +628,13 @@
                 }
             }
 
-            // 读取 homework.txt（禁用缓存）
             function loadHomework() {
-                // 显示加载状态
                 setLoadingState(true);
                 
-                // 添加时间戳禁用缓存
                 const url = './homework.txt?t=' + new Date().getTime();
                 
                 fetch(url, {
-                    cache: 'no-store',  // 强制不使用缓存
+                    cache: 'no-store',
                     headers: {
                         'Pragma': 'no-cache',
                         'Cache-Control': 'no-cache'
@@ -694,19 +647,15 @@
                         return response.text();
                     })
                     .then(text => {
-                        console.log('Raw text:', text);
                         const items = parseHomework(text);
-                        console.log('Parsed items:', items);
                         renderHomework(items);
                     })
                     .catch(error => {
                         console.warn('读取 homework.txt 失败，视为空文件。', error);
-                        // 出错时当作空文件处理，显示空状态提示
                         renderHomework([]);
                     });
             }
 
-            // 页面加载完成后立即执行
             window.addEventListener('load', loadHomework);
         })();
     </script>
