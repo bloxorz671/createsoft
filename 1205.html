@@ -59,19 +59,34 @@
             border: 1px solid rgba(185, 28, 28, 0.15);
         }
 
-        /* 刷新按钮容器 - 在提示文字下方另起一行 */
-        .refresh-container {
+        /* 工具栏 - 包含刷新、查找和学科筛选 */
+        .toolbar {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
             margin: 0 auto 1.5rem auto;
             width: 100%;
+            gap: 0.8rem;
+            flex-wrap: wrap;
         }
 
-        .refresh-btn {
+        .toolbar-left {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+        }
+
+        /* 刷新和查找按钮通用样式 */
+        .action-btn {
             background: #f1f5f9;
             border: 1px solid #cbd5e1;
             border-radius: 40px;
-            padding: 0.6rem 2rem;
+            padding: 0.6rem 1.5rem;
             font-size: 1.1rem;
             font-weight: 500;
             color: #334155;
@@ -85,23 +100,79 @@
             white-space: nowrap;
         }
 
-        .refresh-btn:hover {
+        .action-btn:hover {
             background: #e2e8f0;
             border-color: #94a3b8;
         }
 
-        .refresh-btn:active {
+        .action-btn:active {
             transform: scale(0.97);
         }
 
-        .refresh-btn svg {
+        /* 查找按钮图标 - 使用find.jpg */
+        .find-icon {
             width: 18px;
             height: 18px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+            background-image: url('./find.jpg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            display: inline-block;
+        }
+
+        /* 学科筛选下拉框 - 无边框样式 */
+        .subject-filter {
+            position: relative;
+            display: inline-block;
+        }
+
+        .subject-filter-select {
+            background: transparent;
+            color: #334155;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 0.6rem 1.8rem 0.6rem 0.8rem;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 0.2rem center;
+            background-size: 16px;
+            min-width: 100px;
+            text-align: right;
+        }
+
+        .subject-filter-select option {
+            background: white;
+            color: #1e293b;
+            padding: 0.5rem;
+        }
+
+        /* 搜索输入框容器（点击查找按钮后显示） */
+        .search-container {
+            width: 100%;
+            margin: 0 auto 1rem auto;
+            display: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            font-size: 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 40px;
+            outline: none;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .search-input:focus {
+            border-color: #94a3b8;
+            box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.1);
         }
 
         /* 加载中提示样式 */
@@ -127,6 +198,18 @@
             border-radius: 30px;
             border: 1px dashed #94a3b8;
             line-height: 1.6;
+        }
+
+        /* 无搜索结果提示 */
+        .no-results {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #64748b;
+            margin: 2rem 0;
+            padding: 2rem;
+            background-color: #f8fafc;
+            border-radius: 30px;
+            border: 1px dashed #94a3b8;
         }
 
         /* 作业列表区域 */
@@ -322,13 +405,29 @@
                 margin: 1rem auto 0.8rem auto;
             }
             
-            .refresh-container {
-                margin: 0 auto 1.2rem auto;
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+                margin: 0 auto 1rem auto;
             }
             
-            .refresh-btn {
-                padding: 0.5rem 1.8rem;
+            .toolbar-left {
+                justify-content: center;
+            }
+            
+            .toolbar-right {
+                justify-content: center;
+            }
+            
+            .action-btn {
+                padding: 0.5rem 1.2rem;
                 font-size: 1rem;
+            }
+            
+            .subject-filter-select {
+                font-size: 1rem;
+                padding: 0.5rem 1.8rem 0.5rem 0.5rem;
             }
             
             .homework-item {
@@ -395,8 +494,12 @@
                 font-size: 1.5rem;
             }
             
-            .refresh-btn {
-                padding: 0.4rem 1.5rem;
+            .action-btn {
+                padding: 0.4rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .subject-filter-select {
                 font-size: 0.9rem;
             }
             
@@ -425,15 +528,38 @@
             如果你不是广州市第四十一中学初二五班的学生，请退出本网页
         </div>
 
-        <!-- 刷新按钮 - 在提示文字下方另起一行，居中显示 -->
-        <div class="refresh-container">
-            <button class="refresh-btn" id="refreshBtn" title="刷新作业列表">
-                <svg viewBox="0 0 24 24" width="18" height="18">
-                    <path d="M23 4v6h-6M1 20v-6h6" />
-                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-                </svg>
-                刷新
-            </button>
+        <!-- 工具栏：刷新、查找、学科筛选 -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <!-- 刷新按钮 -->
+                <button class="action-btn" id="refreshBtn" title="刷新作业列表">
+                    <svg viewBox="0 0 24 24" width="18" height="18">
+                        <path d="M23 4v6h-6M1 20v-6h6" />
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                    </svg>
+                    刷新
+                </button>
+
+                <!-- 查找按钮 -->
+                <button class="action-btn" id="findBtn" title="查找作业">
+                    <span class="find-icon"></span>
+                    查找
+                </button>
+            </div>
+
+            <div class="toolbar-right">
+                <!-- 学科筛选下拉框 - 无边框，深灰色文字 -->
+                <div class="subject-filter">
+                    <select id="subjectFilter" class="subject-filter-select">
+                        <option value="all">所有学科</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 搜索输入框（点击查找按钮后显示） -->
+        <div id="searchContainer" class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="输入关键词搜索作业名称...">
         </div>
 
         <!-- 加载中提示容器 -->
@@ -443,6 +569,11 @@
 
         <!-- 作业内容将动态渲染到这里 -->
         <div id="homeworkContainer" style="display: none;"></div>
+
+        <!-- 无搜索结果提示 -->
+        <div id="noResultsContainer" class="no-results" style="display: none;">
+            没有找到匹配的作业
+        </div>
 
         <!-- 空状态提示容器（无作业时显示） -->
         <div id="emptyContainer" class="empty-message" style="display: none;">
@@ -457,6 +588,17 @@
             // 获取当前浏览器的 UA
             const currentUA = navigator.userAgent;
             
+            // 存储原始作业数据
+            let originalItems = [];
+            // 当前筛选后的作业数据
+            let filteredItems = [];
+            // 当前搜索关键词
+            let currentSearchTerm = '';
+            // 当前选中的学科
+            let currentSubject = 'all';
+            // 是否显示搜索框
+            let showSearch = false;
+
             // 解析RGB颜色字符串
             function parseRgbColor(colorStr) {
                 if (!colorStr) return null;
@@ -565,8 +707,8 @@
                     
                     if (sub || name || link || hasUaBracket || more || startTimeStr || endTimeStr) {
                         items.push({ 
-                            sub, 
-                            name, 
+                            sub: sub || '其他',
+                            name: name || '未命名作业',
                             link,
                             uaList: uaList,
                             hasUaBracket: hasUaBracket,
@@ -637,33 +779,93 @@
                 return null;
             }
 
-            function setLoadingState(isLoading) {
-                const loadingEl = document.getElementById('loadingContainer');
-                const homeworkEl = document.getElementById('homeworkContainer');
-                const emptyEl = document.getElementById('emptyContainer');
+            // 获取所有不重复的学科
+            function getUniqueSubjects(items) {
+                const subjects = new Set();
+                items.forEach(item => {
+                    if (item.sub) {
+                        subjects.add(item.sub);
+                    }
+                });
+                return Array.from(subjects).sort();
+            }
+
+            // 更新学科筛选下拉框
+            function updateSubjectFilter(items) {
+                const subjectFilter = document.getElementById('subjectFilter');
+                const subjects = getUniqueSubjects(items);
                 
-                if (isLoading) {
-                    loadingEl.style.display = 'block';
-                    homeworkEl.style.display = 'none';
-                    emptyEl.style.display = 'none';
+                // 保留当前选中的值
+                const currentValue = subjectFilter.value;
+                
+                // 清空并重新填充
+                subjectFilter.innerHTML = '<option value="all">所有学科</option>';
+                subjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject;
+                    option.textContent = subject;
+                    subjectFilter.appendChild(option);
+                });
+                
+                // 如果之前选中的学科仍然存在，则恢复选中
+                if (subjects.includes(currentValue)) {
+                    subjectFilter.value = currentValue;
+                } else {
+                    subjectFilter.value = 'all';
+                    currentSubject = 'all';
                 }
             }
 
+            // 筛选作业
+            function filterItems() {
+                if (!originalItems.length) return [];
+                
+                return originalItems.filter(item => {
+                    // 学科筛选
+                    if (currentSubject !== 'all' && item.sub !== currentSubject) {
+                        return false;
+                    }
+                    
+                    // 关键词搜索
+                    if (currentSearchTerm) {
+                        const term = currentSearchTerm.toLowerCase();
+                        const nameMatch = item.name && item.name.toLowerCase().includes(term);
+                        const subMatch = item.sub && item.sub.toLowerCase().includes(term);
+                        const moreMatch = item.more && item.more.toLowerCase().includes(term);
+                        return nameMatch || subMatch || moreMatch;
+                    }
+                    
+                    return true;
+                });
+            }
+
+            // 渲染作业列表
             function renderHomework(items) {
                 const loadingEl = document.getElementById('loadingContainer');
                 const homeworkEl = document.getElementById('homeworkContainer');
                 const emptyEl = document.getElementById('emptyContainer');
+                const noResultsEl = document.getElementById('noResultsContainer');
                 
                 if (!homeworkEl) return;
 
                 loadingEl.style.display = 'none';
 
                 if (items.length === 0) {
-                    homeworkEl.style.display = 'none';
-                    emptyEl.style.display = 'block';
+                    if (originalItems.length === 0) {
+                        // 没有原始数据
+                        homeworkEl.style.display = 'none';
+                        emptyEl.style.display = 'block';
+                        noResultsEl.style.display = 'none';
+                    } else {
+                        // 有原始数据但筛选无结果
+                        homeworkEl.style.display = 'none';
+                        emptyEl.style.display = 'none';
+                        noResultsEl.style.display = 'block';
+                    }
                 } else {
                     homeworkEl.style.display = 'block';
                     emptyEl.style.display = 'none';
+                    noResultsEl.style.display = 'none';
                     homeworkEl.innerHTML = '';
 
                     const section = document.createElement('div');
@@ -692,7 +894,7 @@
                         const nameContainer = document.createElement('div');
                         nameContainer.className = 'name-container';
 
-                        // 时间提示（显示在作业名称上方）
+                        // 时间提示
                         const timeHint = getTimeHint(item);
                         if (timeHint) {
                             const hintDiv = document.createElement('div');
@@ -757,6 +959,13 @@
                 }
             }
 
+            // 应用筛选并重新渲染
+            function applyFilter() {
+                filteredItems = filterItems();
+                renderHomework(filteredItems);
+            }
+
+            // 加载作业数据
             function loadHomework() {
                 setLoadingState(true);
                 
@@ -776,22 +985,76 @@
                         return response.text();
                     })
                     .then(text => {
-                        const items = parseHomework(text);
-                        renderHomework(items);
+                        originalItems = parseHomework(text);
+                        filteredItems = [...originalItems];
+                        
+                        // 更新学科筛选下拉框
+                        updateSubjectFilter(originalItems);
+                        
+                        // 重置筛选状态
+                        currentSubject = 'all';
+                        currentSearchTerm = '';
+                        document.getElementById('searchInput').value = '';
+                        
+                        renderHomework(filteredItems);
                     })
                     .catch(error => {
                         console.warn('读取 homework.txt 失败，视为空文件。', error);
+                        originalItems = [];
+                        filteredItems = [];
                         renderHomework([]);
                     });
             }
+
+            function setLoadingState(isLoading) {
+                const loadingEl = document.getElementById('loadingContainer');
+                const homeworkEl = document.getElementById('homeworkContainer');
+                const emptyEl = document.getElementById('emptyContainer');
+                const noResultsEl = document.getElementById('noResultsContainer');
+                
+                if (isLoading) {
+                    loadingEl.style.display = 'block';
+                    homeworkEl.style.display = 'none';
+                    emptyEl.style.display = 'none';
+                    noResultsEl.style.display = 'none';
+                }
+            }
+
+            // 页面加载完成后执行
+            window.addEventListener('load', loadHomework);
 
             // 绑定刷新按钮事件
             document.getElementById('refreshBtn').addEventListener('click', function() {
                 loadHomework();
             });
 
-            // 页面加载完成后执行
-            window.addEventListener('load', loadHomework);
+            // 绑定查找按钮事件
+            document.getElementById('findBtn').addEventListener('click', function() {
+                const searchContainer = document.getElementById('searchContainer');
+                showSearch = !showSearch;
+                searchContainer.style.display = showSearch ? 'block' : 'none';
+                
+                if (showSearch) {
+                    document.getElementById('searchInput').focus();
+                } else {
+                    // 隐藏搜索框时清空搜索词
+                    currentSearchTerm = '';
+                    document.getElementById('searchInput').value = '';
+                    applyFilter();
+                }
+            });
+
+            // 绑定搜索输入事件
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                currentSearchTerm = e.target.value.trim();
+                applyFilter();
+            });
+
+            // 绑定学科筛选事件
+            document.getElementById('subjectFilter').addEventListener('change', function(e) {
+                currentSubject = e.target.value;
+                applyFilter();
+            });
         })();
     </script>
 </body>
