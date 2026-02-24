@@ -1,8 +1,8 @@
 """
 sub=数学
 name=录制讲题视频
-link=https://wj.qq.com/s2/25680318/44e9/
-more=本作业提交入口将在2026年2月25日00:00关闭，请及时提交。
+link=
+more=当前链接已满，请放备用链接
 more_colour[255,0,0]
 start_time=2025/1/1 00:00
 end_time=2026/2/25 00:00
@@ -10,8 +10,8 @@ end_time=2026/2/25 00:00
 """
 sub=数学
 name=录制讲题视频（备用链接）
-link=https://send2me.cn/hU983hXi/TJOKFgqcJRprGA
-more=如果第一个链接塞爆了就放交个链接
+link=https://account.wps.cn/v1/mobilelogin?cb=https%3A%2F%2Fyunbiz.wps.cn%2Fc%2Fcollect%2Fc3OG8DI77C9
+more=由于第一个腾讯文档收集链接塞满了，请放到这个链接
 more_colour[0,150,0]
 start_time=2025/1/1 00:00
 end_time=2026/2/25 00:00
