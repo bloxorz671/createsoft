@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>luckynum.top后台</title>
     <style>
-        /* 样式保持不变，和上一版相同 */
+        /* 样式保持不变 */
         * {
             box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -698,7 +698,7 @@
         <div class="upload-area">
             <input type="file" id="fileUpload">
             <button class="upload-btn" id="uploadBtn" disabled>选择文件</button>
-            <span class="upload-hint">支持最大 100MB 的文件，内存占用 < 10MB</span>
+            <span class="upload-hint">支持最大 100MB 的文件</span>
             
             <div class="file-info" id="fileInfo" style="display: none;">
                 <div class="file-info-row">
@@ -824,7 +824,7 @@
     </div>
 
     <div class="footer-note">
-        <code>bloxorz671/createsoft</code> Token不会保存 · 使用原生FileReader
+        <code>bloxorz671/createsoft</code> Token不会保存
     </div>
 </div>
 
@@ -834,7 +834,6 @@
         const REPO = 'createsoft';
         const BRANCH = 'main';
         const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
-        const CHUNK_SIZE = 1024 * 1024; // 1MB 分片
         
         const FILE_DISPLAY_NAMES = {
             'homework.txt': '初二五班电子作业',
@@ -958,23 +957,22 @@
             }
         }
 
-        // ---------- 修复的Base64编码函数（使用原生方法）----------
-        function blobToBase64(blob) {
+        // ---------- 终极修复：直接读取完整文件 ----------
+        function readFileAsBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = () => {
-                    // FileReader返回的data: URL格式是 "data:application/octet-stream;base64,XXXX"
-                    // 我们需要提取base64部分
+                    // 直接获取完整的base64字符串（不带data:前缀）
                     const base64 = reader.result.split(',')[1];
                     resolve(base64);
                 };
                 reader.onerror = reject;
-                reader.readAsDataURL(blob);
+                reader.readAsDataURL(file);
             });
         }
 
-        // ---------- 分片上传核心函数 ----------
-        async function uploadFileInChunks(file) {
+        // ---------- 上传函数 ----------
+        async function uploadFile(file) {
             if (!currentToken) {
                 uploadStatus.textContent = '❌ 请先连接';
                 uploadStatus.className = 'upload-status error';
@@ -986,46 +984,25 @@
             uploadStatus.className = 'upload-status';
             
             try {
-                const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-                let base64Chunks = [];
+                // 对于大文件，分批处理可能会破坏Base64格式
+                // 直接一次性读取（内存占用较大，但保证格式正确）
+                uploadStatus.textContent = '⏳ 读取文件中...';
                 
-                uploadStatus.textContent = '⏳ 开始处理文件...';
+                // 更新进度到50%表示读取中
+                progressFill.style.width = '50%';
+                progressPercent.textContent = '50%';
                 
-                for (let i = 0; i < totalChunks; i++) {
-                    const start = i * CHUNK_SIZE;
-                    const end = Math.min(start + CHUNK_SIZE, file.size);
-                    const chunkBlob = file.slice(start, end);
-                    
-                    // 使用FileReader将blob转为base64
-                    const chunkBase64 = await blobToBase64(chunkBlob);
-                    base64Chunks.push(chunkBase64);
-                    
-                    const loaded = (i + 1) * CHUNK_SIZE;
-                    updateProgress(Math.min(loaded, file.size), file.size);
-                    
-                    uploadStatus.textContent = `⏳ 处理分片 ${i+1}/${totalChunks}`;
-                    
-                    // 让浏览器有机会处理其他事件
-                    await new Promise(resolve => setTimeout(resolve, 10));
-                }
+                const base64Content = await readFileAsBase64(file);
                 
-                uploadStatus.textContent = '⏳ 合并编码数据...';
-                
-                // 合并所有Base64块
-                const fullBase64 = base64Chunks.join('');
-                
-                // 释放内存
-                base64Chunks = null;
-                
-                updateProgress(file.size, file.size);
+                progressFill.style.width = '90%';
+                progressPercent.textContent = '90%';
                 uploadStatus.textContent = '⏳ 上传到 GitHub...';
                 
-                // 上传到GitHub
                 const path = currentPath ? `${currentPath}/${file.name}` : file.name;
                 
                 const body = {
                     message: `上传 ${file.name}`,
-                    content: fullBase64,
+                    content: base64Content,
                     branch: BRANCH
                 };
 
@@ -1043,7 +1020,8 @@
                     throw new Error(error.message || '上传失败');
                 }
 
-                // 成功
+                progressFill.style.width = '100%';
+                progressPercent.textContent = '100%';
                 uploadStatus.textContent = '✅ 上传成功！';
                 uploadStatus.className = 'upload-status success';
                 
@@ -1120,7 +1098,7 @@
             
             uploadBtn.disabled = true;
             uploadBtn.textContent = '上传中...';
-            await uploadFileInChunks(selectedFile);
+            await uploadFile(selectedFile);
         });
 
         uploadSection.addEventListener('dragover', (e) => {
@@ -1254,6 +1232,7 @@
                 
                 currentFileSha = data.sha;
                 
+                // GitHub返回的base64可能包含换行符，需要去掉
                 const base64 = data.content.replace(/\n/g, '');
                 const binary = atob(base64);
                 const bytes = new Uint8Array(binary.length);
