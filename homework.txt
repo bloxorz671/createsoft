@@ -10,7 +10,7 @@ end_time=2026/2/25 00:00
 """
 sub=数学
 name=录制讲题视频（备用链接）
-link=https://wj.qq.com/s2/25680318/44e9/
+link=https://send2me.cn/hU983hXi/TJOKFgqcJRprGA
 more=如果第一个链接塞爆了就放交个链接
 more_colour[0,255,0]
 start_time=2025/1/1 00:00
