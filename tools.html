@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>更多工具</title>
     <style>
-        /* 干净简洁的全局样式 —— 无任何 emoji，纯黑白灰 + 极淡蓝点缀 */
         * {
             margin: 0;
             padding: 0;
@@ -14,7 +13,7 @@
 
         body {
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: #f8fafc;   /* 极浅灰蓝底 */
+            background: #f8fafc;
             min-height: 100vh;
             padding: 2rem 1.5rem;
             display: flex;
@@ -27,10 +26,9 @@
             width: 100%;
         }
 
-        /* 大标题 —— 更多工具，纯粹文字 */
         .page-title {
             font-size: 2.8rem;
-            font-weight: 500;        /* 中等字重，干净利落 */
+            font-weight: 500;
             letter-spacing: -0.02em;
             color: #1a1e24;
             margin-bottom: 0.5rem;
@@ -38,7 +36,6 @@
             border-bottom: 2px solid rgba(0,0,0,0.05);
         }
 
-        /* 大标题下方的小标题 */
         .sub-title {
             font-size: 1.2rem;
             font-weight: 400;
@@ -47,14 +44,12 @@
             margin-top: 0.2rem;
         }
 
-        /* 网格卡片区 */
         .tools-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.8rem;
         }
 
-        /* 卡片 — 无阴影、轻边框、纯白底 */
         .tool-card {
             background: #ffffff;
             border: 1px solid #e2e8f0;
@@ -71,66 +66,99 @@
             background: #fdfdfd;
         }
 
-        /* 图标区域 —— 完全由用户提供的图片链接决定，无emoji后备 */
         .icon-area {
             width: 56px;
             height: 56px;
-            margin-bottom: 1.2rem;
-            border-radius: 16px;      /* 微圆角，不抢眼 */
-            background: #f1f4f9;       /* 仅当图片缺失或加载前的占位 */
+            margin-bottom: 1rem;
+            border-radius: 16px;
+            background: #f1f4f9;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0;              /* 避免占位文字 */
+            font-size: 0;
         }
         .icon-area img {
             max-width: 100%;
             max-height: 100%;
-            border-radius: 14px;        /* 图片本身也带点圆润 */
+            border-radius: 14px;
             object-fit: contain;
         }
 
-        /* 工具名称 */
+        /* 标题行：名称 + type 标签 */
+        .title-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-bottom: 0.25rem;
+            width: 100%;
+        }
+
         .tool-name {
             font-size: 1.5rem;
             font-weight: 520;
             line-height: 1.3;
             color: #0b1e2e;
-            margin-bottom: 0.25rem;
         }
 
-        /* 简介 —— 名字下方小字 */
+        /* 类型标签 */
+        .type-badge {
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            display: inline-block;
+            background-color: #e2e8f0; /* 默认灰 */
+            color: #1e293b;
+        }
+
         .tool-intro {
             font-size: 0.9rem;
             color: #5e6f8d;
             line-height: 1.45;
             margin-bottom: 1.2rem;
-            flex: 1;                   /* 把底部按钮往下推 */
+            width: 100%;
         }
 
-        /* 启动按钮 —— 干净、无边框、悬浮淡背景 */
-        .tool-link {
+        /* 按钮组 */
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            margin-top: 0.5rem;
+            width: 100%;
+        }
+
+        .tool-btn {
             display: inline-block;
-            padding: 0.55rem 1.4rem;
+            padding: 0.55rem 1.2rem;
             background: transparent;
             border: 1px solid #dde3ed;
             border-radius: 40px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 450;
             color: #1e2b3f;
             text-decoration: none;
             transition: background 0.15s, border-color 0.15s;
-            margin-top: 0.5rem;
-            align-self: flex-start;    /* 左对齐，不拉伸 */
+            cursor: pointer;
         }
 
-        .tool-link:hover {
+        .tool-btn:hover {
             background: #eaf0f8;
             border-color: #9fb0cc;
             color: #0a1a2a;
         }
 
-        /* 无数据 / 加载中提示 */
+        .btn-disabled {
+            opacity: 0.6;
+            pointer-events: none;
+            background: #f1f5f9;
+            border-color: #d1d9e6;
+            color: #6b7a93;
+        }
+
         .status-message {
             grid-column: 1 / -1;
             text-align: center;
@@ -145,12 +173,8 @@
 </head>
 <body>
     <div class="container">
-        <!-- 大标题：更多工具 (无任何装饰) -->
         <h1 class="page-title">更多工具</h1>
-        <!-- 大标题下方增加小标题 -->
         <div class="sub-title">我们开发的其他小工具</div>
-
-        <!-- 工具卡片网格 -->
         <div id="toolsGrid" class="tools-grid">
             <div class="status-message">🔍 正在加载工具列表……</div>
         </div>
@@ -158,47 +182,105 @@
 
     <script>
         (function() {
-            // --- 配置 ---
-            const DATA_URL = 'https://luckynum.top/tools.txt';  // 您指定的数据地址
+            const DATA_URL = 'https://luckynum.top/tools.txt';
 
-            // --- 工具函数：解析每一条工具数据 (严格按题目格式) ---
+            // 解析 type_colour[R,G,B] 格式，返回 [r,g,b] 数组
+            function parseTypeColour(str) {
+                const match = str.match(/type_colour\[(\d+),\s*(\d+),\s*(\d+)\]/);
+                if (match) {
+                    return [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
+                }
+                return null;
+            }
+
+            // 计算亮度 (0-255)
+            function getLuminance(r, g, b) {
+                return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            }
+
+            // 根据背景色生成合适的文字颜色
+            function getTextColorForBg(r, g, b) {
+                const lum = getLuminance(r, g, b);
+                
+                // 纯白或纯黑
+                if ((r === 255 && g === 255 && b === 255) || (r === 0 && g === 0 && b === 0)) {
+                    return '#6b7280'; // 灰色
+                }
+                
+                // 浅色背景 -> 深色文字
+                if (lum > 180) {
+                    return `rgb(${Math.max(0, r-80)}, ${Math.max(0, g-80)}, ${Math.max(0, b-80)})`;
+                } 
+                // 深色背景 -> 浅色文字
+                else {
+                    return `rgb(${Math.min(255, r+80)}, ${Math.min(255, g+80)}, ${Math.min(255, b+80)})`;
+                }
+            }
+
             function parseToolEntry(block) {
-                // 去除首尾多余空白，并按行拆分
                 const lines = block.split('\n').map(line => line.trim()).filter(line => line !== '');
-                let name = '';
-                let icon = '';
-                let link = '';
-                let introduction = '';
+                let tool = {
+                    name: '',
+                    icon: '',
+                    link: '',
+                    introduction: '',
+                    type: '',
+                    typeColour: null,
+                    download: '',
+                    downloadLink: ''
+                };
 
                 for (let line of lines) {
-                    // 使用正则提取 字段名=字段值 (值可能包含空格、标点，但不含emoji)
-                    // 注意: 字段名只能是 name, icon, link, introduction
-                    const match = line.match(/^(name|icon|link|introduction)\s*=\s*(.*)$/);
+                    // 处理 type_colour[R,G,B] 特殊格式
+                    if (line.includes('type_colour[')) {
+                        const colourMatch = line.match(/type_colour\[(\d+,\s*\d+,\s*\d+)\]/);
+                        if (colourMatch) {
+                            tool.typeColour = colourMatch[1].split(',').map(Number);
+                        }
+                        continue;
+                    }
+
+                    const match = line.match(/^(name|icon|link|introduction|type|download|download_link)\s*=\s*(.*)$/);
                     if (match) {
                         const field = match[1];
-                        const value = match[2].trim();   // 保留原始字符，但不含emoji
-                        if (field === 'name') name = value;
-                        else if (field === 'icon') icon = value;
-                        else if (field === 'link') link = value;
-                        else if (field === 'introduction') introduction = value;
+                        const value = match[2].trim();
+                        if (field === 'name') tool.name = value;
+                        else if (field === 'icon') tool.icon = value;
+                        else if (field === 'link') tool.link = value;
+                        else if (field === 'introduction') tool.introduction = value;
+                        else if (field === 'type') tool.type = value;
+                        else if (field === 'download') tool.download = value;
+                        else if (field === 'download_link') tool.downloadLink = value;
                     }
                 }
 
-                // 只返回至少包含name的记录（题目中name应该都有，但防呆）
-                return (name || icon || link || introduction) ? { name, icon, link, introduction } : null;
+                // 只有至少有一个有效字段才返回
+                return (tool.name || tool.icon || tool.link || tool.introduction || tool.type || tool.download || tool.downloadLink) ? tool : null;
             }
 
-            // --- 主函数：获取并渲染 ---
+            // 强制下载文件
+            function downloadFile(filename) {
+                // 构建完整路径（同目录）
+                const baseUrl = DATA_URL.substring(0, DATA_URL.lastIndexOf('/') + 1);
+                const fileUrl = baseUrl + filename;
+                
+                const a = document.createElement('a');
+                a.href = fileUrl;
+                a.download = filename; // 强制下载
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+
             async function loadAndRenderTools() {
                 const grid = document.getElementById('toolsGrid');
                 if (!grid) return;
 
                 try {
-                    // 1. 发起请求 (设置简单头部避免缓存)
                     const response = await fetch(DATA_URL, {
                         method: 'GET',
                         headers: { 'Cache-Control': 'no-cache' },
-                        mode: 'cors'  // 注意：如果跨域未配置可能会失败，届时会catch
+                        mode: 'cors'
                     });
 
                     if (!response.ok) {
@@ -207,65 +289,90 @@
 
                     const text = await response.text();
 
-                    // 2. 解析文本：按每对 """ 分割 (假定格式严格)
-                    // 分割前先处理：可能文件开头有空白，用正则全局匹配 """(.*?)"""  (非贪婪)
                     const tripleQuoteRegex = /"""(.*?)"""/gs;
                     let matches = [];
                     let match;
                     while ((match = tripleQuoteRegex.exec(text)) !== null) {
-                        // match[1] 是三个引号之间的内容
                         if (match[1].trim().length > 0) {
                             matches.push(match[1].trim());
                         }
                     }
 
-                    // 如果没有匹配到任何三引号块，尝试另一种朴素分割：按连续两个换行？但忠实于题目描述就用三引号
-                    // 万一用户文件内没有使用三个引号，可以加后备逻辑，但这里严格按题目给的格式
                     let tools = [];
                     if (matches.length === 0) {
-                        // 极简后备：如果完全没匹配到"""，就把整个文本当做一个块试试？但很可能格式不对。
-                        // 为了稳健，尝试按空行分割后再解析行内键值？但题目明确用"""包裹，所以保留提示。
                         console.warn('未找到三引号包裹的数据块，尝试按空行分割处理（兼容模式）');
-                        // 简易后备：按连续两个以上换行分割
                         const blocks = text.split(/\n\s*\n\s*\n/).filter(b => b.trim().length > 0);
                         for (let blk of blocks) {
                             const tool = parseToolEntry(blk);
                             if (tool) tools.push(tool);
                         }
                     } else {
-                        // 标准情况：解析每个三引号内的内容
                         for (let content of matches) {
                             const tool = parseToolEntry(content);
                             if (tool) tools.push(tool);
                         }
                     }
 
-                    // 3. 渲染卡片
                     if (tools.length === 0) {
                         grid.innerHTML = `<div class="status-message">📋 暂无有效工具数据，请检查 tools.txt 格式</div>`;
                         return;
                     }
 
-                    // 生成所有卡片 HTML (保证没有任何 emoji 字符)
                     let cardsHtml = '';
                     for (let t of tools) {
-                        // 对每个字段进行转义，防止XSS，同时保留空格和字符（但不引入emoji）
                         const safeName = escapeHtml(t.name || '未命名工具');
-                        const safeIntro = escapeHtml(t.introduction || ' ');  // 若无简介就放一个空格占位
+                        const safeIntro = escapeHtml(t.introduction || ' ');
                         const safeIcon = t.icon ? escapeHtml(t.icon) : '';
-                        const safeLink = t.link ? escapeHtml(t.link) : '#';   // 没链接就置空
+                        
+                        // 构建按钮组
+                        let buttons = [];
+                        
+                        // link 按钮
+                        if (t.link) {
+                            buttons.push(`<a href="${escapeHtml(t.link)}" class="tool-btn" target="_blank" rel="noopener noreferrer">立即打开</a>`);
+                        }
+                        
+                        // download 按钮
+                        if (t.download) {
+                            // 使用 onclick 触发下载，不能直接用 href
+                            buttons.push(`<button class="tool-btn" onclick="downloadFile('${escapeHtml(t.download)}')">立即下载</button>`);
+                        } else if (t.downloadLink) {
+                            buttons.push(`<a href="${escapeHtml(t.downloadLink)}" class="tool-btn" target="_blank" rel="noopener noreferrer">立即下载</a>`);
+                        }
+                        
+                        // 如果没有按钮
+                        if (buttons.length === 0) {
+                            buttons.push(`<span class="tool-btn btn-disabled">暂未开放</span>`);
+                        }
 
-                        // 卡片结构 —— 完全按照 name / icon / link / introduction 显示
-                        // 注意：icon 是图片网址，如果网址无效或无法加载会显示背景色占位，不会出现 emoji
-                        // 额外：如果icon为空，就不输出img，只显示纯色块(无文字)
+                        // 处理 type 标签样式
+                        let typeBadgeHtml = '';
+                        if (t.type) {
+                            let bgColor = '#e2e8f0';
+                            let textColor = '#1e293b';
+                            
+                            if (t.typeColour && Array.isArray(t.typeColour) && t.typeColour.length === 3) {
+                                const [r, g, b] = t.typeColour;
+                                bgColor = `rgb(${r}, ${g}, ${b})`;
+                                textColor = getTextColorForBg(r, g, b);
+                            }
+                            
+                            typeBadgeHtml = `<span class="type-badge" style="background-color: ${bgColor}; color: ${textColor};">${escapeHtml(t.type)}</span>`;
+                        }
+
                         cardsHtml += `
                             <div class="tool-card">
                                 <div class="icon-area">
                                     ${safeIcon ? `<img src="${safeIcon}" alt="${safeName} icon" loading="lazy" onerror="this.style.display='none'">` : ''}
                                 </div>
-                                <div class="tool-name">${safeName}</div>
+                                <div class="title-row">
+                                    <span class="tool-name">${safeName}</span>
+                                    ${typeBadgeHtml}
+                                </div>
                                 <div class="tool-intro">${safeIntro}</div>
-                                <a href="${safeLink}" class="tool-link" target="_blank" rel="noopener noreferrer">立即打开</a>
+                                <div class="button-group">
+                                    ${buttons.join('')}
+                                </div>
                             </div>
                         `;
                     }
@@ -274,13 +381,11 @@
 
                 } catch (error) {
                     console.error('加载或解析失败:', error);
-                    // 友好显示错误（仍然不带 emoji，只用文字说明）
-                    let errorMsg = `加载失败: ${error.message}。请确保：<br>1. 地址 ${DATA_URL} 可访问且允许跨域<br>2. 文件内容严格遵循格式：每对"""包裹一个工具，包含 name= icon= link= introduction=`;
+                    let errorMsg = `加载失败: ${error.message}。请确保：<br>1. 地址 ${DATA_URL} 可访问且允许跨域<br>2. 文件内容严格遵循格式：每对"""包裹一个工具，包含 name= icon= link= introduction= type= type_colour[R,G,B] download= download_link=`;
                     grid.innerHTML = `<div class="status-message" style="color:#5f4b3a; background:#fef4f0;">⚠️ ${errorMsg}</div>`;
                 }
             }
 
-            // 极简的HTML转义函数 (防止注入，同时保留文字干净)
             function escapeHtml(unsafe) {
                 return unsafe
                     .replace(/&/g, "&amp;")
@@ -290,7 +395,19 @@
                     .replace(/'/g, "&#039;");
             }
 
-            // 执行
+            // 将 downloadFile 挂载到全局，以便 onclick 调用
+            window.downloadFile = function(filename) {
+                const baseUrl = DATA_URL.substring(0, DATA_URL.lastIndexOf('/') + 1);
+                const fileUrl = baseUrl + filename;
+                
+                const a = document.createElement('a');
+                a.href = fileUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+
             loadAndRenderTools();
         })();
     </script>
