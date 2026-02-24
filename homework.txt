@@ -1,11 +1,11 @@
 """
 sub=数学
 name=录制讲题视频
-link=
+link=https://wj.qq.com/s2/25680318/44e9/
 more=当前链接已满，请放备用链接
 more_colour[255,0,0]
-start_time=2025/1/1 00:00
-end_time=2026/2/25 00:00
+start_time=1/1/1 00:00
+end_time=1916/1/1 00:00
 """
 """
 sub=数学
