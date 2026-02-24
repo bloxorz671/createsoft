@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>luckynum.top后台</title>
-    <!-- 百度统计代码（已部署） -->
+    <!-- 百度统计代码（保留） -->
     <script>
     var _hmt = _hmt || [];
     (function() {
@@ -43,11 +43,11 @@
             font-weight: 500;
         }
         
-        /* 新增：浏览量卡片 */
-        .stats-card {
-            background: linear-gradient(135deg, #1976d2, #64b5f6);
+        /* HITS 统计卡片 */
+        .hits-card {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
             border-radius: 12px;
-            padding: 24px;
+            padding: 20px;
             margin-bottom: 30px;
             color: white;
             display: flex;
@@ -55,66 +55,56 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 20px;
-            box-shadow: 0 4px 20px rgba(25,118,210,0.3);
+            box-shadow: 0 4px 20px rgba(44,62,80,0.3);
         }
-        .stats-left {
+        .hits-left {
             display: flex;
             align-items: center;
             gap: 20px;
         }
-        .stats-icon {
-            font-size: 48px;
-            background: rgba(255,255,255,0.2);
-            width: 80px;
-            height: 80px;
-            border-radius: 40px;
+        .hits-icon {
+            font-size: 40px;
+            background: rgba(255,255,255,0.15);
+            width: 70px;
+            height: 70px;
+            border-radius: 35px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .stats-info h3 {
+        .hits-info h3 {
             font-size: 18px;
             font-weight: 400;
-            margin: 0 0 8px 0;
+            margin: 0 0 10px 0;
             opacity: 0.9;
         }
-        .stats-numbers {
+        .hits-badges {
             display: flex;
-            gap: 40px;
+            gap: 20px;
             flex-wrap: wrap;
+            align-items: center;
         }
-        .stat-item {
-            text-align: center;
+        .hits-badges img {
+            height: 24px;
+            border-radius: 12px;
         }
-        .stat-value {
-            font-size: 32px;
-            font-weight: 600;
-            line-height: 1.2;
-        }
-        .stat-label {
-            font-size: 14px;
-            opacity: 0.8;
-        }
-        .stats-note {
+        .hits-note {
             font-size: 13px;
             opacity: 0.7;
             margin-top: 8px;
         }
-        .refresh-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.5);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .refresh-btn:hover {
-            background: rgba(255,255,255,0.3);
+        
+        /* 百度统计备用（保留但不显示随机数） */
+        .baidu-stats {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #666;
         }
         
         .token-section {
@@ -759,41 +749,29 @@
 <div class="container">
     <h1>luckynum.top后台</h1>
 
-    <!-- 新增：浏览量卡片（使用百度统计图片显示） -->
-    <div class="stats-card">
-        <div class="stats-left">
-            <div class="stats-icon">📊</div>
-            <div class="stats-info">
-                <h3>网站访问统计</h3>
-                <div class="stats-numbers">
-                    <div class="stat-item">
-                        <div class="stat-value" id="todayPV">-</div>
-                        <div class="stat-label">今日浏览量</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="todayUV">-</div>
-                        <div class="stat-label">今日访客</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="totalPV">-</div>
-                        <div class="stat-label">总浏览量</div>
-                    </div>
+    <!-- HITS 真实统计卡片 -->
+    <div class="hits-card">
+        <div class="hits-left">
+            <div class="hits-icon">👁️</div>
+            <div class="hits-info">
+                <h3>网站访问统计 (HITS)</h3>
+                <div class="hits-badges">
+                    <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fbloxorz671.github.io%2Fcreatesoft%2Fdevsetting.html&count_bg=%233498db&title_bg=%232c3e50&title=今日&edge_flat=false"/>
+                    <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fbloxorz671.github.io%2Fcreatesoft%2Fdevsetting.html&count_bg=%232ecc71&title_bg=%232c3e50&title=累计&edge_flat=false"/>
                 </div>
-                <div class="stats-note" id="statsNote">数据来自百度统计</div>
+                <div class="hits-note">每刷新一次增加计数，数据实时更新</div>
             </div>
         </div>
         <div>
-            <button class="refresh-btn" onclick="refreshStats()">
-                🔄 刷新
-            </button>
+            <a href="https://hits.seeyoufarm.com" target="_blank" style="color: white; opacity: 0.8; font-size: 13px; text-decoration: none;">Hits</a>
         </div>
     </div>
 
-    <!-- 百度统计官方图片徽章（直接显示统计数据） -->
-    <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 20px; padding: 10px; background: #f5f5f5; border-radius: 8px;">
-        <img src="https://hm.baidu.com/hm.svg?site=efaf77a4ecf8113659f6e5c8ee6857fd&type=uv" alt="百度统计访客数" style="height: 24px;">
-        <img src="https://hm.baidu.com/hm.svg?site=efaf77a4ecf8113659f6e5c8ee6857fd&type=pv" alt="百度统计浏览量" style="height: 24px;">
-        <img src="https://hm.baidu.com/hm.svg?site=efaf77a4ecf8113659f6e5c8ee6857fd&type=custom&name=今日" alt="百度统计今日数据" style="height: 24px;">
+    <!-- 百度统计备用（仅保留说明） -->
+    <div class="baidu-stats">
+        <span>📊 百度统计已部署</span>
+        <span>|</span>
+        <span>数据在后台查看</span>
     </div>
 
     <div class="token-section">
@@ -967,35 +945,6 @@
         const cancelFolderDelete = document.getElementById('cancelFolderDelete');
         const confirmFolderDelete = document.getElementById('confirmFolderDelete');
         const deleteFolderMessage = document.getElementById('deleteFolderMessage');
-
-        // 浏览量相关
-        const todayPV = document.getElementById('todayPV');
-        const todayUV = document.getElementById('todayUV');
-        const totalPV = document.getElementById('totalPV');
-        const statsNote = document.getElementById('statsNote');
-
-        // 模拟刷新统计数据（实际使用时可以替换为真实API）
-        window.refreshStats = function() {
-            // 生成随机数据模拟浏览量
-            const randomPV = Math.floor(Math.random() * 50) + 20;
-            const randomUV = Math.floor(Math.random() * 30) + 10;
-            const randomTotal = Math.floor(Math.random() * 500) + 200;
-            
-            todayPV.textContent = randomPV;
-            todayUV.textContent = randomUV;
-            totalPV.textContent = randomTotal;
-            statsNote.textContent = `数据来自百度统计 · 最后更新：${new Date().toLocaleTimeString()}`;
-        };
-
-        // 页面加载时显示一次
-        setTimeout(() => {
-            refreshStats();
-        }, 500);
-
-        // 每30秒自动刷新
-        setInterval(() => {
-            refreshStats();
-        }, 30000);
 
         function setStatus(msg, type = 'info') {
             statusDiv.textContent = msg;
