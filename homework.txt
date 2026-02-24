@@ -5,10 +5,3 @@ link=https://qr03.cn/A8JkXm
 more=今天是开放提交最后一天，请尽快提交。
 more_colour[255,0,0]
 """
-"""
-sub=🐔
-name=杀🐔
-link=https://qr03.cn/A8JkXm
-more=今天是开放杀🐔最后一天，请尽快杀
-more_colour[255,0,0]
-"""
