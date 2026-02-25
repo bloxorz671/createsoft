@@ -31,7 +31,154 @@
             position: relative;
         }
 
-        /* 头部区域 - 只包含标题 */
+        /* 滚动公告条样式 */
+        .notice-board {
+            background-color: #fff9e6;  /* 浅黄色底 */
+            color: #b45309;  /* 深黄色字 */
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid #fcd34d;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .notice-board-content {
+            display: inline-block;
+            animation: scrollNotice 15s linear infinite;
+            padding-left: 100%;
+        }
+
+        @keyframes scrollNotice {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* 暂停滚动效果（鼠标悬停时） */
+        .notice-board:hover .notice-board-content {
+            animation-play-state: paused;
+        }
+
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal {
+            background-color: white;
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 90%;
+            width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            margin-bottom: 1rem;
+            padding-right: 2rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #1e293b;
+            line-height: 1.3;
+        }
+
+        .modal-content {
+            font-size: 1.1rem;
+            color: #334155;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            white-space: pre-wrap;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: #f1f5f9;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #475569;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+            transform: scale(1.1);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn:hover {
+            background: #112b44;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .modal-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* 头部区域 */
         .header {
             margin-bottom: 1rem;
         }
@@ -46,7 +193,7 @@
             text-align: center;
         }
 
-        .notice {
+        .notice-text {
             color: #b91c1c;
             font-size: 1.1rem;
             font-weight: 400;
@@ -60,12 +207,21 @@
             border: 1px solid rgba(185, 28, 28, 0.15);
         }
 
-        /* 刷新按钮容器 - 居中显示 */
+        /* 工具栏 */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 auto 1.5rem auto;
+            width: 100%;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
         .refresh-container {
             display: flex;
             justify-content: center;
-            margin: 0 auto 1.5rem auto;
-            width: 100%;
+            flex: 1;
         }
 
         .refresh-btn {
@@ -105,7 +261,37 @@
             stroke-linejoin: round;
         }
 
-        /* 加载中提示样式 */
+        .subject-filter {
+            position: relative;
+            display: inline-block;
+        }
+
+        .subject-filter-select {
+            background: transparent;
+            color: #334155;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 0.6rem 1.8rem 0.6rem 0.8rem;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 0.2rem center;
+            background-size: 16px;
+            min-width: 100px;
+            text-align: right;
+        }
+
+        .subject-filter-select option {
+            background: white;
+            color: #1e293b;
+            padding: 0.5rem;
+        }
+
         .loading-message {
             text-align: center;
             font-size: 1.2rem;
@@ -117,7 +303,6 @@
             border: 1px solid #e2e8f0;
         }
 
-        /* 空状态提示样式 */
         .empty-message {
             text-align: center;
             font-size: 1.2rem;
@@ -130,7 +315,6 @@
             line-height: 1.6;
         }
 
-        /* 作业列表区域 */
         .homework-section {
             margin: 1rem 0 3rem 0;
             width: 100%;
@@ -158,7 +342,6 @@
             flex-wrap: wrap;
         }
 
-        /* 科目标签容器 */
         .subject-container {
             position: relative;
             margin-right: 0.5rem;
@@ -177,7 +360,6 @@
             white-space: nowrap;
         }
 
-        /* 科目颜色 */
         .subject-chinese {
             color: #c44536;
             border-left: 4px solid #e67e22;
@@ -199,7 +381,6 @@
             background: #f0f2f4;
         }
 
-        /* 作业名容器 */
         .name-container {
             position: relative;
             flex: 1;
@@ -209,7 +390,6 @@
             margin: 0 0.5rem;
         }
 
-        /* 时间提示 - 显示在作业名称上方 */
         .time-hint {
             font-size: 0.7rem;
             color: #64748b;
@@ -231,7 +411,6 @@
             line-height: 1.3;
         }
 
-        /* 按钮样式 */
         .homework-link {
             display: inline-block;
             background: #2c3e50;
@@ -259,7 +438,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* 禁用按钮样式 */
         .homework-link-disabled {
             display: inline-block;
             background: #94a3b8;
@@ -277,7 +455,6 @@
             pointer-events: none;
         }
 
-        /* UA 提示信息样式 */
         .ua-message {
             margin-top: 0.8rem;
             margin-left: 0;
@@ -307,7 +484,6 @@
             opacity: 0.6;
         }
 
-        /* 移动端竖屏优化 */
         @media (max-width: 600px) {
             body {
                 padding: 0 0.8rem;
@@ -317,18 +493,48 @@
                 font-size: 1.8rem;
             }
             
-            .notice {
+            .notice-text {
                 font-size: 1rem;
                 padding: 0.7rem 1rem;
                 margin: 1rem auto 0.8rem auto;
             }
             
-            .refresh-container {
+            .notice-board {
+                font-size: 0.9rem;
+                padding: 0.6rem 0.8rem;
+            }
+            
+            .toolbar {
+                flex-direction: row;
+                justify-content: center;
+                gap: 0.5rem;
                 margin: 0 auto 1.2rem auto;
             }
             
+            .refresh-container {
+                flex: 0 1 auto;
+            }
+            
             .refresh-btn {
-                padding: 0.5rem 1.8rem;
+                padding: 0.5rem 1.5rem;
+                font-size: 1rem;
+            }
+            
+            .subject-filter-select {
+                font-size: 1rem;
+                padding: 0.5rem 1.8rem 0.5rem 0.5rem;
+            }
+            
+            .modal {
+                padding: 1.5rem;
+                width: 90%;
+            }
+            
+            .modal-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .modal-content {
                 font-size: 1rem;
             }
             
@@ -390,14 +596,17 @@
             }
         }
 
-        /* 针对更小屏幕的优化 */
         @media (max-width: 380px) {
             h1 {
                 font-size: 1.5rem;
             }
             
             .refresh-btn {
-                padding: 0.4rem 1.5rem;
+                padding: 0.4rem 1.2rem;
+                font-size: 0.9rem;
+            }
+            
+            .subject-filter-select {
                 font-size: 0.9rem;
             }
             
@@ -416,25 +625,38 @@
 </head>
 <body>
     <div class="container">
-        <!-- 头部：只包含标题 -->
+        <!-- 滚动公告条容器 -->
+        <div id="noticeBoard" class="notice-board" style="display: none;">
+            <div class="notice-board-content" id="noticeBoardContent"></div>
+        </div>
+
+        <!-- 头部 -->
         <div class="header">
             <h1>初二五班电子作业提交</h1>
         </div>
 
         <!-- 提示文字 -->
-        <div class="notice">
+        <div class="notice-text">
             如果你不是广州市第四十一中学初二五班的学生，请退出本网页
         </div>
 
-        <!-- 刷新按钮 - 居中显示 -->
-        <div class="refresh-container">
-            <button class="refresh-btn" id="refreshBtn" title="刷新作业列表">
-                <svg viewBox="0 0 24 24" width="18" height="18">
-                    <path d="M23 4v6h-6M1 20v-6h6" />
-                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-                </svg>
-                刷新
-            </button>
+        <!-- 工具栏 -->
+        <div class="toolbar">
+            <div class="refresh-container">
+                <button class="refresh-btn" id="refreshBtn" title="刷新作业列表">
+                    <svg viewBox="0 0 24 24" width="18" height="18">
+                        <path d="M23 4v6h-6M1 20v-6h6" />
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                    </svg>
+                    刷新
+                </button>
+            </div>
+
+            <div class="subject-filter">
+                <select id="subjectFilter" class="subject-filter-select">
+                    <option value="all">所有学科</option>
+                </select>
+            </div>
         </div>
 
         <!-- 加载中提示容器 -->
@@ -445,10 +667,13 @@
         <!-- 作业内容将动态渲染到这里 -->
         <div id="homeworkContainer" style="display: none;"></div>
 
-        <!-- 空状态提示容器（无作业时显示） -->
+        <!-- 空状态提示容器 -->
         <div id="emptyContainer" class="empty-message" style="display: none;">
             当前暂无需要通过此网页提交的作业或管理员未发布新的作业
         </div>
+
+        <!-- 弹窗容器 -->
+        <div id="modalContainer" style="display: none;"></div>
 
         <div class="class-line" aria-hidden="true"></div>
     </div>
@@ -460,6 +685,8 @@
             
             // 存储原始作业数据
             let originalItems = [];
+            let filteredItems = [];
+            let currentSubject = 'all';
 
             // 解析RGB颜色字符串
             function parseRgbColor(colorStr) {
@@ -586,6 +813,85 @@
                 return items;
             }
 
+            // 解析通知文件
+            function parseNoticeFile(text) {
+                const lines = text.split('\n');
+                let head = '';
+                let message = '';
+                let board = '';
+                
+                for (let line of lines) {
+                    line = line.trim();
+                    if (line.startsWith('Head=')) {
+                        head = line.substring(5).trim();
+                    } else if (line.startsWith('Message=')) {
+                        message = line.substring(8).trim();
+                    } else if (line.startsWith('Board=')) {
+                        board = line.substring(6).trim();
+                    }
+                }
+                
+                return { head, message, board };
+            }
+
+            // 显示弹窗
+            function showModal(head, message) {
+                const modalContainer = document.getElementById('modalContainer');
+                
+                const modalOverlay = document.createElement('div');
+                modalOverlay.className = 'modal-overlay';
+                
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                
+                modal.innerHTML = `
+                    <button class="modal-close" id="modalCloseBtn">&times;</button>
+                    <div class="modal-header">
+                        <h2>${head || '通知'}</h2>
+                    </div>
+                    <div class="modal-content">
+                        ${message.replace(/\n/g, '<br>')}
+                    </div>
+                    <div class="modal-footer">
+                        <button class="modal-btn" id="modalConfirmBtn">知道了</button>
+                    </div>
+                `;
+                
+                modalOverlay.appendChild(modal);
+                modalContainer.innerHTML = '';
+                modalContainer.appendChild(modalOverlay);
+                modalContainer.style.display = 'block';
+                
+                // 绑定关闭事件
+                document.getElementById('modalCloseBtn').addEventListener('click', function() {
+                    modalContainer.style.display = 'none';
+                });
+                
+                document.getElementById('modalConfirmBtn').addEventListener('click', function() {
+                    modalContainer.style.display = 'none';
+                });
+                
+                // 点击遮罩层关闭
+                modalOverlay.addEventListener('click', function(e) {
+                    if (e.target === modalOverlay) {
+                        modalContainer.style.display = 'none';
+                    }
+                });
+            }
+
+            // 显示滚动公告
+            function showNoticeBoard(board) {
+                const noticeBoard = document.getElementById('noticeBoard');
+                const noticeBoardContent = document.getElementById('noticeBoardContent');
+                
+                if (board) {
+                    noticeBoardContent.textContent = board;
+                    noticeBoard.style.display = 'block';
+                } else {
+                    noticeBoard.style.display = 'none';
+                }
+            }
+
             function getSubjectClass(sub) {
                 if (!sub) return 'subject-other';
                 const subLower = sub.trim().toLowerCase();
@@ -622,7 +928,6 @@
                 return { disabled: false, text: '去提交' };
             }
 
-            // 获取时间提示
             function getTimeHint(item) {
                 const now = new Date();
                 
@@ -641,7 +946,54 @@
                 return null;
             }
 
-            // 渲染作业列表
+            function getUniqueSubjects(items) {
+                const subjects = new Set();
+                items.forEach(item => {
+                    if (item.sub) {
+                        subjects.add(item.sub);
+                    }
+                });
+                return Array.from(subjects).sort();
+            }
+
+            function updateSubjectFilter(items) {
+                const subjectFilter = document.getElementById('subjectFilter');
+                const subjects = getUniqueSubjects(items);
+                
+                const currentValue = subjectFilter.value;
+                
+                subjectFilter.innerHTML = '<option value="all">所有学科</option>';
+                subjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject;
+                    option.textContent = subject;
+                    subjectFilter.appendChild(option);
+                });
+                
+                if (subjects.includes(currentValue)) {
+                    subjectFilter.value = currentValue;
+                    currentSubject = currentValue;
+                } else {
+                    subjectFilter.value = 'all';
+                    currentSubject = 'all';
+                }
+            }
+
+            function filterItems() {
+                if (!originalItems.length) return [];
+                
+                if (currentSubject === 'all') {
+                    return [...originalItems];
+                } else {
+                    return originalItems.filter(item => item.sub === currentSubject);
+                }
+            }
+
+            function applyFilter() {
+                filteredItems = filterItems();
+                renderHomework(filteredItems);
+            }
+
             function renderHomework(items) {
                 const loadingEl = document.getElementById('loadingContainer');
                 const homeworkEl = document.getElementById('homeworkContainer');
@@ -652,8 +1004,20 @@
                 loadingEl.style.display = 'none';
 
                 if (items.length === 0) {
-                    homeworkEl.style.display = 'none';
-                    emptyEl.style.display = 'block';
+                    if (originalItems.length === 0) {
+                        homeworkEl.style.display = 'none';
+                        emptyEl.style.display = 'block';
+                    } else {
+                        homeworkEl.style.display = 'none';
+                        emptyEl.style.display = 'none';
+                        const tempDiv = document.createElement('div');
+                        tempDiv.className = 'empty-message';
+                        tempDiv.textContent = '没有找到该学科的作业';
+                        homeworkEl.parentNode.insertBefore(tempDiv, homeworkEl.nextSibling);
+                        setTimeout(() => {
+                            if (tempDiv.parentNode) tempDiv.remove();
+                        }, 2000);
+                    }
                 } else {
                     homeworkEl.style.display = 'block';
                     emptyEl.style.display = 'none';
@@ -672,7 +1036,6 @@
                         const rowDiv = document.createElement('div');
                         rowDiv.className = 'homework-row';
 
-                        // 科目标签容器
                         const subjectContainer = document.createElement('div');
                         subjectContainer.className = 'subject-container';
 
@@ -681,11 +1044,9 @@
                         subSpan.textContent = subjectDisplay;
                         subjectContainer.appendChild(subSpan);
 
-                        // 作业名容器
                         const nameContainer = document.createElement('div');
                         nameContainer.className = 'name-container';
 
-                        // 时间提示
                         const timeHint = getTimeHint(item);
                         if (timeHint) {
                             const hintDiv = document.createElement('div');
@@ -750,6 +1111,40 @@
                 }
             }
 
+            // 加载通知文件
+            function loadNoticeFile() {
+                const url = './homework-notice.txt?t=' + new Date().getTime();
+                
+                return fetch(url, {
+                    cache: 'no-store',
+                    headers: {
+                        'Pragma': 'no-cache',
+                        'Cache-Control': 'no-cache'
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`无法读取通知文件`);
+                        }
+                        return response.text();
+                    })
+                    .then(text => {
+                        const { head, message, board } = parseNoticeFile(text);
+                        
+                        // 显示滚动公告
+                        showNoticeBoard(board);
+                        
+                        // 显示弹窗（如果有Head）
+                        if (head) {
+                            showModal(head, message || '');
+                        }
+                    })
+                    .catch(error => {
+                        console.warn('读取 homework-notice.txt 失败', error);
+                        // 不显示任何通知
+                    });
+            }
+
             // 加载作业数据
             function loadHomework() {
                 setLoadingState(true);
@@ -771,11 +1166,19 @@
                     })
                     .then(text => {
                         originalItems = parseHomework(text);
-                        renderHomework(originalItems);
+                        filteredItems = [...originalItems];
+                        
+                        updateSubjectFilter(originalItems);
+                        
+                        currentSubject = 'all';
+                        document.getElementById('subjectFilter').value = 'all';
+                        
+                        renderHomework(filteredItems);
                     })
                     .catch(error => {
                         console.warn('读取 homework.txt 失败，视为空文件。', error);
                         originalItems = [];
+                        filteredItems = [];
                         renderHomework([]);
                     });
             }
@@ -792,13 +1195,28 @@
                 }
             }
 
+            // 初始化：同时加载通知文件和作业数据
+            function initialize() {
+                // 先加载通知文件
+                loadNoticeFile().finally(() => {
+                    // 再加载作业数据
+                    loadHomework();
+                });
+            }
+
             // 绑定刷新按钮事件
             document.getElementById('refreshBtn').addEventListener('click', function() {
                 loadHomework();
             });
 
+            // 绑定学科筛选事件
+            document.getElementById('subjectFilter').addEventListener('change', function(e) {
+                currentSubject = e.target.value;
+                applyFilter();
+            });
+
             // 页面加载完成后执行
-            window.addEventListener('load', loadHomework);
+            window.addEventListener('load', initialize);
         })();
     </script>
 </body>
