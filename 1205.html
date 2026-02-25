@@ -41,7 +41,7 @@
             border: 1px solid #fcd34d;
             font-size: 1rem;
             font-weight: 500;
-            text-align: center;
+            text-align: left;  /* 左对齐 */
             overflow: hidden;
             white-space: nowrap;
             position: relative;
@@ -68,7 +68,7 @@
             animation-play-state: paused;
         }
 
-        /* 弹窗样式 */
+        /* 弹窗样式 - 内容顶格显示 */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -125,6 +125,8 @@
             line-height: 1.6;
             margin-bottom: 2rem;
             white-space: pre-wrap;
+            text-align: left;  /* 左对齐，顶格 */
+            word-break: break-word;
         }
 
         .modal-close {
@@ -834,7 +836,7 @@
                 return { head, message, board };
             }
 
-            // 显示弹窗
+            // 显示弹窗 - 内容顶格左对齐
             function showModal(head, message) {
                 const modalContainer = document.getElementById('modalContainer');
                 
