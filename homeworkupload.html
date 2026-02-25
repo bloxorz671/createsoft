@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作业提交</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #f5f9ff 0%, #e6f0fa 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .card {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 40px;
+            padding: 40px 32px;
+            box-shadow: 0 20px 40px rgba(0,20,50,0.15);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        h2 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a3b5c;
+            margin-bottom: 32px;
+        }
+        .input-area {
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        .input-label {
+            font-size: 16px;
+            font-weight: 500;
+            color: #2d4b6e;
+            margin-bottom: 8px;
+            margin-left: 8px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 16px;
+            border: 2px solid #d0e0f0;
+            border-radius: 60px;
+            outline: none;
+            transition: 0.2s;
+            background: #f8fcff;
+        }
+        .input-field:focus {
+            border-color: #1a5f9c;
+            background: white;
+        }
+        .upload-area {
+            background: #f2f8ff;
+            border: 2px dashed #9bb9da;
+            border-radius: 30px;
+            padding: 36px 20px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .upload-area:hover {
+            background: #e5f0ff;
+            border-color: #1a5f9c;
+        }
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .upload-text {
+            font-size: 18px;
+            font-weight: 500;
+            color: #1a3b5c;
+        }
+        .upload-hint {
+            font-size: 14px;
+            color: #5f7d9c;
+            margin-top: 8px;
+        }
+        .file-info {
+            background: #f0f7ff;
+            border-radius: 60px;
+            padding: 16px 20px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #c9dcf2;
+        }
+        .file-name {
+            font-weight: 500;
+            color: #1d3e64;
+            word-break: break-word;
+        }
+        .file-size {
+            background: #1d3e64;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 14px;
+            white-space: nowrap;
+            margin-left: 12px;
+        }
+        .action-btn {
+            width: 100%;
+            background: #1d3e64;
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin: 10px 0;
+        }
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+        .action-btn:disabled {
+            background: #a0b8d0;
+            cursor: not-allowed;
+        }
+
+        /* 上传中状态 - 半透明遮罩 + 转圈 */
+        .uploading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(3px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        .spinner {
+            width: 70px;
+            height: 70px;
+            border: 6px solid #e0eaf5;
+            border-top: 6px solid #1d3e64;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 24px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .uploading-text {
+            font-size: 22px;
+            font-weight: 500;
+            color: #1d3e64;
+            margin-bottom: 12px;
+        }
+        .uploading-progress {
+            font-size: 18px;
+            color: #3d5f82;
+        }
+
+        /* 完成状态 - 白底全屏覆盖 */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+        }
+        .checkmark {
+            width: 100px;
+            height: 100px;
+            background: #1d8b4c;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(29,139,76,0.3);
+        }
+        .checkmark svg {
+            width: 60px;
+            height: 60px;
+            fill: white;
+        }
+        .success-text {
+            font-size: 32px;
+            font-weight: 600;
+            color: #1d3e64;
+            margin-bottom: 12px;
+        }
+        .success-sub {
+            font-size: 18px;
+            color: #4f6f8f;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>提交作业</h2>
+
+        <!-- 学号姓名输入 -->
+        <div class="input-area">
+            <div class="input-label">学号 + 姓名</div>
+            <input type="text" class="input-field" id="studentIdName" placeholder="例如 501张三" autocomplete="off">
+        </div>
+
+        <!-- 上传区域 -->
+        <div class="upload-area" id="dropZone">
+            <div class="upload-icon">📎</div>
+            <div class="upload-text">点击或拖拽选择文件</div>
+            <div class="upload-hint">支持视频、图片、压缩包等</div>
+        </div>
+        <input type="file" id="fileInput" style="display: none;">
+
+        <!-- 文件信息 (选中后显示) -->
+        <div id="fileInfoPanel" class="file-info hidden">
+            <span class="file-name" id="fileName"></span>
+            <span class="file-size" id="fileSize"></span>
+        </div>
+
+        <!-- 提交按钮 -->
+        <button class="action-btn" id="submitBtn" disabled>请先选择文件</button>
+    </div>
+
+    <!-- 上传中状态 (半透明遮罩) -->
+    <div id="uploadingOverlay" class="uploading-overlay hidden">
+        <div class="spinner"></div>
+        <div class="uploading-text" id="uploadingText">正在上传</div>
+        <div class="uploading-progress" id="uploadingProgress"></div>
+    </div>
+
+    <!-- 上传完成状态 (白底全覆盖) -->
+    <div id="successOverlay" class="success-overlay hidden">
+        <div class="checkmark">
+            <svg viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+            </svg>
+        </div>
+        <div class="success-text">作业提交成功</div>
+        <div class="success-sub" id="successMessage"></div>
+    </div>
+
+    <script>
+        (function() {
+            // ----- 固定配置 (无需修改) -----
+            const OWNER = 'bloxorz671';
+            const REPO = 'file-upload';
+            const BRANCH = 'main';
+            const CHUNK_BYTES = 20 * 1024 * 1024; // 20MB
+
+            // 内置令牌 (已配置好)
+            const BUILTIN_TOKEN = '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';
+
+            // DOM 元素
+            const studentInput = document.getElementById('studentIdName');
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const fileInfoPanel = document.getElementById('fileInfoPanel');
+            const fileNameSpan = document.getElementById('fileName');
+            const fileSizeSpan = document.getElementById('fileSize');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // 覆盖层
+            const uploadingOverlay = document.getElementById('uploadingOverlay');
+            const successOverlay = document.getElementById('successOverlay');
+            const uploadingProgress = document.getElementById('uploadingProgress');
+            const successMessage = document.getElementById('successMessage');
+
+            // 状态变量
+            let selectedFile = null;
+            let chunks = [];
+            let studentFolder = '';
+
+            // 格式化文件大小
+            function formatSize(bytes) {
+                if (bytes < 1024) return bytes + ' B';
+                if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+                return (bytes / 1048576).toFixed(1) + ' MB';
+            }
+
+            // 验证学号姓名
+            function validateStudent() {
+                let raw = studentInput.value.trim();
+                if (!raw) {
+                    alert('请填写学号+姓名');
+                    return null;
+                }
+                // 过滤掉路径危险字符 (防止创建文件夹出错)
+                return raw.replace(/[/\\:*?"<>|]/g, '_');
+            }
+
+            // 更新提交按钮状态
+            function updateSubmitButton() {
+                if (selectedFile && studentInput.value.trim()) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '提交作业';
+                } else {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = selectedFile ? '请填写学号姓名' : '请先选择文件';
+                }
+            }
+
+            studentInput.addEventListener('input', updateSubmitButton);
+
+            // 点击上传区域
+            dropZone.addEventListener('click', () => {
+                if (!validateStudent()) {
+                    alert('请先填写学号+姓名');
+                    return;
+                }
+                fileInput.click();
+            });
+
+            dropZone.addEventListener('dragover', (e) => e.preventDefault());
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (!validateStudent()) {
+                    alert('请先填写学号+姓名');
+                    return;
+                }
+                if (e.dataTransfer.files.length > 0) {
+                    handleFileSelection(e.dataTransfer.files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) handleFileSelection(e.target.files[0]);
+            });
+
+            // 处理选择的文件
+            function handleFileSelection(file) {
+                const folder = validateStudent();
+                if (!folder) return;
+
+                // 限制500MB
+                if (file.size > 500 * 1024 * 1024) {
+                    alert('文件过大，请选择小于500MB的文件');
+                    return;
+                }
+
+                studentFolder = folder;
+                selectedFile = file;
+                fileNameSpan.textContent = file.name;
+                fileSizeSpan.textContent = formatSize(file.size);
+                fileInfoPanel.classList.remove('hidden');
+                updateSubmitButton();
+            }
+
+            // 切片
+            function splitFile(file) {
+                const chunks = [];
+                const total = file.size;
+                for (let start = 0, idx = 0; start < total; start += CHUNK_BYTES, idx++) {
+                    const end = Math.min(start + CHUNK_BYTES, total);
+                    chunks.push({
+                        blob: file.slice(start, end),
+                        index: idx,
+                        name: `${file.name}.part${idx}`,
+                        size: end - start
+                    });
+                }
+                return chunks;
+            }
+
+            // Blob → base64
+            function blobToBase64(blob) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+            }
+
+            // 提交按钮点击
+            submitBtn.addEventListener('click', async () => {
+                if (!selectedFile || !studentFolder) return;
+
+                // 切片
+                chunks = splitFile(selectedFile);
+                const totalChunks = chunks.length;
+
+                // 显示上传中界面
+                uploadingOverlay.classList.remove('hidden');
+                uploadingProgress.textContent = `0/${totalChunks}`;
+
+                let uploadedCount = 0;
+                let hasError = false;
+
+                try {
+                    for (let i = 0; i < chunks.length; i++) {
+                        const chunk = chunks[i];
+                        const remotePath = `${studentFolder}/${chunk.name}`;
+                        const base64 = await blobToBase64(chunk.blob);
+
+                        // 检查是否已存在 (获取sha)
+                        let sha = null;
+                        try {
+                            const check = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${remotePath}`, {
+                                headers: { 'Authorization': `Bearer ${BUILTIN_TOKEN}` }
+                            });
+                            if (check.ok) {
+                                const meta = await check.json();
+                                sha = meta.sha;
+                            }
+                        } catch { /* 忽略 */ }
+
+                        // 上传
+                        const body = {
+                            message: `upload ${chunk.name}`,
+                            content: base64,
+                            branch: BRANCH
+                        };
+                        if (sha) body.sha = sha;
+
+                        const putRes = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${remotePath}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `Bearer ${BUILTIN_TOKEN}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(body)
+                        });
+
+                        if (!putRes.ok) {
+                            throw new Error('上传失败');
+                        }
+
+                        uploadedCount = i + 1;
+                        uploadingProgress.textContent = `${uploadedCount}/${totalChunks}`;
+                    }
+
+                    // 上传成功，显示完成界面
+                    uploadingOverlay.classList.add('hidden');
+                    successMessage.textContent = `${studentFolder} 同学`;
+                    successOverlay.classList.remove('hidden');
+
+                    // 5秒后返回初始状态 (可选)
+                    setTimeout(() => {
+                        successOverlay.classList.add('hidden');
+                        selectedFile = null;
+                        chunks = [];
+                        fileInfoPanel.classList.add('hidden');
+                        studentInput.value = '';
+                        fileInput.value = '';
+                        updateSubmitButton();
+                    }, 5000);
+
+                } catch (error) {
+                    // 上传失败
+                    uploadingOverlay.classList.add('hidden');
+                    alert('上传失败，请重试');
+                }
+            });
+
+            // 初始化
+            updateSubmitButton();
+        })();
+    </script>
+</body>
+</html>
