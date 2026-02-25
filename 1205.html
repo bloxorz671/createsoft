@@ -41,7 +41,7 @@
             border: 1px solid #fcd34d;
             font-size: 1rem;
             font-weight: 500;
-            text-align: left;  /* 左对齐 */
+            text-align: left;
             overflow: hidden;
             white-space: nowrap;
             position: relative;
@@ -63,12 +63,11 @@
             }
         }
 
-        /* 暂停滚动效果（鼠标悬停时） */
         .notice-board:hover .notice-board-content {
             animation-play-state: paused;
         }
 
-        /* 弹窗样式 - 内容顶格显示 */
+        /* 弹窗样式 - 去除所有多余空白 */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -86,7 +85,7 @@
         .modal {
             background-color: white;
             border-radius: 24px;
-            padding: 2rem;
+            padding: 0;  /* 移除所有内边距，由内部元素控制 */
             max-width: 90%;
             width: 400px;
             max-height: 80vh;
@@ -107,9 +106,10 @@
             }
         }
 
+        /* 移除标题区域的所有边距 */
         .modal-header {
-            margin-bottom: 1rem;
-            padding-right: 2rem;
+            padding: 1.5rem 1.5rem 0.5rem 1.5rem;  /* 上左右内边距，底部减小 */
+            margin: 0;
         }
 
         .modal-header h2 {
@@ -117,22 +117,30 @@
             font-weight: 600;
             color: #1e293b;
             line-height: 1.3;
+            margin: 0;  /* 移除标题的默认边距 */
         }
 
+        /* 内容区域 - 完全顶格，移除所有多余空白 */
         .modal-content {
             font-size: 1.1rem;
             color: #334155;
             line-height: 1.6;
-            margin-bottom: 2rem;
+            padding: 0 1.5rem 1.5rem 1.5rem;  /* 左右内边距保留，上下由其他元素控制 */
+            margin: 0;  /* 移除所有外边距 */
             white-space: pre-wrap;
-            text-align: left;  /* 左对齐，顶格 */
+            text-align: left;
             word-break: break-word;
+        }
+
+        /* 如果没有标题，内容区域要从顶部开始 */
+        .modal.no-header .modal-content {
+            padding-top: 1.5rem;
         }
 
         .modal-close {
             position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
+            top: 1rem;
+            right: 1rem;
             background: #f1f5f9;
             border: none;
             width: 32px;
@@ -145,6 +153,7 @@
             font-size: 1.2rem;
             color: #475569;
             transition: all 0.2s;
+            z-index: 10;
         }
 
         .modal-close:hover {
@@ -154,6 +163,7 @@
         }
 
         .modal-footer {
+            padding: 0 1.5rem 1.5rem 1.5rem;  /* 底部内边距 */
             display: flex;
             justify-content: flex-end;
         }
@@ -528,8 +538,11 @@
             }
             
             .modal {
-                padding: 1.5rem;
                 width: 90%;
+            }
+            
+            .modal-header {
+                padding: 1.2rem 1.2rem 0.3rem 1.2rem;
             }
             
             .modal-header h2 {
@@ -538,6 +551,11 @@
             
             .modal-content {
                 font-size: 1rem;
+                padding: 0 1.2rem 1.2rem 1.2rem;
+            }
+            
+            .modal-footer {
+                padding: 0 1.2rem 1.2rem 1.2rem;
             }
             
             .homework-item {
@@ -836,7 +854,7 @@
                 return { head, message, board };
             }
 
-            // 显示弹窗 - 内容顶格左对齐
+            // 显示弹窗 - 完全顶格显示，去除所有多余空白
             function showModal(head, message) {
                 const modalContainer = document.getElementById('modalContainer');
                 
@@ -846,11 +864,26 @@
                 const modal = document.createElement('div');
                 modal.className = 'modal';
                 
-                modal.innerHTML = `
-                    <button class="modal-close" id="modalCloseBtn">&times;</button>
-                    <div class="modal-header">
-                        <h2>${head || '通知'}</h2>
-                    </div>
+                // 构建弹窗HTML - 精心控制间距
+                let modalHTML = '';
+                
+                // 关闭按钮
+                modalHTML += '<button class="modal-close" id="modalCloseBtn">&times;</button>';
+                
+                // 如果有标题才显示标题区域
+                if (head && head.trim() !== '') {
+                    modalHTML += `
+                        <div class="modal-header">
+                            <h2>${head}</h2>
+                        </div>
+                    `;
+                } else {
+                    // 无标题时给modal添加一个类，用于调整内容的内边距
+                    modal.className += ' no-header';
+                }
+                
+                // 内容区域 - 直接顶格，不加任何额外间距
+                modalHTML += `
                     <div class="modal-content">
                         ${message.replace(/\n/g, '<br>')}
                     </div>
@@ -858,6 +891,8 @@
                         <button class="modal-btn" id="modalConfirmBtn">知道了</button>
                     </div>
                 `;
+                
+                modal.innerHTML = modalHTML;
                 
                 modalOverlay.appendChild(modal);
                 modalContainer.innerHTML = '';
