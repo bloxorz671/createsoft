@@ -1,7 +1,7 @@
 """
 sub=数学
 name=录制讲题视频
-link=https://luckynum.top/homeworkupload
+link=brilliant-unicorn-633b63.netlify.app
 more=截止时间已延长到25日23:59分，请尽快提交
 more_colour[255,0,0]
 start_time=2026/1/1 00:00
