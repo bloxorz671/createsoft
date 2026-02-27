@@ -44,7 +44,7 @@
             text-shadow: 0 8px 25px rgba(211, 47, 47, 0.15);
             margin: 0 0 0.2rem 0;
             transform: scale(1);
-            transition: none;  /* 去掉悬停动画，避免多余效果 */
+            transition: none;
         }
 
         /* File not found — 不大不小，刚好配合布满氛围 */
@@ -57,8 +57,22 @@
             word-break: keep-all;
         }
 
-        /* 中文提示行已按需求完全删除 (原“页面未找到，您可以返回首页重新打开”不要) 
-           因此此处没有任何中文提示 */
+        /* 新增提示行：无框黑字，符合要求 */
+        .hint-message {
+            font-size: clamp(1rem, 3.5vw, 1.4rem);
+            font-weight: 400;
+            color: #222222;           /* 纯黑字，无框 */
+            margin: 0.5rem 0 1.2rem 0;  /* 与上下保持舒适距离 */
+            letter-spacing: 0.3px;
+            word-break: keep-all;
+            opacity: 0.85;             /* 极轻微柔和，依然保持无框黑字感 */
+            background: transparent;    /* 绝对无框 */
+            border: none;
+            box-shadow: none;
+            text-shadow: none;
+            padding: 0;
+            line-height: 1.4;
+        }
 
         /* 按钮: 干净、无右箭头、无任何装饰符号 */
         .home-link {
@@ -71,13 +85,12 @@
             font-weight: 500;
             font-size: clamp(1.4rem, 5vw, 2rem);
             padding: 0.7rem 2.8rem;
-            border-radius: 60px;           /* 保留一点友好圆角, 但不破坏全屏感 */
+            border-radius: 60px;
             box-shadow: 0 12px 24px -12px rgba(211, 47, 47, 0.4);
             border: none;
             cursor: pointer;
             margin-top: 0.8rem;
             transition: background 0.15s, box-shadow 0.15s;
-            /* 确保没有任何伪元素或额外符号 */
         }
 
         .home-link:hover {
@@ -91,8 +104,7 @@
             box-shadow: 0 8px 16px -8px #b71c1c;
         }
 
-        /* 移除所有可能的小符号 —— 包括之前箭头、装饰点、以及所有“·” 
-           原glow类含有·，整个删除，并且全局任何::after,::before都禁用符号 */
+        /* 移除所有可能的小符号 —— 包括之前箭头、装饰点，以及所有“·” */
         .home-link::after,
         .home-link::before {
             display: none !important;
@@ -113,6 +125,9 @@
                 padding: 0.6rem 2rem;
                 border-radius: 50px;
                 margin-top: 0.5rem;
+            }
+            .hint-message {
+                margin: 0.3rem 0 1rem 0;
             }
         }
 
@@ -144,7 +159,8 @@
         <!-- 小一点：File not found (无任何多余符号) -->
         <div class="file-not-found">File not found</div>
 
-        <!-- 中文提示已完全删除 (不再有“页面未找到，您可以返回首页重新打开”) -->
+        <!-- 新增无框黑字提示行：完全符合要求 -->
+        <div class="hint-message">请检查网址是否正确，或者功能可能已删除</div>
 
         <!-- 返回首页按钮，无箭头无符号，直接文字，跳转至根目录 luckynum.top -->
         <a href="https://luckynum.top" class="home-link">
