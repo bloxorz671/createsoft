@@ -187,6 +187,87 @@
             transform: translateY(1px);
         }
 
+        /* 作业码输入弹窗样式 */
+        .code-modal-content {
+            padding: 1.5rem;
+        }
+
+        .code-modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        .code-modal-input {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            font-size: 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 40px;
+            outline: none;
+            background: white;
+            transition: all 0.2s;
+            margin-bottom: 1rem;
+        }
+
+        .code-modal-input:focus {
+            border-color: #1e3a5f;
+            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+        }
+
+        .code-modal-message {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            min-height: 1.5rem;
+        }
+
+        .code-modal-message.error {
+            color: #b91c1c;
+        }
+
+        .code-modal-message.success {
+            color: #2e7d32;
+        }
+
+        .code-modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.8rem;
+        }
+
+        .code-modal-cancel {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            padding: 0.8rem 1.5rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .code-modal-cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .code-modal-submit {
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .code-modal-submit:hover {
+            background: #112b44;
+        }
+
         /* 头部区域 */
         .header {
             margin-bottom: 1rem;
@@ -484,98 +565,33 @@
             font-weight: 400;
         }
 
-        /* 作业码输入区域样式 */
-        .code-section {
-            margin: 2rem 0 2rem 0;
-            padding: 1.5rem;
-            background-color: #f8fafc;
-            border-radius: 20px;
-            border: 1px solid #e2e8f0;
-            width: 100%;
-        }
-
-        .code-title {
-            font-size: 1.2rem;
-            font-weight: 500;
-            color: #1e293b;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .code-title svg {
-            width: 20px;
-            height: 20px;
-            stroke: #475569;
-        }
-
-        .code-input-container {
-            display: flex;
-            gap: 0.8rem;
-            flex-wrap: wrap;
-        }
-
-        .code-input {
-            flex: 1;
-            min-width: 200px;
-            padding: 0.8rem 1.2rem;
-            font-size: 1rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 40px;
-            outline: none;
-            background: white;
-            transition: all 0.2s;
-        }
-
-        .code-input:focus {
-            border-color: #1e3a5f;
-            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
-        }
-
-        .code-submit-btn {
-            background: #1e3a5f;
-            color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .code-submit-btn:hover {
-            background: #112b44;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .code-submit-btn:active {
-            transform: translateY(1px);
-        }
-
-        .code-message {
-            margin-top: 0.8rem;
+        /* 不显眼的作业码入口 */
+        .code-entry {
+            text-align: center;
+            margin: 1.5rem 0 1rem 0;
             font-size: 0.9rem;
-            color: #64748b;
-            min-height: 1.5rem;
         }
 
-        .code-message.error {
-            color: #b91c1c;
+        .code-link {
+            color: #2563eb;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 0.9rem;
+            padding: 0.2rem 0.5rem;
         }
 
-        .code-message.success {
-            color: #2e7d32;
+        .code-link:hover {
+            color: #1d4ed8;
         }
 
         .class-line {
             width: 80px;
             height: 3px;
             background: #d9e2ef;
-            margin: 2rem auto 0 auto;
+            margin: 1rem auto 0 auto;
             border-radius: 30px;
             opacity: 0.6;
         }
@@ -642,6 +658,10 @@
                 padding: 0 1.2rem 1.2rem 1.2rem;
             }
             
+            .code-modal-content {
+                padding: 1.2rem;
+            }
+            
             .homework-item {
                 padding: 1rem;
             }
@@ -699,16 +719,8 @@
                 padding-top: 0.5rem;
             }
             
-            .code-section {
-                padding: 1.2rem;
-            }
-            
-            .code-input-container {
-                flex-direction: column;
-            }
-            
-            .code-submit-btn {
-                width: 100%;
+            .code-entry {
+                margin: 1rem 0 0.5rem 0;
             }
         }
 
@@ -788,25 +800,16 @@
             当前暂无需要通过此网页提交的作业或管理员未发布新的作业
         </div>
 
-        <!-- 作业码输入区域 -->
-        <div id="codeSection" class="code-section" style="display: none;">
-            <div class="code-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="9" y1="9" x2="15" y2="15"></line>
-                    <line x1="15" y1="9" x2="9" y2="15"></line>
-                </svg>
-                作业码快速通道
-            </div>
-            <div class="code-input-container">
-                <input type="text" id="codeInput" class="code-input" placeholder="请输入作业码" autocomplete="off">
-                <button id="codeSubmitBtn" class="code-submit-btn">前往作业</button>
-            </div>
-            <div id="codeMessage" class="code-message"></div>
+        <!-- 不显眼的作业码入口 -->
+        <div id="codeEntry" class="code-entry" style="display: none;">
+            <button class="code-link" id="codeLink">输入作业码</button>
         </div>
 
         <!-- 弹窗容器 -->
         <div id="modalContainer" style="display: none;"></div>
+
+        <!-- 作业码弹窗容器 -->
+        <div id="codeModalContainer" style="display: none;"></div>
 
         <div class="class-line" aria-hidden="true"></div>
     </div>
@@ -889,7 +892,7 @@
                 return codes;
             }
 
-            // 解析作业函数 - 修改以分离作业码块
+            // 解析作业函数
             function parseHomework(text) {
                 const items = [];
                 
@@ -1017,7 +1020,7 @@
                 return { head, message, board };
             }
 
-            // 显示弹窗
+            // 显示普通弹窗
             function showModal(head, message) {
                 const modalContainer = document.getElementById('modalContainer');
                 
@@ -1072,6 +1075,95 @@
                 });
             }
 
+            // 显示作业码弹窗
+            function showCodeModal() {
+                const codeModalContainer = document.getElementById('codeModalContainer');
+                
+                const modalOverlay = document.createElement('div');
+                modalOverlay.className = 'modal-overlay';
+                
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                
+                modal.innerHTML = `
+                    <button class="modal-close" id="codeModalCloseBtn">&times;</button>
+                    <div class="code-modal-content">
+                        <div class="code-modal-title">输入作业码</div>
+                        <input type="text" id="codeModalInput" class="code-modal-input" placeholder="请输入作业码" autocomplete="off">
+                        <div id="codeModalMessage" class="code-modal-message"></div>
+                        <div class="code-modal-buttons">
+                            <button class="code-modal-cancel" id="codeModalCancelBtn">取消</button>
+                            <button class="code-modal-submit" id="codeModalSubmitBtn">前往作业</button>
+                        </div>
+                    </div>
+                `;
+                
+                modalOverlay.appendChild(modal);
+                codeModalContainer.innerHTML = '';
+                codeModalContainer.appendChild(modalOverlay);
+                codeModalContainer.style.display = 'block';
+                
+                const input = document.getElementById('codeModalInput');
+                input.focus();
+                
+                // 关闭弹窗函数
+                function closeCodeModal() {
+                    codeModalContainer.style.display = 'none';
+                }
+                
+                // 处理作业码提交
+                function handleCodeSubmit() {
+                    const code = input.value.trim();
+                    const messageEl = document.getElementById('codeModalMessage');
+                    
+                    if (!code) {
+                        messageEl.className = 'code-modal-message error';
+                        messageEl.textContent = '请输入作业码';
+                        return;
+                    }
+                    
+                    const link = codeMap.get(code);
+                    
+                    if (link) {
+                        window.open(link, '_blank');
+                        messageEl.className = 'code-modal-message success';
+                        messageEl.textContent = '正在跳转...';
+                        input.value = '';
+                        
+                        setTimeout(() => {
+                            closeCodeModal();
+                        }, 500);
+                    } else {
+                        messageEl.className = 'code-modal-message error';
+                        messageEl.textContent = '作业码无效，请重新输入';
+                        input.value = '';
+                        input.focus();
+                        
+                        setTimeout(() => {
+                            messageEl.textContent = '';
+                            messageEl.className = 'code-modal-message';
+                        }, 2000);
+                    }
+                }
+                
+                // 绑定事件
+                document.getElementById('codeModalCloseBtn').addEventListener('click', closeCodeModal);
+                document.getElementById('codeModalCancelBtn').addEventListener('click', closeCodeModal);
+                document.getElementById('codeModalSubmitBtn').addEventListener('click', handleCodeSubmit);
+                
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        handleCodeSubmit();
+                    }
+                });
+                
+                modalOverlay.addEventListener('click', function(e) {
+                    if (e.target === modalOverlay) {
+                        closeCodeModal();
+                    }
+                });
+            }
+
             // 显示滚动公告
             function showNoticeBoard(board) {
                 const noticeBoard = document.getElementById('noticeBoard');
@@ -1085,13 +1177,13 @@
                 }
             }
 
-            // 显示/隐藏作业码区域
-            function updateCodeSection() {
-                const codeSection = document.getElementById('codeSection');
+            // 显示/隐藏作业码入口
+            function updateCodeEntry() {
+                const codeEntry = document.getElementById('codeEntry');
                 if (codeMap.size > 0) {
-                    codeSection.style.display = 'block';
+                    codeEntry.style.display = 'block';
                 } else {
-                    codeSection.style.display = 'none';
+                    codeEntry.style.display = 'none';
                 }
             }
 
@@ -1313,46 +1405,8 @@
                     homeworkEl.appendChild(section);
                 }
                 
-                // 更新作业码区域显示
-                updateCodeSection();
-            }
-
-            // 处理作业码提交
-            function handleCodeSubmit() {
-                const codeInput = document.getElementById('codeInput');
-                const codeMessage = document.getElementById('codeMessage');
-                const code = codeInput.value.trim();
-                
-                if (!code) {
-                    codeMessage.className = 'code-message error';
-                    codeMessage.textContent = '请输入作业码';
-                    return;
-                }
-                
-                const link = codeMap.get(code);
-                
-                if (link) {
-                    // 找到对应的链接，跳转
-                    window.open(link, '_blank');
-                    codeMessage.className = 'code-message success';
-                    codeMessage.textContent = '正在跳转...';
-                    codeInput.value = ''; // 清空输入框
-                    
-                    // 2秒后清除提示信息
-                    setTimeout(() => {
-                        codeMessage.textContent = '';
-                        codeMessage.className = 'code-message';
-                    }, 2000);
-                } else {
-                    codeMessage.className = 'code-message error';
-                    codeMessage.textContent = '作业码无效，请重新输入';
-                    
-                    // 2秒后清除错误提示
-                    setTimeout(() => {
-                        codeMessage.textContent = '';
-                        codeMessage.className = 'code-message';
-                    }, 2000);
-                }
+                // 更新作业码入口显示
+                updateCodeEntry();
             }
 
             // 加载通知文件
@@ -1454,14 +1508,9 @@
                 applyFilter();
             });
 
-            // 绑定作业码提交事件
-            document.getElementById('codeSubmitBtn').addEventListener('click', handleCodeSubmit);
-            
-            // 绑定输入框回车事件
-            document.getElementById('codeInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleCodeSubmit();
-                }
+            // 绑定作业码入口点击事件
+            document.getElementById('codeLink').addEventListener('click', function() {
+                showCodeModal();
             });
 
             window.addEventListener('load', initialize);
