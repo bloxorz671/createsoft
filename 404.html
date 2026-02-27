@@ -15,7 +15,7 @@
         html, body {
             width: 100%;
             min-height: 100vh;
-            background: #f2f4f8;  /* 干净背景，无装饰 */
+            background: #f2f4f8;
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             display: flex;
             align-items: center;
@@ -23,45 +23,58 @@
             text-align: center;
         }
 
-        /* 全屏居中容器 */
+        /* 全屏居中容器 - 使用flex列方向，确保内容垂直居中 */
         .full-center {
             width: 100%;
             padding: 2rem;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            min-height: 100vh;
         }
 
-        /* 水平排列的内容区：图片 + 右侧文字组 */
-        .content-row {
-            display: flex;
-            align-items: center;      /* 图片和文字组垂直居中 */
-            justify-content: center;
-            gap: 1.2rem;              /* 图片与右侧文字的间距，更紧凑 */
-            flex-wrap: wrap;           /* 小屏时自动换行 */
-        }
-
-        /* 左侧图片：404.png (缩小一点) */
-        .alien-img {
-            width: 80px;               /* 缩小图片尺寸 */
-            height: auto;
-            max-width: 15vw;           /* 小屏自适应进一步缩小 */
-            display: block;
-            flex-shrink: 0;            /* 防止图片被压缩 */
-        }
-
-        /* 右侧文字组：404 + 中间描述 + 按钮（保持垂直排列） */
-        .text-group {
+        /* 主要内容区域 - 使用flex列，让图片单独一行在上方 */
+        .main-content {
             display: flex;
             flex-direction: column;
-            align-items: center;        /* 内部文字水平居中 */
+            align-items: center;
             justify-content: center;
-            gap: 0.6rem;                /* 文字之间紧凑 */
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
-        /* 大红 404 — 保持醒目 */
+        /* 图片容器 - 单独一行，位于404上方 */
+        .image-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        /* 图片 - 大一点，在404上面 */
+        .alien-img {
+            width: 180px;           /* 图片调大 */
+            height: auto;
+            max-width: 40vw;         /* 小屏自适应 */
+            display: block;
+        }
+
+        /* 文字和按钮容器 - 保证404和按钮居中 */
+        .center-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            gap: 1.5rem;            /* 404与按钮之间的间距 */
+        }
+
+        /* 大红 404 — 保持醒目，绝对居中 */
         .four-oh-four {
-            font-size: clamp(5rem, 15vw, 8rem);
+            font-size: clamp(6rem, 18vw, 10rem);
             font-weight: 800;
             color: #d32f2f;
             line-height: 1;
@@ -70,44 +83,34 @@
             margin: 0;
         }
 
-        /* 中间文字：网页被外星人偷走了 */
-        .alien-message {
-            font-size: clamp(1.3rem, 4vw, 2rem);
-            font-weight: 450;
-            color: #222;
-            line-height: 1.3;
-            margin: 0;
-            white-space: nowrap;
-        }
-
-        /* 返回主页按钮 */
+        /* 返回主页按钮 - 无圆角矩形，蓝底白字 */
         .home-link {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: #d32f2f;
+            background: #1e6df2;        /* 鲜明蓝色 */
             color: white;
             text-decoration: none;
             font-weight: 500;
-            font-size: clamp(1.2rem, 3.5vw, 1.8rem);
-            padding: 0.5rem 2rem;
-            border-radius: 60px;
-            box-shadow: 0 12px 24px -12px rgba(211, 47, 47, 0.4);
+            font-size: clamp(1.4rem, 5vw, 2.2rem);
+            padding: 0.7rem 3rem;
+            border-radius: 0;            /* 无圆角，直角矩形 */
+            box-shadow: 0 8px 20px -8px rgba(30, 109, 242, 0.5);
             border: none;
             cursor: pointer;
-            margin-top: 0.2rem;
             transition: background 0.15s, box-shadow 0.15s;
+            /* 确保没有任何伪元素符号 */
         }
 
         .home-link:hover {
-            background: #b71c1c;
-            box-shadow: 0 18px 30px -12px #b71c1c;
+            background: #1552c4;        /* 深一点的蓝色 */
+            box-shadow: 0 12px 28px -10px #1552c4;
             text-decoration: none;
         }
 
         .home-link:active {
             transform: translateY(2px);
-            box-shadow: 0 8px 16px -8px #b71c1c;
+            box-shadow: 0 5px 12px -6px #1552c4;
         }
 
         /* 移除所有可能的小符号、伪元素、多余的装饰 */
@@ -123,40 +126,42 @@
             }
         }
 
-        /* 小屏友好：允许文字换行 */
-        @media (max-width: 500px) {
-            .content-row {
-                gap: 1rem;
-            }
+        /* 小屏友好：图片稍微调小一点但依然明显 */
+        @media (max-width: 600px) {
             .alien-img {
-                width: 60px;
+                width: 150px;
             }
-            .alien-message {
-                white-space: normal;
+            .home-link {
+                padding: 0.6rem 2.5rem;
             }
         }
 
-        @media (max-width: 380px) {
+        @media (max-width: 400px) {
             .alien-img {
-                width: 50px;
+                width: 120px;
+            }
+            .four-oh-four {
+                font-size: 5rem;
             }
             .home-link {
-                padding: 0.4rem 1.5rem;
+                padding: 0.5rem 2rem;
+                font-size: 1.3rem;
             }
         }
     </style>
 </head>
 <body>
     <div class="full-center">
-        <!-- 内容行：左边图片 + 右边文字组 -->
-        <div class="content-row">
-            <!-- 左侧图片：404.png (位于同一目录，已缩小) -->
-            <img src="404.png" alt="外星人" class="alien-img">
-
-            <!-- 右侧文字组 (404 + 外星人话 + 返回主页) 整体居中 -->
-            <div class="text-group">
+        <!-- 主要内容区域：图片单独一行在上，404和按钮居中 -->
+        <div class="main-content">
+            <!-- 图片单独一行，在404上面 -->
+            <div class="image-row">
+                <img src="404.png" alt="外星人" class="alien-img">
+            </div>
+            
+            <!-- 404和按钮居中区域 -->
+            <div class="center-group">
                 <div class="four-oh-four">404</div>
-                <div class="alien-message">网页被外星人偷走了</div>
                 <a href="https://luckynum.top" class="home-link">返回主页</a>
             </div>
         </div>
