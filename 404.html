@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404</title>
     <style>
-        /* 彻底重置边距，让页面完全布满 */
+        /* 彻底重置边距，保证全屏布满无多余效果 */
         * {
             margin: 0;
             padding: 0;
@@ -15,66 +15,73 @@
         html, body {
             width: 100%;
             min-height: 100vh;
-            background: #f2f4f8;  /* 干净基底 */
+            background: #f2f4f8;  /* 干净背景，无装饰 */
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            line-height: 1.2;
         }
 
-        /* 绝对全屏居中，没有任何卡片/突出效果 */
+        /* 全屏居中容器，不添加任何额外卡片效果 */
         .full-center {
             width: 100%;
-            padding: 2rem 1.5rem;  /* 仅保留小边距防止小屏贴边 */
+            padding: 2rem;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
         }
 
-        /* 大红 404 — 布满感由大字体撑起 */
+        /* 水平排列的内容区：左边图片 + 右边文字组 */
+        .content-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2.5rem;          /* 图片与右侧文字间距 */
+            flex-wrap: wrap;       /* 小屏时自动换行，仍然居中 */
+            margin-bottom: 2rem;
+        }
+
+        /* 左侧图片：404.png (与本网页同一目录下) */
+        .alien-img {
+            width: 120px;          /* 适中大小，可根据实际图片调整 */
+            height: auto;
+            max-width: 30vw;       /* 小屏自适应 */
+            display: block;
+        }
+
+        /* 右侧文字组：404 + 中间描述 + 按钮（保持垂直排列） */
+        .text-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        /* 大红 404 — 布满感大字体 */
         .four-oh-four {
-            font-size: clamp(8rem, 30vw, 20rem);
+            font-size: clamp(6rem, 20vw, 12rem);
             font-weight: 800;
             color: #d32f2f;
             line-height: 1;
             letter-spacing: -0.02em;
             text-shadow: 0 8px 25px rgba(211, 47, 47, 0.15);
-            margin: 0 0 0.2rem 0;
-            transform: scale(1);
-            transition: none;
+            margin: 0;
         }
 
-        /* File not found — 不大不小，刚好配合布满氛围 */
-        .file-not-found {
-            font-size: clamp(1.8rem, 6vw, 3.5rem);
-            font-weight: 400;
-            color: #2e405b;
-            margin: 0 0 0.4rem 0;
-            letter-spacing: 0.3px;
-            word-break: keep-all;
+        /* 中间文字：网页被外星人偷走了（完全居中，无框无装饰） */
+        .alien-message {
+            font-size: clamp(1.6rem, 5vw, 2.5rem);
+            font-weight: 450;
+            color: #222;            /* 深灰近黑，无背景无框 */
+            line-height: 1.3;
+            margin: 0.2rem 0;
+            white-space: nowrap;    /* 保持一行，若小屏放不下可通过媒体查询调整 */
         }
 
-        /* 新增提示行：无框黑字，符合要求 */
-        .hint-message {
-            font-size: clamp(1rem, 3.5vw, 1.4rem);
-            font-weight: 400;
-            color: #222222;           /* 纯黑字，无框 */
-            margin: 0.5rem 0 1.2rem 0;  /* 与上下保持舒适距离 */
-            letter-spacing: 0.3px;
-            word-break: keep-all;
-            opacity: 0.85;             /* 极轻微柔和，依然保持无框黑字感 */
-            background: transparent;    /* 绝对无框 */
-            border: none;
-            box-shadow: none;
-            text-shadow: none;
-            padding: 0;
-            line-height: 1.4;
-        }
-
-        /* 按钮: 干净、无右箭头、无任何装饰符号 */
+        /* 返回主页按钮：干净、无任何多余符号 */
         .home-link {
             display: inline-flex;
             align-items: center;
@@ -83,14 +90,15 @@
             color: white;
             text-decoration: none;
             font-weight: 500;
-            font-size: clamp(1.4rem, 5vw, 2rem);
-            padding: 0.7rem 2.8rem;
+            font-size: clamp(1.3rem, 4vw, 2rem);
+            padding: 0.6rem 2.4rem;
             border-radius: 60px;
             box-shadow: 0 12px 24px -12px rgba(211, 47, 47, 0.4);
             border: none;
             cursor: pointer;
-            margin-top: 0.8rem;
+            margin-top: 0.4rem;
             transition: background 0.15s, box-shadow 0.15s;
+            /* 确保没有任何伪元素符号 */
         }
 
         .home-link:hover {
@@ -104,70 +112,63 @@
             box-shadow: 0 8px 16px -8px #b71c1c;
         }
 
-        /* 移除所有可能的小符号 —— 包括之前箭头、装饰点，以及所有“·” */
+        /* 移除所有可能的小符号、伪元素、多余的装饰 */
         .home-link::after,
         .home-link::before {
             display: none !important;
             content: none !important;
         }
 
-        /* 确保没有任何多余的装饰文本或点 */
-        .no-glow, .glow, .extra-decoration {
-            display: none;
-        }
-
-        /* 小屏完美适配 */
-        @media (max-width: 480px) {
-            .full-center {
-                padding: 1rem;
-            }
-            .home-link {
-                padding: 0.6rem 2rem;
-                border-radius: 50px;
-                margin-top: 0.5rem;
-            }
-            .hint-message {
-                margin: 0.3rem 0 1rem 0;
-            }
-        }
-
-        /* 极高屏幕也完美居中 */
-        @media (min-height: 900px) {
-            .full-center {
-                justify-content: center;
-            }
-        }
-
-        /* 确保没有任何一个多余的“·”出现 — 连伪元素也清除 */
         body, div, p, span, a, h1, h2, h3, h4 {
             &::before, &::after {
                 content: none !important;
             }
         }
 
-        /* 额外保险：移除所有·相关的unicode符号或内容（如果有隐藏元素） */
+        /* 任何可能隐藏的符号容器都彻底移除 */
         [class*="glow"], [class*="dot"], [class*="separator"] {
             display: none;
+        }
+
+        /* 小屏友好：缩小间距，文字换行正常 */
+        @media (max-width: 600px) {
+            .content-row {
+                gap: 1.5rem;
+            }
+            .alien-img {
+                width: 100px;
+            }
+            .alien-message {
+                white-space: normal;   /* 允许换行，避免溢出 */
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .alien-img {
+                width: 80px;
+            }
+            .home-link {
+                padding: 0.5rem 1.8rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="full-center">
-        <!-- 中央大红 404 -->
-        <div class="four-oh-four">404</div>
+        <!-- 内容行：左边图片 + 右边所有文字 -->
+        <div class="content-row">
+            <!-- 左侧图片：404.png (位于同一目录) -->
+            <img src="404.png" alt="外星人" class="alien-img">
 
-        <!-- 小一点：File not found (无任何多余符号) -->
-        <div class="file-not-found">File not found</div>
-
-        <!-- 新增无框黑字提示行：完全符合要求 -->
-        <div class="hint-message">请检查网址是否正确，或者功能可能已删除</div>
-
-        <!-- 返回首页按钮，无箭头无符号，直接文字，跳转至根目录 luckynum.top -->
-        <a href="https://luckynum.top" class="home-link">
-            返回首页
-        </a>
+            <!-- 右侧文字组 (404 + 外星人话 + 返回主页) -->
+            <div class="text-group">
+                <div class="four-oh-four">404</div>
+                <div class="alien-message">网页被外星人偷走了</div>
+                <a href="https://luckynum.top" class="home-link">返回主页</a>
+            </div>
+        </div>
+        <!-- 没有其他任何内容、脚注、装饰符号 -->
     </div>
-
-    <!-- 没有任何脚本生成额外符号。简而又简 -->
 </body>
 </html>
