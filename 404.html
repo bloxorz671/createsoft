@@ -23,46 +23,45 @@
             text-align: center;
         }
 
-        /* 全屏居中容器，不添加任何额外卡片效果 */
+        /* 全屏居中容器 */
         .full-center {
             width: 100%;
             padding: 2rem;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
         }
 
-        /* 水平排列的内容区：左边图片 + 右边文字组 */
+        /* 水平排列的内容区：图片 + 右侧文字组 */
         .content-row {
             display: flex;
-            align-items: center;
+            align-items: center;      /* 图片和文字组垂直居中 */
             justify-content: center;
-            gap: 2.5rem;          /* 图片与右侧文字间距 */
-            flex-wrap: wrap;       /* 小屏时自动换行，仍然居中 */
-            margin-bottom: 2rem;
+            gap: 1.2rem;              /* 图片与右侧文字的间距，更紧凑 */
+            flex-wrap: wrap;           /* 小屏时自动换行 */
         }
 
-        /* 左侧图片：404.png (与本网页同一目录下) */
+        /* 左侧图片：404.png (缩小一点) */
         .alien-img {
-            width: 120px;          /* 适中大小，可根据实际图片调整 */
+            width: 80px;               /* 缩小图片尺寸 */
             height: auto;
-            max-width: 30vw;       /* 小屏自适应 */
+            max-width: 15vw;           /* 小屏自适应进一步缩小 */
             display: block;
+            flex-shrink: 0;            /* 防止图片被压缩 */
         }
 
         /* 右侧文字组：404 + 中间描述 + 按钮（保持垂直排列） */
         .text-group {
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: center;        /* 内部文字水平居中 */
             justify-content: center;
-            gap: 1rem;
+            gap: 0.6rem;                /* 文字之间紧凑 */
         }
 
-        /* 大红 404 — 布满感大字体 */
+        /* 大红 404 — 保持醒目 */
         .four-oh-four {
-            font-size: clamp(6rem, 20vw, 12rem);
+            font-size: clamp(5rem, 15vw, 8rem);
             font-weight: 800;
             color: #d32f2f;
             line-height: 1;
@@ -71,17 +70,17 @@
             margin: 0;
         }
 
-        /* 中间文字：网页被外星人偷走了（完全居中，无框无装饰） */
+        /* 中间文字：网页被外星人偷走了 */
         .alien-message {
-            font-size: clamp(1.6rem, 5vw, 2.5rem);
+            font-size: clamp(1.3rem, 4vw, 2rem);
             font-weight: 450;
-            color: #222;            /* 深灰近黑，无背景无框 */
+            color: #222;
             line-height: 1.3;
-            margin: 0.2rem 0;
-            white-space: nowrap;    /* 保持一行，若小屏放不下可通过媒体查询调整 */
+            margin: 0;
+            white-space: nowrap;
         }
 
-        /* 返回主页按钮：干净、无任何多余符号 */
+        /* 返回主页按钮 */
         .home-link {
             display: inline-flex;
             align-items: center;
@@ -90,15 +89,14 @@
             color: white;
             text-decoration: none;
             font-weight: 500;
-            font-size: clamp(1.3rem, 4vw, 2rem);
-            padding: 0.6rem 2.4rem;
+            font-size: clamp(1.2rem, 3.5vw, 1.8rem);
+            padding: 0.5rem 2rem;
             border-radius: 60px;
             box-shadow: 0 12px 24px -12px rgba(211, 47, 47, 0.4);
             border: none;
             cursor: pointer;
-            margin-top: 0.4rem;
+            margin-top: 0.2rem;
             transition: background 0.15s, box-shadow 0.15s;
-            /* 确保没有任何伪元素符号 */
         }
 
         .home-link:hover {
@@ -125,43 +123,37 @@
             }
         }
 
-        /* 任何可能隐藏的符号容器都彻底移除 */
-        [class*="glow"], [class*="dot"], [class*="separator"] {
-            display: none;
-        }
-
-        /* 小屏友好：缩小间距，文字换行正常 */
-        @media (max-width: 600px) {
+        /* 小屏友好：允许文字换行 */
+        @media (max-width: 500px) {
             .content-row {
-                gap: 1.5rem;
+                gap: 1rem;
             }
             .alien-img {
-                width: 100px;
+                width: 60px;
             }
             .alien-message {
-                white-space: normal;   /* 允许换行，避免溢出 */
-                font-size: 1.8rem;
+                white-space: normal;
             }
         }
 
-        @media (max-width: 400px) {
+        @media (max-width: 380px) {
             .alien-img {
-                width: 80px;
+                width: 50px;
             }
             .home-link {
-                padding: 0.5rem 1.8rem;
+                padding: 0.4rem 1.5rem;
             }
         }
     </style>
 </head>
 <body>
     <div class="full-center">
-        <!-- 内容行：左边图片 + 右边所有文字 -->
+        <!-- 内容行：左边图片 + 右边文字组 -->
         <div class="content-row">
-            <!-- 左侧图片：404.png (位于同一目录) -->
+            <!-- 左侧图片：404.png (位于同一目录，已缩小) -->
             <img src="404.png" alt="外星人" class="alien-img">
 
-            <!-- 右侧文字组 (404 + 外星人话 + 返回主页) -->
+            <!-- 右侧文字组 (404 + 外星人话 + 返回主页) 整体居中 -->
             <div class="text-group">
                 <div class="four-oh-four">404</div>
                 <div class="alien-message">网页被外星人偷走了</div>
