@@ -1,1 +1,202 @@
- 
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404页面未找到</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f8f9fa;  /* 柔和基底色 */
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1.5;
+            padding: 1.5rem;
+        }
+
+        .error-container {
+            max-width: 620px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(3px);
+            padding: 2.8rem 2rem 3.2rem;
+            border-radius: 48px 48px 40px 40px;
+            box-shadow: 0 25px 40px -10px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        /* 大红 404 */
+        .four-oh-four {
+            font-size: clamp(6rem, 20vw, 11rem);
+            font-weight: 800;
+            color: #d32f2f;          /* 醒目红色 */
+            letter-spacing: -0.02em;
+            line-height: 1;
+            text-shadow: 0 8px 20px rgba(211, 47, 47, 0.15);
+            margin-bottom: 0.2rem;
+            transition: transform 0.2s ease;
+        }
+
+        .four-oh-four:hover {
+            transform: scale(1.01);
+        }
+
+        /* File not found (小一点) */
+        .file-not-found {
+            font-size: 1.7rem;
+            font-weight: 420;
+            color: #2c3e50;
+            letter-spacing: 0.4px;
+            margin-top: -0.1rem;
+            margin-bottom: 0.9rem;
+            word-break: keep-all;
+        }
+
+        /* 中文提示 */
+        .chinese-hint {
+            font-size: 1.2rem;
+            color: #4a5b6b;
+            background: rgba(211, 47, 47, 0.02);
+            padding: 0.75rem 1.2rem;
+            border-radius: 60px;
+            display: inline-block;
+            margin: 1.2rem auto 1.8rem;
+            border: 1px solid rgba(211, 47, 47, 0.08);
+            backdrop-filter: blur(4px);
+            font-weight: 400;
+        }
+
+        /* 返回首页按钮 */
+        .home-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #d32f2f;
+            color: white;
+            text-decoration: none;
+            font-weight: 520;
+            font-size: 1.25rem;
+            padding: 0.9rem 2.5rem;
+            border-radius: 60px;
+            box-shadow: 0 10px 18px -8px rgba(211, 47, 47, 0.4), 0 4px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            margin-top: 0.4rem;
+            letter-spacing: 0.3px;
+            gap: 0.4rem;
+        }
+
+        .home-link:hover {
+            background: #b71c1c;
+            box-shadow: 0 14px 24px -8px rgba(183, 28, 28, 0.5);
+            transform: translateY(-3px);
+            text-decoration: none;
+        }
+
+        .home-link:active {
+            transform: translateY(1px);
+            box-shadow: 0 6px 12px -6px #b71c1c;
+        }
+
+        /* 小箭头 (可选装饰) */
+        .home-link::after {
+            content: "⌂";
+            font-size: 1.5rem;
+            font-weight: 500;
+            line-height: 1;
+            margin-left: 0.3rem;
+            transition: transform 0.15s;
+        }
+
+        .home-link:hover::after {
+            transform: translateX(4px);
+        }
+
+        /* 柔光点缀 */
+        .glow {
+            font-size: 0.95rem;
+            color: #8f9eae;
+            margin-top: 2rem;
+            opacity: 0.6;
+            border-top: 1px dashed rgba(100, 100, 120, 0.15);
+            padding-top: 1rem;
+            width: 70%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 适配小屏 */
+        @media (max-width: 480px) {
+            .error-container {
+                padding: 2rem 1.2rem 2.5rem;
+                border-radius: 36px;
+            }
+
+            .file-not-found {
+                font-size: 1.4rem;
+            }
+
+            .chinese-hint {
+                font-size: 1rem;
+                padding: 0.5rem 1rem;
+            }
+
+            .home-link {
+                font-size: 1.1rem;
+                padding: 0.8rem 2rem;
+            }
+        }
+
+        /* 对于非常高的屏幕保持美观 */
+        @media (min-height: 800px) {
+            .error-container {
+                margin: 2rem auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <!-- 正中央大红 404 -->
+        <div class="four-oh-four" aria-label="404">404</div>
+
+        <!-- 小一点：File not found -->
+        <div class="file-not-found">File not found</div>
+
+        <!-- 中文提示：页面未找到 + 返回引导 -->
+        <div class="chinese-hint">
+            页面未找到，您可以返回首页重新打开
+        </div>
+
+        <!-- 返回首页按钮，点击跳转至根目录 luckynum.top -->
+        <a href="https://luckynum.top" class="home-link" rel="noopener noreferrer">
+            返回首页
+        </a>
+
+        <!-- 极简装饰 (低调) -->
+        <div class="glow">· 404请检查地址或返回首页 ·</div>
+    </div>
+
+    <!-- 微交互：点击返回直接跳转到根目录 (luckynum.top) 
+         同时保留右键功能等正常行为。如果需要在当前页打开，直接用 https 即可。 
+         如果希望从本地文件测试也能模拟点击，地址使用绝对路径 -->
+    <script>
+        (function() {
+            // 保证链接绝对正确 (万一未来路径被修改，这里也可以冗余处理)
+            // 但不需要额外操作，<a> 已经完美指向根域名。
+            // 添加一点平滑体验：外部链接增加安全提示，但因为是同一网站不会有大问题。
+            console.log('404 page loaded – return link goes to https://luckynum.top');
+        })();
+    </script>
+</body>
+</html>
