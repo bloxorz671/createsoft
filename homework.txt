@@ -2,7 +2,7 @@
 sub=数学
 name=录制讲题视频（补交）
 link=https://brilliant-unicorn-633b63.netlify.app
-more=补交表截止时间为27日11:59分，迟交的请尽快提交
+more=收集已经完全截止，如果您确实因为各种原因晚交的，请联系我，我会给您提供补交的作业码。
 more_colour[255,0,0]
 start_time=2026/1/1 00:00
 end_time=2026/2/27 11:59
