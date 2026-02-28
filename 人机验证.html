@@ -12,7 +12,7 @@
         }
 
         body {
-            background: #1a1e24;        /* 深色背景，与矩形内形成对比 */
+            background: #d8d8d8;        /* 浅灰色背景，与矩形内浅色稍有区分 */
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -22,10 +22,10 @@
             padding: 20px;
         }
 
-        /* 极简矩形框 — 黑色边框，内部保持浅色 */
+        /* 极简矩形框 — 黑色边框，内部保持浅色 (比外部更亮) */
         .captcha-rect {
             border: 2px solid #000000;
-            background: #f2f2f2;          /* 框内浅灰，与深色外部明显区分 */
+            background: #f8f8f8;          /* 框内亮浅灰，与外部浅灰形成柔和对比 */
             padding: 24px 42px 24px 38px;
             display: inline-block;
             box-shadow: none;
@@ -68,7 +68,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #f2f2f2;
+            background-color: #f8f8f8;    /* 与矩形内背景一致 */
             border: 2px solid #000000;
             border-radius: 0;
             pointer-events: none;
@@ -111,7 +111,7 @@
             left: 0;
             width: 28px;
             height: 28px;
-            border: 3px solid #cccccc;
+            border: 3px solid #aaaaaa;
             border-top: 3px solid #000000;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
@@ -167,7 +167,7 @@
     </style>
 </head>
 <body>
-    <!-- 黑色矩形框，内部浅色 -->
+    <!-- 黑色矩形框，内部亮浅色，外部稍暗浅灰 -->
     <div class="captcha-rect">
         <div class="verify-row">
             <div class="checkbox-wrap">
@@ -222,7 +222,7 @@
                 const deltaY = Math.abs(clickY - centerY);
                 const distanceToCenter = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-                // 中心判定范围 (保持之前缩小的4.5px)
+                // 中心判定范围 (4.5px)
                 const CENTER_THRESHOLD = 4.5;
                 const elapsedTime = Date.now() - pageOpenTime;
                 const tooFast = elapsedTime < 1000;
