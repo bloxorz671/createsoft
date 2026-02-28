@@ -12,7 +12,7 @@
         }
 
         body {
-            background: #f2f2f2;        /* 与框外颜色一致 (浅灰背景) 框内背景也相同 */
+            background: #1a1e24;        /* 深色背景，与矩形内形成对比 */
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -22,14 +22,14 @@
             padding: 20px;
         }
 
-        /* 极简矩形框 — 黑色边框，内部背景色与外部完全相同 */
+        /* 极简矩形框 — 黑色边框，内部保持浅色 */
         .captcha-rect {
-            border: 2px solid #000000;   /* 黑色边框 */
-            background: #f2f2f2;          /* 框内颜色与body背景一致 (浅灰) */
+            border: 2px solid #000000;
+            background: #f2f2f2;          /* 框内浅灰，与深色外部明显区分 */
             padding: 24px 42px 24px 38px;
             display: inline-block;
             box-shadow: none;
-            border-radius: 0;              /* 彻底矩形，无圆角 */
+            border-radius: 0;
         }
 
         /* 验证行：复选框 + 文字 */
@@ -40,7 +40,7 @@
             user-select: none;
         }
 
-        /* 复选框包装 — 用于精确定位点击坐标 */
+        /* 复选框包装 — 用于定位和切换显示 */
         .checkbox-wrap {
             position: relative;
             width: 28px;
@@ -48,7 +48,7 @@
             flex-shrink: 0;
         }
 
-        /* 原生复选框完全透明且覆盖区域，用于捕获点击和坐标 */
+        /* 原生复选框（完全透明用于点击） */
         #verifyCheckbox {
             position: absolute;
             top: 0;
@@ -61,40 +61,71 @@
             cursor: pointer;
         }
 
-        /* 自定义视觉复选框 (纯黑白，无圆角发光) */
+        /* 自定义视觉复选框 (默认可见) */
         .checkbox-custom {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #f2f2f2;       /* 与外部一致 */
-            border: 2px solid #000000;        /* 黑色边框 */
-            border-radius: 0;                  /* 直角矩形 */
-            pointer-events: none;               /* 点击穿透 */
+            background-color: #f2f2f2;
+            border: 2px solid #000000;
+            border-radius: 0;
+            pointer-events: none;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #000000;
             font-size: 20px;
             font-weight: bold;
-        }
-
-        /* 勾选时的效果: 背景填充黑色，勾变为白色 */
-        #verifyCheckbox:checked + .checkbox-custom {
-            background-color: #000000;
+            transition: opacity 0.1s;
         }
 
         .checkbox-custom::after {
             content: "✓";
             opacity: 0;
-            color: #ffffff;                 /* 白色勾 */
+            color: #ffffff;
             transform: scale(0.9);
             transition: opacity 0.1s;
         }
 
+        /* 勾选状态：背景变黑，白色勾 */
+        #verifyCheckbox:checked + .checkbox-custom {
+            background-color: #000000;
+        }
+
         #verifyCheckbox:checked + .checkbox-custom::after {
             opacity: 1;
+        }
+
+        /* 隐藏复选框（验证中时使用） */
+        .checkbox-custom.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 旋转器 — 完全覆盖在复选框位置 */
+        .spinner-mini {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 28px;
+            height: 28px;
+            border: 3px solid #cccccc;
+            border-top: 3px solid #000000;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            z-index: 5;
+            display: none;
+        }
+
+        .spinner-mini.show {
+            display: block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* 右侧提示文字 */
@@ -106,62 +137,7 @@
             cursor: default;
         }
 
-        /* ---------- 覆盖层：验证中(转圈) ---------- */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);  /* 半透明遮罩 */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            backdrop-filter: blur(2px);
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.2s ease, visibility 0.2s;
-        }
-
-        .overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .spinner-box {
-            background: #ffffff;
-            border: 2px solid #000000;           /* 黑色边框，呼应主题 */
-            padding: 28px 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 16px;
-            box-shadow: none;
-            border-radius: 0;                     /* 直角矩形 */
-        }
-
-        .spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid #dddddd;
-            border-top: 4px solid #000000;        /* 黑色旋转部分 */
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        .spinner-box span {
-            font-size: 1.4rem;
-            color: #000000;
-            font-weight: 500;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* 失败提示（toast风格，极简黑框） */
+        /* 失败提示 (黑色边框) */
         .fail-toast {
             position: fixed;
             top: 30px;
@@ -191,124 +167,130 @@
     </style>
 </head>
 <body>
-    <!-- 黑色矩形框，内部背景与外部完全一致 -->
+    <!-- 黑色矩形框，内部浅色 -->
     <div class="captcha-rect">
         <div class="verify-row">
             <div class="checkbox-wrap">
                 <input type="checkbox" id="verifyCheckbox">
-                <span class="checkbox-custom"></span>
+                <span class="checkbox-custom" id="checkboxVisual"></span>
+                <!-- 迷你旋转器 (验证中显示) -->
+                <div class="spinner-mini" id="miniSpinner"></div>
             </div>
             <span class="label-text">请证明你是人类</span>
         </div>
     </div>
 
-    <!-- 验证中遮罩 (旋转提示) -->
-    <div id="loadingOverlay" class="overlay">
-        <div class="spinner-box">
-            <div class="spinner"></div>
-            <span>正在验证中...</span>
-        </div>
-    </div>
-
-    <!-- 失败提示框 (黑色边框) -->
+    <!-- 失败提示框 -->
     <div id="failToast" class="fail-toast">验证失败，请重试</div>
 
     <script>
         (function() {
             const checkbox = document.getElementById('verifyCheckbox');
-            const overlay = document.getElementById('loadingOverlay');
+            const checkboxVisual = document.getElementById('checkboxVisual');
+            const miniSpinner = document.getElementById('miniSpinner');
             const failToast = document.getElementById('failToast');
 
-            // 页面打开时间戳 (毫秒)
+            // 页面打开时间戳
             const pageOpenTime = Date.now();
 
-            // 标记是否正在处理验证中 (防止连续点击)
+            // 标记是否正在验证中
             let isVerifying = false;
+            // 标记验证结果 (用于3秒后处理)
+            let verificationResult = false;
 
-            // 清除任何可能遗留的勾选状态 (保证初始未勾选)
+            // 初始状态：复选框未勾选，视觉正常
             checkbox.checked = false;
+            checkboxVisual.classList.remove('hidden');
+            miniSpinner.classList.remove('show');
 
-            // 点击验证的核心逻辑
+            // 点击验证
             checkbox.addEventListener('click', function(e) {
-                e.preventDefault();     // 阻止原生勾选切换，由我们控制
+                e.preventDefault();     // 阻止原生勾选
 
-                // 如果已经在验证过程中，直接忽略新的点击
+                // 如果已经在验证中，忽略
                 if (isVerifying) return;
 
-                // 获取鼠标相对于复选框左上角的点击坐标 (用于中心判定)
+                // 获取点击坐标用于中心判定
                 const rect = checkbox.getBoundingClientRect();
                 const clickX = e.clientX - rect.left;
                 const clickY = e.clientY - rect.top;
 
-                // 计算距离中心的偏移 (复选框大小为28x28, 中心点 14,14)
-                const centerX = rect.width / 2;      // 应为14
-                const centerY = rect.height / 2;     // 应为14
+                // 中心点 (14,14)
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
                 const deltaX = Math.abs(clickX - centerX);
                 const deltaY = Math.abs(clickY - centerY);
                 const distanceToCenter = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-                // 中心判定范围: 缩小为 4.5 像素 (原来8，现在更严格，只拒绝极端正中)
+                // 中心判定范围 (保持之前缩小的4.5px)
                 const CENTER_THRESHOLD = 4.5;
-
-                // 耗时判定: 是否小于1秒
                 const elapsedTime = Date.now() - pageOpenTime;
                 const tooFast = elapsedTime < 1000;
                 const tooCentered = distanceToCenter <= CENTER_THRESHOLD;
 
-                // 决定验证是否通过 (人类标准: 不是太快 且 没有点在极端中心)
+                // 验证结果
                 const isHuman = !(tooFast || tooCentered);
+                verificationResult = isHuman;
 
-                // 无论成功/失败，首先显示加载遮罩(3秒)，期间不可操作
+                // 开始验证流程
                 isVerifying = true;
-                overlay.classList.add('show');
 
-                // 可以手动将复选框置为未勾选状态(因为我们在click里一直preventDefault, 它不会自动勾)
-                // 但为了视觉统一，先强制取消勾选 (后面如果成功，在跳转前我们也不改变勾选了，因为遮罩出现)
+                // 1. 隐藏复选框勾选框
+                checkboxVisual.classList.add('hidden');
+                // 2. 显示迷你旋转器
+                miniSpinner.classList.add('show');
+                // 确保复选框未勾选
                 checkbox.checked = false;
 
-                // 3秒后处理结果
+                // 3. 等待3秒
                 setTimeout(() => {
-                    // 隐藏遮罩
-                    overlay.classList.remove('show');
+                    // 隐藏旋转器
+                    miniSpinner.classList.remove('show');
 
-                    if (isHuman) {
-                        // 验证成功: 直接跳转 (不改变复选框状态，因为已经离开页面)
-                        window.location.href = 'https://brilliant-unicorn-633b63.netlify.app/';
-                        // (跳转会中断所有操作)
+                    if (verificationResult) {
+                        // 验证成功：显示打勾的复选框
+                        checkboxVisual.classList.remove('hidden');
+                        checkbox.checked = true;    // 打勾状态
+
+                        // 0.5秒后跳转
+                        setTimeout(() => {
+                            window.location.href = 'https://brilliant-unicorn-633b63.netlify.app/';
+                        }, 500);
                     } else {
-                        // 验证失败: 显示黑色矩形失败toast, 并且重置isVerifying, 让用户可以再次尝试
+                        // 验证失败：恢复复选框显示（未勾状态），并显示失败提示
+                        checkboxVisual.classList.remove('hidden');
+                        checkbox.checked = false;    // 确保未勾
+
+                        // 显示失败toast
                         failToast.classList.add('show');
-
-                        // 保持复选框未勾选 (已经是false)
-                        checkbox.checked = false;
-
-                        // 1.5秒后隐藏失败提示
                         setTimeout(() => {
                             failToast.classList.remove('show');
                         }, 1500);
 
-                        // 允许新的验证
+                        // 重置验证状态，允许再次尝试
                         isVerifying = false;
                     }
-                }, 3000); // 固定3秒等待
+                }, 3000); // 固定3秒验证过程
             });
 
-            // 阻止键盘操作(空格)修改复选框，也触发表单验证?
+            // 阻止键盘操作
             checkbox.addEventListener('keydown', function(e) {
                 if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Space') {
                     e.preventDefault();
-                    // 如果不在验证中，模拟一次点击行为（但键盘一般没有坐标，我们直接判定为机器操作? 可以给失败）
                     if (!isVerifying) {
-                        // 键盘触发直接视为“太快或正中” ? 根据规则，无坐标，但我们按机器处理，显示失败。
-                        // 更合理：显示验证失败，因为没有真实点击位置，当作正中处理。
+                        // 键盘触发直接当作机器处理（无坐标，视为正中）
                         isVerifying = true;
-                        overlay.classList.add('show');
+                        verificationResult = false;
 
-                        // 强制取消勾选
+                        checkboxVisual.classList.add('hidden');
+                        miniSpinner.classList.add('show');
                         checkbox.checked = false;
 
                         setTimeout(() => {
-                            overlay.classList.remove('show');
+                            miniSpinner.classList.remove('show');
+                            checkboxVisual.classList.remove('hidden');
+                            checkbox.checked = false;
+
                             failToast.classList.add('show');
                             setTimeout(() => {
                                 failToast.classList.remove('show');
@@ -319,10 +301,7 @@
                 }
             });
 
-            // 额外: 如果点击标签文字, 无动作 (符合需求: 只有复选框)
-            // 完全不加任何额外监听
-
-            // 确保标题严格为人机验证
+            // 设置标题
             document.title = '人机验证';
         })();
     </script>
