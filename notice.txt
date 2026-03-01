@@ -1,4 +1,4 @@
-Head=
-Message=
+Head=开发者提示
+Message=软件仍在调试中
 Board=
 
