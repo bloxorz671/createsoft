@@ -545,7 +545,6 @@
             pointer-events: none;
         }
 
-        /* 移除UA相关样式，只保留more=样式 */
         .more-message {
             margin-top: 0.8rem;
             margin-left: 0;
@@ -787,7 +786,7 @@
         <!-- 作业内容将动态渲染到这里 -->
         <div id="homeworkContainer" style="display: none;"></div>
 
-        <!-- 空状态提示容器 -->
+        <!-- 空状态提示容器（无作业时显示） -->
         <div id="emptyContainer" class="empty-message" style="display: none;">
             当前暂无需要通过此网页提交的作业或管理员未发布新的作业
         </div>
@@ -885,8 +884,9 @@
             function parseHomework(text) {
                 const items = [];
                 
-                // 查找最后一个【】块（作业码块）
+                // 先查找最后一个【】块（作业码块）- 这个可能在"""外部
                 const lastBracketMatch = text.match(/【([^】]*)】\s*$/);
+                let hasCodeBlock = false;
                 
                 if (lastBracketMatch) {
                     // 提取作业码块
@@ -898,6 +898,9 @@
                     codes.forEach(({ code, link }) => {
                         codeMap.set(code, link);
                     });
+                    
+                    // 标记有作业码块
+                    hasCodeBlock = codes.length > 0;
                     
                     // 移除最后一个【】块，处理剩余部分作为作业内容
                     const lastBracketIndex = text.lastIndexOf('【');
@@ -970,7 +973,8 @@
                     }
                 }
                 
-                return items;
+                // 返回作业项和是否有作业码块的标记
+                return { items, hasCodeBlock };
             }
 
             // 解析通知文件
@@ -1362,7 +1366,7 @@
                     homeworkEl.appendChild(section);
                 }
                 
-                // 更新作业码入口显示
+                // 更新作业码入口显示 - 只要codeMap有内容就显示，无论是否有作业
                 updateCodeEntry();
             }
 
@@ -1417,7 +1421,8 @@
                         return response.text();
                     })
                     .then(text => {
-                        originalItems = parseHomework(text);
+                        const { items, hasCodeBlock } = parseHomework(text);
+                        originalItems = items;
                         filteredItems = [...originalItems];
                         
                         updateSubjectFilter(originalItems);
@@ -1426,6 +1431,8 @@
                         document.getElementById('subjectFilter').value = 'all';
                         
                         renderHomework(filteredItems);
+                        
+                        // 注意：updateCodeEntry已经在renderHomework中调用
                     })
                     .catch(error => {
                         console.warn('读取 homework.txt 失败，视为空文件。', error);
