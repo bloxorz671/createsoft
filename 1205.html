@@ -545,7 +545,8 @@
             pointer-events: none;
         }
 
-        .ua-message {
+        /* 移除UA相关样式，只保留more=样式 */
+        .more-message {
             margin-top: 0.8rem;
             margin-left: 0;
             font-size: 0.9rem;
@@ -553,16 +554,7 @@
             width: 100%;
             text-align: left;
             border-top: 1px dashed #e0e6ed;
-        }
-
-        .ua-confirmed {
-            color: #2e7d32;
-            font-weight: 450;
-        }
-
-        .ua-waiting {
-            color: #b91c1c;
-            font-weight: 400;
+            color: #1e293b;
         }
 
         /* 不显眼的作业码入口 */
@@ -713,7 +705,7 @@
                 font-size: 1rem;
             }
             
-            .ua-message {
+            .more-message {
                 font-size: 0.85rem;
                 margin-top: 0.8rem;
                 padding-top: 0.5rem;
@@ -816,9 +808,6 @@
 
     <script>
         (function() {
-            // 获取当前浏览器的 UA
-            const currentUA = navigator.userAgent;
-            
             // 存储原始作业数据
             let originalItems = [];
             let filteredItems = [];
@@ -892,11 +881,11 @@
                 return codes;
             }
 
-            // 解析作业函数
+            // 解析作业函数 - 只解析"""内的内容
             function parseHomework(text) {
                 const items = [];
                 
-                // 查找最后一个【】块
+                // 查找最后一个【】块（作业码块）
                 const lastBracketMatch = text.match(/【([^】]*)】\s*$/);
                 
                 if (lastBracketMatch) {
@@ -915,84 +904,69 @@
                     text = text.substring(0, lastBracketIndex).trim();
                 }
                 
-                // 解析作业内容
+                // 解析作业内容 - 只处理"""内的内容
                 const rawBlocks = text.split(/"""/);
                 
                 for (let i = 0; i < rawBlocks.length; i++) {
-                    let block = rawBlocks[i].trim();
-                    if (block === '') continue;
-                    
-                    const lines = block.split('\n');
-                    let sub = '', name = '', link = '';
-                    let uaList = [];
-                    let hasUaBracket = false;
-                    let more = '';
-                    let moreColor = null;
-                    let startTimeStr = '';
-                    let endTimeStr = '';
-                    
-                    for (let line of lines) {
-                        line = line.trim();
+                    // 只处理奇数索引（即"""之间的内容）
+                    // 索引0是第一个"""之前的内容，索引1是第一个和第二个"""之间的内容，以此类推
+                    if (i % 2 === 1) {
+                        let block = rawBlocks[i].trim();
+                        if (block === '') continue;
                         
-                        if (line.startsWith('【')) {
-                            hasUaBracket = true;
-                            const match = line.match(/【(.*?)】/);
-                            if (match && match[1]) {
-                                const uaContent = match[1];
-                                const uaParts = uaContent.split(/\n\s*\n/);
-                                for (let part of uaParts) {
-                                    part = part.trim();
-                                    if (part) {
-                                        uaList.push(part);
-                                    }
+                        const lines = block.split('\n');
+                        let sub = '', name = '', link = '';
+                        let more = '';
+                        let moreColor = null;
+                        let startTimeStr = '';
+                        let endTimeStr = '';
+                        
+                        for (let line of lines) {
+                            line = line.trim();
+                            
+                            // 检查 more_colour[,,]
+                            const colorMatch = line.match(/more_colour\s*\[\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\]/);
+                            if (colorMatch) {
+                                const r = parseInt(colorMatch[1]);
+                                const g = parseInt(colorMatch[2]);
+                                const b = parseInt(colorMatch[3]);
+                                if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
+                                    moreColor = `rgb(${r}, ${g}, ${b})`;
                                 }
+                                continue;
                             }
-                            continue;
+                            
+                            if (line.startsWith('sub=')) {
+                                sub = line.substring(4).trim();
+                            } else if (line.startsWith('name=')) {
+                                name = line.substring(5).trim();
+                            } else if (line.startsWith('link=')) {
+                                link = line.substring(5).trim();
+                            } else if (line.startsWith('more=')) {
+                                more = line.substring(5).trim();
+                            } else if (line.startsWith('start_time=')) {
+                                startTimeStr = line.substring(11).trim();
+                            } else if (line.startsWith('end_time=')) {
+                                endTimeStr = line.substring(9).trim();
+                            }
                         }
                         
-                        const colorMatch = line.match(/more_colour\s*\[\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\]/);
-                        if (colorMatch) {
-                            const r = parseInt(colorMatch[1]);
-                            const g = parseInt(colorMatch[2]);
-                            const b = parseInt(colorMatch[3]);
-                            if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
-                                moreColor = `rgb(${r}, ${g}, ${b})`;
-                            }
-                            continue;
-                        }
+                        const startTime = parseDateTime(startTimeStr);
+                        const endTime = parseDateTime(endTimeStr);
                         
-                        if (line.startsWith('sub=')) {
-                            sub = line.substring(4).trim();
-                        } else if (line.startsWith('name=')) {
-                            name = line.substring(5).trim();
-                        } else if (line.startsWith('link=')) {
-                            link = line.substring(5).trim();
-                        } else if (line.startsWith('more=')) {
-                            more = line.substring(5).trim();
-                        } else if (line.startsWith('start_time=')) {
-                            startTimeStr = line.substring(11).trim();
-                        } else if (line.startsWith('end_time=')) {
-                            endTimeStr = line.substring(9).trim();
+                        if (sub || name || link || more || startTimeStr || endTimeStr) {
+                            items.push({ 
+                                sub: sub || '其他',
+                                name: name || '未命名作业',
+                                link,
+                                more: more,
+                                moreColor: moreColor,
+                                startTime: startTime,
+                                endTime: endTime,
+                                startTimeStr: startTimeStr,
+                                endTimeStr: endTimeStr
+                            });
                         }
-                    }
-                    
-                    const startTime = parseDateTime(startTimeStr);
-                    const endTime = parseDateTime(endTimeStr);
-                    
-                    if (sub || name || link || hasUaBracket || more || startTimeStr || endTimeStr) {
-                        items.push({ 
-                            sub: sub || '其他',
-                            name: name || '未命名作业',
-                            link,
-                            uaList: uaList,
-                            hasUaBracket: hasUaBracket,
-                            more: more,
-                            moreColor: moreColor,
-                            startTime: startTime,
-                            endTime: endTime,
-                            startTimeStr: startTimeStr,
-                            endTimeStr: endTimeStr
-                        });
                     }
                 }
                 
@@ -1200,11 +1174,6 @@
                 return sub || '作业';
             }
 
-            function isUaConfirmed(uaList) {
-                if (!uaList || uaList.length === 0) return false;
-                return uaList.some(ua => ua.trim() === currentUA);
-            }
-
             function getButtonState(item) {
                 const now = new Date();
                 
@@ -1376,26 +1345,14 @@
                         rowDiv.appendChild(linkBtn);
                         itemDiv.appendChild(rowDiv);
 
+                        // 只保留more=内容的显示
                         if (item.more) {
                             const msgDiv = document.createElement('div');
-                            msgDiv.className = 'ua-message';
+                            msgDiv.className = 'more-message';
                             msgDiv.textContent = item.more;
                             if (item.moreColor) {
                                 msgDiv.style.color = item.moreColor;
                             }
-                            itemDiv.appendChild(msgDiv);
-                        } else if (item.hasUaBracket) {
-                            const msgDiv = document.createElement('div');
-                            msgDiv.className = 'ua-message';
-                            
-                            if (item.uaList && item.uaList.length > 0 && isUaConfirmed(item.uaList)) {
-                                msgDiv.className += ' ua-confirmed';
-                                msgDiv.textContent = '管理员已确认本设备提交的内容';
-                            } else {
-                                msgDiv.className += ' ua-waiting';
-                                msgDiv.textContent = '你的作业正在等待确认，或者你还未提交作业';
-                            }
-                            
                             itemDiv.appendChild(msgDiv);
                         }
                         
