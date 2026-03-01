@@ -1,4 +1,4 @@
 Head=开发者提示
-Message=欢迎王鸡使用！
+Message=
 Board=
 
