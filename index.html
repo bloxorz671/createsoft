@@ -1306,7 +1306,7 @@
       <h1>随机抽号V3.1</h1>
       <div class="subhead">免费 实用 极简</div>
       
-      <!-- 双卡片：Windows版 + 信创版（无下拉框）+ 网页版 -->
+      <!-- 双卡片：Windows版 + 信创版 + 网页版 -->
       <div class="button-group">
         
         <!-- Windows版卡片 - 蓝奏云链接 -->
@@ -1320,13 +1320,16 @@
           <div class="system-support">适用于Win7及以上</div>
         </div>
         
-        <!-- 信创版卡片 - 无下拉框，直接下载.sh文件，同时打开安装步骤图片 -->
+        <!-- 信创版卡片 - 使用隐藏下载链接，只触发一次下载 -->
         <div class="download-card">
           <div class="image-wrapper">
             <img class="linux-icon" src="https://ss-mpvolc.meipian.me/users/499047829/cd78accd974d71a7f7c5cf09b7bb6debmpand__jpg.heic~tplv-s1ctq42ewb-s2-cC-q:750:0:0:0:q80.webp" alt="信创版">
           </div>
           
-          <!-- 自定义按钮，同时触发下载和打开图片 -->
+          <!-- 隐藏的真实下载链接 - 修改为通用包 -->
+          <a href="随机抽号Linux通用包.sh" download="随机抽号Linux通用包.sh" id="linuxDownloadLink" style="display: none;">下载</a>
+          
+          <!-- 自定义按钮，只触发一次下载并打开图片页面 -->
           <button class="download-btn" onclick="downloadLinuxAndShowGuide()">下载信创版</button>
           
           <!-- 密码提示 -->
@@ -1406,19 +1409,123 @@
         window.location.href = 'http://luckynum.top/online';
       };
 
-      // 信创版下载函数 - 同时触发下载和打开安装步骤图片
+      // 信创版下载函数 - 只触发一次下载，并在新标签页打开带有手动下载按钮的图片页面
       window.downloadLinuxAndShowGuide = function() {
-        // 创建隐藏的下载链接触发下载
-        const downloadLink = document.createElement('a');
-        downloadLink.href = '随机抽号Linux版3.1.0安装程序.sh';
-        downloadLink.download = '随机抽号Linux版3.1.0安装程序.sh';
-        downloadLink.style.display = 'none';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+        // 只触发一次下载 - 使用隐藏链接
+        const downloadLink = document.getElementById('linuxDownloadLink');
+        if (downloadLink) {
+          downloadLink.click();
+        }
         
-        // 在新标签页打开安装步骤图片
-        window.open('安装步骤.png', '_blank');
+        // 在新标签页打开自定义的安装指南页面（包含手动下载按钮）
+        const guidePage = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>安装指南 - 随机抽号Linux版</title>
+            <style>
+              body {
+                margin: 0;
+                padding: 20px;
+                background-color: #f5f5f5;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-height: 100vh;
+              }
+              .container {
+                max-width: 800px;
+                width: 100%;
+                background: white;
+                border-radius: 24px;
+                padding: 30px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+              }
+              h1 {
+                color: #1E2A47;
+                margin-bottom: 20px;
+                text-align: center;
+              }
+              .guide-image {
+                width: 100%;
+                border-radius: 16px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                margin: 20px 0;
+              }
+              .download-button {
+                display: inline-block;
+                background: linear-gradient(165deg, #1F2B3C, #283B54);
+                color: white;
+                font-weight: 700;
+                font-size: 1.2rem;
+                padding: 15px 40px;
+                border-radius: 60px;
+                text-decoration: none;
+                margin: 20px 0;
+                box-shadow: 0 8px 16px rgba(0,20,50,0.2);
+                transition: all 0.2s;
+                border: none;
+                cursor: pointer;
+              }
+              .download-button:hover {
+                background: linear-gradient(165deg, #25364a, #1f2e44);
+                transform: scale(1.02);
+              }
+              .note {
+                color: #666;
+                font-size: 0.9rem;
+                text-align: center;
+                margin-top: 20px;
+                padding-top: 20px;
+                border-top: 1px solid #eee;
+              }
+              .password-hint {
+                font-size: 1rem;
+                color: #1E2A47;
+                background: #f0f4f8;
+                padding: 8px 16px;
+                border-radius: 40px;
+                display: inline-block;
+                margin: 10px 0;
+              }
+              .password-hint::before {
+                content: "🔒 ";
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>📦 随机抽号 Linux 版安装指南</h1>
+              
+              <!-- 这里放置安装步骤图片 -->
+              <img src="安装步骤.png" alt="安装步骤" class="guide-image" onerror="this.style.display='none'">
+              
+              <div style="text-align: center;">
+                <p style="font-size: 1.1rem; margin: 20px 0;">如果下载没有自动开始，请点击下方按钮手动下载：</p>
+                <a href="随机抽号Linux通用包.sh" download="随机抽号Linux通用包.sh" class="download-button">⬇️ 手动下载安装包</a>
+                <div class="password-hint">密码：1234</div>
+              </div>
+              
+              <div class="note">
+                <p>安装步骤：</p>
+                <p>1. 下载完成后，打开终端进入下载目录</p>
+                <p>2. 运行：chmod +x 随机抽号Linux通用包.sh</p>
+                <p>3. 运行：./随机抽号Linux通用包.sh</p>
+                <p>4. 按照提示完成安装</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `;
+        
+        // 创建Blob对象并打开新窗口
+        const blob = new Blob([guidePage], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
       };
 
       // 执行设备检测
