@@ -1,7 +1,5 @@
 
-【
-num=262702,link=https://brilliant-unicorn-633b63.netlify.app
-】
+【num=262702,link=https://brilliant-unicorn-633b63.netlify.app】
 学科
 作业名
 链接
