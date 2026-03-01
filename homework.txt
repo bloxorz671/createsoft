@@ -16,5 +16,6 @@ start_time=
 end_time=
 学科前后加三个英文符双引号
 
-【num=262702,link=luckynum.top/404】
+
 https://brilliant-unicorn-633b63.netlify.app
+【num=262702,link=luckynum.top/404】
