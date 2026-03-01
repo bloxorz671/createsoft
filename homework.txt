@@ -1,11 +1,5 @@
 """
-sub=
-name=
-link=
-more=
-more_colour[,,]
-start_time=
-end_time=
+
 """
 【
 num=262702,link=https://brilliant-unicorn-633b63.netlify.app
@@ -17,3 +11,10 @@ num=262702,link=https://brilliant-unicorn-633b63.netlify.app
 小字颜色[R,G,B]
 开始时间年/月/日 时:分
 截止时间年/月/日 时:分
+sub=
+name=
+link=
+more=
+more_colour[,,]
+start_time=
+end_time=
