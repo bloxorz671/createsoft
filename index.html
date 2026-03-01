@@ -1321,22 +1321,22 @@
         </div>
         
         <!-- 信创版卡片 - 使用双重下载机制确保触发 -->
-        <div class="download-card">
-          <div class="image-wrapper">
-            <img class="linux-icon" src="https://ss-mpvolc.meipian.me/users/499047829/cd78accd974d71a7f7c5cf09b7bb6debmpand__jpg.heic~tplv-s1ctq42ewb-s2-cC-q:750:0:0:0:q80.webp" alt="信创版">
-          </div>
-          
-          <!-- 隐藏的真实下载链接 -->
-          <a href="随机抽号Linux版3.1.0安装程序.sh" download="随机抽号Linux版3.1.0安装程序.sh" id="linuxDownloadLink" style="display: none;">下载</a>
-          
-          <!-- 自定义按钮，同时触发下载和打开图片 -->
-          <button class="download-btn" onclick="downloadLinuxAndShowGuide()">下载信创版</button>
-          
-          <!-- 密码提示 -->
-          <div class="password-hint">密码：1234</div>
-          <div class="accent-line"></div>
-          <div class="system-support">银河麒麟/统信UOS</div>
-        </div>
+<div class="download-card">
+  <div class="image-wrapper">
+    <img class="linux-icon" src="https://ss-mpvolc.meipian.me/users/499047829/cd78accd974d71a7f7c5cf09b7bb6debmpand__jpg.heic~tplv-s1ctq42ewb-s2-cC-q:750:0:0:0:q80.webp" alt="信创版">
+  </div>
+  
+  <!-- 隐藏的真实下载链接 - 修改为随机抽号Linux通用包.sh -->
+  <a href="随机抽号Linux通用包.sh" download="随机抽号Linux通用包.sh" id="linuxDownloadLink" style="display: none;">下载</a>
+  
+  <!-- 自定义按钮，同时触发下载和打开图片 -->
+  <button class="download-btn" onclick="downloadLinuxAndShowGuide()">下载信创版</button>
+  
+  <!-- 密码提示 -->
+  <div class="password-hint">无需密码</div>
+  <div class="accent-line"></div>
+  <div class="system-support">主流Linux系统架构通用</div>
+</div>
 
         <!-- 网页版卡片 -->
         <div class="download-card">
@@ -1409,33 +1409,18 @@
         window.location.href = 'http://luckynum.top/online';
       };
 
-      // 信创版下载函数 - 使用多种方式确保下载触发
-      window.downloadLinuxAndShowGuide = function() {
-        // 方法1: 直接使用隐藏链接的 click 方法（最可靠）
-        const downloadLink = document.getElementById('linuxDownloadLink');
-        if (downloadLink) {
-          downloadLink.click();
-        }
-        
-        // 方法2: 创建 iframe 作为备选（针对某些特殊浏览器）
-        setTimeout(function() {
-          try {
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = '随机抽号Linux版3.1.0安装程序.sh';
-            document.body.appendChild(iframe);
-            setTimeout(function() {
-              document.body.removeChild(iframe);
-            }, 1000);
-          } catch (e) {
-            console.log('备选下载方式失败:', e);
-          }
-        }, 100);
-        
-        // 在新标签页打开安装步骤图片
-        window.open('安装步骤.png', '_blank');
-      };
-
+  // 信创版下载函数 - 使用多种方式确保下载触发
+	// 信创版下载函数 - 修复下载两个的问题
+	window.downloadLinuxAndShowGuide = function() {
+	  // 只触发一次下载 - 移除备选的iframe下载
+	  const downloadLink = document.getElementById('linuxDownloadLink');
+	  if (downloadLink) {
+		downloadLink.click(); // 只触发这一次下载
+	  }
+	  
+	  // 在新标签页打开安装步骤图片
+	  window.open('安装步骤.png', '_blank');
+	};
       // 执行设备检测
       checkUnsupportedDevice();
     })();
