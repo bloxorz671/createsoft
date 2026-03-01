@@ -512,33 +512,38 @@
       border: 0.5px solid rgba(255,255,255,0.8);
     }
 
-    /* ===== 三按钮区域（卡片严格对齐） ===== */
-    .button-group {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: stretch;
-      gap: 3rem;
-      margin: 1.5rem 0 1rem;
-      width: 100%;
-    }
 
-    .download-card {
-      flex: 0 1 300px;
-      min-width: 260px;
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-radius: 48px;
-      padding: 2.2rem 1.8rem 1.8rem;
-      box-shadow: 0 20px 30px -10px rgba(30, 50, 80, 0.15);
-      transition: transform 0.25s;
-      border: 1px solid rgba(255,255,255,0.7);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-    }
+	/* ===== 三按钮区域（卡片居中显示） ===== */
+	.button-group {
+	  display: flex;
+	  flex-wrap: wrap;
+	  justify-content: center;
+	  align-items: stretch;
+	  gap: 3rem;
+	  margin: 1.5rem auto 1rem; /* 修改这里：左右外边距设为 auto */
+	  width: 100%;
+	  max-width: 1200px; /* 添加最大宽度限制 */
+	  padding: 0 1rem; /* 添加左右内边距 */
+	}
+
+	.download-card {
+	  flex: 0 1 300px;
+	  min-width: 260px;
+	  max-width: 300px; /* 添加最大宽度限制 */
+	  background: rgba(255, 255, 255, 0.6);
+	  backdrop-filter: blur(16px);
+	  -webkit-backdrop-filter: blur(16px);
+	  border-radius: 48px;
+	  padding: 2.2rem 1.8rem 1.8rem;
+	  box-shadow: 0 20px 30px -10px rgba(30, 50, 80, 0.15);
+	  transition: transform 0.25s;
+	  border: 1px solid rgba(255,255,255,0.7);
+	  display: flex;
+	  flex-direction: column;
+	  align-items: center;
+	  position: relative;
+	  margin: 0 auto; /* 确保卡片自身居中 */
+	}
 
     .download-card:hover {
       transform: translateY(-8px);
@@ -1306,7 +1311,7 @@
       <h1>随机抽号V3.1</h1>
       <div class="subhead">免费 实用 极简</div>
       
-      <!-- 双卡片：Windows版 + 信创版 + 网页版 -->
+      <!-- 三卡片：Windows版 + 信创版 + 网页版 -->
       <div class="button-group">
         
         <!-- Windows版卡片 - 蓝奏云链接 -->
@@ -1320,16 +1325,16 @@
           <div class="system-support">适用于Win7及以上</div>
         </div>
         
-        <!-- 信创版卡片 - 使用隐藏下载链接，只触发一次下载 -->
+        <!-- 信创版卡片 -->
         <div class="download-card">
           <div class="image-wrapper">
             <img class="linux-icon" src="https://ss-mpvolc.meipian.me/users/499047829/cd78accd974d71a7f7c5cf09b7bb6debmpand__jpg.heic~tplv-s1ctq42ewb-s2-cC-q:750:0:0:0:q80.webp" alt="信创版">
           </div>
           
-          <!-- 隐藏的真实下载链接 - 修改为通用包 -->
+          <!-- 隐藏的真实下载链接 - 通用包 -->
           <a href="随机抽号Linux通用包.sh" download="随机抽号Linux通用包.sh" id="linuxDownloadLink" style="display: none;">下载</a>
           
-          <!-- 自定义按钮，只触发一次下载并打开图片页面 -->
+          <!-- 自定义按钮，触发下载并打开安装指南页面 -->
           <button class="download-btn" onclick="downloadLinuxAndShowGuide()">下载信创版</button>
           
           <!-- 密码提示 -->
@@ -1409,124 +1414,198 @@
         window.location.href = 'http://luckynum.top/online';
       };
 
-      // 信创版下载函数 - 只触发一次下载，并在新标签页打开带有手动下载按钮的图片页面
-      window.downloadLinuxAndShowGuide = function() {
-        // 只触发一次下载 - 使用隐藏链接
-        const downloadLink = document.getElementById('linuxDownloadLink');
-        if (downloadLink) {
-          downloadLink.click();
-        }
-        
-        // 在新标签页打开自定义的安装指南页面（包含手动下载按钮）
-        const guidePage = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>安装指南 - 随机抽号Linux版</title>
-            <style>
-              body {
-                margin: 0;
-                padding: 20px;
-                background-color: #f5f5f5;
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                min-height: 100vh;
-              }
-              .container {
-                max-width: 800px;
-                width: 100%;
-                background: white;
-                border-radius: 24px;
-                padding: 30px;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-              }
-              h1 {
-                color: #1E2A47;
-                margin-bottom: 20px;
-                text-align: center;
-              }
-              .guide-image {
-                width: 100%;
-                border-radius: 16px;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-                margin: 20px 0;
-              }
-              .download-button {
-                display: inline-block;
-                background: linear-gradient(165deg, #1F2B3C, #283B54);
-                color: white;
-                font-weight: 700;
-                font-size: 1.2rem;
-                padding: 15px 40px;
-                border-radius: 60px;
-                text-decoration: none;
-                margin: 20px 0;
-                box-shadow: 0 8px 16px rgba(0,20,50,0.2);
-                transition: all 0.2s;
-                border: none;
-                cursor: pointer;
-              }
-              .download-button:hover {
-                background: linear-gradient(165deg, #25364a, #1f2e44);
-                transform: scale(1.02);
-              }
-              .note {
-                color: #666;
-                font-size: 0.9rem;
-                text-align: center;
-                margin-top: 20px;
-                padding-top: 20px;
-                border-top: 1px solid #eee;
-              }
-              .password-hint {
-                font-size: 1rem;
-                color: #1E2A47;
-                background: #f0f4f8;
-                padding: 8px 16px;
-                border-radius: 40px;
-                display: inline-block;
-                margin: 10px 0;
-              }
-              .password-hint::before {
-                content: "🔒 ";
-              }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <h1>📦 随机抽号 Linux 版安装指南</h1>
-              
-              <!-- 这里放置安装步骤图片 -->
-              <img src="安装步骤.png" alt="安装步骤" class="guide-image" onerror="this.style.display='none'">
-              
-              <div style="text-align: center;">
-                <p style="font-size: 1.1rem; margin: 20px 0;">如果下载没有自动开始，请点击下方按钮手动下载：</p>
-                <a href="随机抽号Linux通用包.sh" download="随机抽号Linux通用包.sh" class="download-button">⬇️ 手动下载安装包</a>
-                <div class="password-hint">密码：1234</div>
-              </div>
-              
-              <div class="note">
-                <p>安装步骤：</p>
-                <p>1. 下载完成后，打开终端进入下载目录</p>
-                <p>2. 运行：chmod +x 随机抽号Linux通用包.sh</p>
-                <p>3. 运行：./随机抽号Linux通用包.sh</p>
-                <p>4. 按照提示完成安装</p>
-              </div>
+      // 信创版下载函数 - 触发下载并打开安装指南页面（图片 + 手动下载按钮）
+   // 信创版下载函数 - 修复点击无响应问题
+window.downloadLinuxAndShowGuide = function(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
+  console.log('下载信创版按钮被点击'); // 添加调试信息
+  
+  // 触发一次下载
+  const downloadLink = document.getElementById('linuxDownloadLink');
+  if (downloadLink) {
+    downloadLink.click();
+    console.log('下载已触发');
+  } else {
+    console.error('找不到下载链接元素');
+    // 如果找不到隐藏链接，创建一个临时链接
+    const tempLink = document.createElement('a');
+    tempLink.href = '随机抽号Linux通用包.sh';
+    tempLink.download = '随机抽号Linux通用包.sh';
+    tempLink.style.display = 'none';
+    document.body.appendChild(tempLink);
+    tempLink.click();
+    setTimeout(() => document.body.removeChild(tempLink), 1000);
+  }
+  
+  // 延迟一点打开新窗口，避免被浏览器拦截
+  setTimeout(() => {
+    // 创建安装指南页面HTML
+    const guidePage = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>安装指南 - 随机抽号Linux版</title>
+        <style>
+          body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          .guide-card {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+          }
+          h1 {
+            color: #1E2A47;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 2rem;
+          }
+          .image-container {
+            background: #f5f5f5;
+            border-radius: 16px;
+            padding: 10px;
+            margin: 20px 0;
+            border: 2px dashed #ccc;
+          }
+          .guide-image {
+            width: 100%;
+            border-radius: 12px;
+            display: block;
+          }
+          .image-fallback {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1rem;
+          }
+          .download-section {
+            text-align: center;
+            margin: 30px 0 20px;
+            padding: 20px;
+            background: linear-gradient(165deg, #f8f9fa, #e9ecef);
+            border-radius: 20px;
+          }
+          .manual-download-btn {
+            display: inline-block;
+            background: linear-gradient(165deg, #1F2B3C, #283B54);
+            color: white;
+            font-weight: 700;
+            font-size: 1.3rem;
+            padding: 16px 48px;
+            border-radius: 60px;
+            text-decoration: none;
+            margin: 15px 0;
+            box-shadow: 0 10px 20px rgba(0,20,50,0.3);
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+          }
+          .manual-download-btn:hover {
+            background: linear-gradient(165deg, #25364a, #1f2e44);
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(0,20,50,0.4);
+          }
+          .password-hint {
+            font-size: 1.1rem;
+            color: #1E2A47;
+            background: #fff;
+            padding: 8px 20px;
+            border-radius: 40px;
+            display: inline-block;
+            margin: 10px 0;
+            border: 1px solid #1E2A47;
+          }
+          .password-hint::before {
+            content: "🔒 ";
+          }
+          .install-steps {
+            background: #1E2A47;
+            color: white;
+            padding: 25px;
+            border-radius: 20px;
+            margin-top: 20px;
+          }
+          .install-steps p {
+            margin: 10px 0;
+            font-size: 1rem;
+          }
+          .install-steps code {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-family: monospace;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="guide-card">
+          <h1>📦 随机抽号 Linux 版安装指南</h1>
+          
+          <div class="image-container">
+            <img src="安装步骤.png" alt="安装步骤" class="guide-image" onerror="this.style.display='none'; document.getElementById('imageFallback').style.display='block';">
+            <div id="imageFallback" class="image-fallback" style="display: none;">
+              ⚠️ 安装步骤图片加载失败<br>
+              请参考下方的文字说明进行安装
             </div>
-          </body>
-          </html>
-        `;
+          </div>
+          
+          <div class="download-section">
+            <p style="font-size: 1.2rem; margin-bottom: 10px;">✨ 下载已自动开始，如果没有自动下载：</p>
+            <a href="随机抽号Linux通用包.sh" download="随机抽号Linux通用包.sh" class="manual-download-btn">
+              ⬇️ 手动下载安装包
+            </a>
+            <div class="password-hint">密码：1234</div>
+          </div>
+          
+          <div class="install-steps">
+            <h3 style="margin-bottom: 15px;">📋 安装步骤：</h3>
+            <p>1️⃣ 下载完成后，打开终端进入下载目录</p>
+            <p>2️⃣ 赋予执行权限：<code>chmod +x 随机抽号Linux通用包.sh</code></p>
+            <p>3️⃣ 运行安装程序：<code>./随机抽号Linux通用包.sh</code></p>
+            <p>4️⃣ 按照提示完成安装</p>
+            <p style="margin-top: 15px; font-size: 0.9rem; opacity: 0.9;">⚠️ 如果下载没有自动开始，请点击上方的手动下载按钮</p>
+          </div>
+        </div>
         
-        // 创建Blob对象并打开新窗口
-        const blob = new Blob([guidePage], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-      };
+        <script>
+          // 确保图片加载失败时显示备用信息
+          const img = document.querySelector('.guide-image');
+          if (img) {
+            img.addEventListener('error', function() {
+              this.style.display = 'none';
+              document.getElementById('imageFallback').style.display = 'block';
+            });
+          }
+        <\/script>
+      </body>
+      </html>
+    `;
+    
+    // 创建Blob对象并打开新窗口
+    const blob = new Blob([guidePage], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, 100);
+};
 
       // 执行设备检测
       checkUnsupportedDevice();
