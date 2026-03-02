@@ -10,7 +10,7 @@
 """
 sub=英语
 name=英语寒假作业（电子海报）收集表
-link=https://yunbiz.wps.cn/c/collect/cLYT7dZe0ts
+link=https://brilliant-unicorn-633b63.netlify.app
 more=已经提交过给英语课代的无需重复提交
 more_colour[255,0,0]
 start_time=2026/1/1 00:00
