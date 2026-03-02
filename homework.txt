@@ -9,7 +9,7 @@
 截止时间年/月/日 时:分
 """
 sub=英语
-name=英语寒假作业（电子作业）收集表
+name=英语寒假作业（电子海报）收集表
 link=https://yunbiz.wps.cn/c/collect/cLYT7dZe0ts
 more=已经提交过给英语课代的无需重复提交
 more_colour[255,0,0]
