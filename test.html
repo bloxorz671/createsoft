@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超声波数据交互 · 服务端/客户端演示</title>
+    <style>
+        * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+        body {
+            background: linear-gradient(145deg, #f6f9fc 0%, #eef2f7 100%);
+            min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center;
+            padding: 16px;
+        }
+        .card {
+            max-width: 700px; width: 100%; background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-radius: 48px; box-shadow: 0 20px 40px rgba(0,20,40,0.2), 0 4px 12px rgba(0,0,0,0.05);
+            padding: 32px; border: 1px solid rgba(255,255,255,0.6);
+        }
+        h1 { font-size: 2rem; font-weight: 600; margin: 0 0 8px 0; background: linear-gradient(135deg, #1a2a4f, #2c3e6e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .sub { color: #4a5b7a; margin-bottom: 28px; font-weight: 400; border-left: 4px solid #3b82f6; padding-left: 16px; background: #f0f4fe60; border-radius: 0 20px 20px 0; }
+        .compat-panel {
+            background: #ffffffc0; border-radius: 32px; padding: 20px; margin-bottom: 28px;
+            border: 1px solid #ffffff; box-shadow: inset 0 1px 4px #0000000a, 0 8px 18px -8px #1e293b30;
+        }
+        .badge { display: inline-block; padding: 6px 14px; border-radius: 40px; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.3px; }
+        .badge.ok { background: #e6f7e6; color: #1e7e34; border: 1px solid #a3e0a3; }
+        .badge.warn { background: #fff3d1; color: #9b6f0b; border: 1px solid #f7d98c; }
+        .badge.issue { background: #ffe2dd; color: #b83e2b; border: 1px solid #fbb8aa; }
+        .role-row { display: flex; gap: 16px; margin: 28px 0 20px; flex-wrap: wrap; }
+        .role-btn {
+            flex: 1 1 200px; background: white; border: none; padding: 22px 12px; border-radius: 36px;
+            font-size: 1.3rem; font-weight: 600; color: #1f2b48; box-shadow: 0 8px 18px -8px #1e293b50;
+            cursor: pointer; transition: 0.2s; border: 2px solid transparent; display: flex; flex-direction: column;
+            align-items: center; gap: 8px; backdrop-filter: blur(4px);
+        }
+        .role-btn small { font-size: 0.85rem; font-weight: 400; color: #5a6b89; }
+        .role-btn.active { border-color: #3b82f6; background: #eef4ff; transform: scale(1.02); box-shadow: 0 12px 24px -12px #2563eb; }
+        .role-btn:first-child .emoji-big { font-size: 2.4rem; }
+        .role-btn:last-child .emoji-big { font-size: 2.4rem; }
+        .hint-box {
+            background: #dbeafe; border-radius: 28px; padding: 18px 22px; margin: 24px 0 18px;
+            border-left: 6px solid #2563eb; font-weight: 500; color: #1e3a8a;
+        }
+        .tx-box, .rx-box { background: white; border-radius: 24px; padding: 20px; margin: 16px 0; }
+        input, textarea { width: 100%; padding: 16px 18px; font-size: 1rem; border-radius: 44px; border: 2px solid #e2e8f0; background: #fafdff; margin: 8px 0; }
+        button.action {
+            background: #1e293b; color: white; border: none; padding: 14px 28px; border-radius: 60px;
+            font-weight: 600; font-size: 1.1rem; cursor: pointer; transition: 0.15s; box-shadow: 0 6px 14px #0f172a40;
+            border: 1px solid #334155; width: 100%;
+        }
+        button.action:active { transform: scale(0.97); background: #0f172a; }
+        button.action:disabled { opacity: 0.3; transform: none; pointer-events: none; }
+        .log-panel {
+            background: #1a2639; color: #b0e0ff; border-radius: 24px; padding: 18px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;
+            max-height: 160px; overflow-y: auto; margin-top: 24px; border: 2px solid #00a6ff40; box-shadow: inset 0 0 10px #00000060;
+        }
+        .footnote { font-size: 0.8rem; color: #656f88; margin-top: 24px; text-align: center; border-top: 1px dashed #a0b8d0; padding-top: 20px; }
+        .flex { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .hl { background: #fef9c3; color: #854d0e; padding: 2px 8px; border-radius: 40px; font-size: 0.8rem; }
+    </style>
+    <!-- 加载 ggwave 核心库 (WebAssembly) 和辅助 -->
+    <script src="https://cdn.jsdelivr.net/npm/ggwave@0.4.0/dist/ggwave.js"></script>
+    <!-- 用于 fallback 提示的简单浏览器检测函数 (内置在代码中) -->
+</head>
+<body>
+<div class="card" id="app">
+    <h1>📡 超声波数据链路</h1>
+    <div class="sub">通过扬声器 · 麦克风 · WebAudio 实现设备间轻交互</div>
+
+    <!-- 兼容性面板 (动态填充) -->
+    <div class="compat-panel" id="compatibilityPanel">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;" id="compatIcons">
+            <span class="badge">🔍 检测中...</span>
+        </div>
+        <div id="compatDetails" style="margin-top: 12px; font-size: 0.9rem; color: #2d3a5e;"></div>
+    </div>
+
+    <!-- 角色选择按钮 -->
+    <div class="role-row">
+        <button class="role-btn" id="btnSender" data-role="sender">
+            <span class="emoji-big">📢</span>
+            作为服务端
+            <small>需要扬声器 · 发送数据</small>
+        </button>
+        <button class="role-btn" id="btnReceiver" data-role="receiver">
+            <span class="emoji-big">🎤</span>
+            作为客户端
+            <small>需要麦克风 · 接收数据</small>
+        </button>
+    </div>
+
+    <!-- 根据角色动态显示内容 -->
+    <div id="rolePanel"></div>
+
+    <!-- 统一的日志/数据展示区 -->
+    <div class="log-panel" id="log">
+        ⚡ 准备就绪，请选择角色并允许设备权限
+    </div>
+
+    <div class="footnote">
+        ⚠️ Firefox 接收端限制：仅支持可听声 (~16kHz)  <br>
+        ✅ 推荐使用 Chrome / Edge / 安卓 Chrome · 需要 HTTPS 或 localhost
+    </div>
+</div>
+
+<script>
+(function() {
+    // --- 核心变量 ---
+    const logDiv = document.getElementById('log');
+    const compatIcons = document.getElementById('compatIcons');
+    const compatDetails = document.getElementById('compatDetails');
+    const rolePanel = document.getElementById('rolePanel');
+    const btnSender = document.getElementById('btnSender');
+    const btnReceiver = document.getElementById('btnReceiver');
+
+    let currentRole = null;               // 'sender' 或 'receiver'
+    let ggInstance = null;                // GGWave 实例
+    let audioCtx = null;                  // AudioContext (用户手势后激活)
+    let mediaStream = null;                // 麦克风流 (仅 receiver)
+    let isListening = false;               // 接收标志
+    let isSending = false;                 // 发送标志
+    let sourceNode = null;                 // 发送用 BufferSource
+    let intervalId = null;
+
+    // --- 辅助: 日志追加 ---
+    function log(message, isWarning = false) {
+        const prefix = isWarning ? '⚠️' : '🔹';
+        logDiv.innerHTML = prefix + ' ' + message + '<br>' + logDiv.innerHTML;
+        if (logDiv.children.length > 6) {
+            logDiv.removeChild(logDiv.lastChild);
+        }
+    }
+
+    // --- 浏览器兼容性检测 (基于真实设备和 known issues) ---
+    function detectCompatibility() {
+        const ua = navigator.userAgent;
+        const isFirefox = ua.includes('Firefox');
+        const isSafari = /^((?!chrome|android).)*safari/i.test(ua) && !/crios|fxios/i.test(ua);
+        const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isAndroid = /Android/.test(ua);
+        const isChrome = /Chrome/.test(ua) && !isFirefox && !isSafari;
+        const isEdge = /Edg/.test(ua);
+
+        let hasWebAudio = !!(window.AudioContext || window.webkitAudioContext);
+        let hasUserMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+        let isHttpsOrLocal = (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+
+        let browserName = '未知';
+        if (isFirefox) browserName = 'Firefox';
+        else if (isSafari) browserName = 'Safari';
+        else if (isChrome) browserName = 'Chrome';
+        else if (isEdge) browserName = 'Edge';
+        else if (isIOS) browserName = 'iOS Safari';
+
+        // 整理兼容性摘要
+        let txOk = true;    // 发送理论上大多数都支持
+        let rxOk = true;    // 接收有很多限制
+
+        let rxIssues = [];
+        if (isFirefox) {
+            rxOk = false;   // 无法接收超声波 [citation:3][citation:5]
+            rxIssues.push('Firefox 接收超声波受限 (只能收可听声)');
+        }
+        if (isSafari && isIOS) {
+            rxOk = false;   // iOS Safari 麦克风不可用 [citation:3]
+            rxIssues.push('iOS Safari 不支持麦克风输入');
+        } else if (isSafari) {
+            rxOk = false;
+            rxIssues.push('macOS Safari 麦克风支持有限');
+        }
+        if (!hasUserMedia) {
+            rxOk = false;
+            rxIssues.push('浏览器无麦克风API');
+        }
+        if (!isHttpsOrLocal) {
+            log('⚠️ 非 HTTPS 环境: 麦克风可能被浏览器阻止', true);
+        }
+
+        // 生成界面
+        compatIcons.innerHTML = '';
+        const addBadge = (text, cls) => {
+            const b = document.createElement('span');
+            b.className = `badge ${cls}`;
+            b.innerText = text;
+            compatIcons.appendChild(b);
+        };
+        addBadge(`🖥️ ${browserName}`, 'ok');
+        addBadge(txOk ? '🔊 发送可用' : '🔇 发送可能受限', txOk ? 'ok' : 'warn');
+        addBadge(rxOk ? '🎤 接收可用' : '🎤 接收受限', rxOk ? 'ok' : 'issue');
+
+        let detailMsg = '';
+        if (rxIssues.length) {
+            detailMsg = '⚠️ 接收限制: ' + rxIssues.join('; ');
+        } else {
+            detailMsg = '✅ 全功能支持 (建议 Chrome/Edge)';
+        }
+        compatDetails.innerText = detailMsg;
+
+        return { browserName, isFirefox, isSafari, isIOS, rxOk, txOk: true, hasUserMedia };
+    }
+
+    const compat = detectCompatibility();
+
+    // --- 初始化 ggwave (单例) ---
+    async function initGGWave() {
+        if (ggInstance) return ggInstance;
+        try {
+            log('🔄 加载超声波协议库 (ggwave-wasm)...');
+            // 等待全局 GGWave 就绪 (从 script src 加载)
+            if (typeof window.GGWave === 'undefined') {
+                throw new Error('ggwave库加载失败，请刷新');
+            }
+            ggInstance = await window.GGWave(); // 初始化 wasm
+            log('✅ 音频协议库就绪');
+            return ggInstance;
+        } catch (e) {
+            log('❌ 初始化库失败: ' + e.message, true);
+            throw e;
+        }
+    }
+
+    // --- 获取或创建 AudioContext (必须由用户手势触发) ---
+    async function getAudioContext() {
+        if (audioCtx && audioCtx.state !== 'closed') {
+            if (audioCtx.state === 'suspended') await audioCtx.resume();
+            return audioCtx;
+        }
+        const Ctor = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new Ctor({ sampleRate: 48000, latencyHint: 'interactive' });
+        return audioCtx;
+    }
+
+    // --- 清理接收资源 ---
+    function stopReceiving() {
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(t => t.stop());
+            mediaStream = null;
+        }
+        if (sourceNode) {
+            try { sourceNode.disconnect(); } catch(e) {}
+            sourceNode = null;
+        }
+        isListening = false;
+        if (intervalId) clearInterval(intervalId);
+        intervalId = null;
+        log('🛑 接收已停止');
+    }
+
+    // --- 清理发送资源 ---
+    function stopSending() {
+        if (sourceNode) {
+            try { sourceNode.stop(); sourceNode.disconnect(); } catch(e) {}
+            sourceNode = null;
+        }
+        isSending = false;
+        log('🔇 发送已停止');
+    }
+
+    // --- 渲染界面: 根据角色 ---
+    function renderRole(role) {
+        currentRole = role;
+        btnSender.classList.remove('active');
+        btnReceiver.classList.remove('active');
+        if (role === 'sender') btnSender.classList.add('active');
+        else btnReceiver.classList.add('active');
+
+        if (role === 'sender') {
+            rolePanel.innerHTML = `
+                <div class="tx-box">
+                    <div style="font-weight:600; margin-bottom:8px;">📨 待发送的消息</div>
+                    <input type="text" id="messageInput" placeholder="输入文字（如: Hello, 超声波）" value="Ping 🎙️">
+                    <div class="flex" style="margin: 12px 0;">
+                        <button class="action" id="startSendBtn">▶ 持续发送 (每秒2次)</button>
+                        <button class="action" id="stopSendBtn" style="background:#475569;">■ 停止发送</button>
+                    </div>
+                    <div style="background:#e2f0fa; border-radius: 40px; padding:12px; font-size:0.9rem">
+                        🔊 确保扬声器开启 · 建议音量 70% · 手机不要静音
+                    </div>
+                </div>
+            `;
+            // 绑定发送事件
+            document.getElementById('startSendBtn').addEventListener('click', startSending);
+            document.getElementById('stopSendBtn').addEventListener('click', stopSending);
+        } else {
+            rolePanel.innerHTML = `
+                <div class="rx-box">
+                    <div style="font-weight:600; margin-bottom:12px;">🎧 超声波接收器</div>
+                    <button class="action" id="startListenBtn" style="background:#0f3b5e;">🎤 开始监听 (请求麦克风)</button>
+                    <button class="action" id="stopListenBtn" style="background:#4b5563; margin-top:8px;">⏹️ 停止监听</button>
+                    <p style="margin:16px 0 0; font-size:0.9rem; background:#eef4ff; border-radius:24px; padding:12px;">
+                    🧪 将发送端设备靠近本机麦克风<br>解码消息会显示在下方日志区
+                    </p>
+                </div>
+            `;
+            document.getElementById('startListenBtn').addEventListener('click', startListening);
+            document.getElementById('stopListenBtn').addEventListener('click', stopReceiving);
+        }
+    }
+
+    // --- 发送逻辑 (基于 ggwave 编码, 使用扬声器) ---
+    async function startSending() {
+        if (isSending) { log('⏳ 已经在发送中'); return; }
+        const msgInput = document.getElementById('messageInput');
+        if (!msgInput) return;
+        const text = msgInput.value.trim() || "data";
+        try {
+            const gg = await initGGWave();
+            const ctx = await getAudioContext();
+            if (ctx.state === 'suspended') await ctx.resume();
+
+            // 编码: 使用默认协议 (可听/近超声 兼顾)
+            const waveform = gg.encode(text, { protocol: window.GGWave.PROTOCOL.AUDIBLE_FAST });
+            if (!waveform || waveform.length === 0) throw new Error('编码失败');
+
+            // 循环发送 (每次发送重新创建 source, 因为source只能start一次)
+            isSending = true;
+            log(`🔊 开始循环发送: "${text}" (间隔500ms)`);
+
+            const playOnce = () => {
+                if (!isSending) return;
+                const buffer = ctx.createBuffer(1, waveform.length, 48000);
+                buffer.copyToChannel(waveform, 0);
+                const src = ctx.createBufferSource();
+                src.buffer = buffer;
+                src.connect(ctx.destination);
+                src.onended = () => { src.disconnect(); };
+                src.start();
+                sourceNode = src; // 保留最近一个用于stop
+            };
+
+            playOnce(); // 立即发一次
+            intervalId = setInterval(() => {
+                if (isSending) playOnce();
+            }, 500); // 每秒2次提高被接收概率
+
+        } catch (e) {
+            log('❌ 发送失败: ' + e.message, true);
+            isSending = false;
+        }
+    }
+
+    // --- 接收逻辑 (麦克风 + ggwave 解码) ---
+    async function startListening() {
+        if (isListening) return;
+        if (!compat.hasUserMedia) {
+            log('❌ 当前浏览器不支持麦克风', true); return;
+        }
+        if (compat.isFirefox) {
+            log('ℹ️ Firefox 接收可能仅限可听声 (~16kHz以下) 请确保发送端使用兼容频率', true);
+        }
+        try {
+            const gg = await initGGWave();
+            const ctx = await getAudioContext();
+            await ctx.resume();
+
+            // 请求麦克风 (关闭降噪以便捕捉高频)
+            mediaStream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: false,
+                    noiseSuppression: false,
+                    autoGainControl: false,
+                    channelCount: 1,
+                    sampleRate: { ideal: 48000 }
+                }
+            });
+
+            const source = ctx.createMediaStreamSource(mediaStream);
+            const node = ctx.createScriptProcessor(4096, 1, 1);
+            source.connect(node);
+            node.connect(ctx.destination); // 静音输出防止自激
+
+            isListening = true;
+            log('🎧 正在监听麦克风，等待超声波数据...');
+
+            node.onaudioprocess = (e) => {
+                if (!isListening) return;
+                const inputData = e.inputBuffer.getChannelData(0);
+                // ggwave 解码
+                const res = gg.decode(inputData);
+                if (res && res.length > 0) {
+                    // 转换为文本 (去除末尾空白)
+                    let msg = '';
+                    for (let i = 0; i < res.length; i++) {
+                        if (res[i] === 0) break;
+                        msg += String.fromCharCode(res[i]);
+                    }
+                    if (msg.trim()) {
+                        log(`📥 收到消息: "${msg}"`);
+                    }
+                }
+            };
+
+            // 保存便于停止
+            sourceNode = source; // 复用变量
+
+        } catch (err) {
+            log('❌ 麦克风错误: ' + err.message, true);
+            console.error(err);
+            stopReceiving();
+        }
+    }
+
+    // --- 事件绑定 ---
+    btnSender.addEventListener('click', () => {
+        if (currentRole === 'sender') return;
+        stopReceiving();  // 切换时停止另一边
+        stopSending();
+        renderRole('sender');
+    });
+    btnReceiver.addEventListener('click', () => {
+        if (currentRole === 'receiver') return;
+        stopSending();
+        stopReceiving();
+        renderRole('receiver');
+    });
+
+    // 初始默认 sender 界面
+    renderRole('sender');
+    log('🟢 演示就绪 · 请点击对应按钮操作');
+
+    // 防止页面关闭时继续占用麦克风
+    window.addEventListener('beforeunload', () => {
+        if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+    });
+})();
+</script>
+</body>
+</html>
