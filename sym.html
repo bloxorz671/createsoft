@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 虚拟滚动符号库 · 流畅浏览海量符号</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #f5efe9;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #2b3a47;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            text-shadow: 4px 4px 0 #ffdbb5;
+        }
+
+        .subhead {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #5b4a3a;
+            margin-bottom: 2rem;
+            border-bottom: 2px dashed #c9ad93;
+            padding-bottom: 0.8rem;
+            display: inline-block;
+            margin-left: auto;
+            margin-right: auto;
+            background: #fff3e6c0;
+            padding: 0.6rem 2rem;
+            border-radius: 40px;
+        }
+
+        .toast-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #1d2b36;
+            color: #fbebd7;
+            padding: 14px 28px;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            box-shadow: 0 15px 30px -10px #0f1a21;
+            z-index: 9999;
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.2s;
+            border-left: 6px solid #ffa25b;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .toast-message.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .category-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .card {
+            background: #fffffff2;
+            border-radius: 40px 40px 32px 32px;
+            box-shadow: 0 20px 30px -12px #b99e8a;
+            width: 350px;
+            border: 1px solid #ffe7d4;
+            overflow: hidden;
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            background: #fff1e0;
+            padding: 1rem 1.5rem;
+            border-bottom: 2px solid #ffcaa3;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2e3f4e;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-header span {
+            font-size: 2.1rem;
+        }
+
+        .count-badge {
+            font-size: 0.9rem;
+            background: #ffdbbd;
+            border-radius: 30px;
+            padding: 0.2rem 1rem;
+            margin-left: 0.7rem;
+            color: #3a2d22;
+            font-weight: 500;
+        }
+
+        /* 虚拟滚动容器 */
+        .symbol-container {
+            position: relative;
+            height: 320px;          /* 固定高度，产生滚动 */
+            overflow-y: auto;
+            background: #fffcf7;
+            scrollbar-width: thin;
+            scrollbar-color: #faa471 #ffe1ca;
+            will-change: scroll-position; /* 提示优化 */
+        }
+
+        .symbol-container::-webkit-scrollbar {
+            width: 7px;
+        }
+        .symbol-container::-webkit-scrollbar-track {
+            background: #ffe1ca;
+        }
+        .symbol-container::-webkit-scrollbar-thumb {
+            background: #faa471;
+            border-radius: 12px;
+        }
+
+        /* 符号项绝对定位，由JS控制top */
+        .symbol-item {
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            height: 48px;           /* 固定高度，与ITEM_HEIGHT一致 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffffdb;
+            border-radius: 24px;
+            box-shadow: 0 2px 6px #dfcbb8, 0 0 0 1px #ffdac2 inset;
+            cursor: pointer;
+            transition: background 0.1s;
+            font-size: 2rem;
+            font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Symbola', sans-serif;
+            border: 1px solid #ffd0b1;
+            user-select: none;
+        }
+
+        .symbol-item:hover {
+            background: #ffcd9e;
+            transform: scale(1.02);
+            z-index: 1;
+        }
+
+        .symbol-item:active {
+            background: #feb16b;
+        }
+
+        /* 加载指示器 */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #7b6856;
+            font-size: 1.2rem;
+        }
+
+        footer {
+            margin-top: 3rem;
+            font-size: 1rem;
+            color: #7b6856;
+            background: #fff7eec0;
+            padding: 1rem 2rem;
+            border-radius: 60px;
+            border: 1px solid #ffdbbf;
+            box-shadow: 0 8px 18px #decbbd;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📜 虚拟滚动符号宝库</h1>
+        <div class="subhead">⚡ 只渲染可见区域 · 万级符号流畅滚动 ⚡</div>
+
+        <div id="copyToast" class="toast-message">
+            <span id="toastIcon">📋</span> 已复制 <span id="copiedSymbolDisplay"></span>
+        </div>
+
+        <div id="categoriesContainer" class="category-grid">
+            <div class="loading">⏳ 正在加载符号数据...</div>
+        </div>
+
+        <footer>
+            💡 数据存储在外部 symbols.json · 滚动时动态渲染 · 点击符号自动复制
+        </footer>
+    </div>
+
+    <script>
+        (function() {
+            // --- 配置 ---
+            const ITEM_HEIGHT = 48;           // 每个符号项高度（px），必须与CSS .symbol-item 的 height 一致
+            const BUFFER_COUNT = 2;            // 上下额外多渲染几个，避免滚动闪烁
+
+            // --- 全局变量 ---
+            let categoriesData = [];            // 从JSON加载的分类数据
+            const containerDiv = document.getElementById('categoriesContainer');
+            const toast = document.getElementById('copyToast');
+            const copiedSpan = document.getElementById('copiedSymbolDisplay');
+            const toastIcon = document.getElementById('toastIcon');
+            let toastTimeout = null;
+
+            // --- 加载外部 JSON ---
+            fetch('symbols.json')
+                .then(response => {
+                    if (!response.ok) throw new Error('加载失败');
+                    return response.json();
+                })
+                .then(data => {
+                    categoriesData = data;
+                    renderAllCategories();
+                })
+                .catch(err => {
+                    containerDiv.innerHTML = `<div style="color: red; padding: 2rem;">❌ 加载 symbols.json 失败：${err.message}。请确保文件在同目录下。</div>`;
+                });
+
+            // --- 渲染所有分类卡片 ---
+            function renderAllCategories() {
+                let html = '';
+                categoriesData.forEach((cat, idx) => {
+                    const total = cat.symbols.length;
+                    html += `
+                        <div class="card" data-category-index="${idx}">
+                            <div class="card-header">
+                                <span>${escapeHtml(cat.icon || '📦')}</span> ${escapeHtml(cat.name)}
+                                <span class="count-badge">${total}</span>
+                            </div>
+                            <div class="symbol-container" data-category-index="${idx}" data-total="${total}">
+                                <!-- 虚拟滚动占位，JS会填充 -->
+                            </div>
+                        </div>
+                    `;
+                });
+                containerDiv.innerHTML = html;
+
+                // 为每个容器初始化虚拟滚动
+                document.querySelectorAll('.symbol-container').forEach(container => {
+                    const categoryIdx = container.dataset.categoryIndex;
+                    const total = parseInt(container.dataset.total, 10);
+                    if (isNaN(total)) return;
+
+                    // 初始化渲染 (scrollTop = 0)
+                    renderVisibleItems(container, categoryIdx, total, 0);
+
+                    // 绑定滚动事件
+                    container.addEventListener('scroll', () => {
+                        // 使用 requestAnimationFrame 避免频繁渲染
+                        requestAnimationFrame(() => {
+                            renderVisibleItems(container, categoryIdx, total, container.scrollTop);
+                        });
+                    });
+                });
+            }
+
+            // --- 核心虚拟滚动渲染函数 ---
+            function renderVisibleItems(container, categoryIdx, totalItems, scrollTop) {
+                const containerHeight = container.clientHeight;
+                if (containerHeight === 0) return;
+
+                // 计算可视区域起始和结束索引
+                const startIdx = Math.max(0, Math.floor(scrollTop / ITEM_HEIGHT) - BUFFER_COUNT);
+                const endIdx = Math.min(totalItems - 1, Math.ceil((scrollTop + containerHeight) / ITEM_HEIGHT) + BUFFER_COUNT);
+                const visibleCount = endIdx - startIdx + 1;
+
+                // 更新容器的 padding 来模拟滚动占位
+                container.style.paddingTop = (startIdx * ITEM_HEIGHT) + 'px';
+                container.style.paddingBottom = ((totalItems - endIdx - 1) * ITEM_HEIGHT) + 'px';
+
+                // 获取当前容器内已有的符号项，重用或新建
+                const existingItems = Array.from(container.children); // 现有的 .symbol-item 元素
+
+                // 移除不在新范围内的项
+                for (let i = existingItems.length - 1; i >= 0; i--) {
+                    const item = existingItems[i];
+                    const idx = parseInt(item.dataset.index, 10);
+                    if (idx < startIdx || idx > endIdx) {
+                        container.removeChild(item);
+                    }
+                }
+
+                // 获取当前保留的项索引集合
+                const keptIndices = new Set();
+                Array.from(container.children).forEach(item => keptIndices.add(parseInt(item.dataset.index, 10)));
+
+                // 添加缺失的项
+                for (let i = startIdx; i <= endIdx; i++) {
+                    if (keptIndices.has(i)) continue;
+
+                    const symbolData = categoriesData[categoryIdx].symbols[i];
+                    let displayChar, copyChar;
+
+                    if (typeof symbolData === 'string') {
+                        displayChar = symbolData;
+                        copyChar = symbolData;
+                    } else {
+                        // 对象格式：{ display: '␣', copy: '\u00A0' }
+                        displayChar = symbolData.display || '�';
+                        copyChar = symbolData.copy || displayChar;
+                    }
+
+                    const item = document.createElement('div');
+                    item.className = 'symbol-item';
+                    item.textContent = displayChar;
+                    item.dataset.index = i;
+                    item.dataset.copy = copyChar;
+                    item.style.top = (i * ITEM_HEIGHT) + 'px';   // 绝对定位的top
+                    container.appendChild(item);
+                }
+
+                // 可选：按索引排序保证DOM顺序正确（避免z-index混乱），但绝对定位不依赖顺序
+                // 为了美观，可以按索引升序排列
+                const itemsArray = Array.from(container.children);
+                itemsArray.sort((a, b) => parseInt(a.dataset.index) - parseInt(b.dataset.index));
+                itemsArray.forEach(item => container.appendChild(item)); // 重新排序
+            }
+
+            // --- 点击复制（事件委托）---
+            containerDiv.addEventListener('click', (e) => {
+                const target = e.target.closest('.symbol-item');
+                if (!target) return;
+                const copyText = target.dataset.copy || target.textContent;
+                if (!copyText) return;
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(copyText).then(() => showToast(copyText))
+                        .catch(() => fallbackCopy(copyText));
+                } else {
+                    fallbackCopy(copyText);
+                }
+            });
+
+            function showToast(text) {
+                copiedSpan.textContent = text.length > 10 ? text.slice(0, 10) + '…' : text;
+                toastIcon.textContent = text.length <= 2 ? text : '📋';
+                if (toastTimeout) clearTimeout(toastTimeout);
+                toast.classList.add('show');
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                    toastTimeout = null;
+                }, 1500);
+            }
+
+            function fallbackCopy(text) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); showToast(text); } catch (e) {}
+                document.body.removeChild(ta);
+            }
+
+            // 简单的转义（防止XSS）
+            function escapeHtml(unsafe) {
+                return unsafe.replace(/[&<>"]/g, m => {
+                    if (m === '&') return '&amp;';
+                    if (m === '<') return '&lt;';
+                    if (m === '>') return '&gt;';
+                    if (m === '"') return '&quot;';
+                    return m;
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
