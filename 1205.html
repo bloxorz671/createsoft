@@ -1354,14 +1354,15 @@
                 // 标记该作业已验证
                 verificationStatus[itemId] = true;
                 
-                // 更新按钮状态
+                // 更新按钮状态 - 将"请先完成验证"变为"去提交"
                 const linkBtn = document.getElementById(`linkbtn-${itemId}`);
                 if (linkBtn) {
                     linkBtn.classList.remove('homework-link-gray');
                     linkBtn.classList.add('homework-link');
+                    linkBtn.textContent = '去提交';
                     linkBtn.disabled = false;
                     
-                    // 显示提示信息
+                    // 显示成功提示
                     const hintEl = document.createElement('div');
                     hintEl.className = 'more-message';
                     hintEl.style.color = '#2e7d32';
@@ -1433,7 +1434,7 @@
                         const hintEl = document.createElement('div');
                         hintEl.className = 'more-message';
                         hintEl.style.color = '#b91c1c';
-                        hintEl.textContent = '⏳ 请先完成上方的验证，验证通过后按钮将变为可用状态';
+                        hintEl.textContent = '⏳ 请先完成上方的验证，验证通过后按钮将变为"去提交"';
                         
                         // 移除之前的提示
                         const oldHint = itemDiv.querySelector('.verify-wait-hint');
@@ -1541,9 +1542,16 @@
                         } else {
                             linkBtn = document.createElement('button');
                             linkBtn.id = `linkbtn-${itemId}`;
-                            linkBtn.className = verificationStatus[itemId] ? 'homework-link' : 'homework-link-gray';
-                            linkBtn.textContent = verificationStatus[itemId] ? '去提交' : '请先完成验证';
-                            linkBtn.disabled = !verificationStatus[itemId];
+                            // 根据验证状态决定按钮文字和样式
+                            if (verificationStatus[itemId]) {
+                                linkBtn.className = 'homework-link';
+                                linkBtn.textContent = '去提交';
+                                linkBtn.disabled = false;
+                            } else {
+                                linkBtn.className = 'homework-link-gray';
+                                linkBtn.textContent = '请先完成验证';
+                                linkBtn.disabled = false; // 不禁用，让点击触发验证
+                            }
                             linkBtn.setAttribute('data-link', item.link);
                             linkBtn.onclick = function(e) {
                                 e.preventDefault();
@@ -1620,6 +1628,9 @@
             // 加载作业数据
             function loadHomework() {
                 setLoadingState(true);
+                
+                // 重置验证状态（可选，如果希望刷新后重新验证）
+                verificationStatus = {};
                 
                 const url = './homework.txt?t=' + new Date().getTime();
                 
