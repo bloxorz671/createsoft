@@ -912,6 +912,9 @@
             // 作业码弹窗的验证状态
             let codeModalVerified = false;
 
+            // 标记是否正在刷新，避免重复刷新
+            let isRefreshing = false;
+
             // 获取错误信息
             function getErrorMessage(errorCode) {
                 const errorMap = {
@@ -946,6 +949,23 @@
                 }
                 
                 return reason;
+            }
+
+            // 刷新页面函数
+            function refreshPage() {
+                if (!isRefreshing) {
+                    isRefreshing = true;
+                    // 显示刷新提示（可选）
+                    const loadingEl = document.getElementById('loadingContainer');
+                    if (loadingEl) {
+                        loadingEl.textContent = '验证失败，正在刷新页面...';
+                        loadingEl.style.display = 'block';
+                    }
+                    // 延迟一点刷新，让用户看到提示
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                }
             }
 
             // 解析RGB颜色字符串
@@ -1204,7 +1224,6 @@
                         <input type="text" id="codeModalInput" class="code-modal-input" placeholder="请输入作业码" autocomplete="off">
                         <div id="codeModalMessage" class="code-modal-message"></div>
                         <div class="turnstile-container" id="codeModalTurnstile">
-                            <div class="turnstile-loading">正在加载人机验证</div>
                         </div>
                         <div class="code-modal-buttons">
                             <button class="code-modal-cancel" id="codeModalCancelBtn">取消</button>
@@ -1246,15 +1265,14 @@
                     },
                     'error-callback': function(errorCode) {
                         const reason = getErrorMessage(errorCode);
-                        const errorMessage = `人机验证失败\n错误代码: ${errorCode}\n原因: ${reason}\n解决方案: 请刷新页面后重试`;
+                        const errorMessage = `人机验证失败\n错误代码: ${errorCode}\n原因: ${reason}\n即将自动刷新页面...`;
                         alert(errorMessage);
-                        codeModalVerified = false;
-                        submitBtn.disabled = true;
-                        messageEl.className = 'code-modal-message error';
-                        messageEl.textContent = '验证失败，请刷新页面重试';
                         
-                        // 清空容器并显示错误信息
-                        turnstileContainer.innerHTML = '<div class="turnstile-loading" style="color:#b91c1c;">验证失败，请刷新页面</div>';
+                        // 关闭弹窗
+                        codeModalContainer.style.display = 'none';
+                        
+                        // 刷新页面
+                        refreshPage();
                     },
                     'refresh-expired': 'auto'
                 });
@@ -1508,28 +1526,21 @@
                         },
                         'error-callback': function(errorCode) {
                             const reason = getErrorMessage(errorCode);
-                            const errorMessage = `人机验证失败\n错误代码: ${errorCode}\n原因: ${reason}\n解决方案: 请刷新页面后重试`;
+                            const errorMessage = `人机验证失败\n错误代码: ${errorCode}\n原因: ${reason}\n即将自动刷新页面...`;
                             alert(errorMessage);
                             
-                            // 更新容器显示错误
-                            container.innerHTML = '<div class="turnstile-loading" style="color:#b91c1c;">验证失败，请刷新页面</div>';
-                            
-                            // 禁用对应的按钮
-                            const linkBtn = document.getElementById(`linkbtn-${itemId}`);
-                            if (linkBtn) {
-                                linkBtn.classList.add('homework-link-gray');
-                                linkBtn.textContent = '验证失败';
-                                linkBtn.disabled = true;
-                            }
+                            // 刷新页面
+                            refreshPage();
                         },
                         'refresh-expired': 'auto'
                     });
                     
                     window.turnstileWidgets[itemId] = widgetId;
                 } catch (e) {
-                    // 渲染失败
-                    container.innerHTML = '<div class="turnstile-loading" style="color:#b91c1c;">验证加载失败，请刷新页面</div>';
+                    // 渲染失败，也刷新页面
                     console.error('Turnstile render error:', e);
+                    alert('人机验证加载失败，即将刷新页面...');
+                    refreshPage();
                 }
             }
 
@@ -1643,11 +1654,10 @@
 
                         const buttonState = getButtonState(item);
                         
-                        // 创建 Turnstile 容器（初始为空，不显示加载提示）
+                        // 创建 Turnstile 容器（初始为空）
                         const turnstileContainer = document.createElement('div');
                         turnstileContainer.id = `turnstile-${itemId}`;
                         turnstileContainer.className = 'turnstile-container';
-                        // 初始为空，不添加加载提示，直接由renderTurnstile处理
                         
                         let linkBtn;
                         if (buttonState.disabled) {
