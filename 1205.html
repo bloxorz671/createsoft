@@ -232,10 +232,15 @@
             color: #2e7d32;
         }
 
+        .code-modal-message.info {
+            color: #2563eb;
+        }
+
         .code-modal-buttons {
             display: flex;
             justify-content: flex-end;
             gap: 0.8rem;
+            flex-wrap: wrap;
         }
 
         .code-modal-cancel {
@@ -268,6 +273,18 @@
 
         .code-modal-submit:hover {
             background: #112b44;
+        }
+
+        .code-modal-submit:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .code-modal-submit:disabled:hover {
+            background: #94a3b8;
+            transform: none;
+            box-shadow: none;
         }
 
         /* 头部区域 */
@@ -539,6 +556,21 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
+        .homework-link-gray {
+            background: #94a3b8;
+            color: #e2e8f0;
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.7;
+            pointer-events: auto;
+        }
+
+        .homework-link-gray:hover {
+            background: #94a3b8;
+            transform: none;
+            box-shadow: none;
+        }
+
         .homework-link-disabled {
             background: #94a3b8;
             color: #e2e8f0;
@@ -704,7 +736,7 @@
                 width: 100%;
             }
             
-            .homework-link, .homework-link-disabled {
+            .homework-link, .homework-link-gray, .homework-link-disabled {
                 width: 100%;
                 text-align: center;
                 margin-left: 0;
@@ -720,6 +752,15 @@
             
             .code-entry {
                 margin: 1rem 0 0.5rem 0;
+            }
+
+            .code-modal-buttons {
+                flex-direction: column;
+            }
+
+            .code-modal-cancel, .code-modal-submit {
+                width: 100%;
+                text-align: center;
             }
         }
 
@@ -823,8 +864,14 @@
             // 存储作业码映射
             let codeMap = new Map();
 
+            // 存储每个作业的验证状态
+            let verificationStatus = {};
+
             // 存储当前点击的作业链接，用于人机验证通过后跳转
             let pendingLink = '';
+
+            // 作业码弹窗的验证状态
+            let codeModalVerified = false;
 
             // 解析RGB颜色字符串
             function parseRgbColor(colorStr) {
@@ -1066,6 +1113,7 @@
 
             // 显示作业码弹窗
             function showCodeModal() {
+                codeModalVerified = false;
                 const codeModalContainer = document.getElementById('codeModalContainer');
                 
                 const modalOverlay = document.createElement('div');
@@ -1080,9 +1128,10 @@
                         <div class="code-modal-title">输入作业码</div>
                         <input type="text" id="codeModalInput" class="code-modal-input" placeholder="请输入作业码" autocomplete="off">
                         <div id="codeModalMessage" class="code-modal-message"></div>
+                        <div class="turnstile-container" id="codeModalTurnstile"></div>
                         <div class="code-modal-buttons">
                             <button class="code-modal-cancel" id="codeModalCancelBtn">取消</button>
-                            <button class="code-modal-submit" id="codeModalSubmitBtn">前往作业</button>
+                            <button class="code-modal-submit" id="codeModalSubmitBtn" disabled>前往作业</button>
                         </div>
                     </div>
                 `;
@@ -1093,7 +1142,30 @@
                 codeModalContainer.style.display = 'block';
                 
                 const input = document.getElementById('codeModalInput');
+                const submitBtn = document.getElementById('codeModalSubmitBtn');
+                const messageEl = document.getElementById('codeModalMessage');
+                
                 input.focus();
+                
+                // 渲染 Turnstile 小部件到作业码弹窗
+                const turnstileContainer = document.getElementById('codeModalTurnstile');
+                turnstile.render(turnstileContainer, {
+                    sitekey: '0x4AAAAAACnzyoSShctyL7pF',
+                    callback: function(token) {
+                        codeModalVerified = true;
+                        submitBtn.disabled = false;
+                        messageEl.className = 'code-modal-message success';
+                        messageEl.textContent = '✓ 人机验证通过，请输入作业码';
+                        
+                        // 移除之前的消息（2秒后）
+                        setTimeout(() => {
+                            if (messageEl.classList.contains('success')) {
+                                messageEl.textContent = '';
+                            }
+                        }, 2000);
+                    },
+                    'refresh-expired': 'auto'
+                });
                 
                 // 关闭弹窗函数
                 function closeCodeModal() {
@@ -1102,8 +1174,13 @@
                 
                 // 处理作业码提交
                 function handleCodeSubmit() {
+                    if (!codeModalVerified) {
+                        messageEl.className = 'code-modal-message error';
+                        messageEl.textContent = '请先完成人机验证';
+                        return;
+                    }
+                    
                     const code = input.value.trim();
-                    const messageEl = document.getElementById('codeModalMessage');
                     
                     if (!code) {
                         messageEl.className = 'code-modal-message error';
@@ -1114,12 +1191,11 @@
                     const link = codeMap.get(code);
                     
                     if (link) {
-                        window.open(link, '_blank');
                         messageEl.className = 'code-modal-message success';
-                        messageEl.textContent = '正在跳转...';
-                        input.value = '';
+                        messageEl.textContent = '验证成功，正在跳转...';
                         
                         setTimeout(() => {
+                            window.open(link, '_blank');
                             closeCodeModal();
                         }, 500);
                     } else {
@@ -1138,7 +1214,7 @@
                 // 绑定事件
                 document.getElementById('codeModalCloseBtn').addEventListener('click', closeCodeModal);
                 document.getElementById('codeModalCancelBtn').addEventListener('click', closeCodeModal);
-                document.getElementById('codeModalSubmitBtn').addEventListener('click', handleCodeSubmit);
+                submitBtn.addEventListener('click', handleCodeSubmit);
                 
                 input.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
@@ -1275,18 +1351,47 @@
 
             // Turnstile 验证回调函数
             window.turnstileSuccess = function(token, itemId) {
-                // 验证成功后跳转到对应的链接
-                if (pendingLink) {
-                    window.open(pendingLink, '_blank');
-                    pendingLink = '';
-                    // 重置对应的小部件
-                    const widgetId = window.turnstileWidgets[itemId];
-                    if (widgetId !== undefined) {
-                        turnstile.remove(widgetId);
-                        delete window.turnstileWidgets[itemId];
+                // 标记该作业已验证
+                verificationStatus[itemId] = true;
+                
+                // 更新按钮状态
+                const linkBtn = document.getElementById(`linkbtn-${itemId}`);
+                if (linkBtn) {
+                    linkBtn.classList.remove('homework-link-gray');
+                    linkBtn.classList.add('homework-link');
+                    linkBtn.disabled = false;
+                    
+                    // 显示提示信息
+                    const hintEl = document.createElement('div');
+                    hintEl.className = 'more-message';
+                    hintEl.style.color = '#2e7d32';
+                    hintEl.textContent = '✓ 人机验证通过，现在可以点击"去提交"按钮了';
+                    
+                    const itemDiv = document.getElementById(`item-${itemId}`);
+                    if (itemDiv && !itemDiv.querySelector('.verify-success-hint')) {
+                        hintEl.classList.add('verify-success-hint');
+                        itemDiv.appendChild(hintEl);
+                        
+                        // 3秒后移除提示
+                        setTimeout(() => {
+                            if (hintEl.parentNode) {
+                                hintEl.remove();
+                            }
+                        }, 3000);
                     }
-                    // 重新渲染小部件
-                    renderTurnstile(itemId);
+                }
+                
+                // 如果有点击时保存的链接，自动跳转
+                if (pendingLink === itemId) {
+                    setTimeout(() => {
+                        if (verificationStatus[itemId] && pendingLink === itemId) {
+                            const link = document.getElementById(`linkbtn-${itemId}`)?.getAttribute('data-link');
+                            if (link) {
+                                window.open(link, '_blank');
+                            }
+                            pendingLink = '';
+                        }
+                    }, 500);
                 }
             };
 
@@ -1311,6 +1416,39 @@
                 });
                 
                 window.turnstileWidgets[itemId] = widgetId;
+            }
+
+            // 处理去提交按钮点击
+            function handleSubmitClick(itemId, link) {
+                if (verificationStatus[itemId]) {
+                    // 已验证，直接跳转
+                    window.open(link, '_blank');
+                } else {
+                    // 未验证，保存链接并显示提示
+                    pendingLink = itemId;
+                    
+                    // 显示提示信息
+                    const itemDiv = document.getElementById(`item-${itemId}`);
+                    if (itemDiv) {
+                        const hintEl = document.createElement('div');
+                        hintEl.className = 'more-message';
+                        hintEl.style.color = '#b91c1c';
+                        hintEl.textContent = '⏳ 请先完成上方的验证，验证通过后按钮将变为可用状态';
+                        
+                        // 移除之前的提示
+                        const oldHint = itemDiv.querySelector('.verify-wait-hint');
+                        if (oldHint) oldHint.remove();
+                        
+                        hintEl.classList.add('verify-wait-hint');
+                        itemDiv.appendChild(hintEl);
+                        
+                        // 触发验证
+                        const widgetId = window.turnstileWidgets[itemId];
+                        if (widgetId) {
+                            turnstile.execute(widgetId);
+                        }
+                    }
+                }
             }
 
             function renderHomework(items) {
@@ -1352,7 +1490,13 @@
                         // 为每个作业生成唯一ID
                         const itemId = `item-${Date.now()}-${index}`;
                         
+                        // 初始化验证状态
+                        if (verificationStatus[itemId] === undefined) {
+                            verificationStatus[itemId] = false;
+                        }
+                        
                         const itemDiv = document.createElement('div');
+                        itemDiv.id = `item-${itemId}`;
                         itemDiv.className = 'homework-item';
 
                         const rowDiv = document.createElement('div');
@@ -1396,17 +1540,14 @@
                             linkBtn.textContent = buttonState.text;
                         } else {
                             linkBtn = document.createElement('button');
-                            linkBtn.className = 'homework-link';
-                            linkBtn.textContent = buttonState.text;
+                            linkBtn.id = `linkbtn-${itemId}`;
+                            linkBtn.className = verificationStatus[itemId] ? 'homework-link' : 'homework-link-gray';
+                            linkBtn.textContent = verificationStatus[itemId] ? '去提交' : '请先完成验证';
+                            linkBtn.disabled = !verificationStatus[itemId];
+                            linkBtn.setAttribute('data-link', item.link);
                             linkBtn.onclick = function(e) {
                                 e.preventDefault();
-                                // 存储待跳转链接
-                                pendingLink = item.link;
-                                // 触发 Turnstile 验证
-                                const widgetId = window.turnstileWidgets[itemId];
-                                if (widgetId) {
-                                    turnstile.execute(widgetId);
-                                }
+                                handleSubmitClick(itemId, item.link);
                             };
                         }
 
@@ -1506,8 +1647,6 @@
                         document.getElementById('subjectFilter').value = 'all';
                         
                         renderHomework(filteredItems);
-                        
-                        // 注意：updateCodeEntry已经在renderHomework中调用
                     })
                     .catch(error => {
                         console.warn('读取 homework.txt 失败，视为空文件。', error);
