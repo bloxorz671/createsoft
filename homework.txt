@@ -15,6 +15,16 @@ more=【人机验证把“证明你是人类”左边的的复选框勾上即可
 more_colour[255,0,0]
 start_time=2026/1/1 00:00
 end_time=2027/3/5 20:00
+"""
+"""
+sub=测试2
+name=测试2勿交
+link=https://brilliant-unicorn-633b63.netlify.app
+more=【人机验证把“证明你是人类”左边的的复选框勾上即可】已经提交过给英语课代的无需重复提交
+more_colour[255,0,0]
+start_time=2026/1/1 00:00
+end_time=2027/3/5 20:00
+"""
 学科前后加三个英文符双引号
 
 
