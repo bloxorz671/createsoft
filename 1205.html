@@ -1225,6 +1225,9 @@
                 
                 input.focus();
                 
+                // 先清空容器，确保没有重叠
+                turnstileContainer.innerHTML = '';
+                
                 // 渲染 Turnstile 小部件到作业码弹窗
                 turnstile.render(turnstileContainer, {
                     sitekey: '0x4AAAAAACnzyoSShctyL7pF',
@@ -1233,12 +1236,6 @@
                         submitBtn.disabled = false;
                         messageEl.className = 'code-modal-message success';
                         messageEl.textContent = '✓ 人机验证通过，请输入作业码';
-                        
-                        // 隐藏加载提示
-                        const loadingEl = turnstileContainer.querySelector('.turnstile-loading');
-                        if (loadingEl) {
-                            loadingEl.style.display = 'none';
-                        }
                         
                         // 移除之前的消息（2秒后）
                         setTimeout(() => {
@@ -1256,14 +1253,8 @@
                         messageEl.className = 'code-modal-message error';
                         messageEl.textContent = '验证失败，请刷新页面重试';
                         
-                        // 更新加载提示为错误信息
-                        const loadingEl = turnstileContainer.querySelector('.turnstile-loading');
-                        if (loadingEl) {
-                            loadingEl.textContent = '验证失败，请刷新页面';
-                            loadingEl.style.color = '#b91c1c';
-                        } else {
-                            turnstileContainer.innerHTML = '<div class="turnstile-loading" style="color:#b91c1c;">验证失败，请刷新页面</div>';
-                        }
+                        // 清空容器并显示错误信息
+                        turnstileContainer.innerHTML = '<div class="turnstile-loading" style="color:#b91c1c;">验证失败，请刷新页面</div>';
                     },
                     'refresh-expired': 'auto'
                 });
@@ -1455,15 +1446,6 @@
                 // 标记该作业已验证
                 verificationStatus[itemId] = true;
                 
-                // 隐藏加载提示
-                const container = document.getElementById(`turnstile-${itemId}`);
-                if (container) {
-                    const loadingEl = container.querySelector('.turnstile-loading');
-                    if (loadingEl) {
-                        loadingEl.style.display = 'none';
-                    }
-                }
-                
                 // 更新按钮状态 - 将"请先完成验证"变为"去提交"
                 const linkBtn = document.getElementById(`linkbtn-${itemId}`);
                 if (linkBtn) {
@@ -1514,8 +1496,8 @@
                 const container = document.getElementById(`turnstile-${itemId}`);
                 if (!container) return;
                 
-                // 清空容器，显示加载中
-                container.innerHTML = '<div class="turnstile-loading">正在加载人机验证</div>';
+                // 重要：先清空容器，确保没有重叠
+                container.innerHTML = '';
                 
                 // 渲染新的小部件
                 try {
@@ -1661,12 +1643,11 @@
 
                         const buttonState = getButtonState(item);
                         
-                        // 创建 Turnstile 容器
+                        // 创建 Turnstile 容器（初始为空，不显示加载提示）
                         const turnstileContainer = document.createElement('div');
                         turnstileContainer.id = `turnstile-${itemId}`;
                         turnstileContainer.className = 'turnstile-container';
-                        // 先显示加载中
-                        turnstileContainer.innerHTML = '<div class="turnstile-loading">正在加载人机验证</div>';
+                        // 初始为空，不添加加载提示，直接由renderTurnstile处理
                         
                         let linkBtn;
                         if (buttonState.disabled) {
