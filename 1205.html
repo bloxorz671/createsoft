@@ -1,1974 +1,1410 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>初二五班电子作业提交</title>
-    <!-- 直接引入 Turnstile 脚本，不使用回调 -->
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background-color: #ffffff;
-            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0 1rem;
-            line-height: 1.5;
-            color: #1e293b;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 800px;
-            margin-top: 2rem;
-            margin-bottom: 3rem;
-            position: relative;
-        }
-
-        /* 滚动公告条样式 */
-        .notice-board {
-            background-color: #fff9e6;
-            color: #b45309;
-            padding: 0.8rem 1rem;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            border: 1px solid #fcd34d;
-            font-size: 1rem;
-            font-weight: 500;
-            text-align: left;
-            overflow: hidden;
-            white-space: nowrap;
-            position: relative;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        .notice-board-content {
-            display: inline-block;
-            animation: scrollNotice 15s linear infinite;
-            padding-left: 100%;
-        }
-
-        @keyframes scrollNotice {
-            0% {
-                transform: translateX(0);
-            }
-            100% {
-                transform: translateX(-100%);
-            }
-        }
-
-        .notice-board:hover .notice-board-content {
-            animation-play-state: paused;
-        }
-
-        /* 弹窗样式 */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            backdrop-filter: blur(3px);
-        }
-
-        .modal {
-            background-color: white;
-            border-radius: 24px;
-            padding: 0;
-            max-width: 90%;
-            width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            position: relative;
-            animation: modalSlideIn 0.3s ease;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                transform: translateY(-30px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal-header {
-            padding: 1.5rem 1.5rem 0.5rem 1.5rem;
-            margin: 0;
-        }
-
-        .modal-header h2 {
-            font-size: 1.6rem;
-            font-weight: 600;
-            color: #1e293b;
-            line-height: 1.3;
-            margin: 0;
-        }
-
-        .modal-content {
-            font-size: 1.1rem;
-            color: #334155;
-            line-height: 1.6;
-            padding: 0 1.5rem 1.5rem 1.5rem;
-            margin: 0;
-            white-space: pre-wrap;
-            text-align: left;
-            word-break: break-word;
-        }
-
-        .modal.no-header .modal-content {
-            padding-top: 1.5rem;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: #f1f5f9;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1.2rem;
-            color: #475569;
-            transition: all 0.2s;
-            z-index: 10;
-        }
-
-        .modal-close:hover {
-            background: #e2e8f0;
-            color: #1e293b;
-            transform: scale(1.1);
-        }
-
-        .modal-footer {
-            padding: 0 1.5rem 1.5rem 1.5rem;
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .modal-btn {
-            background: #1e3a5f;
-            color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .modal-btn:hover {
-            background: #112b44;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .modal-btn:active {
-            transform: translateY(1px);
-        }
-
-        /* 作业码输入弹窗样式 */
-        .code-modal-content {
-            padding: 1.5rem;
-        }
-
-        .code-modal-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 1rem;
-        }
-
-        .code-modal-input {
-            width: 100%;
-            padding: 0.8rem 1.2rem;
-            font-size: 1rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 40px;
-            outline: none;
-            background: white;
-            transition: all 0.2s;
-            margin-bottom: 1rem;
-        }
-
-        .code-modal-input:focus {
-            border-color: #1e3a5f;
-            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
-        }
-
-        .code-modal-message {
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-            min-height: 1.5rem;
-        }
-
-        .code-modal-message.error {
-            color: #b91c1c;
-        }
-
-        .code-modal-message.success {
-            color: #2e7d32;
-        }
-
-        .code-modal-message.info {
-            color: #2563eb;
-        }
-
-        .code-modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.8rem;
-            flex-wrap: wrap;
-        }
-
-        .code-modal-cancel {
-            background: #f1f5f9;
-            color: #475569;
-            border: 1px solid #cbd5e1;
-            padding: 0.8rem 1.5rem;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .code-modal-cancel:hover {
-            background: #e2e8f0;
-        }
-
-        .code-modal-submit {
-            background: #1e3a5f;
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .code-modal-submit:hover {
-            background: #112b44;
-        }
-
-        .code-modal-submit:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-
-        .code-modal-submit:disabled:hover {
-            background: #94a3b8;
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* 头部区域 */
-        .header {
-            margin-bottom: 1rem;
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 500;
-            letter-spacing: -0.02em;
-            color: #0f172a;
-            line-height: 1.2;
-            margin: 0;
-            text-align: center;
-        }
-
-        .notice-text {
-            color: #b91c1c;
-            font-size: 1.1rem;
-            font-weight: 400;
-            text-align: center;
-            max-width: 550px;
-            margin: 1.5rem auto 1rem auto;
-            background-color: #fff8f8;
-            padding: 0.8rem 1.5rem;
-            border-radius: 60px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-            border: 1px solid rgba(185, 28, 28, 0.15);
-        }
-
-        /* 工具栏 */
-        .toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 0 auto 1.5rem auto;
-            width: 100%;
-            flex-wrap: wrap;
-            gap: 0.8rem;
-        }
-
-        .refresh-container {
-            display: flex;
-            justify-content: center;
-            flex: 1;
-        }
-
-        .refresh-btn {
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            border-radius: 40px;
-            padding: 0.6rem 2rem;
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: #334155;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: all 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            white-space: nowrap;
-        }
-
-        .refresh-btn:hover {
-            background: #e2e8f0;
-            border-color: #94a3b8;
-        }
-
-        .refresh-btn:active {
-            transform: scale(0.97);
-        }
-
-        .refresh-btn svg {
-            width: 18px;
-            height: 18px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .subject-filter {
-            position: relative;
-            display: inline-block;
-        }
-
-        .subject-filter-select {
-            background: transparent;
-            color: #334155;
-            font-size: 1.1rem;
-            font-weight: 500;
-            padding: 0.6rem 1.8rem 0.6rem 0.8rem;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-            background-repeat: no-repeat;
-            background-position: right 0.2rem center;
-            background-size: 16px;
-            min-width: 100px;
-            text-align: right;
-        }
-
-        .subject-filter-select option {
-            background: white;
-            color: #1e293b;
-            padding: 0.5rem;
-        }
-
-        .loading-message {
-            text-align: center;
-            font-size: 1.2rem;
-            color: #64748b;
-            margin: 2rem 0;
-            padding: 1rem;
-            background-color: #f8fafc;
-            border-radius: 60px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .empty-message {
-            text-align: center;
-            font-size: 1.2rem;
-            color: #475569;
-            margin: 2rem 0;
-            padding: 2rem;
-            background-color: #f8fafc;
-            border-radius: 30px;
-            border: 1px dashed #94a3b8;
-            line-height: 1.6;
-        }
-
-        .homework-section {
-            margin: 1rem 0 2rem 0;
-            width: 100%;
-        }
-
-        .homework-item {
-            display: flex;
-            flex-direction: column;
-            padding: 1.2rem 1.2rem;
-            background-color: #f9fafc;
-            border-radius: 20px;
-            margin-bottom: 1rem;
-            border: 1px solid #e9edf4;
-            transition: box-shadow 0.2s;
-        }
-
-        .homework-item:hover {
-            box-shadow: 0 6px 14px rgba(0, 20, 40, 0.06);
-        }
-
-        .homework-row {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            flex-wrap: wrap;
-        }
-
-        .subject-container {
-            position: relative;
-            margin-right: 0.5rem;
-            min-width: 100px;
-        }
-
-        .subject-tag {
-            font-size: 1.2rem;
-            font-weight: 500;
-            min-width: 100px;
-            padding: 0.5rem 0.8rem;
-            text-align: center;
-            border-radius: 30px;
-            background-color: white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-            white-space: nowrap;
-        }
-
-        .subject-chinese {
-            color: #c44536;
-            border-left: 4px solid #e67e22;
-            background: #fff5eb;
-        }
-        .subject-math {
-            color: #1e6f9f;
-            border-left: 4px solid #2980b9;
-            background: #ebf5ff;
-        }
-        .subject-english {
-            color: #2e7d5e;
-            border-left: 4px solid #27ae60;
-            background: #eafaf2;
-        }
-        .subject-other {
-            color: #3c4b5a;
-            border-left: 4px solid #95a5a6;
-            background: #f0f2f4;
-        }
-
-        .name-container {
-            position: relative;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-width: 200px;
-            margin: 0 0.5rem;
-        }
-
-        .time-hint {
-            font-size: 0.7rem;
-            color: #64748b;
-            font-weight: 400;
-            white-space: nowrap;
-            background-color: transparent;
-            padding: 0 0 2px 0;
-            letter-spacing: 0.3px;
-            line-height: 1.2;
-            margin-bottom: 2px;
-        }
-
-        .homework-name {
-            font-size: 1.2rem;
-            font-weight: 450;
-            color: #1e2b3a;
-            word-break: break-word;
-            width: 100%;
-            line-height: 1.3;
-        }
-
-        /* Turnstile 小部件容器 */
-        .turnstile-wrapper {
-            margin: 10px 0;
-            min-height: 70px;
-            display: flex;
-            justify-content: flex-end;
-            position: relative;
-            width: 100%;
-        }
-        
-        .turnstile-loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f1f5f9;
-            border-radius: 30px;
-            padding: 0.5rem 1.5rem;
-            color: #475569;
-            font-size: 0.9rem;
-            border: 1px solid #cbd5e1;
-            width: fit-content;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .turnstile-loading:hover {
-            background: #e2e8f0;
-        }
-        
-        .turnstile-loading::after {
-            content: "...";
-            animation: dots 1.5s steps(4, end) infinite;
-            width: 20px;
-            display: inline-block;
-            text-align: left;
-        }
-        
-        .turnstile-loading.timeout::after {
-            content: " ⏱️ 点击重试";
-            animation: none;
-            width: auto;
-        }
-        
-        .turnstile-loading.error::after {
-            content: " ❌ 点击重试";
-            animation: none;
-            width: auto;
-            color: #b91c1c;
-        }
-        
-        @keyframes dots {
-            0%, 20% { content: ""; }
-            40% { content: "."; }
-            60% { content: ".."; }
-            80%, 100% { content: "..."; }
-        }
-
-        .turnstile-widget {
-            width: 100%;
-        }
-        
-        .homework-link, .homework-link-disabled {
-            display: inline-block;
-            background: #2c3e50;
-            color: white;
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: 450;
-            padding: 0.6rem 1.5rem;
-            border-radius: 40px;
-            transition: background-color 0.15s, transform 0.1s;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-            white-space: nowrap;
-            margin-left: 0.5rem;
-            cursor: pointer;
-            border: none;
-        }
-
-        .homework-link:hover {
-            background: #1a2b3c;
-            transform: translateY(-1px);
-            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .homework-link:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .homework-link-gray {
-            background: #94a3b8;
-            color: #e2e8f0;
-            cursor: not-allowed;
-            box-shadow: none;
-            opacity: 0.7;
-            pointer-events: auto;
-        }
-
-        .homework-link-gray:hover {
-            background: #94a3b8;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .homework-link-disabled {
-            background: #94a3b8;
-            color: #e2e8f0;
-            cursor: default;
-            box-shadow: none;
-            opacity: 0.7;
-            pointer-events: none;
-        }
-
-        .more-message {
-            margin-top: 0.8rem;
-            margin-left: 0;
-            font-size: 0.9rem;
-            padding: 0.5rem 0 0 0;
-            width: 100%;
-            text-align: left;
-            border-top: 1px dashed #e0e6ed;
-            color: #1e293b;
-        }
-
-        /* 不显眼的作业码入口 */
-        .code-entry {
-            text-align: center;
-            margin: 1.5rem 0 1rem 0;
-            font-size: 0.9rem;
-        }
-
-        .code-link {
-            color: #2563eb;
-            text-decoration: underline;
-            text-underline-offset: 2px;
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-size: 0.9rem;
-            padding: 0.2rem 0.5rem;
-        }
-
-        .code-link:hover {
-            color: #1d4ed8;
-        }
-
-        .class-line {
-            width: 80px;
-            height: 3px;
-            background: #d9e2ef;
-            margin: 1rem auto 0 auto;
-            border-radius: 30px;
-            opacity: 0.6;
-        }
-
-        @media (max-width: 600px) {
-            body {
-                padding: 0 0.8rem;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
-            
-            .notice-text {
-                font-size: 1rem;
-                padding: 0.7rem 1rem;
-                margin: 1rem auto 0.8rem auto;
-            }
-            
-            .notice-board {
-                font-size: 0.9rem;
-                padding: 0.6rem 0.8rem;
-            }
-            
-            .toolbar {
-                flex-direction: row;
-                justify-content: center;
-                gap: 0.5rem;
-                margin: 0 auto 1.2rem auto;
-            }
-            
-            .refresh-container {
-                flex: 0 1 auto;
-            }
-            
-            .refresh-btn {
-                padding: 0.5rem 1.5rem;
-                font-size: 1rem;
-            }
-            
-            .subject-filter-select {
-                font-size: 1rem;
-                padding: 0.5rem 1.8rem 0.5rem 0.5rem;
-            }
-            
-            .modal {
-                width: 90%;
-            }
-            
-            .modal-header {
-                padding: 1.2rem 1.2rem 0.3rem 1.2rem;
-            }
-            
-            .modal-header h2 {
-                font-size: 1.3rem;
-            }
-            
-            .modal-content {
-                font-size: 1rem;
-                padding: 0 1.2rem 1.2rem 1.2rem;
-            }
-            
-            .modal-footer {
-                padding: 0 1.2rem 1.2rem 1.2rem;
-            }
-            
-            .code-modal-content {
-                padding: 1.2rem;
-            }
-            
-            .homework-item {
-                padding: 1rem;
-            }
-            
-            .homework-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.8rem;
-            }
-            
-            .subject-container {
-                margin-right: 0;
-                width: 100%;
-                min-width: auto;
-            }
-            
-            .subject-tag {
-                min-width: auto;
-                width: 100%;
-                text-align: center;
-                font-size: 1.1rem;
-                padding: 0.5rem;
-            }
-            
-            .name-container {
-                width: 100%;
-                margin: 0;
-                min-width: auto;
-            }
-            
-            .time-hint {
-                font-size: 0.65rem;
-                padding: 0 0 4px 0;
-                margin-bottom: 4px;
-                white-space: normal;
-                line-height: 1.4;
-            }
-            
-            .homework-name {
-                font-size: 1.1rem;
-                margin-bottom: 0.2rem;
-            }
-
-            .turnstile-wrapper {
-                justify-content: center;
-                width: 100%;
-            }
-            
-            .turnstile-loading {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .homework-link, .homework-link-gray, .homework-link-disabled {
-                width: 100%;
-                text-align: center;
-                margin-left: 0;
-                padding: 0.7rem;
-                font-size: 1rem;
-            }
-            
-            .more-message {
-                font-size: 0.85rem;
-                margin-top: 0.8rem;
-                padding-top: 0.5rem;
-            }
-            
-            .code-entry {
-                margin: 1rem 0 0.5rem 0;
-            }
-
-            .code-modal-buttons {
-                flex-direction: column;
-            }
-
-            .code-modal-cancel, .code-modal-submit {
-                width: 100%;
-                text-align: center;
-            }
-        }
-
-        @media (max-width: 380px) {
-            h1 {
-                font-size: 1.5rem;
-            }
-            
-            .refresh-btn {
-                padding: 0.4rem 1.2rem;
-                font-size: 0.9rem;
-            }
-            
-            .subject-filter-select {
-                font-size: 0.9rem;
-            }
-            
-            .time-hint {
-                font-size: 0.6rem;
-            }
-            
-            .homework-name {
-                font-size: 1rem;
-            }
-        }
-    </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>随机抽号V3.1</title>
+  <!-- 引入优雅的Inter字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <style>
+    /* ===== 全局重置 ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: url('https://ss-mpvolc.meipian.me/users/499047829/d664dcc08472db08f1dcf85c35628038mpand__jpg.heic~tplv-s1ctq42ewb-s2-cC-q:750:0:0:0:q80.webp') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      line-height: 1.5;
+      color: #1a2639;
+      position: relative;
+    }
+
+    /* 半透明遮罩 */
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(3px);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ===== 帮助与反馈弹窗（保留样式但不再使用）===== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 40px;
+      padding: 2.5rem 3rem;
+      box-shadow: 0 30px 50px -20px rgba(0, 20, 40, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.7) inset;
+      border: 1px solid rgba(255,255,255,0.6);
+      max-width: 450px;
+      width: 90%;
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-content h3 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1E2A47;
+      margin-bottom: 1rem;
+    }
+
+    .modal-email {
+      font-size: 1.6rem;
+      font-weight: 600;
+      background: linear-gradient(145deg, #1E2A47, #2C3E6E);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin: 1.2rem 0;
+      padding: 0.8rem;
+      border-radius: 20px;
+      background-color: rgba(255,255,255,0.4);
+      word-break: break-all;
+    }
+
+    .modal-close {
+      display: inline-block;
+      background: linear-gradient(165deg, #1F2B3C, #283B54);
+      color: white !important;
+      font-weight: 600;
+      font-size: 1.2rem;
+      padding: 0.6rem 2rem;
+      border-radius: 60px;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: all 0.2s;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .modal-close:hover {
+      background: linear-gradient(165deg, #25364a, #1f2e44);
+      transform: scale(1.02);
+    }
+
+    /* ===== 设备不支持弹窗（用于非安卓手机）===== */
+    .device-unsupported-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .device-unsupported-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .device-unsupported-content {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 48px;
+      padding: 3rem 3.5rem;
+      box-shadow: 0 40px 60px -20px rgba(180, 60, 30, 0.3), 0 0 0 1px rgba(255, 200, 180, 0.6) inset;
+      border: 1px solid rgba(255, 180, 150, 0.5);
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .device-unsupported-overlay.active .device-unsupported-content {
+      transform: scale(1);
+    }
+
+    .device-unsupported-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 8px 12px rgba(200, 80, 40, 0.2));
+    }
+
+    .device-unsupported-content h2 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #b13e2e;
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .device-unsupported-message {
+      font-size: 1.3rem;
+      font-weight: 500;
+      color: #5a3a32;
+      margin: 1.5rem 0;
+      padding: 0.5rem;
+      background: rgba(255, 220, 200, 0.3);
+      border-radius: 60px;
+      line-height: 1.6;
+    }
+
+    .device-unsupported-close {
+      display: inline-block;
+      background: linear-gradient(165deg, #b13e2e, #8f2e20);
+      color: white !important;
+      font-weight: 600;
+      font-size: 1.2rem;
+      padding: 0.8rem 2.5rem;
+      border-radius: 60px;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: all 0.2s;
+      border: 1px solid rgba(255, 200, 180, 0.4);
+      box-shadow: 0 8px 16px -6px rgba(150, 40, 20, 0.3);
+    }
+
+    .device-unsupported-close:hover {
+      background: linear-gradient(165deg, #c84e3a, #a83826);
+      transform: scale(1.02);
+    }
+
+    /* ===== 下载选项弹窗 ===== */
+    .download-options-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000004;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .download-options-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .download-options-content {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px);
+      border-radius: 48px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 40px 60px -20px rgba(0, 40, 80, 0.3);
+      border: 1px solid rgba(255,255,255,0.6);
+      max-width: 380px;
+      width: 85%;
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .download-options-overlay.active .download-options-content {
+      transform: scale(1);
+    }
+
+    .download-options-content h3 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1E2A47;
+      margin-bottom: 5px;
+    }
+
+    .download-options-subtitle {
+      font-size: 14px;
+      color: #5a5f7a;
+      margin-bottom: 20px;
+    }
+
+    .download-option-button {
+      display: block;
+      width: 100%;
+      padding: 14px 0;
+      margin-bottom: 5px;
+      background-color: #0066CC;
+      color: white;
+      text-decoration: none;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 50px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      box-shadow: 0 4px 12px rgba(0,102,204,0.3);
+      border: none;
+      transition: background-color 0.2s;
+    }
+
+    .download-option-button:hover {
+      background-color: #0052a3;
+    }
+
+    .update-time {
+      font-size: 11px;
+      color: #999;
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: 400;
+    }
+
+    .download-options-close {
+      display: inline-block;
+      background: linear-gradient(165deg, #1F2B3C, #283B54);
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 10px 25px;
+      border-radius: 60px;
+      border: none;
+      cursor: pointer;
+      margin-top: 5px;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .download-options-close:hover {
+      background: linear-gradient(165deg, #25364a, #1f2e44);
+      transform: scale(1.02);
+    }
+
+    /* ===== 系统不支持弹窗（用于非Windows/Linux电脑）===== */
+    .unsupported-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .unsupported-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .unsupported-content {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 48px;
+      padding: 3rem 3.5rem;
+      box-shadow: 0 40px 60px -20px rgba(180, 60, 30, 0.3), 0 0 0 1px rgba(255, 200, 180, 0.6) inset;
+      border: 1px solid rgba(255, 180, 150, 0.5);
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .unsupported-overlay.active .unsupported-content {
+      transform: scale(1);
+    }
+
+    .unsupported-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 8px 12px rgba(200, 80, 40, 0.2));
+    }
+
+    .unsupported-content h2 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #b13e2e;
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .unsupported-message {
+      font-size: 1.3rem;
+      font-weight: 500;
+      color: #5a3a32;
+      margin: 1.5rem 0;
+      padding: 0.5rem;
+      background: rgba(255, 220, 200, 0.3);
+      border-radius: 60px;
+      line-height: 1.6;
+    }
+
+    .unsupported-close {
+      display: inline-block;
+      background: linear-gradient(165deg, #b13e2e, #8f2e20);
+      color: white !important;
+      font-weight: 600;
+      font-size: 1.2rem;
+      padding: 0.8rem 2.5rem;
+      border-radius: 60px;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: all 0.2s;
+      border: 1px solid rgba(255, 200, 180, 0.4);
+      box-shadow: 0 8px 16px -6px rgba(150, 40, 20, 0.3);
+    }
+
+    .unsupported-close:hover {
+      background: linear-gradient(165deg, #c84e3a, #a83826);
+      transform: scale(1.02);
+    }
+
+    /* ===== 主面板 ===== */
+    .glass-panel {
+      max-width: 1400px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 64px;
+      padding: 4rem 2.5rem;
+      box-shadow: 0 30px 50px -20px rgba(0, 20, 40, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+      border: 1px solid rgba(255,255,255,0.5);
+      position: relative;
+      z-index: 2;
+    }
+
+    /* 顶部按钮容器 */
+    .top-buttons {
+      position: absolute;
+      top: 1.8rem;
+      right: 2rem;
+      display: flex;
+      gap: 1rem;
+      z-index: 10;
+    }
+
+    /* 工具按钮 */
+    .tool-button {
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.8);
+      padding: 0.6rem 1.5rem;
+      border-radius: 60px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #1E2A47;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .tool-button:hover {
+      background: rgba(255, 255, 255, 0.8);
+      transform: translateY(-2px);
+    }
+
+    /* 帮助按钮 - 现在直接跳转链接 */
+    .help-button {
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.8);
+      padding: 0.6rem 1.5rem;
+      border-radius: 60px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #1E2A47;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      font-family: inherit;
+    }
+
+    .help-button:hover {
+      background: rgba(255, 255, 255, 0.8);
+      transform: translateY(-2px);
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* 大标题 */
+    h1 {
+      font-size: clamp(3.5rem, 12vw, 5.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(145deg, #1E2A47 0%, #2C3E6E 40%, #16202E 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 10px 20px rgba(18, 52, 102, 0.1);
+      margin-bottom: 1rem;
+      white-space: nowrap;
+    }
+
+    /* 副标题 */
+    .subhead {
+      font-size: 1.3rem;
+      font-weight: 450;
+      color: #1E2A47;
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 0.6rem 2rem;
+      border-radius: 60px;
+      margin-bottom: 3.5rem;
+      letter-spacing: 2px;
+      border: 0.5px solid rgba(255,255,255,0.8);
+    }
+
+    /* ===== 三按钮区域（卡片严格对齐） ===== */
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: stretch;
+      gap: 3rem;
+      margin: 1.5rem 0 1rem;
+      width: 100%;
+    }
+
+    .download-card {
+      flex: 0 1 300px;
+      min-width: 260px;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 48px;
+      padding: 2.2rem 1.8rem 1.8rem;
+      box-shadow: 0 20px 30px -10px rgba(30, 50, 80, 0.15);
+      transition: transform 0.25s;
+      border: 1px solid rgba(255,255,255,0.7);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .download-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 32px 45px -12px rgba(18, 52, 102, 0.2);
+      background: rgba(255, 255, 255, 0.75);
+    }
+
+    /* 图片容器 - 固定高度确保完全对齐 */
+    .image-wrapper {
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    /* Windows版图标（动图） */
+    .windows-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+      transition: transform 0.2s ease;
+    }
+
+    /* 信创版图标（风景） */
+    .linux-icon {
+      width: 80px;
+      height: 96px;
+      border-radius: 20px;
+      object-fit: contain;
+      object-position: center;
+      background-color: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+      transition: transform 0.2s ease;
+      padding: 4px;
+    }
+
+    /* 网页版图标（新图片） */
+    .web-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+      transition: transform 0.2s ease;
+    }
+
+    .download-card:hover .windows-icon,
+    .download-card:hover .linux-icon,
+    .download-card:hover .web-icon {
+      transform: scale(1.05);
+    }
+
+    /* 主按钮 */
+    .download-btn {
+      display: inline-block;
+      background: linear-gradient(165deg, #1F2B3C, #283B54);
+      color: white !important;
+      font-weight: 700;
+      font-size: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 100px;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 12px 16px -6px rgba(0,20,50,0.2);
+      transition: all 0.18s;
+      width: 100%;
+      max-width: 240px;
+      margin: 0.2rem 0 0.7rem;
+      line-height: 1.2;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+    }
+
+    .download-btn:hover {
+      background: linear-gradient(165deg, #25364a, #1f2e44);
+      transform: scale(1.01);
+    }
+
+    /* 网页版专属样式 */
+    .web-btn {
+      background: linear-gradient(165deg, #2a4a6e, #1e3a5a);
+    }
+
+    /* 密码提示 */
+    .password-hint {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #1E2A47;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      padding: 0.35rem 1.2rem;
+      border-radius: 100px;
+      display: inline-block;
+      margin-top: 0.6rem;
+      border: 0.5px solid rgba(255,255,255,0.5);
+      line-height: 1.4;
+    }
+
+    .password-hint::before {
+      content: "🔒 ";
+      font-size: 0.95rem;
+    }
+
+    .accent-line {
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(60,100,150,0.3), transparent);
+      margin: 1.2rem auto 0.8rem;
+    }
+
+    .system-support {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-top: 0.3rem;
+      color: #1E2A47;
+      height: 20px;
+      line-height: 20px;
+      font-weight: 500;
+    }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 900px) {
+      .button-group {
+        gap: 2rem;
+      }
+      .download-card {
+        flex: 0 1 280px;
+      }
+      .top-buttons {
+        gap: 0.5rem;
+      }
+    }
+
+    @media (max-width: 750px) {
+      .glass-panel { padding: 3rem 1.5rem; }
+      h1 { white-space: normal; }
+      .button-group { gap: 2rem; }
+      .download-card { min-width: 240px; }
+      .top-buttons { top: 1.2rem; right: 1.2rem; }
+      .tool-button, .help-button { padding: 0.5rem 1.2rem; font-size: 0.9rem; }
+      .image-wrapper { height: 90px; }
+      .windows-icon, .web-icon { width: 70px; height: 70px; }
+      .linux-icon { width: 70px; height: 84px; }
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 1rem; }
+      .glass-panel { padding: 2.5rem 1.2rem; }
+      h1 { font-size: 2.8rem; }
+      .download-btn { font-size: 1.3rem; }
+      .image-wrapper { height: 80px; }
+      .windows-icon, .web-icon { width: 60px; height: 60px; }
+      .linux-icon { width: 60px; height: 72px; }
+      .top-buttons {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin-bottom: 1.5rem;
+        justify-content: center;
+      }
+    }
+
+    .footer-note {
+      margin-top: 3rem;
+      font-size: 0.8rem;
+      color: #1E2A47;
+      border-top: 1px dashed rgba(255,255,255,0.6);
+      padding-top: 1.8rem;
+      width: 80%;
+      font-weight: 500;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- 滚动公告条容器 -->
-        <div id="noticeBoard" class="notice-board" style="display: none;">
-            <div class="notice-board-content" id="noticeBoardContent"></div>
-        </div>
+  <!-- ===== 手机跳转检测脚本（区分安卓和其他手机）===== -->
+  <script>
+    (function() {
+      // 检测是否为手机设备
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      // 检测是否为安卓设备
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      
+      // 如果是手机设备（包括安卓和非安卓）
+      if (isMobile) {
+        // 图片链接
+        const imageUrl = 'https://ss-mpvolc.meipian.me/users/499047829/00f34565027946def57924297af9bb3bmpand__jpg.heic~tplv-s1ctq42ewb-s2-cC-q%3A0%3A0%3A0%3A0%3Aq0.jpg';
+        
+        // 网页版链接
+        const webVersionLink = 'http://luckynum.top/online';
+        
+        // 更多工具链接 - 当前路径下加 /tools
+        const toolsLink = window.location.href.includes('/') 
+          ? window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1) + 'tools'
+          : window.location.href + '/tools';
+        
+        // 下载链接
+        const phoneDownloadLink = 'http://luckynum.top/%E9%9A%8F%E6%9C%BA%E6%8A%BD%E5%8F%B7Android1.0.0.apk';
+        const tabletDownloadLink = 'http://luckynum.top/%E9%9A%8F%E6%9C%BA%E6%8A%BD%E5%8F%B7AndroidHD1.0.0.apk';
+        
+        // 最后更新时间
+        const updateTime = '最后更新时间：2024年7月11日';
+        
+        // 创建手机版页面，包含下载选项弹窗
+        const mobilePage = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+            <title>随机抽号 - 手机版</title>
+            <style>
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
+              
+              html, body {
+                width: 100%;
+                height: 100%;
+                background-color: #FFFFFF;
+                overflow: hidden;
+              }
+              
+              .mobile-container {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                background-color: #FFFFFF;
+                position: fixed;
+                top: 0;
+                left: 0;
+                z-index: 999999;
+              }
+              
+              .top-buttons-mobile {
+                position: absolute;
+                top: 16px;
+                right: 16px;
+                display: flex;
+                gap: 10px;
+                z-index: 1000001;
+              }
+              
+              .tool-button-mobile, .help-button-mobile {
+                background: rgba(30, 42, 71, 0.15);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                border: 1px solid rgba(30, 42, 71, 0.2);
+                padding: 10px 20px;
+                border-radius: 40px;
+                font-size: 15px;
+                font-weight: 600;
+                color: #1E2A47;
+                cursor: pointer;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                transition: all 0.2s;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                border: 1px solid rgba(255,255,255,0.6);
+                text-decoration: none;
+                display: inline-block;
+              }
+              
+              .tool-button-mobile:hover, .help-button-mobile:hover {
+                background: rgba(30, 42, 71, 0.25);
+                transform: translateY(-1px);
+              }
+              
+              .image-area {
+                flex: 1;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background-color: #FFFFFF;
+                padding-top: 60px;
+              }
+              
+              img {
+                width: 100%;
+                height: auto;
+                max-height: 100%;
+                object-fit: contain;
+                display: block;
+              }
+              
+              @media (orientation: landscape) {
+                img {
+                  width: auto;
+                  height: 100%;
+                  max-width: 100vw;
+                }
+              }
+              
+              .buttons-area {
+                width: 100%;
+                padding: 20px 20px 30px 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                background-color: #FFFFFF;
+              }
+              
+              .web-button {
+                display: block;
+                width: 100%;
+                padding: 16px 0;
+                background-color: #0066CC;
+                color: white;
+                text-decoration: none;
+                text-align: center;
+                font-size: 18px;
+                font-weight: 600;
+                border-radius: 50px;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                box-shadow: 0 4px 12px rgba(0,102,204,0.3);
+                border: none;
+                transition: background-color 0.2s;
+              }
+              
+              .web-button:hover {
+                background-color: #0052a3;
+              }
+              
+              .web-button:active {
+                background-color: #004080;
+              }
+              
+              .history-link {
+                color: #0066CC;
+                text-decoration: underline;
+                font-size: 16px;
+                font-weight: 500;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                background: transparent;
+                display: inline-block;
+                cursor: pointer;
+                text-align: center;
+                width: 100%;
+                border: none;
+                padding: 0;
+              }
+              
+              .history-link:hover {
+                color: #004499;
+              }
+              
+              .history-link:active {
+                color: #003366;
+              }
 
-        <!-- 头部 -->
-        <div class="header">
-            <h1>初二五班电子作业提交</h1>
-        </div>
+              /* 设备不支持弹窗样式 */
+              .device-unsupported-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                backdrop-filter: blur(10px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000002;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+              }
+              
+              .device-unsupported-modal.active {
+                opacity: 1;
+                visibility: visible;
+              }
+              
+              .device-unsupported-content {
+                background: rgba(255, 255, 255, 0.9);
+                backdrop-filter: blur(20px);
+                border-radius: 48px;
+                padding: 2.5rem 2.5rem;
+                box-shadow: 0 40px 60px -20px rgba(180, 60, 30, 0.3);
+                border: 1px solid rgba(255, 180, 150, 0.5);
+                max-width: 400px;
+                width: 90%;
+                text-align: center;
+                transform: scale(0.9);
+                transition: transform 0.3s ease;
+              }
+              
+              .device-unsupported-modal.active .device-unsupported-content {
+                transform: scale(1);
+              }
+              
+              .device-unsupported-icon {
+                font-size: 3.5rem;
+                margin-bottom: 1rem;
+              }
+              
+              .device-unsupported-content h2 {
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: #b13e2e;
+                margin-bottom: 1rem;
+              }
+              
+              .device-unsupported-message {
+                font-size: 1.2rem;
+                font-weight: 500;
+                color: #5a3a32;
+                margin: 1.2rem 0;
+                padding: 0.5rem;
+                background: rgba(255, 220, 200, 0.3);
+                border-radius: 60px;
+                line-height: 1.5;
+              }
+              
+              .device-unsupported-close {
+                display: inline-block;
+                background: linear-gradient(165deg, #b13e2e, #8f2e20);
+                color: white !important;
+                font-weight: 600;
+                font-size: 1.1rem;
+                padding: 0.7rem 2rem;
+                border-radius: 60px;
+                border: none;
+                cursor: pointer;
+                margin-top: 0.8rem;
+              }
+              
+              .device-unsupported-close:hover {
+                background: linear-gradient(165deg, #c84e3a, #a83826);
+                transform: scale(1.02);
+              }
 
-        <!-- 提示文字 -->
-        <div class="notice-text">
-            如果你不是广州市第四十一中学初二五班的学生，请退出本网页
-        </div>
+              /* 帮助弹窗样式 */
+              .help-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(8px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000003;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+              }
+              
+              .help-modal.active {
+                opacity: 1;
+                visibility: visible;
+              }
+              
+              .help-content {
+                background: rgba(255, 255, 255, 0.9);
+                backdrop-filter: blur(20px);
+                border-radius: 40px;
+                padding: 30px 30px;
+                box-shadow: 0 30px 50px -20px rgba(0, 20, 40, 0.3);
+                border: 1px solid rgba(255,255,255,0.6);
+                max-width: 380px;
+                width: 85%;
+                text-align: center;
+                transform: scale(0.9);
+                transition: transform 0.3s ease;
+              }
+              
+              .help-modal.active .help-content {
+                transform: scale(1);
+              }
+              
+              .help-content h3 {
+                font-size: 24px;
+                font-weight: 700;
+                color: #1E2A47;
+                margin-bottom: 15px;
+              }
+              
+              .help-email {
+                font-size: 18px;
+                font-weight: 600;
+                background: linear-gradient(145deg, #1E2A47, #2C3E6E);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+                margin: 15px 0;
+                padding: 10px;
+                border-radius: 20px;
+                background-color: rgba(255,255,255,0.4);
+                word-break: break-all;
+              }
+              
+              .help-close {
+                display: inline-block;
+                background: linear-gradient(165deg, #1F2B3C, #283B54);
+                color: white;
+                font-weight: 600;
+                font-size: 16px;
+                padding: 12px 30px;
+                border-radius: 60px;
+                border: none;
+                cursor: pointer;
+                margin-top: 10px;
+                transition: all 0.2s;
+              }
+              
+              .help-close:hover {
+                background: linear-gradient(165deg, #25364a, #1f2e44);
+                transform: scale(1.02);
+              }
 
-        <!-- 工具栏 -->
-        <div class="toolbar">
-            <div class="refresh-container">
-                <button class="refresh-btn" id="refreshBtn" title="刷新作业列表">
-                    <svg viewBox="0 0 24 24" width="18" height="18">
-                        <path d="M23 4v6h-6M1 20v-6h6" />
-                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-                    </svg>
-                    刷新
-                </button>
+              /* 下载选项弹窗样式 */
+              .download-options-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                backdrop-filter: blur(10px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000004;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+              }
+              
+              .download-options-modal.active {
+                opacity: 1;
+                visibility: visible;
+              }
+              
+              .download-options-content {
+                background: rgba(255, 255, 255, 0.9);
+                backdrop-filter: blur(20px);
+                border-radius: 48px;
+                padding: 2.5rem 2rem;
+                box-shadow: 0 40px 60px -20px rgba(0, 40, 80, 0.3);
+                border: 1px solid rgba(255,255,255,0.6);
+                max-width: 380px;
+                width: 85%;
+                text-align: center;
+                transform: scale(0.9);
+                transition: transform 0.3s ease;
+              }
+              
+              .download-options-modal.active .download-options-content {
+                transform: scale(1);
+              }
+              
+              .download-options-content h3 {
+                font-size: 24px;
+                font-weight: 700;
+                color: #1E2A47;
+                margin-bottom: 5px;
+              }
+              
+              .download-options-subtitle {
+                font-size: 14px;
+                color: #5a5f7a;
+                margin-bottom: 20px;
+              }
+              
+              .download-option-button {
+                display: block;
+                width: 100%;
+                padding: 14px 0;
+                margin-bottom: 5px;
+                background-color: #0066CC;
+                color: white;
+                text-decoration: none;
+                text-align: center;
+                font-size: 16px;
+                font-weight: 600;
+                border-radius: 50px;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                box-shadow: 0 4px 12px rgba(0,102,204,0.3);
+                border: none;
+                transition: background-color 0.2s;
+              }
+              
+              .download-option-button:hover {
+                background-color: #0052a3;
+              }
+              
+              .update-time {
+                font-size: 11px;
+                color: #999;
+                text-align: center;
+                margin-bottom: 15px;
+                font-weight: 400;
+              }
+              
+              .download-options-close {
+                display: inline-block;
+                background: linear-gradient(165deg, #1F2B3C, #283B54);
+                color: white;
+                font-weight: 600;
+                font-size: 14px;
+                padding: 10px 25px;
+                border-radius: 60px;
+                border: none;
+                cursor: pointer;
+                margin-top: 5px;
+                transition: all 0.2s;
+                width: 100%;
+              }
+              
+              .download-options-close:hover {
+                background: linear-gradient(165deg, #25364a, #1f2e44);
+                transform: scale(1.02);
+              }
+            </style>
+          </head>
+          <body>
+            <div class="mobile-container">
+              <div class="top-buttons-mobile">
+                <a href="${toolsLink}" class="tool-button-mobile">更多工具</a>
+                <button class="help-button-mobile" onclick="window.location.href='https://wj.qq.com/s2/25900605/5545/'">帮助与反馈</button>
+              </div>
+              <div class="image-area">
+                <img src="${imageUrl}" alt="随机抽号手机版">
+              </div>
+              <div class="buttons-area">
+                <a href="${webVersionLink}" class="web-button" onclick="navigateToWebVersion(event)">访问网页版</a>
+                <button class="history-link" onclick="openDownloadOptionsModal()">下载已不受支持的历史版本</button>
+              </div>
             </div>
-
-            <div class="subject-filter">
-                <select id="subjectFilter" class="subject-filter-select">
-                    <option value="all">所有学科</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- 加载中提示容器 -->
-        <div id="loadingContainer" class="loading-message" style="display: block;">
-            正在获取作业信息...
-        </div>
-
-        <!-- 作业内容将动态渲染到这里 -->
-        <div id="homeworkContainer" style="display: none;"></div>
-
-        <!-- 空状态提示容器（无作业时显示） -->
-        <div id="emptyContainer" class="empty-message" style="display: none;">
-            当前暂无需要通过此网页提交的作业或管理员未发布新的作业
-        </div>
-
-        <!-- 不显眼的作业码入口 -->
-        <div id="codeEntry" class="code-entry" style="display: none;">
-            <button class="code-link" id="codeLink">输入作业码</button>
-        </div>
-
-        <!-- 弹窗容器 -->
-        <div id="modalContainer" style="display: none;"></div>
-
-        <!-- 作业码弹窗容器 -->
-        <div id="codeModalContainer" style="display: none;"></div>
-
-        <div class="class-line" aria-hidden="true"></div>
-    </div>
-
-    <script>
-        (function() {
-            // 存储原始作业数据
-            let originalItems = [];
-            let filteredItems = [];
-            let currentSubject = 'all';
             
-            // 存储作业码映射
-            let codeMap = new Map();
+            <!-- 帮助与反馈弹窗（保留但不再使用） -->
+            <div id="helpModal" class="help-modal">
+              <div class="help-content">
+                <h3>帮助与反馈</h3>
+                <p style="font-size:16px; color:#2a405c; margin-bottom:10px;">📧 联系邮箱</p>
+                <div class="help-email">1715250361@qq.com</div>
+                <p style="color:#4a5e75; margin-bottom:15px;">我们会尽快回复您的邮件</p>
+                <button class="help-close" onclick="closeHelpModal()">确 定</button>
+              </div>
+            </div>
+            
+            <!-- 下载选项弹窗 -->
+            <div id="downloadOptionsModal" class="download-options-modal">
+              <div class="download-options-content">
+                <h3>选择版本</h3>
+                <div class="download-options-subtitle">请选择适合您设备的版本</div>
+                <a href="${phoneDownloadLink}" class="download-option-button" target="_blank">下载手机版</a>
+                <div class="update-time">${updateTime}</div>
+                <a href="${tabletDownloadLink}" class="download-option-button" target="_blank">下载平板版</a>
+                <div class="update-time">${updateTime}</div>
+                <button class="download-options-close" onclick="closeDownloadOptionsModal()">取 消</button>
+              </div>
+            </div>
+            
+            <!-- 非安卓手机设备显示弹窗 -->
+            <div id="deviceUnsupportedModal" class="device-unsupported-modal">
+              <div class="device-unsupported-content">
+                <div class="device-unsupported-icon">⚠️</div>
+                <h2>设备不支持</h2>
+                <div class="device-unsupported-message">当前设备暂不支持安装，请使用安卓手机。</div>
+                <button class="device-unsupported-close" onclick="closeDeviceModal()">确 定</button>
+              </div>
+            </div>
+            
+            <script>
+              // 检测是否为安卓设备
+              const isAndroid = /Android/i.test(navigator.userAgent);
+              
+              // 如果不是安卓（即是iPhone/iPad等其他手机），显示弹窗
+              if (!isAndroid) {
+                setTimeout(function() {
+                  document.getElementById('deviceUnsupportedModal').classList.add('active');
+                }, 500);
+              }
+              
+              // 帮助弹窗函数（保留但不再使用）
+              window.openHelpModal = function() {
+                window.location.href = 'https://wj.qq.com/s2/25900605/5545/';
+              };
+              
+              window.closeHelpModal = function() {
+                document.getElementById('helpModal').classList.remove('active');
+              };
+              
+              // 下载选项弹窗函数
+              window.openDownloadOptionsModal = function() {
+                document.getElementById('downloadOptionsModal').classList.add('active');
+              };
+              
+              window.closeDownloadOptionsModal = function() {
+                document.getElementById('downloadOptionsModal').classList.remove('active');
+              };
+              
+              // 设备不支持弹窗关闭函数
+              window.closeDeviceModal = function() {
+                document.getElementById('deviceUnsupportedModal').classList.remove('active');
+              };
+              
+              // 网页版导航函数（在当前标签页打开）
+              window.navigateToWebVersion = function(event) {
+                event.preventDefault();
+                window.location.href = '${webVersionLink}';
+              };
+            <\/script>
+          </body>
+          </html>
+        `;
+        
+        // 完全替换当前页面内容，确保没有其他元素
+        document.open();
+        document.write(mobilePage);
+        document.close();
+        
+        // 停止执行后续所有代码
+        throw new Error('手机版页面已加载，停止执行');
+      }
+    })();
+  </script>
 
-            // 存储每个作业的验证状态
-            let verificationStatus = {};
+  <!-- ===== 以下内容只在非手机设备显示 ===== -->
+  <!-- ===== 系统不支持弹窗（用于非Windows/Linux电脑）===== -->
+  <div id="unsupportedModal" class="unsupported-overlay">
+    <div class="unsupported-content">
+      <div class="unsupported-icon">⚠️</div>
+      <h2>系统不支持</h2>
+      <div class="unsupported-message">当前本软件暂不支持您当前设备的系统，请使用其他设备安装。</div>
+      <button class="unsupported-close" onclick="closeUnsupportedModal()">确 定</button>
+    </div>
+  </div>
 
-            // 存储当前点击的作业链接，用于人机验证通过后跳转
-            let pendingLink = '';
+  <!-- ===== 帮助与反馈弹窗（保留但不再使用）===== -->
+  <div id="helpModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>帮助与反馈</h3>
+      <p style="font-size:1.2rem; color:#2a405c; margin-bottom:0.5rem;">📧 联系邮箱</p>
+      <div class="modal-email">1715250361@qq.com</div>
+      <p style="color:#4a5e75; margin-bottom:1rem;">我们会尽快回复您的邮件</p>
+      <button class="modal-close" onclick="closeModal()">确 定</button>
+    </div>
+  </div>
 
-            // 作业码弹窗的验证状态
-            let codeModalVerified = false;
+  <!-- ===== 主面板 ===== -->
+  <div class="glass-panel">
+    <!-- 顶部按钮容器 -->
+    <div class="top-buttons">
+      <a href="tools" class="tool-button">更多工具</a>
+      <button class="help-button" onclick="openModal()">帮助与反馈</button>
+    </div>
+    
+    <div class="content">
+      <h1>随机抽号V3.1</h1>
+      <div class="subhead">免费 实用 极简</div>
+      
+      <!-- 三卡片：Windows版 + 信创版 + 网页版 -->
+      <div class="button-group">
+        
+        <!-- Windows版卡片 - 蓝奏云链接 -->
+        <div class="download-card">
+          <div class="image-wrapper">
+            <img class="windows-icon" src="https://ss-mpvolc.meipian.me/users/499047829/failed5d2813ca2d4a4851a72c0abdc0810b8dmpand.gif~tplv-s1ctq42ewb-s2-cC-q:750:0:0:0:q80.gif" alt="Windows版">
+          </div>
+          <a href="https://wwbny.lanzoue.com/iYMWq3iy45di" class="download-btn" target="_blank">下载Windows版</a>
+          <div class="password-hint">密码：1234</div>
+          <div class="accent-line"></div>
+          <div class="system-support">适用于Win7及以上</div>
+        </div>
+        
+        <!-- 信创版卡片 - 金山文档链接（已删除密码提示） -->
+        <div class="download-card">
+          <div class="image-wrapper">
+            <img class="linux-icon" src="https://ss-mpvolc.meipian.me/users/499047829/cd78accd974d71a7f7c5cf09b7bb6debmpand__jpg.heic~tplv-s1ctq42ewb-s2-cC-q:750:0:0:0:q80.webp" alt="信创版">
+          </div>
+          
+          <!-- 直接使用a标签打开金山文档链接 -->
+          <a href="https://www.kdocs.cn/view/l/cf1HFOtKaX72" class="download-btn" target="_blank">下载信创版</a>
+          
+          <!-- 密码提示已删除 -->
+          <div class="accent-line"></div>
+          <div class="system-support">银河麒麟/统信UOS</div>
+        </div>
 
-            // 标记是否正在刷新，避免重复刷新
-            let isRefreshing = false;
+        <!-- 网页版卡片 -->
+        <div class="download-card">
+          <div class="image-wrapper">
+            <img class="web-icon" src="https://ss-mpvolc.meipian.me/users/499047829/a706d29df933a1805e0683c43a9821f2mpand__jpg.heic~tplv-s1ctq42ewb-s2-cC-q:750:0:0:0:q80.webp" alt="网页版">
+          </div>
+          <a href="http://luckynum.top/online" class="download-btn web-btn" onclick="navigateToWebVersion(event)">访问网页版</a>
+          <!-- 网页版不需要密码提示，留空保持高度一致 -->
+          <div style="height: 2.5rem;"></div>
+          <div class="accent-line"></div>
+          <div class="system-support">在线使用，无需安装</div>
+        </div>
+      </div>
+      
+      <div class="footer-note">
+        <span style="letter-spacing: 2px;">随机抽号 V3.1 — 全新信创适配 · 网页在线版</span>
+      </div>
+    </div>
+  </div>
 
-            // Turnstile 脚本加载状态
-            let turnstileReady = false;
+  <script>
+    (function() {
+      "use strict";
 
-            // 等待渲染的队列
-            let pendingTurnstileItems = [];
+      // ===== 检测非主流设备（非Windows/Linux电脑）=====
+      function checkUnsupportedDevice() {
+        const ua = navigator.userAgent.toLowerCase();
+        
+        const isWindows = /windows|win32|win64|wow32|wow64/.test(ua);
+        const isLinux = /linux|ubuntu|debian|centos|redhat|fedora/.test(ua);
+        const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/.test(ua);
+        
+        if (!isWindows && !isLinux && !isMobile) {
+          setTimeout(() => {
+            document.getElementById('unsupportedModal').classList.add('active');
+          }, 100);
+        }
+      }
 
-            // 获取错误信息
-            function getErrorMessage(errorCode) {
-                const errorMap = {
-                    '100***': '挑战初始化失败',
-                    '102***': '无效参数',
-                    '103***': '无效参数',
-                    '104***': '无效参数',
-                    '106***': '无效参数',
-                    '110100': '无效的 sitekey',
-                    '110110': '无效的 sitekey',
-                    '110200': '域名未授权',
-                    '110500': '浏览器版本过低',
-                    '11060*': '验证超时',
-                    '200100': '系统时间不正确',
-                    '300***': '未知错误',
-                    '600***': '验证失败'
-                };
-                
-                // 默认错误信息
-                let reason = '未知错误';
-                for (let [code, msg] of Object.entries(errorMap)) {
-                    if (code.includes('*')) {
-                        const prefix = code.replace('*', '');
-                        if (errorCode.startsWith(prefix.substring(0, prefix.length - 1))) {
-                            reason = msg;
-                            break;
-                        }
-                    } else if (errorCode === code) {
-                        reason = msg;
-                        break;
-                    }
-                }
-                
-                return reason;
-            }
+      // ===== 帮助与反馈跳转（修改为腾讯问卷链接）=====
+      window.openModal = function() {
+        window.location.href = 'https://wj.qq.com/s2/25900605/5545/';
+      };
+      
+      window.closeModal = function() {
+        // 不再使用
+      };
 
-            // 刷新页面函数
-            function refreshPage() {
-                if (!isRefreshing) {
-                    isRefreshing = true;
-                    // 显示刷新提示（可选）
-                    const loadingEl = document.getElementById('loadingContainer');
-                    if (loadingEl) {
-                        loadingEl.textContent = '验证失败，正在刷新页面...';
-                        loadingEl.style.display = 'block';
-                    }
-                    // 延迟一点刷新，让用户看到提示
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1000);
-                }
-            }
+      window.closeUnsupportedModal = function() {
+        document.getElementById('unsupportedModal').classList.remove('active');
+      };
 
-            // 解析RGB颜色字符串
-            function parseRgbColor(colorStr) {
-                if (!colorStr) return null;
-                const match = colorStr.match(/\[\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\]/);
-                if (match) {
-                    const r = parseInt(match[1]);
-                    const g = parseInt(match[2]);
-                    const b = parseInt(match[3]);
-                    if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
-                        return `rgb(${r}, ${g}, ${b})`;
-                    }
-                }
-                return null;
-            }
+      window.onclick = function(e) {
+        const unsupportedModal = document.getElementById('unsupportedModal');
+        if (e.target === unsupportedModal) window.closeUnsupportedModal();
+      };
+      
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          window.closeUnsupportedModal();
+        }
+      });
 
-            // 解析日期时间字符串
-            function parseDateTime(dateTimeStr) {
-                if (!dateTimeStr) return null;
-                const parts = dateTimeStr.split(' ');
-                if (parts.length !== 2) return null;
-                
-                const datePart = parts[0];
-                const timePart = parts[1];
-                
-                const dateParts = datePart.split('/');
-                if (dateParts.length !== 3) return null;
-                
-                const year = parseInt(dateParts[0]);
-                const month = parseInt(dateParts[1]) - 1;
-                const day = parseInt(dateParts[2]);
-                
-                const timeParts = timePart.split(':');
-                if (timeParts.length !== 2) return null;
-                
-                const hour = parseInt(timeParts[0]);
-                const minute = parseInt(timeParts[1]);
-                
-                return new Date(year, month, day, hour, minute, 0);
-            }
+      // 网页版导航函数（在当前标签页打开）
+      window.navigateToWebVersion = function(event) {
+        event.preventDefault();
+        window.location.href = 'http://luckynum.top/online';
+      };
 
-            // 解析作业码块
-            function parseCodeBlock(block) {
-                const lines = block.split('\n');
-                const codes = [];
-                
-                for (let line of lines) {
-                    line = line.trim();
-                    if (line === '') continue;
-                    
-                    // 解析格式: num=作业码,link=访问链接
-                    const numMatch = line.match(/num=([^,]+)/);
-                    const linkMatch = line.match(/link=(\S+)/);
-                    
-                    if (numMatch && linkMatch) {
-                        const code = numMatch[1].trim();
-                        const link = linkMatch[1].trim();
-                        if (code && link) {
-                            codes.push({ code, link });
-                        }
-                    }
-                }
-                
-                return codes;
-            }
-
-            // 解析作业函数 - 只解析"""内的内容
-            function parseHomework(text) {
-                const items = [];
-                
-                // 先查找最后一个【】块（作业码块）- 这个可能在"""外部
-                const lastBracketMatch = text.match(/【([^】]*)】\s*$/);
-                let hasCodeBlock = false;
-                
-                if (lastBracketMatch) {
-                    // 提取作业码块
-                    const codeBlock = lastBracketMatch[1];
-                    const codes = parseCodeBlock(codeBlock);
-                    
-                    // 清空并重新填充codeMap
-                    codeMap.clear();
-                    codes.forEach(({ code, link }) => {
-                        codeMap.set(code, link);
-                    });
-                    
-                    // 标记有作业码块
-                    hasCodeBlock = codes.length > 0;
-                    
-                    // 移除最后一个【】块，处理剩余部分作为作业内容
-                    const lastBracketIndex = text.lastIndexOf('【');
-                    text = text.substring(0, lastBracketIndex).trim();
-                }
-                
-                // 解析作业内容 - 只处理"""内的内容
-                const rawBlocks = text.split(/"""/);
-                
-                for (let i = 0; i < rawBlocks.length; i++) {
-                    // 只处理奇数索引（即"""之间的内容）
-                    // 索引0是第一个"""之前的内容，索引1是第一个和第二个"""之间的内容，以此类推
-                    if (i % 2 === 1) {
-                        let block = rawBlocks[i].trim();
-                        if (block === '') continue;
-                        
-                        const lines = block.split('\n');
-                        let sub = '', name = '', link = '';
-                        let more = '';
-                        let moreColor = null;
-                        let startTimeStr = '';
-                        let endTimeStr = '';
-                        
-                        for (let line of lines) {
-                            line = line.trim();
-                            
-                            // 检查 more_colour[,,]
-                            const colorMatch = line.match(/more_colour\s*\[\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\]/);
-                            if (colorMatch) {
-                                const r = parseInt(colorMatch[1]);
-                                const g = parseInt(colorMatch[2]);
-                                const b = parseInt(colorMatch[3]);
-                                if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
-                                    moreColor = `rgb(${r}, ${g}, ${b})`;
-                                }
-                                continue;
-                            }
-                            
-                            if (line.startsWith('sub=')) {
-                                sub = line.substring(4).trim();
-                            } else if (line.startsWith('name=')) {
-                                name = line.substring(5).trim();
-                            } else if (line.startsWith('link=')) {
-                                link = line.substring(5).trim();
-                            } else if (line.startsWith('more=')) {
-                                more = line.substring(5).trim();
-                            } else if (line.startsWith('start_time=')) {
-                                startTimeStr = line.substring(11).trim();
-                            } else if (line.startsWith('end_time=')) {
-                                endTimeStr = line.substring(9).trim();
-                            }
-                        }
-                        
-                        const startTime = parseDateTime(startTimeStr);
-                        const endTime = parseDateTime(endTimeStr);
-                        
-                        if (sub || name || link || more || startTimeStr || endTimeStr) {
-                            items.push({ 
-                                sub: sub || '其他',
-                                name: name || '未命名作业',
-                                link,
-                                more: more,
-                                moreColor: moreColor,
-                                startTime: startTime,
-                                endTime: endTime,
-                                startTimeStr: startTimeStr,
-                                endTimeStr: endTimeStr
-                            });
-                        }
-                    }
-                }
-                
-                // 返回作业项和是否有作业码块的标记
-                return { items, hasCodeBlock };
-            }
-
-            // 解析通知文件
-            function parseNoticeFile(text) {
-                const lines = text.split('\n');
-                let head = '';
-                let message = '';
-                let board = '';
-                
-                for (let line of lines) {
-                    line = line.trim();
-                    if (line.startsWith('Head=')) {
-                        head = line.substring(5).trim();
-                    } else if (line.startsWith('Message=')) {
-                        message = line.substring(8).trim();
-                    } else if (line.startsWith('Board=')) {
-                        board = line.substring(6).trim();
-                    }
-                }
-                
-                return { head, message, board };
-            }
-
-            // 显示普通弹窗
-            function showModal(head, message) {
-                const modalContainer = document.getElementById('modalContainer');
-                
-                const modalOverlay = document.createElement('div');
-                modalOverlay.className = 'modal-overlay';
-                
-                const modal = document.createElement('div');
-                modal.className = 'modal';
-                
-                let modalHTML = '';
-                
-                modalHTML += '<button class="modal-close" id="modalCloseBtn">&times;</button>';
-                
-                if (head && head.trim() !== '') {
-                    modalHTML += `
-                        <div class="modal-header">
-                            <h2>${head}</h2>
-                        </div>
-                    `;
-                } else {
-                    modal.className += ' no-header';
-                }
-                
-                modalHTML += `
-                    <div class="modal-content">
-                        ${message.replace(/\n/g, '<br>')}
-                    </div>
-                    <div class="modal-footer">
-                        <button class="modal-btn" id="modalConfirmBtn">知道了</button>
-                    </div>
-                `;
-                
-                modal.innerHTML = modalHTML;
-                
-                modalOverlay.appendChild(modal);
-                modalContainer.innerHTML = '';
-                modalContainer.appendChild(modalOverlay);
-                modalContainer.style.display = 'block';
-                
-                document.getElementById('modalCloseBtn').addEventListener('click', function() {
-                    modalContainer.style.display = 'none';
-                });
-                
-                document.getElementById('modalConfirmBtn').addEventListener('click', function() {
-                    modalContainer.style.display = 'none';
-                });
-                
-                modalOverlay.addEventListener('click', function(e) {
-                    if (e.target === modalOverlay) {
-                        modalContainer.style.display = 'none';
-                    }
-                });
-            }
-
-            // 显示作业码弹窗
-            function showCodeModal() {
-                codeModalVerified = false;
-                const codeModalContainer = document.getElementById('codeModalContainer');
-                
-                const modalOverlay = document.createElement('div');
-                modalOverlay.className = 'modal-overlay';
-                
-                const modal = document.createElement('div');
-                modal.className = 'modal';
-                
-                modal.innerHTML = `
-                    <button class="modal-close" id="codeModalCloseBtn">&times;</button>
-                    <div class="code-modal-content">
-                        <div class="code-modal-title">输入作业码</div>
-                        <input type="text" id="codeModalInput" class="code-modal-input" placeholder="请输入作业码" autocomplete="off">
-                        <div id="codeModalMessage" class="code-modal-message"></div>
-                        <div class="turnstile-wrapper" id="codeModalWrapper">
-                            <div class="turnstile-loading" id="codeModalLoading">正在加载人机验证</div>
-                            <div class="turnstile-widget" id="codeModalWidget"></div>
-                        </div>
-                        <div class="code-modal-buttons">
-                            <button class="code-modal-cancel" id="codeModalCancelBtn">取消</button>
-                            <button class="code-modal-submit" id="codeModalSubmitBtn" disabled>前往作业</button>
-                        </div>
-                    </div>
-                `;
-                
-                modalOverlay.appendChild(modal);
-                codeModalContainer.innerHTML = '';
-                codeModalContainer.appendChild(modalOverlay);
-                codeModalContainer.style.display = 'block';
-                
-                const input = document.getElementById('codeModalInput');
-                const submitBtn = document.getElementById('codeModalSubmitBtn');
-                const messageEl = document.getElementById('codeModalMessage');
-                const loadingEl = document.getElementById('codeModalLoading');
-                const widgetEl = document.getElementById('codeModalWidget');
-                
-                input.focus();
-                
-                // 渲染作业码弹窗的 Turnstile
-                renderCodeModalTurnstile(widgetEl, loadingEl, submitBtn, messageEl);
-                
-                // 关闭弹窗函数
-                function closeCodeModal() {
-                    codeModalContainer.style.display = 'none';
-                }
-                
-                // 处理作业码提交
-                function handleCodeSubmit() {
-                    if (!codeModalVerified) {
-                        messageEl.className = 'code-modal-message error';
-                        messageEl.textContent = '请先完成人机验证';
-                        return;
-                    }
-                    
-                    const code = input.value.trim();
-                    
-                    if (!code) {
-                        messageEl.className = 'code-modal-message error';
-                        messageEl.textContent = '请输入作业码';
-                        return;
-                    }
-                    
-                    const link = codeMap.get(code);
-                    
-                    if (link) {
-                        messageEl.className = 'code-modal-message success';
-                        messageEl.textContent = '验证成功，正在跳转...';
-                        
-                        setTimeout(() => {
-                            window.open(link, '_blank');
-                            closeCodeModal();
-                        }, 500);
-                    } else {
-                        messageEl.className = 'code-modal-message error';
-                        messageEl.textContent = '作业码无效，请重新输入';
-                        input.value = '';
-                        input.focus();
-                        
-                        setTimeout(() => {
-                            messageEl.textContent = '';
-                            messageEl.className = 'code-modal-message';
-                        }, 2000);
-                    }
-                }
-                
-                // 绑定事件
-                document.getElementById('codeModalCloseBtn').addEventListener('click', closeCodeModal);
-                document.getElementById('codeModalCancelBtn').addEventListener('click', closeCodeModal);
-                submitBtn.addEventListener('click', handleCodeSubmit);
-                
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        handleCodeSubmit();
-                    }
-                });
-                
-                modalOverlay.addEventListener('click', function(e) {
-                    if (e.target === modalOverlay) {
-                        closeCodeModal();
-                    }
-                });
-            }
-
-            // 渲染作业码弹窗的 Turnstile
-            function renderCodeModalTurnstile(widgetEl, loadingEl, submitBtn, messageEl) {
-                // 显示加载，隐藏小部件
-                loadingEl.style.display = 'flex';
-                widgetEl.innerHTML = ''; // 清空widget
-                
-                // 检查 Turnstile 是否可用
-                if (typeof turnstile === 'undefined') {
-                    console.log('Turnstile not loaded yet for modal, retrying in 1 second');
-                    loadingEl.textContent = '正在加载验证服务...';
-                    setTimeout(() => {
-                        renderCodeModalTurnstile(widgetEl, loadingEl, submitBtn, messageEl);
-                    }, 1000);
-                    return;
-                }
-                
-                let timeoutId = setTimeout(() => {
-                    if (loadingEl.style.display !== 'none') {
-                        loadingEl.classList.add('timeout');
-                        loadingEl.textContent = '加载超时，点击重试';
-                        loadingEl.onclick = () => renderCodeModalTurnstile(widgetEl, loadingEl, submitBtn, messageEl);
-                    }
-                }, 15000);
-                
-                try {
-                    // 渲染 Turnstile 到 widget 元素
-                    turnstile.render(widgetEl, {
-                        sitekey: '0x4AAAAAACnzyoSShctyL7pF',
-                        callback: function(token) {
-                            clearTimeout(timeoutId);
-                            // 验证成功
-                            loadingEl.style.display = 'none';
-                            codeModalVerified = true;
-                            submitBtn.disabled = false;
-                            messageEl.className = 'code-modal-message success';
-                            messageEl.textContent = '✓ 人机验证通过，请输入作业码';
-                            
-                            setTimeout(() => {
-                                if (messageEl.classList.contains('success')) {
-                                    messageEl.textContent = '';
-                                }
-                            }, 2000);
-                        },
-                        'error-callback': function(errorCode) {
-                            clearTimeout(timeoutId);
-                            const reason = getErrorMessage(errorCode);
-                            const errorMessage = `人机验证失败\n错误代码: ${errorCode}\n原因: ${reason}\n即将自动刷新页面...`;
-                            alert(errorMessage);
-                            
-                            // 关闭弹窗
-                            document.getElementById('codeModalContainer').style.display = 'none';
-                            
-                            // 刷新页面
-                            refreshPage();
-                        },
-                        'expired-callback': function() {
-                            // token 过期，可以重新验证
-                            codeModalVerified = false;
-                            submitBtn.disabled = true;
-                        },
-                        'refresh-expired': 'auto'
-                    });
-                    
-                    // 小部件渲染成功，隐藏加载提示
-                    loadingEl.style.display = 'none';
-                    
-                } catch (e) {
-                    clearTimeout(timeoutId);
-                    console.error('Turnstile render error in modal:', e);
-                    loadingEl.classList.add('error');
-                    loadingEl.textContent = '加载失败，点击重试';
-                    loadingEl.onclick = () => renderCodeModalTurnstile(widgetEl, loadingEl, submitBtn, messageEl);
-                }
-            }
-
-            // 显示滚动公告
-            function showNoticeBoard(board) {
-                const noticeBoard = document.getElementById('noticeBoard');
-                const noticeBoardContent = document.getElementById('noticeBoardContent');
-                
-                if (board) {
-                    noticeBoardContent.textContent = board;
-                    noticeBoard.style.display = 'block';
-                } else {
-                    noticeBoard.style.display = 'none';
-                }
-            }
-
-            // 显示/隐藏作业码入口
-            function updateCodeEntry() {
-                const codeEntry = document.getElementById('codeEntry');
-                if (codeMap.size > 0) {
-                    codeEntry.style.display = 'block';
-                } else {
-                    codeEntry.style.display = 'none';
-                }
-            }
-
-            function getSubjectClass(sub) {
-                if (!sub) return 'subject-other';
-                const subLower = sub.trim().toLowerCase();
-                if (subLower.includes('语文')) return 'subject-chinese';
-                if (subLower.includes('数学')) return 'subject-math';
-                if (subLower.includes('英语')) return 'subject-english';
-                return 'subject-other';
-            }
-
-            function getSubjectText(sub) {
-                return sub || '作业';
-            }
-
-            function getButtonState(item) {
-                const now = new Date();
-                
-                if (!item.link || item.link.trim() === '') {
-                    return { disabled: true, text: '已截止' };
-                }
-                
-                if (item.startTime && now < item.startTime) {
-                    return { disabled: true, text: '待开始' };
-                }
-                
-                if (item.endTime && now > item.endTime) {
-                    return { disabled: true, text: '已截止' };
-                }
-                
-                return { disabled: false, text: '去提交' };
-            }
-
-            function getTimeHint(item) {
-                const now = new Date();
-                
-                if (!item.startTime && !item.endTime) {
-                    return null;
-                }
-                
-                if (item.startTime && now < item.startTime) {
-                    return `开始：${item.startTimeStr}`;
-                }
-                
-                if (item.endTime) {
-                    return `截止：${item.endTimeStr}`;
-                }
-                
-                return null;
-            }
-
-            function getUniqueSubjects(items) {
-                const subjects = new Set();
-                items.forEach(item => {
-                    if (item.sub) {
-                        subjects.add(item.sub);
-                    }
-                });
-                return Array.from(subjects).sort();
-            }
-
-            function updateSubjectFilter(items) {
-                const subjectFilter = document.getElementById('subjectFilter');
-                const subjects = getUniqueSubjects(items);
-                
-                const currentValue = subjectFilter.value;
-                
-                subjectFilter.innerHTML = '<option value="all">所有学科</option>';
-                subjects.forEach(subject => {
-                    const option = document.createElement('option');
-                    option.value = subject;
-                    option.textContent = subject;
-                    subjectFilter.appendChild(option);
-                });
-                
-                if (subjects.includes(currentValue)) {
-                    subjectFilter.value = currentValue;
-                    currentSubject = currentValue;
-                } else {
-                    subjectFilter.value = 'all';
-                    currentSubject = 'all';
-                }
-            }
-
-            function filterItems() {
-                if (!originalItems.length) return [];
-                
-                if (currentSubject === 'all') {
-                    return [...originalItems];
-                } else {
-                    return originalItems.filter(item => item.sub === currentSubject);
-                }
-            }
-
-            function applyFilter() {
-                filteredItems = filterItems();
-                renderHomework(filteredItems);
-            }
-
-            // Turnstile 验证回调函数
-            window.turnstileSuccess = function(token, itemId) {
-                // 标记该作业已验证
-                verificationStatus[itemId] = true;
-                
-                // 更新按钮状态 - 将"请先完成验证"变为"去提交"
-                const linkBtn = document.getElementById(`linkbtn-${itemId}`);
-                if (linkBtn) {
-                    linkBtn.classList.remove('homework-link-gray');
-                    linkBtn.classList.add('homework-link');
-                    linkBtn.textContent = '去提交';
-                    linkBtn.disabled = false;
-                    
-                    // 显示成功提示
-                    const hintEl = document.createElement('div');
-                    hintEl.className = 'more-message';
-                    hintEl.style.color = '#2e7d32';
-                    hintEl.textContent = '✓ 人机验证通过，现在可以点击"去提交"按钮了';
-                    
-                    const itemDiv = document.getElementById(`item-${itemId}`);
-                    if (itemDiv && !itemDiv.querySelector('.verify-success-hint')) {
-                        hintEl.classList.add('verify-success-hint');
-                        itemDiv.appendChild(hintEl);
-                        
-                        // 3秒后移除提示
-                        setTimeout(() => {
-                            if (hintEl.parentNode) {
-                                hintEl.remove();
-                            }
-                        }, 3000);
-                    }
-                }
-                
-                // 如果有点击时保存的链接，自动跳转
-                if (pendingLink === itemId) {
-                    setTimeout(() => {
-                        if (verificationStatus[itemId] && pendingLink === itemId) {
-                            const link = document.getElementById(`linkbtn-${itemId}`)?.getAttribute('data-link');
-                            if (link) {
-                                window.open(link, '_blank');
-                            }
-                            pendingLink = '';
-                        }
-                    }, 500);
-                }
-            };
-
-            // 渲染 Turnstile 小部件
-            function renderTurnstile(itemId) {
-                const wrapper = document.getElementById(`turnstile-${itemId}`);
-                if (!wrapper) return;
-                
-                // 清空wrapper
-                wrapper.innerHTML = '';
-                
-                // 创建加载提示和小部件容器
-                const loadingDiv = document.createElement('div');
-                loadingDiv.className = 'turnstile-loading';
-                loadingDiv.textContent = '正在加载人机验证';
-                
-                const widgetDiv = document.createElement('div');
-                widgetDiv.className = 'turnstile-widget';
-                
-                wrapper.appendChild(loadingDiv);
-                wrapper.appendChild(widgetDiv);
-                
-                // 检查 Turnstile 是否可用
-                if (typeof turnstile === 'undefined') {
-                    console.log('Turnstile not loaded yet for', itemId, 'adding to queue');
-                    loadingDiv.textContent = '正在加载验证服务...';
-                    pendingTurnstileItems.push({
-                        itemId: itemId,
-                        wrapper: wrapper,
-                        loadingDiv: loadingDiv,
-                        widgetDiv: widgetDiv
-                    });
-                    return;
-                }
-                
-                // 设置超时
-                let timeoutId = setTimeout(() => {
-                    if (loadingDiv.style.display !== 'none') {
-                        loadingDiv.classList.add('timeout');
-                        loadingDiv.textContent = '加载超时，点击重试';
-                        loadingDiv.onclick = () => renderTurnstile(itemId);
-                    }
-                }, 15000);
-                
-                // 渲染新的小部件
-                try {
-                    turnstile.render(widgetDiv, {
-                        sitekey: '0x4AAAAAACnzyoSShctyL7pF',
-                        callback: function(token) {
-                            clearTimeout(timeoutId);
-                            // 隐藏加载，显示小部件
-                            loadingDiv.style.display = 'none';
-                            window.turnstileSuccess(token, itemId);
-                        },
-                        'error-callback': function(errorCode) {
-                            clearTimeout(timeoutId);
-                            const reason = getErrorMessage(errorCode);
-                            const errorMessage = `人机验证失败\n错误代码: ${errorCode}\n原因: ${reason}\n即将自动刷新页面...`;
-                            alert(errorMessage);
-                            
-                            // 刷新页面
-                            refreshPage();
-                        },
-                        'expired-callback': function() {
-                            // token 过期，可以重新验证
-                            verificationStatus[itemId] = false;
-                            const linkBtn = document.getElementById(`linkbtn-${itemId}`);
-                            if (linkBtn) {
-                                linkBtn.classList.remove('homework-link');
-                                linkBtn.classList.add('homework-link-gray');
-                                linkBtn.textContent = '请先完成验证';
-                            }
-                        },
-                        'refresh-expired': 'auto'
-                    });
-                    
-                    // 小部件渲染成功，隐藏加载提示
-                    loadingDiv.style.display = 'none';
-                    
-                } catch (e) {
-                    clearTimeout(timeoutId);
-                    console.error('Turnstile render error:', e);
-                    loadingDiv.classList.add('error');
-                    loadingDiv.textContent = '加载失败，点击重试';
-                    loadingDiv.onclick = () => renderTurnstile(itemId);
-                }
-            }
-
-            // 处理去提交按钮点击
-            function handleSubmitClick(itemId, link) {
-                if (verificationStatus[itemId]) {
-                    // 已验证，直接跳转
-                    window.open(link, '_blank');
-                } else {
-                    // 未验证，保存链接并显示提示
-                    pendingLink = itemId;
-                    
-                    // 显示提示信息
-                    const itemDiv = document.getElementById(`item-${itemId}`);
-                    if (itemDiv) {
-                        const hintEl = document.createElement('div');
-                        hintEl.className = 'more-message';
-                        hintEl.style.color = '#b91c1c';
-                        hintEl.textContent = '⏳ 请先完成上方的验证，验证通过后按钮将变为"去提交"';
-                        
-                        // 移除之前的提示
-                        const oldHint = itemDiv.querySelector('.verify-wait-hint');
-                        if (oldHint) oldHint.remove();
-                        
-                        hintEl.classList.add('verify-wait-hint');
-                        itemDiv.appendChild(hintEl);
-                        
-                        // 尝试执行验证（如果小部件已加载）
-                        const widgetDiv = document.querySelector(`#turnstile-${itemId} .turnstile-widget`);
-                        if (widgetDiv && widgetDiv.children.length > 0) {
-                            // 小部件已存在，触发验证
-                            const iframe = widgetDiv.querySelector('iframe');
-                            if (iframe) {
-                                // 有些情况下需要点击或执行
-                                console.log('Trigger verification for', itemId);
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 处理等待队列
-            function processPendingTurnstileItems() {
-                if (typeof turnstile !== 'undefined' && pendingTurnstileItems.length > 0) {
-                    console.log('Processing pending Turnstile items:', pendingTurnstileItems.length);
-                    while (pendingTurnstileItems.length > 0) {
-                        const item = pendingTurnstileItems.shift();
-                        // 重新渲染这个项目
-                        renderTurnstile(item.itemId);
-                    }
-                }
-            }
-
-            // 定期检查 Turnstile 是否可用
-            setInterval(processPendingTurnstileItems, 500);
-
-            function renderHomework(items) {
-                const loadingEl = document.getElementById('loadingContainer');
-                const homeworkEl = document.getElementById('homeworkContainer');
-                const emptyEl = document.getElementById('emptyContainer');
-                
-                if (!homeworkEl) return;
-
-                loadingEl.style.display = 'none';
-
-                if (items.length === 0) {
-                    if (originalItems.length === 0) {
-                        homeworkEl.style.display = 'none';
-                        emptyEl.style.display = 'block';
-                    } else {
-                        homeworkEl.style.display = 'none';
-                        emptyEl.style.display = 'none';
-                        const tempDiv = document.createElement('div');
-                        tempDiv.className = 'empty-message';
-                        tempDiv.textContent = '没有找到该学科的作业';
-                        homeworkEl.parentNode.insertBefore(tempDiv, homeworkEl.nextSibling);
-                        setTimeout(() => {
-                            if (tempDiv.parentNode) tempDiv.remove();
-                        }, 2000);
-                    }
-                } else {
-                    homeworkEl.style.display = 'block';
-                    emptyEl.style.display = 'none';
-                    homeworkEl.innerHTML = '';
-
-                    const section = document.createElement('div');
-                    section.className = 'homework-section';
-
-                    items.forEach((item, index) => {
-                        const subjectClass = getSubjectClass(item.sub);
-                        const subjectDisplay = getSubjectText(item.sub);
-                        
-                        // 为每个作业生成唯一ID
-                        const itemId = `item-${Date.now()}-${index}`;
-                        
-                        // 初始化验证状态
-                        if (verificationStatus[itemId] === undefined) {
-                            verificationStatus[itemId] = false;
-                        }
-                        
-                        const itemDiv = document.createElement('div');
-                        itemDiv.id = `item-${itemId}`;
-                        itemDiv.className = 'homework-item';
-
-                        const rowDiv = document.createElement('div');
-                        rowDiv.className = 'homework-row';
-
-                        const subjectContainer = document.createElement('div');
-                        subjectContainer.className = 'subject-container';
-
-                        const subSpan = document.createElement('span');
-                        subSpan.className = `subject-tag ${subjectClass}`;
-                        subSpan.textContent = subjectDisplay;
-                        subjectContainer.appendChild(subSpan);
-
-                        const nameContainer = document.createElement('div');
-                        nameContainer.className = 'name-container';
-
-                        const timeHint = getTimeHint(item);
-                        if (timeHint) {
-                            const hintDiv = document.createElement('div');
-                            hintDiv.className = 'time-hint';
-                            hintDiv.textContent = timeHint;
-                            nameContainer.appendChild(hintDiv);
-                        }
-
-                        const nameSpan = document.createElement('span');
-                        nameSpan.className = 'homework-name';
-                        nameSpan.textContent = item.name || '未命名作业';
-                        nameContainer.appendChild(nameSpan);
-
-                        const buttonState = getButtonState(item);
-                        
-                        // 创建 Turnstile wrapper
-                        const turnstileWrapper = document.createElement('div');
-                        turnstileWrapper.id = `turnstile-${itemId}`;
-                        turnstileWrapper.className = 'turnstile-wrapper';
-                        
-                        let linkBtn;
-                        if (buttonState.disabled) {
-                            linkBtn = document.createElement('span');
-                            linkBtn.className = 'homework-link-disabled';
-                            linkBtn.textContent = buttonState.text;
-                        } else {
-                            linkBtn = document.createElement('button');
-                            linkBtn.id = `linkbtn-${itemId}`;
-                            // 根据验证状态决定按钮文字和样式
-                            if (verificationStatus[itemId]) {
-                                linkBtn.className = 'homework-link';
-                                linkBtn.textContent = '去提交';
-                                linkBtn.disabled = false;
-                            } else {
-                                linkBtn.className = 'homework-link-gray';
-                                linkBtn.textContent = '请先完成验证';
-                                linkBtn.disabled = false; // 不禁用，让点击触发验证
-                            }
-                            linkBtn.setAttribute('data-link', item.link);
-                            linkBtn.onclick = function(e) {
-                                e.preventDefault();
-                                handleSubmitClick(itemId, item.link);
-                            };
-                        }
-
-                        rowDiv.appendChild(subjectContainer);
-                        rowDiv.appendChild(nameContainer);
-                        // 将 Turnstile wrapper 放在按钮之前
-                        rowDiv.appendChild(turnstileWrapper);
-                        rowDiv.appendChild(linkBtn);
-                        itemDiv.appendChild(rowDiv);
-
-                        // 只保留more=内容的显示
-                        if (item.more) {
-                            const msgDiv = document.createElement('div');
-                            msgDiv.className = 'more-message';
-                            msgDiv.textContent = item.more;
-                            if (item.moreColor) {
-                                msgDiv.style.color = item.moreColor;
-                            }
-                            itemDiv.appendChild(msgDiv);
-                        }
-                        
-                        section.appendChild(itemDiv);
-                        
-                        // 在下一帧渲染 Turnstile 小部件
-                        setTimeout(() => {
-                            if (!buttonState.disabled) {
-                                renderTurnstile(itemId);
-                            }
-                        }, 100); // 稍微延迟一点，确保DOM已插入
-                    });
-
-                    homeworkEl.appendChild(section);
-                }
-                
-                // 更新作业码入口显示 - 只要codeMap有内容就显示，无论是否有作业
-                updateCodeEntry();
-            }
-
-            // 加载通知文件
-            function loadNoticeFile() {
-                const url = './homework-notice.txt?t=' + new Date().getTime();
-                
-                return fetch(url, {
-                    cache: 'no-store',
-                    headers: {
-                        'Pragma': 'no-cache',
-                        'Cache-Control': 'no-cache'
-                    }
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`无法读取通知文件`);
-                        }
-                        return response.text();
-                    })
-                    .then(text => {
-                        const { head, message, board } = parseNoticeFile(text);
-                        
-                        showNoticeBoard(board);
-                        
-                        if (head) {
-                            showModal(head, message || '');
-                        }
-                    })
-                    .catch(error => {
-                        console.warn('读取 homework-notice.txt 失败', error);
-                    });
-            }
-
-            // 加载作业数据
-            function loadHomework() {
-                setLoadingState(true);
-                
-                // 重置验证状态
-                verificationStatus = {};
-                
-                const url = './homework.txt?t=' + new Date().getTime();
-                
-                fetch(url, {
-                    cache: 'no-store',
-                    headers: {
-                        'Pragma': 'no-cache',
-                        'Cache-Control': 'no-cache'
-                    }
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`无法读取文件 (${response.status})`);
-                        }
-                        return response.text();
-                    })
-                    .then(text => {
-                        const { items, hasCodeBlock } = parseHomework(text);
-                        originalItems = items;
-                        filteredItems = [...originalItems];
-                        
-                        updateSubjectFilter(originalItems);
-                        
-                        currentSubject = 'all';
-                        document.getElementById('subjectFilter').value = 'all';
-                        
-                        renderHomework(filteredItems);
-                    })
-                    .catch(error => {
-                        console.warn('读取 homework.txt 失败，视为空文件。', error);
-                        originalItems = [];
-                        filteredItems = [];
-                        renderHomework([]);
-                    });
-            }
-
-            function setLoadingState(isLoading) {
-                const loadingEl = document.getElementById('loadingContainer');
-                const homeworkEl = document.getElementById('homeworkContainer');
-                const emptyEl = document.getElementById('emptyContainer');
-                
-                if (isLoading) {
-                    loadingEl.style.display = 'block';
-                    homeworkEl.style.display = 'none';
-                    emptyEl.style.display = 'none';
-                }
-            }
-
-            // 初始化
-            function initialize() {
-                loadNoticeFile().finally(() => {
-                    loadHomework();
-                });
-            }
-
-            // 绑定刷新按钮事件
-            document.getElementById('refreshBtn').addEventListener('click', function() {
-                loadHomework();
-            });
-
-            // 绑定学科筛选事件
-            document.getElementById('subjectFilter').addEventListener('change', function(e) {
-                currentSubject = e.target.value;
-                applyFilter();
-            });
-
-            // 绑定作业码入口点击事件
-            document.getElementById('codeLink').addEventListener('click', function() {
-                showCodeModal();
-            });
-
-            window.addEventListener('load', initialize);
-        })();
-    </script>
+      // 执行设备检测
+      checkUnsupportedDevice();
+    })();
+  </script>
 </body>
 </html>
