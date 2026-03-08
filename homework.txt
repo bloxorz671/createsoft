@@ -7,15 +7,15 @@
 小字颜色[R,G,B]
 开始时间年/月/日 时:分
 截止时间年/月/日 时:分
-
-sub
-name=
-link=
-more=
-more_colour
-start_time==
-end_time=
-
+"""
+sub=测试
+name=测试
+link=https://brilliant-unicorn-633b63.netlify.app
+more=测试
+more_colour[0，0，0]
+start_time==2025/1/1 00:00
+end_time=2099/1/1 00:00
+"""
 
 学科前后加三个英文符双引号
 
