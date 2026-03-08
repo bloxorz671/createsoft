@@ -44,7 +44,7 @@
       z-index: 1;
     }
 
-    /* ===== 帮助与反馈弹窗 ===== */
+    /* ===== 帮助与反馈弹窗（保留样式但不再使用）===== */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -454,7 +454,7 @@
       transform: translateY(-2px);
     }
 
-    /* 帮助按钮 */
+    /* 帮助按钮 - 现在直接跳转链接 */
     .help-button {
       background: rgba(255, 255, 255, 0.5);
       backdrop-filter: blur(12px);
@@ -1172,7 +1172,7 @@
             <div class="mobile-container">
               <div class="top-buttons-mobile">
                 <a href="${toolsLink}" class="tool-button-mobile">更多工具</a>
-                <button class="help-button-mobile" onclick="openHelpModal()">帮助与反馈</button>
+                <button class="help-button-mobile" onclick="window.location.href='https://wj.qq.com/s2/25900605/5545/'">帮助与反馈</button>
               </div>
               <div class="image-area">
                 <img src="${imageUrl}" alt="随机抽号手机版">
@@ -1183,7 +1183,7 @@
               </div>
             </div>
             
-            <!-- 帮助与反馈弹窗 -->
+            <!-- 帮助与反馈弹窗（保留但不再使用） -->
             <div id="helpModal" class="help-modal">
               <div class="help-content">
                 <h3>帮助与反馈</h3>
@@ -1228,9 +1228,9 @@
                 }, 500);
               }
               
-              // 帮助弹窗函数
+              // 帮助弹窗函数（保留但不再使用）
               window.openHelpModal = function() {
-                document.getElementById('helpModal').classList.add('active');
+                window.location.href = 'https://wj.qq.com/s2/25900605/5545/';
               };
               
               window.closeHelpModal = function() {
@@ -1283,7 +1283,7 @@
     </div>
   </div>
 
-  <!-- ===== 帮助与反馈弹窗 ===== -->
+  <!-- ===== 帮助与反馈弹窗（保留但不再使用）===== -->
   <div id="helpModal" class="modal-overlay">
     <div class="modal-content">
       <h3>帮助与反馈</h3>
@@ -1320,23 +1320,23 @@
           <div class="system-support">适用于Win7及以上</div>
         </div>
         
-        <!-- 信创版卡片 - 使用双重下载机制确保触发 -->
-<div class="download-card">
-  <div class="image-wrapper">
-    <img class="linux-icon" src="https://ss-mpvolc.meipian.me/users/499047829/cd78accd974d71a7f7c5cf09b7bb6debmpand__jpg.heic~tplv-s1ctq42ewb-s2-cC-q:750:0:0:0:q80.webp" alt="信创版">
-  </div>
-  
-  <!-- 隐藏的真实下载链接 - 修改为随机抽号Linux通用包.sh -->
-  <a href="随机抽号Linux通用包.sh" download="随机抽号Linux通用包.sh" id="linuxDownloadLink" style="display: none;">下载</a>
-  
-  <!-- 自定义按钮，同时触发下载和打开图片 -->
-  <button class="download-btn" onclick="downloadLinuxAndShowGuide()">下载信创版</button>
-  
-  <!-- 密码提示 -->
-  <div class="password-hint">无需密码</div>
-  <div class="accent-line"></div>
-  <div class="system-support">主流Linux系统架构通用</div>
-</div>
+        <!-- 信创版卡片 - 修复下载两个的问题 -->
+        <div class="download-card">
+          <div class="image-wrapper">
+            <img class="linux-icon" src="https://ss-mpvolc.meipian.me/users/499047829/cd78accd974d71a7f7c5cf09b7bb6debmpand__jpg.heic~tplv-s1ctq42ewb-s2-cC-q:750:0:0:0:q80.webp" alt="信创版">
+          </div>
+          
+          <!-- 隐藏的真实下载链接 - 修改为随机抽号Linux通用包.sh -->
+          <a href="随机抽号Linux通用包.sh" download="随机抽号Linux通用包.sh" id="linuxDownloadLink" style="display: none;">下载</a>
+          
+          <!-- 自定义按钮，只触发一次下载并打开图片 -->
+          <button class="download-btn" onclick="downloadLinuxAndShowGuide()">下载信创版</button>
+          
+          <!-- 密码提示 -->
+          <div class="password-hint">密码：1234</div>
+          <div class="accent-line"></div>
+          <div class="system-support">银河麒麟/统信UOS</div>
+        </div>
 
         <!-- 网页版卡片 -->
         <div class="download-card">
@@ -1376,29 +1376,26 @@
         }
       }
 
-      // ===== 帮助弹窗 =====
+      // ===== 帮助与反馈跳转（修改为腾讯问卷链接）=====
       window.openModal = function() {
-        document.getElementById('helpModal').classList.add('active');
-      };
-      window.closeModal = function() {
-        document.getElementById('helpModal').classList.remove('active');
+        window.location.href = 'https://wj.qq.com/s2/25900605/5545/';
       };
       
+      window.closeModal = function() {
+        // 不再使用
+      };
+
       window.closeUnsupportedModal = function() {
         document.getElementById('unsupportedModal').classList.remove('active');
       };
 
       window.onclick = function(e) {
-        const helpModal = document.getElementById('helpModal');
-        if (e.target === helpModal) window.closeModal();
-        
         const unsupportedModal = document.getElementById('unsupportedModal');
         if (e.target === unsupportedModal) window.closeUnsupportedModal();
       };
       
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-          window.closeModal();
           window.closeUnsupportedModal();
         }
       });
@@ -1409,18 +1406,18 @@
         window.location.href = 'http://luckynum.top/online';
       };
 
-  // 信创版下载函数 - 使用多种方式确保下载触发
-	// 信创版下载函数 - 修复下载两个的问题
-	window.downloadLinuxAndShowGuide = function() {
-	  // 只触发一次下载 - 移除备选的iframe下载
-	  const downloadLink = document.getElementById('linuxDownloadLink');
-	  if (downloadLink) {
-		downloadLink.click(); // 只触发这一次下载
-	  }
-	  
-	  // 在新标签页打开安装步骤图片
-	  window.open('安装步骤.png', '_blank');
-	};
+      // 信创版下载函数 - 修复下载两个的问题（只触发一次）
+      window.downloadLinuxAndShowGuide = function() {
+        // 只触发一次下载 - 使用隐藏链接
+        const downloadLink = document.getElementById('linuxDownloadLink');
+        if (downloadLink) {
+          downloadLink.click(); // 只触发这一次下载
+        }
+        
+        // 在新标签页打开安装步骤图片
+        window.open('安装步骤.png', '_blank');
+      };
+
       // 执行设备检测
       checkUnsupportedDevice();
     })();
