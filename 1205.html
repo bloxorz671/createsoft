@@ -556,6 +556,11 @@
             60% { content: ".."; }
             80%, 100% { content: "..."; }
         }
+
+        /* Turnstile 小部件成功加载后隐藏加载提示 */
+        .turnstile-container.cf-turnstile-ready .turnstile-loading {
+            display: none;
+        }
         
         .homework-link, .homework-link-disabled {
             display: inline-block;
@@ -1216,11 +1221,11 @@
                 const input = document.getElementById('codeModalInput');
                 const submitBtn = document.getElementById('codeModalSubmitBtn');
                 const messageEl = document.getElementById('codeModalMessage');
+                const turnstileContainer = document.getElementById('codeModalTurnstile');
                 
                 input.focus();
                 
                 // 渲染 Turnstile 小部件到作业码弹窗
-                const turnstileContainer = document.getElementById('codeModalTurnstile');
                 turnstile.render(turnstileContainer, {
                     sitekey: '0x4AAAAAACnzyoSShctyL7pF',
                     callback: function(token) {
@@ -1228,6 +1233,12 @@
                         submitBtn.disabled = false;
                         messageEl.className = 'code-modal-message success';
                         messageEl.textContent = '✓ 人机验证通过，请输入作业码';
+                        
+                        // 隐藏加载提示
+                        const loadingEl = turnstileContainer.querySelector('.turnstile-loading');
+                        if (loadingEl) {
+                            loadingEl.style.display = 'none';
+                        }
                         
                         // 移除之前的消息（2秒后）
                         setTimeout(() => {
@@ -1245,8 +1256,14 @@
                         messageEl.className = 'code-modal-message error';
                         messageEl.textContent = '验证失败，请刷新页面重试';
                         
-                        // 清空容器，显示错误提示
-                        turnstileContainer.innerHTML = '<div class="turnstile-loading" style="color:#b91c1c;">验证失败，请刷新页面</div>';
+                        // 更新加载提示为错误信息
+                        const loadingEl = turnstileContainer.querySelector('.turnstile-loading');
+                        if (loadingEl) {
+                            loadingEl.textContent = '验证失败，请刷新页面';
+                            loadingEl.style.color = '#b91c1c';
+                        } else {
+                            turnstileContainer.innerHTML = '<div class="turnstile-loading" style="color:#b91c1c;">验证失败，请刷新页面</div>';
+                        }
                     },
                     'refresh-expired': 'auto'
                 });
@@ -1437,6 +1454,15 @@
             window.turnstileSuccess = function(token, itemId) {
                 // 标记该作业已验证
                 verificationStatus[itemId] = true;
+                
+                // 隐藏加载提示
+                const container = document.getElementById(`turnstile-${itemId}`);
+                if (container) {
+                    const loadingEl = container.querySelector('.turnstile-loading');
+                    if (loadingEl) {
+                        loadingEl.style.display = 'none';
+                    }
+                }
                 
                 // 更新按钮状态 - 将"请先完成验证"变为"去提交"
                 const linkBtn = document.getElementById(`linkbtn-${itemId}`);
