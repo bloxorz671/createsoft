@@ -234,7 +234,6 @@
             display: flex;
             justify-content: flex-end;
             gap: 0.8rem;
-            flex-wrap: wrap;
         }
 
         .code-modal-cancel {
@@ -502,7 +501,7 @@
             line-height: 1.3;
         }
 
-        .homework-link, .homework-link-disabled {
+        .homework-link {
             display: inline-block;
             background: #2c3e50;
             color: white;
@@ -516,7 +515,6 @@
             white-space: nowrap;
             margin-left: 0.5rem;
             cursor: pointer;
-            border: none;
         }
 
         .homework-link:hover {
@@ -531,10 +529,18 @@
         }
 
         .homework-link-disabled {
+            display: inline-block;
             background: #94a3b8;
             color: #e2e8f0;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 450;
+            padding: 0.6rem 1.5rem;
+            border-radius: 40px;
             cursor: default;
             box-shadow: none;
+            white-space: nowrap;
+            margin-left: 0.5rem;
             opacity: 0.7;
             pointer-events: none;
         }
@@ -689,7 +695,7 @@
                 font-size: 1.1rem;
                 margin-bottom: 0.2rem;
             }
-
+            
             .homework-link, .homework-link-disabled {
                 width: 100%;
                 text-align: center;
@@ -706,15 +712,6 @@
             
             .code-entry {
                 margin: 1rem 0 0.5rem 0;
-            }
-
-            .code-modal-buttons {
-                flex-direction: column;
-            }
-
-            .code-modal-cancel, .code-modal-submit {
-                width: 100%;
-                text-align: center;
             }
         }
 
@@ -915,6 +912,7 @@
                 
                 for (let i = 0; i < rawBlocks.length; i++) {
                     // 只处理奇数索引（即"""之间的内容）
+                    // 索引0是第一个"""之前的内容，索引1是第一个和第二个"""之间的内容，以此类推
                     if (i % 2 === 1) {
                         let block = rawBlocks[i].trim();
                         if (block === '') continue;
@@ -975,6 +973,7 @@
                     }
                 }
                 
+                // 返回作业项和是否有作业码块的标记
                 return { items, hasCodeBlock };
             }
 
@@ -1083,9 +1082,6 @@
                 codeModalContainer.style.display = 'block';
                 
                 const input = document.getElementById('codeModalInput');
-                const submitBtn = document.getElementById('codeModalSubmitBtn');
-                const messageEl = document.getElementById('codeModalMessage');
-                
                 input.focus();
                 
                 // 关闭弹窗函数
@@ -1096,6 +1092,7 @@
                 // 处理作业码提交
                 function handleCodeSubmit() {
                     const code = input.value.trim();
+                    const messageEl = document.getElementById('codeModalMessage');
                     
                     if (!code) {
                         messageEl.className = 'code-modal-message error';
@@ -1107,7 +1104,13 @@
                     
                     if (link) {
                         window.open(link, '_blank');
-                        closeCodeModal();
+                        messageEl.className = 'code-modal-message success';
+                        messageEl.textContent = '正在跳转...';
+                        input.value = '';
+                        
+                        setTimeout(() => {
+                            closeCodeModal();
+                        }, 500);
                     } else {
                         messageEl.className = 'code-modal-message error';
                         messageEl.textContent = '作业码无效，请重新输入';
@@ -1124,7 +1127,7 @@
                 // 绑定事件
                 document.getElementById('codeModalCloseBtn').addEventListener('click', closeCodeModal);
                 document.getElementById('codeModalCancelBtn').addEventListener('click', closeCodeModal);
-                submitBtn.addEventListener('click', handleCodeSubmit);
+                document.getElementById('codeModalSubmitBtn').addEventListener('click', handleCodeSubmit);
                 
                 input.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
@@ -1291,7 +1294,7 @@
                     const section = document.createElement('div');
                     section.className = 'homework-section';
 
-                    items.forEach((item, index) => {
+                    items.forEach(item => {
                         const subjectClass = getSubjectClass(item.sub);
                         const subjectDisplay = getSubjectText(item.sub);
                         
@@ -1363,7 +1366,7 @@
                     homeworkEl.appendChild(section);
                 }
                 
-                // 更新作业码入口显示
+                // 更新作业码入口显示 - 只要codeMap有内容就显示，无论是否有作业
                 updateCodeEntry();
             }
 
@@ -1428,6 +1431,8 @@
                         document.getElementById('subjectFilter').value = 'all';
                         
                         renderHomework(filteredItems);
+                        
+                        // 注意：updateCodeEntry已经在renderHomework中调用
                     })
                     .catch(error => {
                         console.warn('读取 homework.txt 失败，视为空文件。', error);
