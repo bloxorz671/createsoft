@@ -1,10 +1,10 @@
 <?php
 /**
  * @package Lanzou
- * @author Filmy,hanximeng
+ * @author null,null
  * @version 1.3.103
  * @Date 2025-09-28
- * @link https://hanximeng.com
+ * @link https://luckynum.top
  */
 header('Access-Control-Allow-Origin:*');
 header('Content-Type:application/json; charset=utf-8');
