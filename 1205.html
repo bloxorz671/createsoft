@@ -4,8 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>初二五班电子作业提交</title>
-    <!-- 引入 Cloudflare Turnstile 脚本 -->
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <!-- 引入 Cloudflare Turnstile 脚本 - 使用更可靠的方式 -->
+    <script>
+        // 预定义回调函数，确保Turnstile加载完成后执行
+        window.onloadTurnstileCallback = function() {
+            console.log('Turnstile script loaded');
+            // 如果有待渲染的小部件，可以在这里触发
+            if (window.turnstile && typeof window.renderAllTurnstile === 'function') {
+                window.renderAllTurnstile();
+            }
+        };
+    </script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" async defer></script>
     <style>
         * {
             margin: 0;
@@ -530,13 +540,10 @@
             width: 100%;
         }
         
-        .turnstile-loading, .turnstile-widget {
+        .turnstile-loading {
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-        
-        .turnstile-loading {
             background: #f1f5f9;
             border-radius: 30px;
             padding: 0.5rem 1.5rem;
@@ -936,6 +943,12 @@
 
             // 标记是否正在刷新，避免重复刷新
             let isRefreshing = false;
+
+            // Turnstile 是否已加载
+            let turnstileLoaded = false;
+
+            // 等待渲染的队列
+            let pendingRenderQueue = [];
 
             // 获取错误信息
             function getErrorMessage(errorCode) {
@@ -1343,13 +1356,29 @@
                 loadingEl.textContent = '正在加载人机验证';
                 loadingEl.onclick = null;
                 
+                if (!window.turnstile) {
+                    console.log('Turnstile not loaded yet, will retry in 1 second');
+                    loadingEl.textContent = '正在加载验证服务...';
+                    setTimeout(() => {
+                        renderCodeModalTurnstile(widgetEl, loadingEl, submitBtn, messageEl);
+                    }, 1000);
+                    return;
+                }
+                
                 let timeoutId = setTimeout(() => {
-                    loadingEl.classList.add('timeout');
-                    loadingEl.textContent = '加载超时，点击重试';
-                    loadingEl.onclick = () => renderCodeModalTurnstile(widgetEl, loadingEl, submitBtn, messageEl);
+                    if (loadingEl.style.display !== 'none') {
+                        loadingEl.classList.add('timeout');
+                        loadingEl.textContent = '加载超时，点击重试';
+                        loadingEl.onclick = () => renderCodeModalTurnstile(widgetEl, loadingEl, submitBtn, messageEl);
+                    }
                 }, 15000);
                 
                 try {
+                    // 确保widgetEl是空的
+                    while (widgetEl.firstChild) {
+                        widgetEl.removeChild(widgetEl.firstChild);
+                    }
+                    
                     const widgetId = turnstile.render(widgetEl, {
                         sitekey: '0x4AAAAAACnzyoSShctyL7pF',
                         timeout: 30000,
@@ -1386,6 +1415,7 @@
                         }
                     });
                     
+                    window.turnstileWidgets = window.turnstileWidgets || {};
                     window.turnstileWidgets['codeModal'] = widgetId;
                     
                 } catch (e) {
@@ -1587,18 +1617,33 @@
                 wrapper.appendChild(loadingDiv);
                 wrapper.appendChild(widgetDiv);
                 
+                if (!window.turnstile) {
+                    console.log('Turnstile not loaded yet for', itemId, 'will retry');
+                    loadingDiv.textContent = '正在加载验证服务...';
+                    // 加入重试队列
+                    pendingRenderQueue.push({ itemId, wrapper, loadingDiv, widgetDiv });
+                    return;
+                }
+                
                 // 设置超时
                 let timeoutId = setTimeout(() => {
-                    loadingDiv.classList.add('timeout');
-                    loadingDiv.textContent = '加载超时，点击重试';
-                    if (window.turnstileWidgets[itemId]) {
-                        turnstile.remove(window.turnstileWidgets[itemId]);
+                    if (loadingDiv.style.display !== 'none') {
+                        loadingDiv.classList.add('timeout');
+                        loadingDiv.textContent = '加载超时，点击重试';
+                        if (window.turnstileWidgets[itemId]) {
+                            turnstile.remove(window.turnstileWidgets[itemId]);
+                        }
+                        loadingDiv.onclick = () => renderTurnstile(itemId);
                     }
-                    loadingDiv.onclick = () => renderTurnstile(itemId);
                 }, 15000);
                 
                 // 渲染新的小部件
                 try {
+                    // 确保widgetDiv是空的
+                    while (widgetDiv.firstChild) {
+                        widgetDiv.removeChild(widgetDiv.firstChild);
+                    }
+                    
                     const widgetId = turnstile.render(widgetDiv, {
                         sitekey: '0x4AAAAAACnzyoSShctyL7pF',
                         timeout: 30000,
@@ -1666,6 +1711,16 @@
                     }
                 }
             }
+
+            // 渲染所有等待中的小部件
+            window.renderAllTurnstile = function() {
+                console.log('Rendering all pending Turnstile widgets, count:', pendingRenderQueue.length);
+                turnstileLoaded = true;
+                while (pendingRenderQueue.length > 0) {
+                    const item = pendingRenderQueue.shift();
+                    renderTurnstile(item.itemId);
+                }
+            };
 
             function renderHomework(items) {
                 const loadingEl = document.getElementById('loadingContainer');
