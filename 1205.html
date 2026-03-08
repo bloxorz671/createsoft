@@ -540,6 +540,12 @@
             font-size: 0.9rem;
             border: 1px solid #cbd5e1;
             width: fit-content;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .turnstile-loading:hover {
+            background: #e2e8f0;
         }
         
         .turnstile-loading::after {
@@ -548,6 +554,19 @@
             width: 20px;
             display: inline-block;
             text-align: left;
+        }
+        
+        .turnstile-loading.timeout::after {
+            content: " ⏱️ 点击重试";
+            animation: none;
+            width: auto;
+        }
+        
+        .turnstile-loading.error::after {
+            content: " ❌ 点击重试";
+            animation: none;
+            width: auto;
+            color: #b91c1c;
         }
         
         @keyframes dots {
@@ -1247,35 +1266,92 @@
                 // 先清空容器，确保没有重叠
                 turnstileContainer.innerHTML = '';
                 
+                // 显示加载提示
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'turnstile-loading';
+                loadingDiv.textContent = '正在加载人机验证';
+                turnstileContainer.appendChild(loadingDiv);
+                
+                // 设置超时
+                let timeoutId = setTimeout(() => {
+                    loadingDiv.classList.add('timeout');
+                    loadingDiv.textContent = '加载超时';
+                    if (window.turnstileWidgets['codeModal']) {
+                        turnstile.remove(window.turnstileWidgets['codeModal']);
+                    }
+                    loadingDiv.onclick = () => {
+                        loadingDiv.remove();
+                        renderCodeModalTurnstile(turnstileContainer, loadingDiv, submitBtn, messageEl);
+                    };
+                }, 15000);
+                
                 // 渲染 Turnstile 小部件到作业码弹窗
-                turnstile.render(turnstileContainer, {
-                    sitekey: '0x4AAAAAACnzyoSShctyL7pF',
-                    callback: function(token) {
-                        codeModalVerified = true;
-                        submitBtn.disabled = false;
-                        messageEl.className = 'code-modal-message success';
-                        messageEl.textContent = '✓ 人机验证通过，请输入作业码';
-                        
-                        // 移除之前的消息（2秒后）
-                        setTimeout(() => {
-                            if (messageEl.classList.contains('success')) {
-                                messageEl.textContent = '';
+                function renderCodeModalTurnstile(container, loadingDiv, submitBtn, messageEl) {
+                    container.innerHTML = '';
+                    const newLoadingDiv = document.createElement('div');
+                    newLoadingDiv.className = 'turnstile-loading';
+                    newLoadingDiv.textContent = '正在加载人机验证';
+                    container.appendChild(newLoadingDiv);
+                    
+                    try {
+                        const widgetId = turnstile.render(container, {
+                            sitekey: '0x4AAAAAACnzyoSShctyL7pF',
+                            timeout: 30000,
+                            'refresh-expired': 'auto',
+                            'retry': 'auto',
+                            'retry-interval': 3000,
+                            callback: function(token) {
+                                clearTimeout(timeoutId);
+                                codeModalVerified = true;
+                                submitBtn.disabled = false;
+                                messageEl.className = 'code-modal-message success';
+                                messageEl.textContent = '✓ 人机验证通过，请输入作业码';
+                                
+                                // 移除加载提示
+                                newLoadingDiv.remove();
+                                
+                                // 移除之前的消息（2秒后）
+                                setTimeout(() => {
+                                    if (messageEl.classList.contains('success')) {
+                                        messageEl.textContent = '';
+                                    }
+                                }, 2000);
+                            },
+                            'error-callback': function(errorCode) {
+                                clearTimeout(timeoutId);
+                                const reason = getErrorMessage(errorCode);
+                                const errorMessage = `人机验证失败\n错误代码: ${errorCode}\n原因: ${reason}\n即将自动刷新页面...`;
+                                alert(errorMessage);
+                                
+                                // 关闭弹窗
+                                codeModalContainer.style.display = 'none';
+                                
+                                // 刷新页面
+                                refreshPage();
                             }
-                        }, 2000);
-                    },
-                    'error-callback': function(errorCode) {
-                        const reason = getErrorMessage(errorCode);
-                        const errorMessage = `人机验证失败\n错误代码: ${errorCode}\n原因: ${reason}\n即将自动刷新页面...`;
-                        alert(errorMessage);
+                        });
                         
-                        // 关闭弹窗
-                        codeModalContainer.style.display = 'none';
+                        window.turnstileWidgets['codeModal'] = widgetId;
                         
-                        // 刷新页面
-                        refreshPage();
-                    },
-                    'refresh-expired': 'auto'
-                });
+                        // 额外的超时保护
+                        setTimeout(() => {
+                            if (newLoadingDiv.parentNode && !codeModalVerified) {
+                                newLoadingDiv.classList.add('timeout');
+                                newLoadingDiv.textContent = '加载超时，点击重试';
+                                newLoadingDiv.onclick = () => renderCodeModalTurnstile(container, newLoadingDiv, submitBtn, messageEl);
+                            }
+                        }, 35000);
+                        
+                    } catch (e) {
+                        clearTimeout(timeoutId);
+                        console.error('Turnstile render error:', e);
+                        newLoadingDiv.classList.add('error');
+                        newLoadingDiv.textContent = '加载失败，点击重试';
+                        newLoadingDiv.onclick = () => renderCodeModalTurnstile(container, newLoadingDiv, submitBtn, messageEl);
+                    }
+                }
+                
+                renderCodeModalTurnstile(turnstileContainer, loadingDiv, submitBtn, messageEl);
                 
                 // 关闭弹窗函数
                 function closeCodeModal() {
@@ -1514,33 +1590,66 @@
                 const container = document.getElementById(`turnstile-${itemId}`);
                 if (!container) return;
                 
-                // 重要：先清空容器，确保没有重叠
+                // 重要：先清空容器
                 container.innerHTML = '';
+                
+                // 显示加载提示
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'turnstile-loading';
+                loadingDiv.textContent = '正在加载人机验证';
+                container.appendChild(loadingDiv);
+                
+                // 设置超时
+                let timeoutId = setTimeout(() => {
+                    loadingDiv.classList.add('timeout');
+                    loadingDiv.textContent = '加载超时，点击重试';
+                    if (window.turnstileWidgets[itemId]) {
+                        turnstile.remove(window.turnstileWidgets[itemId]);
+                    }
+                    loadingDiv.onclick = () => renderTurnstile(itemId);
+                }, 15000);
                 
                 // 渲染新的小部件
                 try {
                     const widgetId = turnstile.render(`#turnstile-${itemId}`, {
                         sitekey: '0x4AAAAAACnzyoSShctyL7pF',
+                        timeout: 30000,
+                        'refresh-expired': 'auto',
+                        'retry': 'auto',
+                        'retry-interval': 3000,
                         callback: function(token) {
+                            clearTimeout(timeoutId);
+                            loadingDiv.remove();
                             window.turnstileSuccess(token, itemId);
                         },
                         'error-callback': function(errorCode) {
+                            clearTimeout(timeoutId);
                             const reason = getErrorMessage(errorCode);
                             const errorMessage = `人机验证失败\n错误代码: ${errorCode}\n原因: ${reason}\n即将自动刷新页面...`;
                             alert(errorMessage);
                             
                             // 刷新页面
                             refreshPage();
-                        },
-                        'refresh-expired': 'auto'
+                        }
                     });
                     
                     window.turnstileWidgets[itemId] = widgetId;
+                    
+                    // 额外的超时保护
+                    setTimeout(() => {
+                        if (loadingDiv.parentNode && !verificationStatus[itemId]) {
+                            loadingDiv.classList.add('timeout');
+                            loadingDiv.textContent = '加载超时，点击重试';
+                            loadingDiv.onclick = () => renderTurnstile(itemId);
+                        }
+                    }, 35000);
+                    
                 } catch (e) {
-                    // 渲染失败，也刷新页面
+                    clearTimeout(timeoutId);
                     console.error('Turnstile render error:', e);
-                    alert('人机验证加载失败，即将刷新页面...');
-                    refreshPage();
+                    loadingDiv.classList.add('error');
+                    loadingDiv.textContent = '加载失败，点击重试';
+                    loadingDiv.onclick = () => renderTurnstile(itemId);
                 }
             }
 
