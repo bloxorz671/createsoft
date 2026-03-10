@@ -4,7 +4,7 @@ link=文件拆分合并器
 introduction=将大文件切成多个小文件以便于发送上传
 """
 """name=一键配置Adobe Flash Player
-icon=flash_icon.webp
+icon=flash_icon.jpg
 download_link=一键配置Adobe_Flash_Player.exe
 introduction=自动为您的Windows电脑配置Flash Player ActiveX（适用于IE和大部分应用程序）和官方的swf文件播放器
 """
