@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本编码转换器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 16px;
+        }
+        .container {
+            width: 100%;
+            max-width: 680px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 500;
+            color: #000000;
+            letter-spacing: -0.02em;
+            margin: 0 0 8px 0;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        textarea {
+            width: 100%;
+            padding: 18px 20px;
+            font-size: 16px;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+            background: #ffffff;
+            border: 1px solid #b0b0b0;
+            border-radius: 24px;
+            resize: vertical;
+            min-height: 160px;
+            line-height: 1.5;
+            outline: none;
+            color: #1e1e1e;
+            transition: border 0.1s;
+            box-shadow: none;
+            margin-bottom: 8px;
+        }
+        textarea:focus {
+            border-color: #606060;
+        }
+        
+        .button-row {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-start;
+            margin: 4px 0 8px 0;
+        }
+        
+        .action-btn {
+            background: #ffffff;
+            border: 1px solid #b0b0b0;
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: 450;
+            color: #1e1e1e;
+            cursor: pointer;
+            transition: background 0.15s, border 0.15s;
+            min-width: 100px;
+            text-align: center;
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        
+        .action-btn:hover {
+            background: #f4f4f4;
+            border-color: #7a7a7a;
+        }
+        
+        .action-btn:active {
+            background: #e6e6e6;
+            transform: scale(0.98);
+        }
+        
+        .convert-btn {
+            background: #ffffff;
+            border: 1px solid #b0b0b0;
+            padding: 16px 28px;
+            border-radius: 48px;
+            font-size: 20px;
+            font-weight: 450;
+            color: #1e1e1e;
+            cursor: pointer;
+            transition: background 0.15s, border 0.15s;
+            width: fit-content;
+            min-width: 200px;
+            margin: 12px auto 0 auto;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        
+        .convert-btn:hover {
+            background: #f4f4f4;
+            border-color: #7a7a7a;
+        }
+        
+        .convert-btn:active {
+            background: #e6e6e6;
+            transform: scale(0.98);
+        }
+        
+        /* 移除所有提示性内容 */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>文本编码转换器</h1>
+    
+    <!-- 输入框 -->
+    <textarea id="mainInput" placeholder=" "></textarea>
+    
+    <!-- 复制和粘贴按钮行 - 位于文本框下方左侧 -->
+    <div class="button-row">
+        <button class="action-btn" id="copyBtn">复制</button>
+        <button class="action-btn" id="pasteBtn">粘贴</button>
+    </div>
+    
+    <!-- 单个转换按钮 -->
+    <button class="convert-btn" id="convertBtn">转换</button>
+</div>
+
+<script>
+    (function() {
+        const inputEl = document.getElementById('mainInput');
+        const convertBtn = document.getElementById('convertBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const pasteBtn = document.getElementById('pasteBtn');
+
+        // --- 核心 UTF-8 字节 ↔ ._ 编码 (双向) ---
+        // 普通文本 → ._ 编码: 每个字节8位, 0→'.' , 1→'_'
+        function textToDotUnderline(str) {
+            if (str.length === 0) return '';
+            const encoder = new TextEncoder();
+            const bytes = encoder.encode(str);  // Uint8Array (UTF-8)
+            let result = '';
+            for (let byte of bytes) {
+                // 保证8位二进制
+                let bin = byte.toString(2).padStart(8, '0');
+                // 替换: 0→. , 1→_
+                result += bin.replace(/0/g, '.').replace(/1/g, '_');
+            }
+            return result;
+        }
+
+        // ._ 编码 → 普通文本 (过滤非._字符, 每8位一组)
+        function dotUnderlineToText(dotStr) {
+            // 只保留 . 和 _ (忽略空格、换行、制表等)
+            const clean = dotStr.replace(/[^._]/g, '');
+            if (clean.length < 8) return '';   // 至少需要8个符号
+
+            const bytes = [];
+            for (let i = 0; i + 7 < clean.length; i += 8) {
+                const chunk = clean.substr(i, 8);
+                let bin = '';
+                for (let ch of chunk) {
+                    if (ch === '.') bin += '0';
+                    else if (ch === '_') bin += '1';
+                }
+                // 二进制转整数 (0-255)
+                let byteVal = parseInt(bin, 2);
+                if (!isNaN(byteVal) && byteVal >= 0 && byteVal <= 255) {
+                    bytes.push(byteVal);
+                }
+            }
+            if (bytes.length === 0) return '';
+            const decoder = new TextDecoder('utf-8');
+            return decoder.decode(new Uint8Array(bytes));
+        }
+
+        /** 检测字符串是否「看起来像」._编码
+         *  规则：如果去掉空格/换行后，超过一半的字符是 . 或 _ 且长度>0，就认为是编码模式
+         */
+        function looksLikeDotUnderline(str) {
+            if (str.length === 0) return false;
+            // 去除空白符后再判断
+            const withoutSpaces = str.replace(/\s+/g, '');
+            if (withoutSpaces.length === 0) return false;
+
+            let dotUnderlineCount = 0;
+            for (let ch of withoutSpaces) {
+                if (ch === '.' || ch === '_') dotUnderlineCount++;
+            }
+            // 如果非空且大多数(超过50%)字符是 . 或 _，则认为是编码串
+            return (dotUnderlineCount / withoutSpaces.length) > 0.5;
+        }
+
+        // 转换主逻辑: 自动判断方向并更新输入框内容
+        function performConversion() {
+            const raw = inputEl.value;
+            if (raw.trim() === '') {
+                return;
+            }
+
+            // 判断当前输入是普通文本 还是 ._编码
+            const isCode = looksLikeDotUnderline(raw);
+
+            try {
+                if (isCode) {
+                    // 编码 → 文本
+                    const converted = dotUnderlineToText(raw);
+                    if (converted !== '') {
+                        inputEl.value = converted;
+                    }
+                    // 转换失败则静默保留原内容
+                } else {
+                    // 文本 → 编码
+                    const converted = textToDotUnderline(raw);
+                    inputEl.value = converted;
+                }
+            } catch (e) {
+                // 任何异常静默忽略
+                console.debug('conversion error', e);
+            }
+        }
+
+        // 复制功能
+        copyBtn.addEventListener('click', function() {
+            if (inputEl.value.trim() === '') return;
+            navigator.clipboard.writeText(inputEl.value).catch(() => {
+                // 静默失败
+            });
+        });
+
+        // 粘贴功能
+        pasteBtn.addEventListener('click', function() {
+            navigator.clipboard.readText().then(text => {
+                inputEl.value = text;
+            }).catch(() => {
+                // 静默失败（用户未授权或浏览器不支持）
+            });
+        });
+
+        // 绑定转换按钮点击事件
+        convertBtn.addEventListener('click', performConversion);
+
+    })();
+</script>
+</body>
+</html>
