@@ -736,6 +736,35 @@
         .scan-input-btn:hover {
             background: #3a7bc8;
         }
+        
+        /* 输入提示 */
+        .input-hint {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 0.3rem;
+        }
+        
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 2rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+        }
     </style>
     <!-- 使用 ZXing 库 -->
     <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
@@ -834,17 +863,18 @@
                         </div>
                     </div>
 
-                    <!-- 增删值日卡 - 支持扫码录入 -->
+                    <!-- 增删值日卡 - 支持扫码录入和手动输入 -->
                     <div class="scan-panel" style="padding: 0.8rem;">
                         <div style="font-weight:600; margin-bottom:0.5rem;">➕ 增加值日卡</div>
                         <div class="flex-row" style="margin-bottom: 0.3rem;">
-                            <input type="text" id="newDutyCardInput" placeholder="值日卡条码" readonly>
+                            <input type="text" id="newDutyCardInput" placeholder="值日卡条码（可手动输入或扫码）">
                             <button id="scanDutyCardBtn" class="scan-input-btn">📷 扫码录入</button>
                         </div>
-                        <div class="flex-row">
+                        <div class="flex-row" style="margin-bottom: 0.3rem;">
                             <input type="text" id="dutyCardNameInput" placeholder="值日卡名称（可选）">
                             <button id="addDutyCardBtn" class="primary">添加</button>
                         </div>
+                        <div class="input-hint">支持手动输入条码，或点击扫码录入快速扫描</div>
                         <div style="margin:0.8rem 0 0.3rem;">📋 已授权值日卡列表</div>
                         <div id="dutyCardListContainer" class="card-list">
                             <div class="empty-state">暂无值日卡，请添加</div>
@@ -920,10 +950,10 @@
     </div>
 
     <!-- 扫码录入模态框 -->
-    <div id="scanModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center;">
-        <div style="background: white; border-radius: 2rem; padding: 2rem; max-width: 500px; width: 90%;">
+    <div id="scanModal" class="modal">
+        <div class="modal-content">
             <h3 style="margin-bottom: 1rem;">📷 扫码录入值日卡</h3>
-            <div id="scanModalVideo" style="width: 100%; border-radius: 1rem; overflow: hidden; background: #000; margin-bottom: 1rem;">
+            <div style="width: 100%; border-radius: 1rem; overflow: hidden; background: #000; margin-bottom: 1rem;">
                 <video id="modalScannerVideo" autoplay playsinline style="width: 100%;"></video>
             </div>
             <div id="scanModalResult" style="text-align: center; margin-bottom: 1rem; min-height: 2rem;"></div>
@@ -1968,7 +1998,10 @@
     document.getElementById('addDutyCardBtn').addEventListener('click', () => {
         const card = newDutyCardInput.value.trim();
         const name = dutyCardNameInput.value.trim();
-        if (!card) return;
+        if (!card) {
+            alert('请输入值日卡条码');
+            return;
+        }
         
         if (!classData.dutyCards.includes(card)) { 
             addDutyCard(card, name);
