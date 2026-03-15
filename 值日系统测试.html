@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>值日登记系统</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background: #1a2634;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .aspect-4-3 {
+            width: 100%;
+            max-width: 1200px;
+            aspect-ratio: 4 / 3;
+            background: #f0f4f8;
+            border-radius: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .container {
+            height: 100%;
+            padding: 1.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-y: auto;
+        }
+        
+        #video-container {
+            width: 100%;
+            border-radius: 2rem;
+            overflow: hidden;
+            background: #1e293b;
+            margin: 0.8rem 0;
+            position: relative;
+            display: none;
+            flex-shrink: 0;
+            max-height: 35vh;
+        }
+        
+        #scanner-video {
+            width: 100%;
+            height: auto;
+            display: block;
+            max-height: 35vh;
+            object-fit: contain;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #1e293b;
+            text-align: center;
+            margin: 0 0 0.8rem 0;
+            padding-bottom: 0.8rem;
+            border-bottom: 3px solid #e2e8f0;
+            flex-shrink: 0;
+        }
+        
+        .main-btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 1.5rem 1rem;
+            font-size: 2.2rem;
+            font-weight: 700;
+            border-radius: 3rem;
+            cursor: pointer;
+            transition: 0.2s;
+            margin: 0.3rem 0;
+            letter-spacing: 2px;
+            box-shadow: 0 10px 15px -5px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        
+        .main-btn:hover {
+            background: #1e2b3a;
+            transform: translateY(-2px);
+        }
+        
+        .main-btn:active {
+            transform: translateY(0);
+        }
+        
+        .scan-panel {
+            background: #f8fafc;
+            border-radius: 2rem;
+            padding: 1.2rem;
+            margin: 0.5rem 0;
+            border: 2px solid #e9eef2;
+            flex-shrink: 0;
+        }
+        
+        .flex-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        input {
+            flex: 1;
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            border: 2px solid #dde3ea;
+            border-radius: 3rem;
+            outline: none;
+            font-family: monospace;
+        }
+        
+        input:focus {
+            border-color: #2c3e50;
+        }
+        
+        button {
+            background: #eef2f6;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 3rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.1s;
+            border: 1px solid #cdd9e6;
+        }
+        
+        button.primary {
+            background: #2c3e50;
+            color: white;
+            border: none;
+        }
+        
+        button.primary:hover {
+            background: #1e2b3a;
+        }
+        
+        button.warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fbbf24;
+        }
+        
+        button.warning:hover {
+            background: #fde68a;
+        }
+        
+        button.danger {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+        
+        button.danger:hover {
+            background: #fecaca;
+        }
+        
+        button.success {
+            background: #22c55e;
+            color: white;
+            border: none;
+        }
+        
+        button.success:hover {
+            background: #16a34a;
+        }
+        
+        .card-item {
+            background: #f1f5f9;
+            border-radius: 2rem;
+            padding: 0.6rem 1.2rem;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: monospace;
+            font-size: 1.1rem;
+            word-break: break-all;
+        }
+        
+        .badge {
+            background: #2c3e50;
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+        
+        .badge.success {
+            background: #22c55e;
+        }
+        
+        .badge.warning {
+            background: #f59e0b;
+        }
+        
+        .badge.voice-on {
+            background: #8b5cf6;
+        }
+        
+        .badge.voice-off {
+            background: #9ca3af;
+        }
+        
+        .top-message {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #22c55e;
+            color: white;
+            padding: 1rem 3rem;
+            border-radius: 3rem;
+            font-size: 1.8rem;
+            font-weight: bold;
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.5);
+            z-index: 1000;
+            animation: slideDown 0.3s ease;
+            text-align: center;
+            white-space: nowrap;
+            border: 3px solid white;
+        }
+        
+        .top-message.error {
+            background: #ef4444;
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.5);
+        }
+        
+        @keyframes slideDown {
+            from {
+                top: -100px;
+                opacity: 0;
+            }
+            to {
+                top: 30px;
+                opacity: 1;
+            }
+        }
+        
+        .history-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.2rem;
+            padding: 0.5rem 1rem;
+            margin: 0.3rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .history-item .info {
+            flex: 1;
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .history-item .delete-btn {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: none;
+            padding: 0.2rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .history-item .delete-btn:hover {
+            background: #fecaca;
+        }
+        
+        .records-panel {
+            background: #f8fafc;
+            border-radius: 2rem;
+            padding: 1rem 1.2rem;
+            margin: 0.5rem 0;
+            border: 2px solid #e9eef2;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .records-panel h3 {
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .records-panel .record-count {
+            background: #2c3e50;
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+        }
+        
+        .records-container {
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 4px;
+        }
+        
+        .record-item {
+            padding: 0.4rem 0.6rem;
+            border-bottom: 1px dashed #dde3ea;
+            font-size: 0.9rem;
+            color: #475569;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .record-item:last-child {
+            border-bottom: none;
+        }
+        
+        .record-item .student-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .record-item .student-code {
+            font-weight: 500;
+            color: #1e293b;
+        }
+        
+        .record-item .count-badge {
+            background: #e2e8f0;
+            color: #1e293b;
+            padding: 0.1rem 0.6rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+        }
+        
+        .record-item .time {
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .scan-region {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 160px;
+            border: 4px solid #ffd700;
+            border-radius: 20px;
+            box-shadow: 0 0 0 500px rgba(0,0,0,0.5);
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { border-color: #ffd700; }
+            50% { border-color: #ffaa00; }
+            100% { border-color: #ffd700; }
+        }
+        
+        .close-camera {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            cursor: pointer;
+            z-index: 10;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .close-camera:hover {
+            background: #dc2626;
+        }
+        
+        .camera-select {
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: 2rem;
+            margin: 0.8rem 0;
+        }
+        
+        .camera-select select {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 2rem;
+            border: 2px solid #dde3ea;
+            margin-bottom: 0.8rem;
+            font-size: 1rem;
+            background: white;
+        }
+        
+        .voice-settings {
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: 2rem;
+            margin: 0.8rem 0;
+        }
+        
+        .voice-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .voice-switch {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 26px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #8b5cf6;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .voice-select {
+            width: 100%;
+            padding: 0.6rem;
+            border-radius: 2rem;
+            border: 2px solid #dde3ea;
+            margin-bottom: 0.5rem;
+            background: white;
+        }
+        
+        .voice-test {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .voice-test input {
+            flex: 1;
+            padding: 0.5rem 1rem;
+        }
+        
+        .voice-rate {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        
+        .voice-rate input[type="range"] {
+            flex: 1;
+            padding: 0;
+        }
+        
+        .password-field {
+            -webkit-text-security: disc;
+            text-security: disc;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 0.8rem;
+            border-radius: 1rem;
+            margin: 0.5rem 0;
+            text-align: center;
+        }
+        
+        .status-badge {
+            background: #f1f5f9;
+            padding: 0.4rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin: 0.3rem 0;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #94a3b8;
+            padding: 1.5rem;
+            font-size: 1rem;
+        }
+        
+        .scroll-content {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+            padding-right: 4px;
+        }
+        
+        .card-list {
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        
+        .footer-fixed {
+            flex-shrink: 0;
+            margin-top: 0.3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .backup-status {
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-top: 0.2rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+        
+        .backup-status span {
+            background: #e2e8f0;
+            padding: 0.1rem 0.4rem;
+            border-radius: 1rem;
+        }
+        
+        .backup-status .success {
+            background: #22c55e;
+            color: white;
+        }
+        
+        .backup-status .warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .camera-info {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        
+        .default-camera-badge {
+            background: #22c55e;
+            color: white;
+            padding: 0.1rem 0.4rem;
+            border-radius: 1rem;
+            font-size: 0.7rem;
+            margin-left: 0.5rem;
+        }
+        
+        .voice-led {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #44af69;
+            margin-right: 0.5rem;
+            box-shadow: 0 0 0 2px #44af6940;
+        }
+        
+        .voice-led.speaking {
+            animation: pulse-voice 1s infinite;
+        }
+        
+        @keyframes pulse-voice {
+            0% { box-shadow: 0 0 0 2px #8b5cf640; }
+            50% { box-shadow: 0 0 0 4px #8b5cf680; }
+            100% { box-shadow: 0 0 0 2px #8b5cf640; }
+        }
+        
+        .voice-led.disabled {
+            background: #9ca3af;
+            box-shadow: 0 0 0 2px #9ca3af40;
+        }
+        
+        .camera-name-badge {
+            background: #e2e8f0;
+            color: #1e293b;
+            padding: 0.2rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.7rem;
+            margin-left: 0.3rem;
+        }
+        
+        .beep-test {
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+        
+        .beep-test button {
+            background: #f1f5f9;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            padding: 0.4rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .beep-label {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 0.2rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            color: #1e293b;
+            margin-left: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .main-btn {
+                font-size: 1.8rem;
+                padding: 1rem;
+            }
+            
+            .record-item {
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* 新增记录闪烁动画 */
+        @keyframes highlight {
+            0% { background-color: rgba(34, 197, 94, 0.3); }
+            100% { background-color: transparent; }
+        }
+        
+        .record-item.highlight {
+            animation: highlight 1s ease;
+        }
+    </style>
+    <!-- 使用 ZXing 库 -->
+    <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
+</head>
+<body>
+    <div class="aspect-4-3">
+        <div class="container">
+            <h1>值日登记系统</h1>
+
+            <!-- 顶部提示消息 -->
+            <div id="topMessage" class="top-message hidden"></div>
+
+            <!-- 主界面 -->
+            <div id="mainInterface" style="height: 100%; display: flex; flex-direction: column;">
+                <button class="main-btn" id="bigButton">请扫值日卡</button>
+                
+                <!-- 摄像头实时扫描区域 -->
+                <div id="video-container">
+                    <video id="scanner-video" autoplay playsinline></video>
+                    <div class="scan-region"></div>
+                    <button class="close-camera" id="closeCameraBtn">✕ 关闭摄像头</button>
+                </div>
+
+                <!-- 状态信息 -->
+                <div id="statusInfo" class="status-badge hidden"></div>
+
+                <!-- 摄像头错误提示 -->
+                <div id="cameraError" class="error-message hidden">
+                    <p>⚠️ 无法启动摄像头</p>
+                    <p id="cameraErrorDetail"></p>
+                    <button id="retryCameraBtn" class="primary">重试</button>
+                    <button id="useManualOnlyBtn">仅使用手动输入</button>
+                </div>
+
+                <!-- 手动输入备用 -->
+                <div class="scan-panel" style="padding: 0.8rem;">
+                    <div style="font-weight:600; margin-bottom:0.3rem;">📝 手动输入条码</div>
+                    <div class="flex-row">
+                        <input type="text" id="manualBarcodeInput" placeholder="输入条码内容">
+                        <button id="submitManualBarcode">确认</button>
+                    </div>
+                </div>
+
+                <!-- 值日记录 - 新增记录会自动刷新显示 -->
+                <div class="records-panel">
+                    <h3>
+                        值日记录
+                        <span id="recordCount" class="record-count">0</span>
+                    </h3>
+                    <div id="allRecords" class="records-container">
+                        <div class="empty-state">暂无值日记录</div>
+                    </div>
+                </div>
+                
+                <div class="footer-fixed">
+                    <span id="stepIndicator" class="badge">当前: 请扫值日卡</span>
+                    <button id="enterAdminBtn" class="warning">⚙️ 管理员后台</button>
+                </div>
+                
+                <!-- 语音状态提示 -->
+                <div id="voiceStatusBar" class="backup-status" style="margin-top:0.3rem; justify-content: flex-start;">
+                    <span id="voiceStatusLed" class="voice-led"></span>
+                    <span id="voiceStatusText">语音提示 检测中...</span>
+                    <span class="beep-label">🔊 600Hz 蜂鸣</span>
+                </div>
+            </div>
+
+            <!-- 管理员后台 -->
+            <div id="adminPanel" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-shrink: 0;">
+                    <h2 style="margin:0; font-size:1.3rem;">管理员后台</h2>
+                    <button id="backFromAdmin">← 返回</button>
+                </div>
+
+                <div class="scroll-content">
+                    <!-- 修改管理员密码 -->
+                    <div class="scan-panel" style="padding: 0.8rem;">
+                        <div style="font-weight:600; margin-bottom:0.5rem;">🔐 修改管理员密码</div>
+                        <div class="flex-row" style="margin-bottom: 0.3rem;">
+                            <input type="password" id="currentAdminPwd" placeholder="当前密码" class="password-field">
+                        </div>
+                        <div class="flex-row" style="margin-bottom: 0.3rem;">
+                            <input type="password" id="newAdminPwd" placeholder="新密码" class="password-field">
+                        </div>
+                        <div class="flex-row">
+                            <input type="password" id="confirmAdminPwd" placeholder="确认新密码" class="password-field">
+                            <button id="changeAdminPwdBtn" class="primary">修改</button>
+                        </div>
+                    </div>
+
+                    <!-- 增删值日卡 -->
+                    <div class="scan-panel" style="padding: 0.8rem;">
+                        <div style="font-weight:600; margin-bottom:0.5rem;">➕ 增加值日卡</div>
+                        <div class="flex-row">
+                            <input type="text" id="newDutyCardInput" placeholder="值日卡条码">
+                            <button id="addDutyCardBtn" class="primary">添加</button>
+                        </div>
+                        <div style="margin:0.8rem 0 0.3rem;">📋 已授权值日卡列表</div>
+                        <div id="dutyCardListContainer" class="card-list">
+                            <div class="empty-state">暂无值日卡，请添加</div>
+                        </div>
+                    </div>
+
+                    <!-- 语音提示设置 -->
+                    <div class="voice-settings">
+                        <div class="voice-header">
+                            <div style="font-weight:600;">🔊 语音提示</div>
+                            <div class="voice-switch">
+                                <span class="badge" id="voiceStatus">检测中</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="voiceSwitch" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <select id="voiceSelect" class="voice-select"></select>
+                        
+                        <div class="voice-test">
+                            <input type="text" id="testVoiceText" placeholder="测试语音输入" value="1234">
+                            <button id="testVoiceBtn" class="primary">测试</button>
+                        </div>
+                        
+                        <div class="voice-rate">
+                            <span>语速</span>
+                            <input type="range" id="voiceRate" min="0.5" max="2" value="1" step="0.1">
+                            <span id="rateValue">1.0</span>
+                        </div>
+                        
+                        <div class="beep-test">
+                            <button id="testBeepBtn">🔊 测试蜂鸣声 (600Hz 方波)</button>
+                        </div>
+                        
+                        <div style="font-size:0.8rem; color:#64748b; margin-top:0.5rem;" id="voiceSupportInfo">
+                            ⚡ 数字会逐个念出：1234 → 1-2-3-4<br>
+                            🔊 扫码成功必有滴声 (600Hz 方波 120ms)
+                        </div>
+                    </div>
+
+                    <!-- 查看和管理记录 -->
+                    <div class="scan-panel" style="padding: 0.8rem;">
+                        <div style="font-weight:600; margin-bottom:0.5rem;">📜 管理值日记录</div>
+                        <div style="margin-bottom: 0.5rem;">
+                            <select id="historyCardSelector" style="width:100%; padding:0.6rem; border-radius:3rem; margin-bottom:0.3rem;">
+                                <option value="">全部值日卡</option>
+                            </select>
+                            <button id="clearAllRecordsBtn" class="danger" style="width:100%; margin-top:0.3rem; padding:0.5rem;">🗑️ 清空所有记录</button>
+                        </div>
+                        <div id="historyRecords" class="records-container" style="max-height: 200px;"></div>
+                    </div>
+
+                    <!-- 摄像头设置 - 改进版，名称优先 -->
+                    <div class="camera-select">
+                        <div style="font-weight:600; margin-bottom:0.5rem;">📷 选择默认摄像头 <span class="camera-name-badge">名称优先</span></div>
+                        <div id="cameraStatus" class="camera-info">检测摄像头中...</div>
+                        <select id="cameraSelector" size="3" style="height: auto; min-height: 120px;">
+                            <option value="">正在加载摄像头列表...</option>
+                        </select>
+                        <div class="flex-row" style="margin-top:0.8rem;">
+                            <button id="testCameraBtn" style="flex:1;">测试</button>
+                            <button id="saveDefaultCamera" class="primary" style="flex:1;">保存默认</button>
+                        </div>
+                        <div id="defaultCameraInfo" style="font-size:0.9rem; color:#1e293b; margin-top:0.5rem; padding:0.3rem; background:#e2e8f0; border-radius:1rem; text-align:center;"></div>
+                        <div id="cameraDebug" style="font-size:0.8rem; color:#64748b; margin-top:0.3rem; text-align:center;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+(function() {
+    // ==================== 存储键常量 ====================
+    const STORAGE_KEYS = {
+        ADMIN: 'duty_adminCode',
+        DUTY_CARDS: 'duty_cards',
+        RECORDS: 'duty_records',
+        CAMERA_NAME: 'duty_defaultCameraName', // 优先使用名称
+        CAMERA_ID: 'duty_defaultCameraId',     // 备用ID
+        CAMERA_POSITION: 'duty_cameraPosition',
+        VOICE_ENABLED: 'duty_voiceEnabled',
+        VOICE_RATE: 'duty_voiceRate',
+        VOICE_URI: 'duty_voiceURI'
+    };
+    
+    const DEFAULT_ADMIN = 'admin888';
+
+    // ==================== 数据存储模块 ====================
+    let classData = {
+        adminCode: DEFAULT_ADMIN,
+        dutyCards: [],
+        records: [],
+        defaultCameraName: '',  // 优先使用名称
+        defaultCameraId: '',     // 备用ID
+        defaultCameraPosition: '',
+        voiceEnabled: true,
+        voiceRate: 1.0,
+        voiceURI: ''
+    };
+
+    // 从localStorage加载数据
+    function loadFromLocalStorage() {
+        try {
+            // 管理员密码
+            const adminData = localStorage.getItem(STORAGE_KEYS.ADMIN);
+            if (adminData) classData.adminCode = adminData;
+            
+            // 值日卡列表
+            const cardsData = localStorage.getItem(STORAGE_KEYS.DUTY_CARDS);
+            if (cardsData) {
+                try {
+                    classData.dutyCards = JSON.parse(cardsData);
+                } catch {
+                    classData.dutyCards = [];
+                }
+            }
+            
+            // 值日记录
+            const recordsData = localStorage.getItem(STORAGE_KEYS.RECORDS);
+            if (recordsData) {
+                try {
+                    classData.records = JSON.parse(recordsData);
+                } catch {
+                    classData.records = [];
+                }
+            }
+            
+            // 摄像头设置 - 优先读取名称
+            const cameraNameData = localStorage.getItem(STORAGE_KEYS.CAMERA_NAME);
+            if (cameraNameData) classData.defaultCameraName = cameraNameData;
+            
+            const cameraIdData = localStorage.getItem(STORAGE_KEYS.CAMERA_ID);
+            if (cameraIdData) classData.defaultCameraId = cameraIdData;
+            
+            const cameraPosData = localStorage.getItem(STORAGE_KEYS.CAMERA_POSITION);
+            if (cameraPosData) classData.defaultCameraPosition = cameraPosData;
+            
+            // 语音设置
+            const voiceEnabledData = localStorage.getItem(STORAGE_KEYS.VOICE_ENABLED);
+            if (voiceEnabledData !== null) {
+                classData.voiceEnabled = voiceEnabledData === 'true';
+            }
+            
+            const voiceRateData = localStorage.getItem(STORAGE_KEYS.VOICE_RATE);
+            if (voiceRateData !== null) {
+                classData.voiceRate = parseFloat(voiceRateData);
+            }
+            
+            const voiceURIData = localStorage.getItem(STORAGE_KEYS.VOICE_URI);
+            if (voiceURIData !== null) {
+                classData.voiceURI = voiceURIData;
+            }
+            
+        } catch (error) {
+            console.error('加载数据出错:', error);
+            resetToDefaults();
+        }
+    }
+
+    // 重置为默认值
+    function resetToDefaults() {
+        classData = {
+            adminCode: DEFAULT_ADMIN,
+            dutyCards: [],
+            records: [],
+            defaultCameraName: '',
+            defaultCameraId: '',
+            defaultCameraPosition: '',
+            voiceEnabled: true,
+            voiceRate: 1.0,
+            voiceURI: ''
+        };
+    }
+
+    // 保存所有数据到localStorage
+    function saveToLocalStorage() {
+        try {
+            localStorage.setItem(STORAGE_KEYS.ADMIN, classData.adminCode);
+            localStorage.setItem(STORAGE_KEYS.DUTY_CARDS, JSON.stringify(classData.dutyCards));
+            localStorage.setItem(STORAGE_KEYS.RECORDS, JSON.stringify(classData.records));
+            localStorage.setItem(STORAGE_KEYS.CAMERA_NAME, classData.defaultCameraName);
+            localStorage.setItem(STORAGE_KEYS.CAMERA_ID, classData.defaultCameraId);
+            localStorage.setItem(STORAGE_KEYS.CAMERA_POSITION, classData.defaultCameraPosition);
+            localStorage.setItem(STORAGE_KEYS.VOICE_ENABLED, classData.voiceEnabled);
+            localStorage.setItem(STORAGE_KEYS.VOICE_RATE, classData.voiceRate);
+            localStorage.setItem(STORAGE_KEYS.VOICE_URI, classData.voiceURI);
+            
+            // 更新存储状态显示
+            updateStorageStatus();
+        } catch (error) {
+            console.error('保存数据出错:', error);
+            alert('保存数据时出错，请检查浏览器设置。');
+        }
+    }
+
+    // 更新存储状态显示
+    function updateStorageStatus() {
+        const storageStatus = document.getElementById('storageLocalStatus');
+        if (storageStatus) {
+            storageStatus.textContent = '📦 已保存 ' + new Date().toLocaleTimeString();
+        }
+    }
+
+    // ==================== 数据访问接口 ====================
+    function getAdminCode() { return classData.adminCode; }
+    function setAdminCode(code) { classData.adminCode = code; saveToLocalStorage(); }
+
+    function getDutyCards() { return classData.dutyCards || []; }
+    function setDutyCards(cards) { classData.dutyCards = cards; saveToLocalStorage(); }
+
+    function getRecords() { return classData.records || []; }
+    function setRecords(records) { classData.records = records; saveToLocalStorage(); }
+
+    // 摄像头设置 - 名称优先
+    function getDefaultCameraName() { return classData.defaultCameraName; }
+    function getDefaultCameraId() { return classData.defaultCameraId; }
+    
+    function setDefaultCamera(name, id, position) { 
+        classData.defaultCameraName = name || ''; 
+        classData.defaultCameraId = id || '';
+        classData.defaultCameraPosition = position || '';
+        saveToLocalStorage(); 
+    }
+    
+    // 语音设置访问接口
+    function isVoiceEnabled() { return classData.voiceEnabled; }
+    function setVoiceEnabled(enabled) { 
+        classData.voiceEnabled = enabled; 
+        saveToLocalStorage();
+        updateVoiceUI();
+    }
+    
+    function getVoiceRate() { return classData.voiceRate; }
+    function setVoiceRate(rate) { 
+        classData.voiceRate = rate; 
+        saveToLocalStorage(); 
+    }
+    
+    function getVoiceURI() { return classData.voiceURI; }
+    function setVoiceURI(uri) { 
+        classData.voiceURI = uri; 
+        saveToLocalStorage(); 
+    }
+
+    // 辅助函数
+    function addRecord(record) {
+        classData.records.push(record);
+        saveToLocalStorage();
+        updateAllRecordsDisplay();
+        // 高亮显示新记录
+        highlightNewRecord(record);
+    }
+
+    function deleteRecord(index) {
+        if (index >= 0 && index < classData.records.length) {
+            classData.records.splice(index, 1);
+            saveToLocalStorage();
+        }
+    }
+
+    function clearRecords() {
+        classData.records = [];
+        saveToLocalStorage();
+    }
+
+    function addDutyCard(card) {
+        if (!classData.dutyCards.includes(card)) {
+            classData.dutyCards.push(card);
+            saveToLocalStorage();
+        }
+    }
+
+    function removeDutyCard(card) {
+        classData.dutyCards = classData.dutyCards.filter(c => c !== card);
+        saveToLocalStorage();
+    }
+
+    // ==================== 高亮新记录 ====================
+    function highlightNewRecord(record) {
+        // 等待DOM更新
+        setTimeout(() => {
+            const recordItems = document.querySelectorAll('#allRecords .record-item');
+            if (recordItems.length > 0) {
+                // 第一条是最新的记录
+                const newestItem = recordItems[0];
+                newestItem.classList.add('highlight');
+                // 滚动到顶部显示新记录
+                const recordsContainer = document.getElementById('allRecords');
+                if (recordsContainer) {
+                    recordsContainer.scrollTop = 0;
+                }
+            }
+        }, 100);
+    }
+
+    // ==================== 提示音模块 - 600Hz 方波 120ms（您选中的低频蜂鸣）====================
+    let audioContext = null;
+    
+    // 播放蜂鸣声（600Hz 方波，120ms）
+    function playBeep() {
+        try {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            if (audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    playBeepSound();
+                });
+            } else {
+                playBeepSound();
+            }
+        } catch (e) {
+            console.warn('音频不支持:', e);
+        }
+    }
+    
+    function playBeepSound() {
+        try {
+            const now = audioContext.currentTime;
+            
+            // 创建振荡器 - 使用方波产生蜂鸣器音色
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // 600Hz 方波 - 您选中的低频蜂鸣
+            oscillator.frequency.value = 600;
+            oscillator.type = 'square'; // 方波更接近蜂鸣器
+            
+            // 音量包络 - 120ms 时长
+            gainNode.gain.setValueAtTime(0.4, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.12); // 120ms
+            
+            oscillator.start(now);
+            oscillator.stop(now + 0.12);
+            
+        } catch (e) {
+            console.warn('播放提示音失败:', e);
+        }
+    }
+
+    // ==================== 语音提示模块 ====================
+    let synth = window.speechSynthesis;
+    let availableVoices = [];
+    let currentUtterance = null;
+    let voiceSupported = false;
+    
+    // 语音状态UI元素
+    const voiceStatusLed = document.getElementById('voiceStatusLed');
+    const voiceStatusText = document.getElementById('voiceStatusText');
+    const voiceSwitch = document.getElementById('voiceSwitch');
+    const voiceSelect = document.getElementById('voiceSelect');
+    const voiceRate = document.getElementById('voiceRate');
+    const rateValue = document.getElementById('rateValue');
+    const testVoiceBtn = document.getElementById('testVoiceBtn');
+    const testVoiceText = document.getElementById('testVoiceText');
+    const voiceStatus = document.getElementById('voiceStatus');
+    const voiceSupportInfo = document.getElementById('voiceSupportInfo');
+    const testBeepBtn = document.getElementById('testBeepBtn');
+    
+    // 检测语音支持
+    function checkVoiceSupport() {
+        if (!window.speechSynthesis) {
+            voiceSupported = false;
+            voiceStatusLed.className = 'voice-led disabled';
+            voiceStatusText.textContent = '语音提示 不支持';
+            if (voiceStatus) {
+                voiceStatus.textContent = '不支持';
+                voiceStatus.className = 'badge voice-off';
+            }
+            if (voiceSwitch) voiceSwitch.disabled = true;
+            if (voiceSupportInfo) voiceSupportInfo.textContent = '❌ 当前浏览器不支持语音提示，但蜂鸣声仍可用 (600Hz)';
+            return false;
+        }
+        
+        voiceSupported = true;
+        return true;
+    }
+    
+    // 将数字转换为逐个念出的格式
+    function formatNumberForSpeech(text) {
+        // 如果文本中包含数字，将其拆分为单个数字
+        let result = '';
+        for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            if (char >= '0' && char <= '9') {
+                // 是数字，添加空格让TTS逐个念出
+                result += char + ' ';
+            } else {
+                result += char;
+            }
+        }
+        return result.trim();
+    }
+    
+    // 加载语音列表
+    function loadVoices() {
+        if (!synth) return;
+        
+        availableVoices = synth.getVoices();
+        
+        if (availableVoices.length === 0) {
+            setTimeout(loadVoices, 200);
+            return;
+        }
+        
+        if (!voiceSelect) return;
+        
+        const selectedURI = getVoiceURI();
+        
+        voiceSelect.innerHTML = '';
+        
+        // 优先显示中文语音
+        let hasChinese = false;
+        availableVoices.forEach(voice => {
+            const option = document.createElement('option');
+            option.value = voice.voiceURI;
+            let label = `${voice.name} (${voice.lang})`;
+            if (voice.default) label += ' [默认]';
+            if (voice.localService) label += ' 📍';
+            option.textContent = label;
+            
+            if (voice.lang.startsWith('zh') || voice.lang.startsWith('cmn')) {
+                hasChinese = true;
+            }
+            
+            voiceSelect.appendChild(option);
+        });
+        
+        // 恢复选中状态
+        if (selectedURI && [...voiceSelect.options].some(opt => opt.value === selectedURI)) {
+            voiceSelect.value = selectedURI;
+        } else if (hasChinese) {
+            // 默认选中第一个中文语音
+            for (let opt of voiceSelect.options) {
+                const voice = availableVoices.find(v => v.voiceURI === opt.value);
+                if (voice && (voice.lang.startsWith('zh') || voice.lang.startsWith('cmn'))) {
+                    voiceSelect.value = voice.voiceURI;
+                    setVoiceURI(voice.voiceURI);
+                    break;
+                }
+            }
+        }
+        
+        // 如果还没选中，选第一个
+        if (!voiceSelect.value && voiceSelect.options.length > 0) {
+            voiceSelect.value = voiceSelect.options[0].value;
+            setVoiceURI(voiceSelect.value);
+        }
+    }
+    
+    // 朗读文本（先播放蜂鸣声）
+    function speak(text) {
+        // 无论语音是否支持，都先播放蜂鸣声
+        playBeep();
+        
+        if (!voiceSupported) {
+            console.warn('当前浏览器不支持语音');
+            return;
+        }
+        if (!isVoiceEnabled()) return;
+        if (!text || text.trim() === '') return;
+        if (!synth) return;
+        
+        // 取消当前朗读
+        if (synth.speaking) {
+            synth.cancel();
+        }
+        
+        // 处理文本，让数字逐个念出
+        const processedText = formatNumberForSpeech(text);
+        
+        const utterance = new SpeechSynthesisUtterance(processedText);
+        
+        // 设置语音
+        const selectedURI = getVoiceURI();
+        if (selectedURI && availableVoices.length > 0) {
+            const selectedVoice = availableVoices.find(v => v.voiceURI === selectedURI);
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            }
+        }
+        
+        // 设置语速
+        utterance.rate = getVoiceRate();
+        
+        // 状态更新
+        utterance.onstart = function() {
+            voiceStatusLed.classList.add('speaking');
+            voiceStatusText.textContent = '语音播报中...';
+        };
+        
+        utterance.onend = function() {
+            voiceStatusLed.classList.remove('speaking');
+            voiceStatusText.textContent = isVoiceEnabled() ? '语音提示 已开启' : '语音提示 已关闭';
+        };
+        
+        utterance.onerror = function(event) {
+            console.warn('语音错误:', event);
+            voiceStatusLed.classList.remove('speaking');
+            voiceStatusText.textContent = isVoiceEnabled() ? '语音提示 可用' : '语音提示 已关闭';
+        };
+        
+        // 延迟一点点再播放语音，让蜂鸣声先响完
+        setTimeout(() => {
+            try {
+                synth.speak(utterance);
+            } catch (e) {
+                console.warn('语音播放失败:', e);
+            }
+        }, 120); // 和蜂鸣声时长一致
+        
+        currentUtterance = utterance;
+    }
+    
+    // 更新语音UI状态
+    function updateVoiceUI() {
+        const enabled = isVoiceEnabled() && voiceSupported;
+        
+        if (voiceSwitch) voiceSwitch.checked = isVoiceEnabled();
+        if (voiceStatus) {
+            if (!voiceSupported) {
+                voiceStatus.textContent = '不支持';
+                voiceStatus.className = 'badge voice-off';
+            } else {
+                voiceStatus.textContent = isVoiceEnabled() ? '已开启' : '已关闭';
+                voiceStatus.className = isVoiceEnabled() ? 'badge voice-on' : 'badge voice-off';
+            }
+        }
+        if (voiceStatusText) {
+            if (!voiceSupported) {
+                voiceStatusText.textContent = '语音提示 不支持';
+                voiceStatusLed.className = 'voice-led disabled';
+            } else {
+                voiceStatusText.textContent = isVoiceEnabled() ? '语音提示 已开启' : '语音提示 已关闭';
+                voiceStatusLed.className = isVoiceEnabled() ? 'voice-led' : 'voice-led disabled';
+            }
+        }
+        if (voiceSelect) voiceSelect.disabled = !enabled;
+        if (voiceRate) voiceRate.disabled = !enabled;
+        if (testVoiceBtn) testVoiceBtn.disabled = !enabled;
+        if (testVoiceText) testVoiceText.disabled = !enabled;
+    }
+    
+    // 语音提示函数（先蜂鸣后语音）
+    function speakDutyCardScanned() {
+        speak('值日卡扫描完成，请扫描你的学生卡');
+    }
+    
+    function speakStudentRegistered(studentCode) {
+        // 处理学生证号，如果是数字会逐个念出
+        speak(`已成功登记${studentCode}同学的值日信息`);
+    }
+
+    // ==================== 状态变量 ====================
+    let currentStep = 'SCAN_DUTY';
+    let currentDutyCard = null;
+    let codeReader = null;
+    let camerasList = [];
+    let lastScanTime = 0;
+    const SCAN_COOLDOWN = 1000;
+
+    // ==================== UI元素 ====================
+    const mainDiv = document.getElementById('mainInterface');
+    const adminDiv = document.getElementById('adminPanel');
+    const bigButton = document.getElementById('bigButton');
+    const stepIndicator = document.getElementById('stepIndicator');
+    const videoContainer = document.getElementById('video-container');
+    const closeCameraBtn = document.getElementById('closeCameraBtn');
+    const manualInput = document.getElementById('manualBarcodeInput');
+    const submitManual = document.getElementById('submitManualBarcode');
+    const cameraError = document.getElementById('cameraError');
+    const cameraErrorDetail = document.getElementById('cameraErrorDetail');
+    const retryCameraBtn = document.getElementById('retryCameraBtn');
+    const useManualOnlyBtn = document.getElementById('useManualOnlyBtn');
+    const statusInfo = document.getElementById('statusInfo');
+    const topMessage = document.getElementById('topMessage');
+    const allRecords = document.getElementById('allRecords');
+    const recordCount = document.getElementById('recordCount');
+    const historyRecords = document.getElementById('historyRecords');
+    const clearAllRecordsBtn = document.getElementById('clearAllRecordsBtn');
+
+    // 管理员密码修改元素
+    const currentAdminPwd = document.getElementById('currentAdminPwd');
+    const newAdminPwd = document.getElementById('newAdminPwd');
+    const confirmAdminPwd = document.getElementById('confirmAdminPwd');
+    const changeAdminPwdBtn = document.getElementById('changeAdminPwdBtn');
+
+    // 摄像头相关元素
+    const cameraSelector = document.getElementById('cameraSelector');
+    const testCameraBtn = document.getElementById('testCameraBtn');
+    const saveDefaultCamera = document.getElementById('saveDefaultCamera');
+    const cameraDebug = document.getElementById('cameraDebug');
+    const defaultCameraInfo = document.getElementById('defaultCameraInfo');
+
+    // ==================== 初始化ZXing ====================
+    try {
+        codeReader = new ZXing.BrowserMultiFormatReader();
+        console.log('ZXing初始化成功');
+    } catch (err) {
+        console.error('ZXing初始化失败:', err);
+    }
+
+    // ==================== 工具函数 ====================
+    function formatDateTime(timestamp) {
+        const date = new Date(timestamp);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    // 计算每个学生的值日次数
+    function getStudentDutyCounts() {
+        const records = getRecords();
+        const counts = {};
+        records.forEach(rec => {
+            counts[rec.studentCode] = (counts[rec.studentCode] || 0) + 1;
+        });
+        return counts;
+    }
+
+    // 更新记录总数显示
+    function updateRecordCount() {
+        const records = getRecords();
+        recordCount.textContent = records.length;
+    }
+
+    // 更新前台所有记录显示
+    function updateAllRecordsDisplay() {
+        const records = getRecords();
+        const studentCounts = getStudentDutyCounts();
+        updateRecordCount();
+        
+        if (records.length === 0) {
+            allRecords.innerHTML = '<div class="empty-state">暂无值日记录</div>';
+            return;
+        }
+        
+        // 按时间倒序排列（最新的在前）
+        const sorted = [...records].reverse();
+        let html = '';
+        sorted.forEach(rec => {
+            const count = studentCounts[rec.studentCode] || 0;
+            html += `<div class="record-item">
+                <div class="student-info">
+                    <span class="student-code">${rec.studentCode}</span>
+                    <span class="count-badge">${count}次</span>
+                </div>
+                <span class="time">${rec.time}</span>
+            </div>`;
+        });
+        allRecords.innerHTML = html;
+    }
+
+    function updateStepDisplay() {
+        if (currentStep === 'SCAN_DUTY') {
+            bigButton.textContent = '请扫值日卡';
+            stepIndicator.textContent = '当前: 请扫值日卡';
+        } else {
+            bigButton.textContent = '请扫学生证码';
+            stepIndicator.textContent = `当前: 请扫学生证`;
+        }
+    }
+
+    function stopScanner() {
+        if (codeReader) {
+            try {
+                codeReader.reset();
+            } catch (e) {}
+        }
+        videoContainer.style.display = 'none';
+        cameraError.classList.add('hidden');
+        statusInfo.classList.add('hidden');
+    }
+
+    function showTopMessage(text, isSuccess = true) {
+        topMessage.textContent = isSuccess ? `✅ ${text}` : `❌ ${text}`;
+        topMessage.className = 'top-message ' + (isSuccess ? 'success' : 'error');
+        topMessage.classList.remove('hidden');
+        
+        // 显示消息时也播放蜂鸣声（成功时）
+        if (isSuccess) {
+            playBeep();
+        }
+        
+        setTimeout(() => {
+            topMessage.classList.add('hidden');
+        }, 3000);
+    }
+
+    function handleBarcode(code) {
+        if (!code || !mainDiv.classList.contains('hidden')) {
+            // 扫码成功先播放蜂鸣声
+            playBeep();
+            
+            if (currentStep === 'SCAN_DUTY') {
+                processDutyCard(code);
+            } else if (currentStep === 'SCAN_STUDENT') {
+                processStudentCard(code);
+            }
+        }
+    }
+
+    function processDutyCard(card) {
+        const cards = getDutyCards();
+        if (!cards.includes(card)) {
+            showTopMessage('未授权的值日卡', false);
+            return;
+        }
+        currentDutyCard = card;
+        currentStep = 'SCAN_STUDENT';
+        updateStepDisplay();
+        showTopMessage('值日卡有效，请扫学生证', true);
+        
+        // 语音提示：值日卡扫描完成（内部已经包含蜂鸣声）
+        speakDutyCardScanned();
+    }
+
+    function processStudentCard(studentCode) {
+        if (!currentDutyCard) {
+            showTopMessage('请先扫描值日卡', false);
+            currentStep = 'SCAN_DUTY';
+            updateStepDisplay();
+            return;
+        }
+
+        if (studentCode === currentDutyCard) {
+            showTopMessage('学生证不能与值日卡相同', false);
+            return;
+        }
+
+        const records = getRecords();
+        records.push({
+            card: currentDutyCard,
+            studentCode: studentCode,
+            time: new Date().toLocaleString('zh-CN', {hour12: false})
+        });
+        setRecords(records);
+        
+        showTopMessage(`登记成功`, true);
+        
+        // 语音提示：登记成功（内部已经包含蜂鸣声）
+        speakStudentRegistered(studentCode);
+        
+        currentDutyCard = null;
+        currentStep = 'SCAN_DUTY';
+        updateStepDisplay();
+        
+        stopScanner();
+    }
+
+    // 启动扫码 - 改进版，名称优先
+    async function startScanner() {
+        if (!codeReader) {
+            showTopMessage('扫码库加载失败', false);
+            return;
+        }
+
+        stopScanner();
+        cameraError.classList.add('hidden');
+        statusInfo.classList.remove('hidden');
+        statusInfo.textContent = '正在启动摄像头...';
+
+        try {
+            const videoInputDevices = await codeReader.listVideoInputDevices();
+            console.log('可用摄像头:', videoInputDevices);
+            
+            if (videoInputDevices.length === 0) {
+                throw new Error('未找到摄像头');
+            }
+
+            // 获取保存的摄像头名称（优先）和ID（备用）
+            const savedName = getDefaultCameraName();
+            const savedId = getDefaultCameraId();
+            
+            let selectedDeviceId = null;
+            let matchMethod = '';
+            
+            // 策略1: 按名称精确匹配（优先级最高）
+            if (savedName && savedName.length > 0) {
+                const nameMatch = videoInputDevices.find(d => 
+                    d.label && d.label.trim() === savedName.trim()
+                );
+                if (nameMatch) {
+                    selectedDeviceId = nameMatch.deviceId;
+                    matchMethod = '名称精确匹配';
+                    if (cameraDebug) cameraDebug.textContent = `✅ 名称匹配: ${savedName}`;
+                }
+            }
+            
+            // 策略2: 按名称包含匹配
+            if (!selectedDeviceId && savedName && savedName.length > 0) {
+                const containsMatch = videoInputDevices.find(d => 
+                    d.label && d.label.includes(savedName)
+                );
+                if (containsMatch) {
+                    selectedDeviceId = containsMatch.deviceId;
+                    matchMethod = '名称包含匹配';
+                    if (cameraDebug) cameraDebug.textContent = `📌 名称包含: ${savedName}`;
+                }
+            }
+            
+            // 策略3: 按ID匹配（备用）
+            if (!selectedDeviceId && savedId && savedId.length > 0) {
+                const idMatch = videoInputDevices.find(d => d.deviceId === savedId);
+                if (idMatch) {
+                    selectedDeviceId = savedId;
+                    matchMethod = 'ID匹配';
+                    if (cameraDebug) cameraDebug.textContent = `🔧 ID匹配: ${savedId.substring(0,8)}...`;
+                }
+            }
+            
+            // 策略4: 默认第一个
+            if (!selectedDeviceId) {
+                selectedDeviceId = videoInputDevices[0].deviceId;
+                matchMethod = '默认第一个';
+                if (cameraDebug) cameraDebug.textContent = `🔄 使用第一个摄像头`;
+            }
+
+            const selectedCamera = videoInputDevices.find(d => d.deviceId === selectedDeviceId);
+            statusInfo.textContent = `使用摄像头: ${selectedCamera?.label || '未知'} (${matchMethod})`;
+            
+            // 更新默认摄像头信息显示
+            if (defaultCameraInfo) {
+                defaultCameraInfo.textContent = `当前默认: ${savedName || '未设置'}`;
+            }
+
+            await codeReader.decodeFromVideoDevice(selectedDeviceId, 'scanner-video', (result, err) => {
+                if (result) {
+                    const now = Date.now();
+                    if (now - lastScanTime > SCAN_COOLDOWN) {
+                        lastScanTime = now;
+                        const text = result.getText();
+                        console.log('扫码成功:', text);
+                        handleBarcode(text);
+                    }
+                }
+                if (err && !(err instanceof ZXing.NotFoundException)) {
+                    console.warn('扫码错误:', err);
+                }
+            });
+
+            videoContainer.style.display = 'block';
+
+        } catch (err) {
+            console.error('扫码启动失败:', err);
+            cameraErrorDetail.textContent = err.message || '无法启动摄像头';
+            cameraError.classList.remove('hidden');
+            statusInfo.classList.add('hidden');
+        }
+    }
+
+    // 大按钮点击
+    bigButton.addEventListener('click', async () => {
+        try {
+            await startScanner();
+        } catch (err) {
+            console.error('摄像头启动错误:', err);
+            cameraErrorDetail.textContent = err.message || '无法启动摄像头';
+            cameraError.classList.remove('hidden');
+        }
+    });
+
+    closeCameraBtn.addEventListener('click', stopScanner);
+
+    retryCameraBtn.addEventListener('click', () => {
+        bigButton.click();
+    });
+
+    useManualOnlyBtn.addEventListener('click', () => {
+        cameraError.classList.add('hidden');
+        stopScanner();
+    });
+
+    submitManual.addEventListener('click', () => {
+        const val = manualInput.value.trim();
+        if (!val) return;
+        
+        // 手动输入也播放蜂鸣声
+        playBeep();
+        
+        if (currentStep === 'SCAN_DUTY') {
+            processDutyCard(val);
+        } else {
+            processStudentCard(val);
+        }
+        manualInput.value = '';
+    });
+    
+    manualInput.addEventListener('keypress', e => { 
+        if (e.key === 'Enter') submitManual.click(); 
+    });
+
+    // 测试蜂鸣声按钮
+    if (testBeepBtn) {
+        testBeepBtn.addEventListener('click', () => {
+            playBeep();
+        });
+    }
+
+    // 后台 - 修改管理员密码
+    changeAdminPwdBtn.addEventListener('click', () => {
+        const current = currentAdminPwd.value.trim();
+        const newPwd = newAdminPwd.value.trim();
+        const confirm = confirmAdminPwd.value.trim();
+        
+        const storedAdmin = getAdminCode();
+        
+        if (!current || !newPwd || !confirm) {
+            alert('请填写所有密码字段');
+            return;
+        }
+        
+        if (current !== storedAdmin) {
+            alert('❌ 当前密码错误');
+            return;
+        }
+        
+        if (newPwd !== confirm) {
+            alert('❌ 新密码与确认密码不一致');
+            return;
+        }
+        
+        if (newPwd.length < 4) {
+            alert('密码长度至少4位');
+            return;
+        }
+        
+        setAdminCode(newPwd);
+        alert('✅ 管理员密码修改成功');
+        
+        currentAdminPwd.value = '';
+        newAdminPwd.value = '';
+        confirmAdminPwd.value = '';
+    });
+
+    // 进入后台
+    document.getElementById('enterAdminBtn').addEventListener('click', () => {
+        let pwd = prompt('输入管理员密码', '');
+        if (pwd === getAdminCode()) {
+            mainDiv.classList.add('hidden');
+            adminDiv.classList.remove('hidden');
+            adminDiv.style.display = 'flex';
+            stopScanner();
+            renderDutyCards();
+            populateCardSelector();
+            enumerateCameras();
+            renderAllHistoryRecords();
+            
+            // 更新语音UI
+            if (voiceRate) voiceRate.value = getVoiceRate();
+            if (rateValue) rateValue.textContent = getVoiceRate().toFixed(1);
+            updateVoiceUI();
+        } else alert('❌ 密码错误');
+    });
+
+    document.getElementById('backFromAdmin').addEventListener('click', () => {
+        adminDiv.classList.add('hidden');
+        mainDiv.classList.remove('hidden');
+        mainDiv.style.display = 'flex';
+    });
+
+    document.getElementById('addDutyCardBtn').addEventListener('click', () => {
+        const inp = document.getElementById('newDutyCardInput');
+        const card = inp.value.trim();
+        if (!card) return;
+        
+        if (!classData.dutyCards.includes(card)) { 
+            addDutyCard(card);
+            alert('✅ 添加成功');
+        } else {
+            alert('该卡已存在');
+        }
+        inp.value = '';
+        renderDutyCards();
+        populateCardSelector();
+    });
+
+    // 渲染所有历史记录（后台）
+    function renderAllHistoryRecords() {
+        const records = getRecords();
+        const reversed = [...records].reverse();
+        
+        if (reversed.length === 0) {
+            historyRecords.innerHTML = '<div class="empty-state">暂无记录</div>';
+            return;
+        }
+        
+        let html = '';
+        reversed.forEach((rec, index) => {
+            html += `<div class="history-item" data-index="${index}">
+                <div class="info">
+                    <span>${rec.studentCode}</span>
+                    <span>${rec.card}</span>
+                    <span style="color:#64748b;">${rec.time}</span>
+                </div>
+                <div class="actions">
+                    <button class="delete-btn" onclick="window.deleteRecord(${records.length - 1 - index})">删除</button>
+                </div>
+            </div>`;
+        });
+        historyRecords.innerHTML = html;
+    }
+
+    // 删除单条记录（挂载到window供onclick调用）
+    window.deleteRecord = function(index) {
+        const records = getRecords();
+        if (index >= 0 && index < records.length) {
+            records.splice(index, 1);
+            setRecords(records);
+            renderAllHistoryRecords();
+            updateAllRecordsDisplay(); // 同步更新前台显示
+            alert('✅ 记录已删除');
+        }
+    };
+
+    // 清空所有记录
+    clearAllRecordsBtn.addEventListener('click', () => {
+        if (confirm('确定要清空所有值日记录吗？此操作不可恢复！')) {
+            clearRecords();
+            renderAllHistoryRecords();
+            updateAllRecordsDisplay(); // 同步更新前台显示
+            alert('✅ 所有记录已清空');
+        }
+    });
+
+    function renderDutyCards() {
+        const cont = document.getElementById('dutyCardListContainer');
+        const cards = getDutyCards();
+        if (cards.length === 0) { 
+            cont.innerHTML = '<div class="empty-state">暂无值日卡，请添加</div>'; 
+            return; 
+        }
+        let html = '';
+        cards.forEach(c => {
+            html += `<div class="card-item">
+                <span>${c}</span>
+                <button class="remove-card" data-card="${c}" style="background:#fee2e2; color:#b91c1c; border:none; padding:0.5rem 1rem;">删除</button>
+            </div>`;
+        });
+        cont.innerHTML = html;
+        document.querySelectorAll('.remove-card').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                let card = e.target.dataset.card;
+                removeDutyCard(card);
+                renderDutyCards();
+                populateCardSelector();
+                alert('已删除');
+            });
+        });
+    }
+
+    function populateCardSelector() {
+        const sel = document.getElementById('historyCardSelector');
+        const cards = getDutyCards();
+        sel.innerHTML = '<option value="">全部值日卡</option>';
+        cards.forEach(c => { 
+            let opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            sel.appendChild(opt); 
+        });
+    }
+
+    document.getElementById('historyCardSelector').addEventListener('change', (e) => {
+        const card = e.target.value;
+        if (!card) {
+            renderAllHistoryRecords();
+            return;
+        }
+        
+        const records = getRecords().filter(r => r.card === card).reverse();
+        if (records.length === 0) { 
+            historyRecords.innerHTML = '<div class="badge">暂无记录</div>'; 
+            return; 
+        }
+        
+        let html = '';
+        records.forEach((rec, index) => {
+            html += `<div class="history-item" data-index="${index}">
+                <div class="info">
+                    <span>${rec.studentCode}</span>
+                    <span style="color:#64748b;">${rec.time}</span>
+                </div>
+                <div class="actions">
+                    <button class="delete-btn" onclick="alert('请使用上方全部记录中删除')">删除</button>
+                </div>
+            </div>`;
+        });
+        historyRecords.innerHTML = html;
+    });
+
+    // 枚举摄像头 - 改进版，确保名称正确显示
+    async function enumerateCameras() {
+        try {
+            const statusEl = document.getElementById('cameraStatus');
+            statusEl.textContent = '正在请求摄像头权限...';
+            
+            if (codeReader) {
+                // 请求权限
+                try {
+                    const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    tempStream.getTracks().forEach(track => track.stop());
+                } catch (e) {
+                    statusEl.textContent = '需要摄像头权限';
+                }
+                
+                const devices = await codeReader.listVideoInputDevices();
+                camerasList = devices;
+                
+                if (camerasList.length === 0) {
+                    statusEl.textContent = '未检测到摄像头';
+                    cameraSelector.innerHTML = '<option value="">无可用摄像头</option>';
+                    return;
+                }
+                
+                statusEl.textContent = `找到 ${camerasList.length} 个摄像头`;
+                
+                // 更新选择器
+                cameraSelector.innerHTML = '';
+                
+                const savedName = getDefaultCameraName();
+                const savedId = getDefaultCameraId();
+                
+                let selectedIndex = -1;
+                
+                camerasList.forEach((cam, index) => {
+                    const opt = document.createElement('option');
+                    opt.value = cam.deviceId;
+                    
+                    // 优先使用摄像头提供的名称，如果没有则生成一个
+                    let displayName = cam.label || `摄像头 ${index + 1}`;
+                    let rawName = cam.label || ''; // 保存原始名称用于匹配
+                    
+                    // 添加类型标识（但不覆盖原始名称）
+                    let typeIcon = '';
+                    if (rawName.toLowerCase().includes('back') || rawName.toLowerCase().includes('rear')) {
+                        typeIcon = '📱 ';
+                    } else if (rawName.toLowerCase().includes('front') || rawName.toLowerCase().includes('face')) {
+                        typeIcon = '📱 ';
+                    } else if (rawName.toLowerCase().includes('usb') || rawName.toLowerCase().includes('外接')) {
+                        typeIcon = '🔌 ';
+                    } else if (rawName.toLowerCase().includes('visualizer') || rawName.toLowerCase().includes('展台')) {
+                        typeIcon = '🎥 ';
+                    }
+                    
+                    opt.textContent = typeIcon + displayName;
+                    
+                    // 保存原始名称作为data属性
+                    opt.setAttribute('data-raw-name', rawName);
+                    
+                    // 按名称匹配（优先级最高）
+                    if (savedName && savedName.length > 0 && rawName === savedName) {
+                        opt.textContent += ' ⭐ 默认';
+                        opt.selected = true;
+                        selectedIndex = index;
+                        if (cameraDebug) cameraDebug.textContent = `默认摄像头: ${savedName}`;
+                    }
+                    
+                    cameraSelector.appendChild(opt);
+                });
+                
+                // 如果没有按名称选中，尝试按ID选中
+                if (selectedIndex === -1 && savedId) {
+                    for (let i = 0; i < cameraSelector.options.length; i++) {
+                        if (cameraSelector.options[i].value === savedId) {
+                            cameraSelector.options[i].selected = true;
+                            cameraSelector.options[i].textContent += ' ⭐ 默认(ID)';
+                            selectedIndex = i;
+                            if (cameraDebug) cameraDebug.textContent = `默认摄像头(ID): ${savedId.substring(0,8)}...`;
+                            break;
+                        }
+                    }
+                }
+                
+                // 如果都没有，选中第一个
+                if (selectedIndex === -1 && cameraSelector.options.length > 0) {
+                    cameraSelector.options[0].selected = true;
+                }
+                
+                // 更新默认摄像头信息显示
+                if (defaultCameraInfo) {
+                    if (savedName) {
+                        defaultCameraInfo.textContent = `📌 默认名称: ${savedName}`;
+                    } else if (savedId) {
+                        defaultCameraInfo.textContent = `🔧 默认ID: ${savedId.substring(0,8)}...`;
+                    } else {
+                        defaultCameraInfo.textContent = `未设置默认摄像头`;
+                    }
+                }
+            }
+        } catch (e) { 
+            console.warn('摄像头枚举失败', e);
+            document.getElementById('cameraStatus').textContent = '无法获取摄像头列表';
+        }
+    }
+
+    // 判断摄像头类型
+    function getCameraPosition(label) {
+        label = label.toLowerCase();
+        if (label.includes('back') || label.includes('rear') || label.includes('后置')) {
+            return 'back';
+        } else if (label.includes('front') || label.includes('face') || label.includes('前置')) {
+            return 'front';
+        } else if (label.includes('usb') || label.includes('external') || label.includes('展台')) {
+            return 'external';
+        }
+        return 'unknown';
+    }
+
+    // 测试摄像头
+    testCameraBtn.addEventListener('click', async () => {
+        if (!cameraSelector.value) {
+            alert('请先选择一个摄像头');
+            return;
+        }
+        
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { deviceId: { exact: cameraSelector.value } } 
+            });
+            stream.getTracks().forEach(track => track.stop());
+            alert('✅ 摄像头测试成功');
+        } catch (err) {
+            alert('❌ 摄像头测试失败: ' + err.message);
+        }
+    });
+
+    // 保存默认摄像头 - 改进版，优先保存名称
+    saveDefaultCamera.addEventListener('click', () => {
+        if (cameraSelector.value) {
+            const selectedOption = cameraSelector.options[cameraSelector.selectedIndex];
+            
+            // 获取原始名称（优先使用data-raw-name，如果没有则从显示文本中提取）
+            let rawName = selectedOption.getAttribute('data-raw-name') || '';
+            if (!rawName) {
+                // 从显示文本中提取（去掉图标和星标）
+                let displayText = selectedOption.textContent;
+                displayText = displayText.replace(/[📱🔌🎥]\s/g, ''); // 去掉图标
+                displayText = displayText.replace(/\s⭐.*$/, ''); // 去掉星标
+                rawName = displayText.trim();
+            }
+            
+            const id = cameraSelector.value;
+            const position = getCameraPosition(rawName);
+            
+            // 保存名称（优先）和ID（备用）
+            setDefaultCamera(rawName, id, position);
+            
+            // 更新选择器显示
+            enumerateCameras();
+            
+            if (cameraDebug) {
+                cameraDebug.textContent = `已保存名称: ${rawName}`;
+            }
+            
+            alert('✅ 默认摄像头已保存（名称优先）');
+        } else {
+            alert('请选择一个摄像头');
+        }
+    });
+
+    // ==================== 语音事件绑定 ====================
+    if (checkVoiceSupport()) {
+        // 语音开关
+        if (voiceSwitch) {
+            voiceSwitch.addEventListener('change', function() {
+                setVoiceEnabled(this.checked);
+                updateVoiceUI();
+                
+                // 如果开启，测试一下语音（先蜂鸣）
+                if (this.checked && voiceSupported) {
+                    speak('语音提示已开启');
+                }
+            });
+        }
+        
+        // 语速调节
+        if (voiceRate) {
+            voiceRate.addEventListener('input', function() {
+                const rate = parseFloat(this.value);
+                rateValue.textContent = rate.toFixed(1);
+                setVoiceRate(rate);
+            });
+        }
+        
+        // 语音选择
+        if (voiceSelect) {
+            voiceSelect.addEventListener('change', function() {
+                setVoiceURI(this.value);
+            });
+        }
+        
+        // 测试语音（先蜂鸣）
+        if (testVoiceBtn) {
+            testVoiceBtn.addEventListener('click', function() {
+                const text = testVoiceText.value.trim();
+                if (text) {
+                    speak(text);
+                } else {
+                    speak('1234');
+                }
+            });
+        }
+        
+        // 加载语音列表
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoices;
+        }
+        loadVoices();
+    } else {
+        // 浏览器不支持语音
+        updateVoiceUI();
+    }
+
+    // ==================== 初始化 ====================
+    // 加载数据
+    loadFromLocalStorage();
+    
+    // 更新UI
+    updateStepDisplay();
+    updateAllRecordsDisplay();
+    updateStorageStatus();
+    updateVoiceUI();
+    
+    // 初始化摄像头列表
+    setTimeout(() => {
+        enumerateCameras();
+    }, 1000);
+
+    // 语速显示初始化
+    if (voiceRate && rateValue) {
+        voiceRate.value = getVoiceRate();
+        rateValue.textContent = getVoiceRate().toFixed(1);
+    }
+
+    window.addEventListener('beforeunload', function() {});
+})();
+</script>
+</body>
+</html>
