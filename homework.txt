@@ -8,10 +8,11 @@
 开始时间年/月/日 时:分
 截止时间年/月/日 时:分
 """
-sub=测试
-name=测试
-link=https://brilliant-unicorn-633b63.netlify.app
-more=测试
+sub=音乐
+name=音乐2026考试资料 
+link=https://www.kdocs.cn/join/goy6qbd%20
+邀请你加入「音乐2026考试资料」，一起文档协作
+more=在本链接查看、下载音乐考试资料
 more_colour[0，0，0]
 start_time==2025/1/1 00:00
 end_time=2099/1/1 00:00
