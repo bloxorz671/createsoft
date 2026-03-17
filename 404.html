@@ -1,193 +1,125 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404</title>
+    <meta charset="utf-8">
+    <title>页面跳转中...</title>
     <style>
-        /* 彻底重置边距，保证全屏布满无多余效果 */
-        * {
+        body { 
+            font-family: "Microsoft YaHei", Arial, sans-serif; 
+            text-align: center; 
+            padding-top: 50px;
             margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            background-color: #f5f5f5;
         }
-
-        html, body {
-            width: 100%;
-            min-height: 100vh;
-            background: #f2f4f8;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
-        /* 全屏居中容器 - 使用flex列方向，确保内容垂直居中 */
-        .full-center {
-            width: 100%;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        /* 主要内容区域 - 使用flex列，让图片单独一行在上方 */
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            max-width: 800px;
+        .container {
+            max-width: 600px;
             margin: 0 auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-
-        /* 图片容器 - 单独一行，位于404上方 */
-        .image-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 1rem;
+        h1 { 
+            color: #333;
+            margin-bottom: 30px;
         }
-
-        /* 图片 - 大一点，在404上面 */
-        .alien-img {
-            width: 180px;           /* 图片调大 */
-            height: auto;
-            max-width: 40vw;         /* 小屏自适应 */
-            display: block;
+        .student-info {
+            font-size: 24px;
+            color: #0066cc;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f0f7ff;
+            border-radius: 5px;
+            word-break: break-all;
         }
-
-        /* 文字和按钮容器 - 保证404、提示文字和按钮居中 */
-        .center-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            gap: 1.2rem;            /* 元素之间的间距 */
+        .message {
+            font-size: 18px;
+            color: #666;
+            line-height: 1.6;
+            margin: 20px 0;
+            text-align: left;
         }
-
-        /* 大红 404 — 保持醒目，绝对居中 */
-        .four-oh-four {
-            font-size: clamp(6rem, 18vw, 10rem);
-            font-weight: 800;
-            color: #d32f2f;
-            line-height: 1;
-            letter-spacing: -0.02em;
-            text-shadow: 0 8px 25px rgba(211, 47, 47, 0.15);
-            margin: 0;
+        .note {
+            font-size: 16px;
+            color: #ff6600;
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #fff3e0;
+            border-radius: 5px;
         }
-
-        /* 新增无底黑字: 页面被外星人偷走了 */
-        .alien-message {
-            font-size: clamp(1.6rem, 5vw, 2.4rem);
-            font-weight: 450;
-            color: #222222;           /* 纯黑字 */
-            line-height: 1.3;
-            margin: 0;
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            text-shadow: none;
-            padding: 0;
-            white-space: nowrap;
+        .back-link {
+            margin-top: 30px;
         }
-
-        /* 返回主页按钮 - 无圆角矩形，蓝底白字 */
-        .home-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: #1e6df2;        /* 鲜明蓝色 */
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: clamp(1.4rem, 5vw, 2.2rem);
-            padding: 0.7rem 3rem;
-            border-radius: 0;            /* 无圆角，直角矩形 */
-            box-shadow: 0 8px 20px -8px rgba(30, 109, 242, 0.5);
-            border: none;
-            cursor: pointer;
-            transition: background 0.15s, box-shadow 0.15s;
-            /* 确保没有任何伪元素符号 */
-        }
-
-        .home-link:hover {
-            background: #1552c4;        /* 深一点的蓝色 */
-            box-shadow: 0 12px 28px -10px #1552c4;
+        a {
+            color: #0066cc;
             text-decoration: none;
         }
-
-        .home-link:active {
-            transform: translateY(2px);
-            box-shadow: 0 5px 12px -6px #1552c4;
+        a:hover {
+            text-decoration: underline;
         }
-
-        /* 移除所有可能的小符号、伪元素、多余的装饰 */
-        .home-link::after,
-        .home-link::before {
-            display: none !important;
-            content: none !important;
-        }
-
-        body, div, p, span, a, h1, h2, h3, h4 {
-            &::before, &::after {
-                content: none !important;
-            }
-        }
-
-        /* 小屏友好：允许文字换行，图片稍微调小 */
-        @media (max-width: 600px) {
-            .alien-img {
-                width: 150px;
-            }
-            .alien-message {
-                white-space: normal;    /* 小屏允许换行 */
-            }
-            .home-link {
-                padding: 0.6rem 2.5rem;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .alien-img {
-                width: 120px;
-            }
-            .four-oh-four {
-                font-size: 5rem;
-            }
-            .alien-message {
-                font-size: 1.4rem;
-            }
-            .home-link {
-                padding: 0.5rem 2rem;
-                font-size: 1.3rem;
-            }
+        .error-404 {
+            font-size: 72px;
+            color: #999;
+            margin: 30px 0;
         }
     </style>
 </head>
 <body>
-    <div class="full-center">
-        <!-- 主要内容区域：图片单独一行在上，404、提示文字和按钮居中 -->
-        <div class="main-content">
-            <!-- 图片单独一行，在404上方 -->
-            <div class="image-row">
-                <img src="404.png" alt="外星人" class="alien-img">
-            </div>
-            
-            <!-- 404、提示文字和按钮居中区域 -->
-            <div class="center-group">
-                <div class="four-oh-four">404</div>
-                <div class="alien-message">Pages not found</div>
-                <a href="https://luckynum.top" class="home-link">返回主页</a>
-            </div>
-        </div>
-        <!-- 没有其他任何内容、脚注、装饰符号 -->
+    <div class="container" id="content">
+        <!-- 内容会通过JavaScript动态生成 -->
     </div>
+
+    <script>
+        // 获取当前页面的完整URL
+        var currentUrl = window.location.href;
+        var urlObj = new URL(currentUrl);
+        var path = urlObj.pathname;
+        var queryString = urlObj.search; // 获取?后面的所有内容，包括问号
+        
+        // 获取显示内容的容器
+        var contentDiv = document.getElementById('content');
+        
+        // 只有访问 /zhiri 路径时才显示值日生信息
+        if (path === '/zhiri') {
+            // 修改页面标题
+            document.title = '值日生信息';
+            
+            // 提取参数部分（去掉开头的?）
+            var params = queryString.substring(1); // 删除第一个字符（问号）
+            
+            // 如果没有参数，显示默认提示
+            if (!params) {
+                params = '未提供参数';
+            }
+            
+            // 生成值日生信息页面
+            contentDiv.innerHTML = `
+                <h1>值日生信息</h1>
+                <div class="student-info">${params}</div>
+                <div class="message">
+                    同学你好，请使用教室中控设备（或大屏）上的<br>
+                    “值日管理系统”软件来扫描统计！<br>
+                    先用系统扫描值日卡，再扫描本码！<br>
+                    感谢你的配合。
+                </div>
+                <div class="note">
+                    温馨提示：请确保先扫描值日卡，再扫描此二维码
+                </div>
+            `;
+        } 
+        else {
+            // 对于其他所有404错误，显示普通404页面
+            document.title = '404';
+            
+            contentDiv.innerHTML = `
+                <div class="error-404">404</div>
+                <h1>页面未找到</h1>
+                <p>抱歉，您访问的页面不存在。</p>
+                <div class="back-link">
+                    <a href="/">返回首页</a>
+                </div>
+            `;
+        }
+    </script>
 </body>
 </html>
