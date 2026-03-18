@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>值日码查询系统</title>
+    <style>
+        /* 极端简化：移除所有圆角、阴影、渐变、图标、提示区块 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #ffffff;           /* 纯白背景 */
+            font-family: 'Courier New', Courier, monospace; /* 等宽字体，更显简陋 */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid #000000;      /* 纯黑边框，无圆角 */
+            background: #ffffff;
+            padding: 30px 20px 30px 20px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            text-align: left;
+            color: #000000;
+            border-bottom: 1px solid #000;
+            padding-bottom: 8px;
+            text-transform: uppercase;      /* 全大写，增加一点机械感 */
+            letter-spacing: 1px;
+        }
+        label {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #000;
+        }
+        input {
+            width: 100%;
+            padding: 10px 8px;
+            font-size: 18px;
+            font-family: 'Courier New', Courier, monospace;
+            border: 2px solid #000;
+            background: #ffffff;
+            border-radius: 0;                /* 彻底无圆角 */
+            outline: none;
+            margin-bottom: 20px;
+            box-shadow: none;
+            -webkit-appearance: none;
+        }
+        button {
+            background: #000000;
+            color: #ffffff;
+            border: 2px solid #000000;
+            padding: 12px 24px;
+            font-size: 20px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto;
+            min-width: 140px;
+            text-align: center;
+            border-radius: 0;                /* 直角 */
+            letter-spacing: 1px;
+            box-shadow: none;
+            transition: none;
+        }
+        button:hover {
+            background: #333333;              /* 仅加深背景，仍为直角 */
+            border-color: #000;
+        }
+        button:active {
+            background: #666666;
+        }
+        /* 移除所有装饰性元素：没有任何提示区、预览、脚注、图标 */
+        .no-style {
+            display: none;
+        }
+        /* 非常朴素的警告占位，仅当输入为空时显示纯文本，不加背景/圆角/图标 */
+        .warning-placeholder {
+            font-size: 15px;
+            color: #cc0000;
+            margin-top: 10px;
+            min-height: 22px;
+            font-family: 'Courier New', Courier, monospace;
+            border: none;
+            background: transparent;
+            padding: 0;
+        }
+        /* 完全没有任何花哨 */
+        hr {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>值日码查询系统</h1>
+        
+        <label for="code">请输入你的学号或码号</label>
+        <input type="text" id="code" placeholder="" autocomplete="off" autofocus>
+
+        <!-- 极简的警告区域，只显示必要文字，无装饰 -->
+        <div class="warning-placeholder" id="warningMsg"></div>
+
+        <!-- 只有一个按钮，无图标无提示 -->
+        <button id="queryBtn">查询</button>
+    </div>
+
+    <script>
+        (function() {
+            const inputEl = document.getElementById('code');
+            const btn = document.getElementById('queryBtn');
+            const warnDiv = document.getElementById('warningMsg');
+
+            const BASE_URL = 'https://luckynum.top/zhiri';
+
+            // 清除警告
+            function clearWarn() {
+                warnDiv.innerText = '';
+            }
+
+            // 跳转执行
+            function doQuery() {
+                let raw = inputEl.value;                // 不trim，保留原始空格（但编码时会处理）
+                const trimmed = raw.trim();              // 仅用于检查是否为空（空字符串或全空格）
+
+                if (trimmed === '') {
+                    warnDiv.innerText = '学号或码号不能为空';
+                    inputEl.focus();
+                    return;
+                }
+
+                // 有内容就清除之前的警告
+                clearWarn();
+
+                // 直接编码原始输入值（包含用户可能输入的前后空格，原样传递）
+                const encoded = encodeURIComponent(raw);
+                const target = BASE_URL + '?' + encoded;
+
+                // 跳转
+                window.location.href = target;
+            }
+
+            // 监听点击
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                doQuery();
+            });
+
+            // 监听回车
+            inputEl.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    doQuery();
+                }
+            });
+
+            // 当用户开始输入时，清除警告（可选）
+            inputEl.addEventListener('input', function() {
+                if (warnDiv.innerText !== '') {
+                    warnDiv.innerText = '';
+                }
+            });
+
+            // 控制台安静提示（不显示在页面上）
+            console.log('极简模式：无圆角、无图标、无任何提示区块');
+        })();
+    </script>
+</body>
+</html>
