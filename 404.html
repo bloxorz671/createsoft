@@ -7,7 +7,7 @@
         body { 
             font-family: "Microsoft YaHei", Arial, sans-serif; 
             text-align: center; 
-            padding-top: 50px;
+            padding-top: 30px;
             margin: 0;
             background-color: #f5f5f5;
         }
@@ -29,6 +29,7 @@
             color: #333;
             line-height: 1.8;
             text-align: left;
+            margin-bottom: 30px;
         }
         .message p {
             margin: 15px 0;
@@ -40,6 +41,34 @@
             padding: 2px 6px;
             border-radius: 3px;
             display: inline-block;
+        }
+        .qr-section {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        .qr-title {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .qr-code {
+            display: inline-block;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .qr-code img {
+            display: block;
+            max-width: 200px;
+            height: auto;
+        }
+        .qr-note {
+            font-size: 14px;
+            color: #999;
+            margin-top: 10px;
         }
         .back-link {
             margin-top: 30px;
@@ -86,11 +115,32 @@
                 params = '未知同学';
             }
             
-            // 生成值日生信息页面 - 参数和文字自然融合
+            // 解码URL参数为中文字符
+            try {
+                params = decodeURIComponent(params);
+            } catch (e) {
+                // 如果解码失败，保持原样
+                console.log('解码失败，使用原始参数');
+            }
+            
+            // 构建完整的二维码URL
+            var qrCodeUrl = 'https://luckynum.top/zhiri?' + encodeURIComponent(params);
+            
+            // 使用免费的二维码生成API
+            var qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(qrCodeUrl);
+            
+            // 生成值日生信息页面
             contentDiv.innerHTML = `
                 <h1>值日生信息</h1>
                 <div class="message">
                     <p><span class="student-param">${params}</span> 同学你好，请使用教室中控设备（或大屏）上的“值日管理系统”软件来扫描统计！先用系统扫描值日卡，再扫描本码！感谢你的配合。</p>
+                </div>
+                <div class="qr-section">
+                    <div class="qr-title">你的二维码：</div>
+                    <div class="qr-code">
+                        <img src="${qrImageUrl}" alt="二维码" title="扫描此码进行值日确认">
+                    </div>
+                    <div class="qr-note">请使用值日管理系统扫描此码</div>
                 </div>
             `;
         } 
