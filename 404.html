@@ -2,99 +2,215 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>页面跳转中...</title>
     <style>
-        body { 
-            font-family: "Microsoft YaHei", Arial, sans-serif; 
-            text-align: center; 
-            padding-top: 30px;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Microsoft YaHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
         }
+        
         .container {
-            max-width: 600px;
+            width: 100%;
+            max-width: 480px;
             margin: 0 auto;
-            padding: 40px 30px;
+            padding: 24px 20px;
             background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
+        
         h1 { 
             color: #333;
-            margin-bottom: 30px;
-            font-size: 28px;
+            margin-bottom: 20px;
+            font-size: 26px;
+            font-weight: 600;
+            text-align: center;
         }
+        
         .message {
-            font-size: 18px;
+            font-size: 17px;
             color: #333;
-            line-height: 1.8;
+            line-height: 1.6;
             text-align: left;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
+            padding: 0 4px;
         }
+        
         .message p {
-            margin: 15px 0;
+            margin: 12px 0;
         }
+        
         .student-param {
-            font-weight: bold;
+            font-weight: 600;
             color: #0066cc;
-            background-color: #f0f7ff;
-            padding: 2px 6px;
-            border-radius: 3px;
+            background-color: #e6f0ff;
+            padding: 3px 8px;
+            border-radius: 6px;
             display: inline-block;
+            font-size: 18px;
+            margin: 0 2px;
         }
+        
         .qr-section {
-            margin: 30px 0;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
+            margin: 24px 0 16px;
+            padding: 20px 16px;
+            background-color: #f8f9fa;
+            border-radius: 16px;
+            text-align: center;
         }
+        
         .qr-title {
             font-size: 16px;
-            color: #666;
-            margin-bottom: 15px;
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 16px;
         }
+        
         .qr-code {
             display: inline-block;
-            padding: 10px;
+            padding: 12px;
             background-color: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
+        
         .qr-code img {
             display: block;
-            max-width: 200px;
-            height: auto;
+            width: 200px;
+            height: 200px;
+            max-width: 100%;
+            border-radius: 8px;
         }
+        
         .qr-text {
-            font-size: 16px;
-            color: #333;
-            margin: 15px 0 5px;
-            padding: 8px;
+            font-size: 15px;
+            color: #495057;
+            margin: 16px 8px 8px;
+            padding: 12px;
             background-color: white;
-            border-radius: 5px;
-            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
             word-break: break-all;
-            font-family: monospace;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+            text-align: center;
+            letter-spacing: 0.3px;
         }
+        
         .qr-note {
             font-size: 14px;
-            color: #999;
-            margin-top: 10px;
+            color: #868e96;
+            margin-top: 12px;
+            padding: 0 8px;
         }
+        
         .back-link {
-            margin-top: 30px;
+            margin-top: 24px;
+            text-align: center;
         }
+        
+        .back-link a {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #f1f3f5;
+            color: #495057;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
+        .back-link a:hover {
+            background-color: #e9ecef;
+        }
+        
         a {
             color: #0066cc;
             text-decoration: none;
         }
+        
         a:hover {
             text-decoration: underline;
         }
+        
         .error-404 {
-            font-size: 72px;
-            color: #999;
-            margin: 30px 0;
+            font-size: 80px;
+            font-weight: 600;
+            color: #dee2e6;
+            margin: 20px 0 10px;
+            line-height: 1;
+            text-align: center;
+        }
+        
+        .error-message {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .error-message h2 {
+            font-size: 24px;
+            color: #343a40;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        
+        .error-message p {
+            font-size: 16px;
+            color: #868e96;
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 380px) {
+            .container {
+                padding: 20px 16px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .message {
+                font-size: 16px;
+            }
+            
+            .student-param {
+                font-size: 17px;
+                padding: 2px 6px;
+            }
+            
+            .qr-code img {
+                width: 160px;
+                height: 160px;
+            }
+            
+            .qr-text {
+                font-size: 14px;
+                padding: 10px;
+            }
+            
+            .error-404 {
+                font-size: 64px;
+            }
+        }
+        
+        /* 触摸优化 */
+        .qr-code, .back-link a {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .qr-code:active, .back-link a:active {
+            transform: scale(0.98);
         }
     </style>
 </head>
@@ -142,7 +258,7 @@
             var qrCodeUrl = 'https://luckynum.top/zhiri?' + encodedParams;
             
             // 使用免费的二维码生成API
-            var qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(qrCodeUrl);
+            var qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(qrCodeUrl);
             
             // 生成值日生信息页面
             contentDiv.innerHTML = `
@@ -151,7 +267,7 @@
                     <p><span class="student-param">${params}</span> 同学你好，请使用教室中控设备（或大屏）上的“值日管理系统”软件来扫描统计！先用系统扫描值日卡，再扫描本码！感谢你的配合。</p>
                 </div>
                 <div class="qr-section">
-                    <div class="qr-title">你的二维码：</div>
+                    <div class="qr-title">你的二维码</div>
                     <div class="qr-code">
                         <img src="${qrImageUrl}" alt="二维码" title="扫描此码进行值日确认">
                     </div>
@@ -166,8 +282,10 @@
             
             contentDiv.innerHTML = `
                 <div class="error-404">404</div>
-                <h1>页面未找到</h1>
-                <p>抱歉，您访问的页面不存在。</p>
+                <div class="error-message">
+                    <h2>页面未找到</h2>
+                    <p>抱歉，您访问的页面不存在</p>
+                </div>
                 <div class="back-link">
                     <a href="/">返回首页</a>
                 </div>
