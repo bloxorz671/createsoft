@@ -62,6 +62,25 @@
             margin-bottom: 6px;
         }
 
+        /* 下划线蓝体字: 放在输入框下方，查询按钮上方 */
+        .rule-link {
+            display: inline-block;
+            margin-top: 8px;
+            margin-bottom: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            color: #0000EE;
+            text-decoration: underline;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+        .rule-link:hover {
+            color: #ff0000;
+            text-decoration: underline;
+        }
+
         /* 按钮: 黑底白字, 直角 */
         .query-btn {
             background: #000000;
@@ -74,7 +93,7 @@
             cursor: pointer;
             width: auto;
             min-width: 120px;
-            margin-top: 8px;
+            margin-top: 0;
             margin-bottom: 10px;
             border-radius: 0;
             transition: none;
@@ -86,38 +105,18 @@
             background: #444444;
         }
 
-        /* 下划线蓝体字: 纯粹 a 标签模拟 */
-        .rule-link {
-            display: inline-block;
-            margin-top: 12px;
-            margin-bottom: 8px;
-            font-size: 15px;
-            font-family: inherit;
-            color: #0000EE;
-            text-decoration: underline;
-            cursor: pointer;
-            font-weight: normal;
-            background: none;
-            border: none;
-            padding: 0;
-        }
-        .rule-link:hover {
-            color: #ff0000;
-            text-decoration: underline;
-        }
-
-        /* 规则面板 (学校列表 + 详情) */
+        /* 规则面板 */
         .rule-panel {
             margin-top: 16px;
             border-top: 1px solid #888;
             padding-top: 14px;
-            display: none;   /* 默认隐藏，点击“查询值日码规则”后显示 */
+            display: none;
         }
         .rule-panel.show {
             display: block;
         }
 
-        /* 学校列表区域: 简单块级元素，无圆角 */
+        /* 学校列表区域 */
         .school-list {
             margin-bottom: 20px;
             border: 1px solid #ccc;
@@ -167,14 +166,20 @@
             font-family: monospace;
             border-radius: 0;
         }
-        .loading-text, .error-text {
+        .loading-text, .empty-text {
+            font-size: 14px;
+            font-family: monospace;
+            padding: 6px 0;
+            color: #666;
+        }
+        .error-text {
             font-size: 14px;
             font-family: monospace;
             padding: 6px 0;
             color: #990000;
         }
 
-        /* 警告信息: 简单红色字 */
+        /* 警告信息 */
         .warning-msg {
             color: #cc0000;
             font-size: 14px;
@@ -186,14 +191,6 @@
         hr {
             display: none;
         }
-        footer {
-            margin-top: 28px;
-            font-size: 11px;
-            border-top: 1px solid #ccc;
-            padding-top: 12px;
-            text-align: left;
-            color: #333;
-        }
     </style>
 </head>
 <body>
@@ -203,15 +200,15 @@
     <div class="input-label">请输入你的学号或码号</div>
     <input type="text" id="studentCode" placeholder="" autocomplete="off" autofocus>
     <div class="warning-msg" id="warningMsg"></div>
-
-    <button class="query-btn" id="queryBtn">查询</button>
-
-    <!-- 下划线蓝体字: 点击显示规则列表 -->
+    
+    <!-- 蓝体字超链接：放在输入框下方，查询按钮上方 -->
     <div>
         <span id="toggleRuleBtn" class="rule-link">查询值日码规则</span>
     </div>
+    
+    <button class="query-btn" id="queryBtn">查询</button>
 
-    <!-- 规则展示面板: 内含学校列表 + 详情 -->
+    <!-- 规则展示面板 -->
     <div id="rulePanel" class="rule-panel">
         <div id="schoolListContainer" class="school-list">
             <div class="loading-text">加载规则文件中...</div>
@@ -220,15 +217,11 @@
             <!-- 动态显示学校规则详情 -->
         </div>
     </div>
-
-    <footer>
-        规则依据 zrrule.txt (每行格式: 学校名[对应的规则])
-    </footer>
 </div>
 
 <script>
     (function() {
-        // ---------- DOM 元素 ----------
+        // DOM 元素
         const studentInput = document.getElementById('studentCode');
         const queryBtn = document.getElementById('queryBtn');
         const warningDiv = document.getElementById('warningMsg');
@@ -237,12 +230,12 @@
         const schoolListContainer = document.getElementById('schoolListContainer');
         const ruleDetailArea = document.getElementById('ruleDetailArea');
 
-        // ---------- 全局数据 ----------
-        let schoolsData = [];          // 存储 [{ name: "学校名", rule: "规则内容" }]
+        // 全局数据
+        let schoolsData = [];          // [{ name: "学校名", rule: "规则内容" }]
         let isLoading = false;
         let loadError = false;
 
-        // ---------- 辅助函数 ----------
+        // 辅助函数
         function clearWarning() {
             warningDiv.innerText = '';
         }
@@ -252,217 +245,10 @@
         }
 
         // 读取同路径下的 zrrule.txt (UTF-8)
+        // 格式: [学校名][对应的规则]
         async function fetchRuleFile() {
-            // 防止重复加载时覆盖已有数据
             if (schoolsData.length > 0) return true;
             if (isLoading) return false;
 
             isLoading = true;
-            schoolListContainer.innerHTML = '<div class="loading-text">正在读取规则文件 ...</div>';
-            try {
-                // 使用 fetch 获取同目录下的 zrrule.txt, 添加时间戳避免缓存问题(但保持路径简洁)
-                const url = 'zrrule.txt?_=' + Date.now();
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: 无法加载 zrrule.txt`);
-                }
-                const text = await response.text();
-                // 解析文本: 每行格式 "学校名[对应的规则]"
-                // 注意: 学校名和规则之间使用 [ 符号分隔，规则中可以包含任何字符。
-                // 例如: 第一中学[值日码为年级+班级+学号后两位]
-                //      光明小学[规则: 学号前两位代表年份]
-                // 按照题目描述: [学校名][对应的规则] ，但一般我们理解为学校名和规则之间用 [ 分割，右侧剩余部分均为规则。
-                // 严谨实现: 寻找第一个 '[' 的位置，左侧为学校名，右侧到行尾为规则（去除两端空白）。
-                const lines = text.split(/\r?\n/);
-                const parsed = [];
-                for (let line of lines) {
-                    line = line.trim();
-                    if (line === "") continue;   // 跳过空行
-                    // 查找第一个左括号 [
-                    const firstBracket = line.indexOf('[');
-                    if (firstBracket === -1) {
-                        // 格式错误行跳过，但可记录控制台
-                        console.warn(`忽略无效行(缺少[): ${line}`);
-                        continue;
-                    }
-                    let schoolName = line.substring(0, firstBracket).trim();
-                    let ruleContent = line.substring(firstBracket + 1).trim();
-                    // 如果规则内容末尾可能包含多余的 ] 则去除末尾的中括号? 但规则内可能包含符号，保留原样即可。但按照约定规则可能以]结尾可以去掉一个结尾]
-                    if (ruleContent.endsWith(']')) {
-                        // 但有可能规则内本身包含 ] ，为安全起见仅去除末尾的一个]
-                        ruleContent = ruleContent.replace(/\]$/, '');
-                    }
-                    if (schoolName === "") {
-                        // 如果学校名为空，则忽略
-                        continue;
-                    }
-                    parsed.push({ name: schoolName, rule: ruleContent || "(无具体规则文本)" });
-                }
-                if (parsed.length === 0) {
-                    schoolListContainer.innerHTML = '<div class="error-text">⚠️ 未检测到有效学校数据，请检查zrrule.txt格式(每行:学校名[规则])</div>';
-                    loadError = true;
-                    isLoading = false;
-                    return false;
-                }
-                schoolsData = parsed;
-                // 渲染学校列表
-                renderSchoolList();
-                isLoading = false;
-                return true;
-            } catch (err) {
-                console.error("读取规则文件失败: ", err);
-                schoolListContainer.innerHTML = `<div class="error-text">❌ 加载失败: 无法读取 zrrule.txt<br>请确认文件存在于同目录下，格式正确。</div>`;
-                loadError = true;
-                isLoading = false;
-                return false;
-            }
-        }
-
-        // 渲染学校列表 (可点击)
-        function renderSchoolList() {
-            if (!schoolListContainer) return;
-            if (schoolsData.length === 0) {
-                schoolListContainer.innerHTML = '<div class="error-text">暂无学校规则数据</div>';
-                return;
-            }
-            const ul = document.createElement('div');
-            ul.className = 'school-list';
-            // 清空原容器内容
-            schoolListContainer.innerHTML = '';
-            for (let i = 0; i < schoolsData.length; i++) {
-                const school = schoolsData[i];
-                const divItem = document.createElement('div');
-                divItem.className = 'school-item';
-                divItem.textContent = school.name;
-                // 绑定点击事件展示对应规则
-                divItem.addEventListener('click', (function(idx) {
-                    return function() { showRuleDetail(idx); };
-                })(i));
-                schoolListContainer.appendChild(divItem);
-            }
-        }
-
-        // 显示某个学校的规则详情
-        function showRuleDetail(index) {
-            if (!schoolsData[index]) return;
-            const school = schoolsData[index];
-            // 构建详情区域HTML
-            const detailHtml = `
-                <div class="rule-detail">
-                    <strong>📌 ${escapeHtml(school.name)}</strong><br>
-                    <span style="display:inline-block; margin-top:6px;">${escapeHtml(school.rule)}</span>
-                </div>
-                <button id="closeDetailBtn" class="close-detail">关闭详情</button>
-            `;
-            ruleDetailArea.innerHTML = detailHtml;
-            ruleDetailArea.style.display = 'block';
-            // 绑定关闭按钮事件
-            const closeBtn = document.getElementById('closeDetailBtn');
-            if (closeBtn) {
-                closeBtn.addEventListener('click', function() {
-                    ruleDetailArea.style.display = 'none';
-                    ruleDetailArea.innerHTML = '';
-                });
-            }
-            // 滚动到详情区域
-            ruleDetailArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-
-        // 简易防XSS
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-                return c;
-            });
-        }
-
-        // 处理面板的显示/隐藏 (点击 "查询值日码规则")
-        let panelVisible = false;
-        async function toggleRulePanel() {
-            if (panelVisible) {
-                // 如果已经显示，就隐藏面板
-                rulePanel.classList.remove('show');
-                panelVisible = false;
-                return;
-            }
-            // 先显示面板（展示加载中占位）
-            rulePanel.classList.add('show');
-            panelVisible = true;
-            // 如果还没有加载数据或者加载出错但是有旧数据清空的情况，则加载文件
-            if (schoolsData.length === 0 && !loadError) {
-                await fetchRuleFile();
-            } else if (schoolsData.length === 0 && loadError) {
-                // 已经尝试加载并失败，显示错误提示不再重复fetch
-                // 但是schoolListContainer里面已有错误信息，无需额外操作
-            } else if (schoolsData.length > 0 && schoolListContainer.children.length === 0) {
-                // 奇怪情况，重新渲染
-                renderSchoolList();
-            }
-            // 如果规则详情区域有内容且打开中，保持，不做额外动作
-        }
-
-        // 查询跳转函数 (与之前逻辑一致: 跳转 https://luckynum.top/zhiri?输入的内容)
-        function performQuery() {
-            let rawValue = studentInput.value;   // 保留原始输入（前后空格由编码决定）
-            const trimmed = rawValue.trim();
-            if (trimmed === '') {
-                setWarning('学号或码号不能为空');
-                studentInput.focus();
-                return;
-            }
-            clearWarning();
-            // 构建跳转URL (保留原始输入，不做额外trim处理，但一般建议保留原始空格, 但习惯使用trim后内容? 为准确: 使用原始rawValue进行编码)
-            // 但很多场景希望去除前后空格，但题目未明确定义，保守使用用户输入的原样（但空格会被编码）。但为避免意外，使用trim后的值也可以。
-            // 根据一般查询逻辑，通常会trim掉首尾空格，我们采用 trimmed 更合理，更接近预期。
-            const finalCode = trimmed;
-            const encoded = encodeURIComponent(finalCode);
-            const targetUrl = `https://luckynum.top/zhiri?${encoded}`;
-            window.location.href = targetUrl;
-        }
-
-        // 绑定查询按钮 + 回车
-        queryBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            performQuery();
-        });
-        studentInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                performQuery();
-            }
-        });
-        // 输入时清除警告
-        studentInput.addEventListener('input', function() {
-            if (warningDiv.innerText !== '') warningDiv.innerText = '';
-        });
-
-        // 下划线蓝体字点击事件
-        toggleRuleBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            toggleRulePanel();
-        });
-
-        // 可选：如果不想一开始加载规则文件，只在第一次点击时加载。符合需求: 点击后显示列表，自动读取zrrule.txt
-        // 额外：如果希望一开始后台静默预加载而不显示，为了体验可在页面加载完毕尝试预加载（但也可以不做），按需求无强制预加载。
-        // 为使得第一次点击更快，我们可以在页面 idle 时悄悄尝试获取文件而不展示面板，但题目无要求，但为避免延迟感，可以预加载数据但不展示面板。
-        // 但注意如果预加载且文件存在，点击后立即显示。如果预加载出错则显示错误。
-        // 增强体验：页面加载时预先拉取规则文件（静默），但不要自动打开面板。
-        function silentPreloadRules() {
-            // 静默加载数据，不展示面板，避免重复请求
-            if (schoolsData.length === 0 && !loadError && !isLoading) {
-                fetchRuleFile().catch(e => console.warn);
-            }
-        }
-        // 延迟一点预加载，以免干扰首屏
-        window.addEventListener('load', function() {
-            setTimeout(silentPreloadRules, 300);
-        });
-    })();
-</script>
-</body>
-</html>
+            schoolListContainer.innerHTML = '<div class="loading-text">加载规则文件中...<
