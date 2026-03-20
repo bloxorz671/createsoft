@@ -1,7 +1,7 @@
 pic
-[p=test1.jpg l=text1.jpg]
-[p=test2.jpg l=test2.jpg]
+[p=homeworkapp.jpg l=homeworkapp]
+[p=ezr.jpg l=ezr]
 
 app
-[n=测试1 p=test1.jpg l=test1.jpg]
-[n=测试2 p=test2.jpg l=test1.jpg] 
+[n=作业提交平台 p=homeworkapp.jpg l=homeworkapp]
+[n=电子值日码 p=ezr.jpg l=ezr] 
