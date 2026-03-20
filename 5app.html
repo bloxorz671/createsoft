@@ -108,6 +108,29 @@
             border-radius: 12px;
         }
 
+        /* 全部应用标题区域 */
+        .apps-header {
+            padding: 20px 20px 8px 20px;
+            background: white;
+        }
+        .apps-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+            position: relative;
+            display: inline-block;
+        }
+        .apps-title:before {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 35px;
+            height: 3px;
+            background: #2b4c8a;
+        }
+
         /* 应用区域: 正方形网格布局 - 无圆角 */
         .apps-grid {
             display: grid;
@@ -196,6 +219,9 @@
             .main-header h1 {
                 font-size: 1.6rem;
             }
+            .apps-title {
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
@@ -213,6 +239,11 @@
         <div class="carousel-dots" id="carouselDots"></div>
     </div>
 
+    <!-- 全部应用标题 -->
+    <div class="apps-header" id="appsHeader" style="display: none;">
+        <h2 class="apps-title">全部应用</h2>
+    </div>
+
     <!-- 应用网格区域 -->
     <div class="apps-grid" id="appsGrid">
         <div class="loading-tip">⏳ 加载应用中...</div>
@@ -224,10 +255,6 @@
     let slidesData = [];      // 存储轮播图片对象 [{ imgUrl, linkUrl }]
     let currentIndex = 0;
     let autoInterval = null;
-    let isDragging = false;
-    let startX = 0;
-    let currentTranslate = 0;
-    let track = null;
     let totalSlides = 0;
 
     // DOM 元素
@@ -235,6 +262,7 @@
     const carouselTrack = document.getElementById('carouselTrack');
     const dotsContainer = document.getElementById('carouselDots');
     const appsGrid = document.getElementById('appsGrid');
+    const appsHeader = document.getElementById('appsHeader');
 
     // ---------- 解析 5app.txt 文件 ----------
     async function loadDataFromFile() {
@@ -249,6 +277,7 @@
             console.error('读取5app.txt失败:', error);
             appsGrid.innerHTML = `<div class="error-tip">⚠️ 加载数据失败，请确保 “5app.txt” 文件存在于同目录下。<br>格式参考：<br>pic<br>[p=图片链接 l=跳转链接]<br>app<br>[n=应用名 p=图标 l=链接]</div>`;
             carouselSection.style.display = 'none';
+            if (appsHeader) appsHeader.style.display = 'none';
         }
     }
 
@@ -308,6 +337,7 @@
             }
         }
 
+        // 处理轮播图
         if (picItems.length > 0) {
             slidesData = picItems;
             renderCarousel();
@@ -318,10 +348,14 @@
             if (autoInterval) clearInterval(autoInterval);
         }
 
+        // 处理应用网格
         if (appItems.length > 0) {
+            // 显示"全部应用"标题
+            if (appsHeader) appsHeader.style.display = 'block';
             renderApps(appItems);
         } else {
             appsGrid.innerHTML = '<div class="empty-tip">📭 暂无应用数据，请在5app.txt的[app]下方添加应用</div>';
+            if (appsHeader) appsHeader.style.display = 'none';
         }
     }
 
