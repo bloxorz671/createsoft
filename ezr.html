@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -29,7 +29,7 @@
             padding: 24px 20px 32px 20px;
         }
 
-        /* 标题: 纯粹文字+下划线 */
+        /* 标题: 纯粹文字+下划线，取消大写转换 */
         h1 {
             font-size: 26px;
             font-weight: 700;
@@ -37,7 +37,7 @@
             padding-bottom: 6px;
             margin-bottom: 28px;
             letter-spacing: 1px;
-            text-transform: uppercase;
+            text-transform: none;  /* 改为 none，保持原始大小写 */
             font-family: inherit;
         }
 
@@ -267,7 +267,6 @@
                     if (line === "") continue;
                     
                     // 匹配两对中括号: [学校名][规则]
-                    // 使用正则匹配第一个 [xxx] 和第二个 [xxx]
                     const bracketPattern = /^\[([^\]]+)\]\[(.*)\]$/;
                     const match = line.match(bracketPattern);
                     
