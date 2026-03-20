@@ -1,1484 +1,600 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>初二五班电子作业提交</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>初二五班在线应用平台</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: #ffffff;
-            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f5f7fc;
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0 1rem;
-            line-height: 1.5;
-            color: #1e293b;
         }
 
-        .container {
-            width: 100%;
-            max-width: 800px;
-            margin-top: 2rem;
-            margin-bottom: 3rem;
-            position: relative;
+        /* 主容器 - 无框，无圆角 */
+        .platform-container {
+            max-width: 550px;
+            margin: 0 auto;
+            background: #ffffff;
         }
 
-        /* 滚动公告条样式 */
-        .notice-board {
-            background-color: #fff9e6;
-            color: #b45309;
-            padding: 0.8rem 1rem;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            border: 1px solid #fcd34d;
-            font-size: 1rem;
-            font-weight: 500;
-            text-align: left;
-            overflow: hidden;
-            white-space: nowrap;
-            position: relative;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        .notice-board-content {
-            display: inline-block;
-            animation: scrollNotice 15s linear infinite;
-            padding-left: 100%;
-        }
-
-        @keyframes scrollNotice {
-            0% {
-                transform: translateX(0);
-            }
-            100% {
-                transform: translateX(-100%);
-            }
-        }
-
-        .notice-board:hover .notice-board-content {
-            animation-play-state: paused;
-        }
-
-        /* 弹窗样式 */
-        .modal-overlay {
-            position: fixed;
+        /* 标题置顶端居中 - 无图标符号 */
+        .main-header {
+            text-align: center;
+            padding: 20px 16px 12px;
+            background: white;
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            backdrop-filter: blur(3px);
+            z-index: 20;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .main-header h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #1e3c72;
+            letter-spacing: -0.3px;
         }
 
-        .modal {
-            background-color: white;
-            border-radius: 24px;
-            padding: 0;
-            max-width: 90%;
-            width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        /* 轮播区样式 - 无圆角 */
+        .carousel-section {
+            margin: 12px 16px 24px;
+            background: #f0f2f6;
+            overflow: hidden;
             position: relative;
-            animation: modalSlideIn 0.3s ease;
         }
-
-        @keyframes modalSlideIn {
-            from {
-                transform: translateY(-30px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        .carousel-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
         }
-
-        .modal-header {
-            padding: 1.5rem 1.5rem 0.5rem 1.5rem;
-            margin: 0;
-        }
-
-        .modal-header h2 {
-            font-size: 1.6rem;
-            font-weight: 600;
-            color: #1e293b;
-            line-height: 1.3;
-            margin: 0;
-        }
-
-        .modal-content {
-            font-size: 1.1rem;
-            color: #334155;
-            line-height: 1.6;
-            padding: 0 1.5rem 1.5rem 1.5rem;
-            margin: 0;
-            white-space: pre-wrap;
-            text-align: left;
-            word-break: break-word;
-        }
-
-        .modal.no-header .modal-content {
-            padding-top: 1.5rem;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: #f1f5f9;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+        .carousel-track {
             display: flex;
-            align-items: center;
+            transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            cursor: grab;
+        }
+        .carousel-track:active {
+            cursor: grabbing;
+        }
+        .carousel-slide {
+            flex: 0 0 100%;
+            width: 100%;
+            position: relative;
+        }
+        .carousel-slide a {
+            display: block;
+            width: 100%;
+            text-decoration: none;
+        }
+        .carousel-slide img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+            background: #d9dde3;
+            aspect-ratio: 16 / 9;
+            pointer-events: auto;
+        }
+
+        /* 指示点 */
+        .carousel-dots {
+            display: flex;
             justify-content: center;
-            cursor: pointer;
-            font-size: 1.2rem;
-            color: #475569;
+            gap: 10px;
+            padding: 12px 0 14px;
+            background: rgba(255,255,255,0.75);
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: #bbb;
+            border-radius: 50%;
             transition: all 0.2s;
-            z-index: 10;
-        }
-
-        .modal-close:hover {
-            background: #e2e8f0;
-            color: #1e293b;
-            transform: scale(1.1);
-        }
-
-        .modal-footer {
-            padding: 0 1.5rem 1.5rem 1.5rem;
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .modal-btn {
-            background: #1e3a5f;
-            color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+        }
+        .dot.active {
+            width: 24px;
+            background: #2b4c8a;
+            border-radius: 12px;
         }
 
-        .modal-btn:hover {
-            background: #112b44;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        /* 全部应用标题区域 */
+        .apps-header {
+            padding: 20px 20px 8px 20px;
+            background: white;
         }
-
-        .modal-btn:active {
-            transform: translateY(1px);
-        }
-
-        /* 作业码输入弹窗样式 */
-        .code-modal-content {
-            padding: 1.5rem;
-        }
-
-        .code-modal-title {
+        .apps-title {
             font-size: 1.3rem;
             font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 1rem;
-        }
-
-        .code-modal-input {
-            width: 100%;
-            padding: 0.8rem 1.2rem;
-            font-size: 1rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 40px;
-            outline: none;
-            background: white;
-            transition: all 0.2s;
-            margin-bottom: 1rem;
-        }
-
-        .code-modal-input:focus {
-            border-color: #1e3a5f;
-            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
-        }
-
-        .code-modal-message {
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-            min-height: 1.5rem;
-        }
-
-        .code-modal-message.error {
-            color: #b91c1c;
-        }
-
-        .code-modal-message.success {
-            color: #2e7d32;
-        }
-
-        .code-modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.8rem;
-        }
-
-        .code-modal-cancel {
-            background: #f1f5f9;
-            color: #475569;
-            border: 1px solid #cbd5e1;
-            padding: 0.8rem 1.5rem;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .code-modal-cancel:hover {
-            background: #e2e8f0;
-        }
-
-        .code-modal-submit {
-            background: #1e3a5f;
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .code-modal-submit:hover {
-            background: #112b44;
-        }
-
-        /* 头部区域 */
-        .header {
-            margin-bottom: 1rem;
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 500;
-            letter-spacing: -0.02em;
-            color: #0f172a;
-            line-height: 1.2;
+            color: #1f2937;
             margin: 0;
-            text-align: center;
-        }
-
-        .notice-text {
-            color: #b91c1c;
-            font-size: 1.1rem;
-            font-weight: 400;
-            text-align: center;
-            max-width: 550px;
-            margin: 1.5rem auto 1rem auto;
-            background-color: #fff8f8;
-            padding: 0.8rem 1.5rem;
-            border-radius: 60px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-            border: 1px solid rgba(185, 28, 28, 0.15);
-        }
-
-        /* 工具栏 */
-        .toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 0 auto 1.5rem auto;
-            width: 100%;
-            flex-wrap: wrap;
-            gap: 0.8rem;
-        }
-
-        .refresh-container {
-            display: flex;
-            justify-content: center;
-            flex: 1;
-        }
-
-        .refresh-btn {
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            border-radius: 40px;
-            padding: 0.6rem 2rem;
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: #334155;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: all 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            white-space: nowrap;
-        }
-
-        .refresh-btn:hover {
-            background: #e2e8f0;
-            border-color: #94a3b8;
-        }
-
-        .refresh-btn:active {
-            transform: scale(0.97);
-        }
-
-        .refresh-btn svg {
-            width: 18px;
-            height: 18px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .subject-filter {
             position: relative;
             display: inline-block;
         }
-
-        .subject-filter-select {
-            background: transparent;
-            color: #334155;
-            font-size: 1.1rem;
-            font-weight: 500;
-            padding: 0.6rem 1.8rem 0.6rem 0.8rem;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-            background-repeat: no-repeat;
-            background-position: right 0.2rem center;
-            background-size: 16px;
-            min-width: 100px;
-            text-align: right;
-        }
-
-        .subject-filter-select option {
-            background: white;
-            color: #1e293b;
-            padding: 0.5rem;
-        }
-
-        .loading-message {
-            text-align: center;
-            font-size: 1.2rem;
-            color: #64748b;
-            margin: 2rem 0;
-            padding: 1rem;
-            background-color: #f8fafc;
-            border-radius: 60px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .empty-message {
-            text-align: center;
-            font-size: 1.2rem;
-            color: #475569;
-            margin: 2rem 0;
-            padding: 2rem;
-            background-color: #f8fafc;
-            border-radius: 30px;
-            border: 1px dashed #94a3b8;
-            line-height: 1.6;
-        }
-
-        .homework-section {
-            margin: 1rem 0 2rem 0;
-            width: 100%;
-        }
-
-        .homework-item {
-            display: flex;
-            flex-direction: column;
-            padding: 1.2rem 1.2rem;
-            background-color: #f9fafc;
-            border-radius: 20px;
-            margin-bottom: 1rem;
-            border: 1px solid #e9edf4;
-            transition: box-shadow 0.2s;
-        }
-
-        .homework-item:hover {
-            box-shadow: 0 6px 14px rgba(0, 20, 40, 0.06);
-        }
-
-        .homework-row {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            flex-wrap: wrap;
-        }
-
-        .subject-container {
-            position: relative;
-            margin-right: 0.5rem;
-            min-width: 100px;
-        }
-
-        .subject-tag {
-            font-size: 1.2rem;
-            font-weight: 500;
-            min-width: 100px;
-            padding: 0.5rem 0.8rem;
-            text-align: center;
-            border-radius: 30px;
-            background-color: white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-            white-space: nowrap;
-        }
-
-        .subject-chinese {
-            color: #c44536;
-            border-left: 4px solid #e67e22;
-            background: #fff5eb;
-        }
-        .subject-math {
-            color: #1e6f9f;
-            border-left: 4px solid #2980b9;
-            background: #ebf5ff;
-        }
-        .subject-english {
-            color: #2e7d5e;
-            border-left: 4px solid #27ae60;
-            background: #eafaf2;
-        }
-        .subject-other {
-            color: #3c4b5a;
-            border-left: 4px solid #95a5a6;
-            background: #f0f2f4;
-        }
-
-        .name-container {
-            position: relative;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-width: 200px;
-            margin: 0 0.5rem;
-        }
-
-        .time-hint {
-            font-size: 0.7rem;
-            color: #64748b;
-            font-weight: 400;
-            white-space: nowrap;
-            background-color: transparent;
-            padding: 0 0 2px 0;
-            letter-spacing: 0.3px;
-            line-height: 1.2;
-            margin-bottom: 2px;
-        }
-
-        .homework-name {
-            font-size: 1.2rem;
-            font-weight: 450;
-            color: #1e2b3a;
-            word-break: break-word;
-            width: 100%;
-            line-height: 1.3;
-        }
-
-        .homework-link {
-            display: inline-block;
-            background: #2c3e50;
-            color: white;
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: 450;
-            padding: 0.6rem 1.5rem;
-            border-radius: 40px;
-            transition: background-color 0.15s, transform 0.1s;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-            white-space: nowrap;
-            margin-left: 0.5rem;
-            cursor: pointer;
-        }
-
-        .homework-link:hover {
-            background: #1a2b3c;
-            transform: translateY(-1px);
-            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .homework-link:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .homework-link-disabled {
-            display: inline-block;
-            background: #94a3b8;
-            color: #e2e8f0;
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: 450;
-            padding: 0.6rem 1.5rem;
-            border-radius: 40px;
-            cursor: default;
-            box-shadow: none;
-            white-space: nowrap;
-            margin-left: 0.5rem;
-            opacity: 0.7;
-            pointer-events: none;
-        }
-
-        .more-message {
-            margin-top: 0.8rem;
-            margin-left: 0;
-            font-size: 0.9rem;
-            padding: 0.5rem 0 0 0;
-            width: 100%;
-            text-align: left;
-            border-top: 1px dashed #e0e6ed;
-            color: #1e293b;
-        }
-
-        /* 不显眼的作业码入口 */
-        .code-entry {
-            text-align: center;
-            margin: 1.5rem 0 1rem 0;
-            font-size: 0.9rem;
-        }
-
-        .code-link {
-            color: #2563eb;
-            text-decoration: underline;
-            text-underline-offset: 2px;
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-size: 0.9rem;
-            padding: 0.2rem 0.5rem;
-        }
-
-        .code-link:hover {
-            color: #1d4ed8;
-        }
-
-        .class-line {
-            width: 80px;
+        .apps-title:before {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 35px;
             height: 3px;
-            background: #d9e2ef;
-            margin: 1rem auto 0 auto;
-            border-radius: 30px;
-            opacity: 0.6;
+            background: #2b4c8a;
         }
 
-        @media (max-width: 600px) {
-            body {
-                padding: 0 0.8rem;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
-            
-            .notice-text {
-                font-size: 1rem;
-                padding: 0.7rem 1rem;
-                margin: 1rem auto 0.8rem auto;
-            }
-            
-            .notice-board {
-                font-size: 0.9rem;
-                padding: 0.6rem 0.8rem;
-            }
-            
-            .toolbar {
-                flex-direction: row;
-                justify-content: center;
-                gap: 0.5rem;
-                margin: 0 auto 1.2rem auto;
-            }
-            
-            .refresh-container {
-                flex: 0 1 auto;
-            }
-            
-            .refresh-btn {
-                padding: 0.5rem 1.5rem;
-                font-size: 1rem;
-            }
-            
-            .subject-filter-select {
-                font-size: 1rem;
-                padding: 0.5rem 1.8rem 0.5rem 0.5rem;
-            }
-            
-            .modal {
-                width: 90%;
-            }
-            
-            .modal-header {
-                padding: 1.2rem 1.2rem 0.3rem 1.2rem;
-            }
-            
-            .modal-header h2 {
-                font-size: 1.3rem;
-            }
-            
-            .modal-content {
-                font-size: 1rem;
-                padding: 0 1.2rem 1.2rem 1.2rem;
-            }
-            
-            .modal-footer {
-                padding: 0 1.2rem 1.2rem 1.2rem;
-            }
-            
-            .code-modal-content {
-                padding: 1.2rem;
-            }
-            
-            .homework-item {
-                padding: 1rem;
-            }
-            
-            .homework-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.8rem;
-            }
-            
-            .subject-container {
-                margin-right: 0;
-                width: 100%;
-                min-width: auto;
-            }
-            
-            .subject-tag {
-                min-width: auto;
-                width: 100%;
-                text-align: center;
-                font-size: 1.1rem;
-                padding: 0.5rem;
-            }
-            
-            .name-container {
-                width: 100%;
-                margin: 0;
-                min-width: auto;
-            }
-            
-            .time-hint {
-                font-size: 0.65rem;
-                padding: 0 0 4px 0;
-                margin-bottom: 4px;
-                white-space: normal;
-                line-height: 1.4;
-            }
-            
-            .homework-name {
-                font-size: 1.1rem;
-                margin-bottom: 0.2rem;
-            }
-            
-            .homework-link, .homework-link-disabled {
-                width: 100%;
-                text-align: center;
-                margin-left: 0;
-                padding: 0.7rem;
-                font-size: 1rem;
-            }
-            
-            .more-message {
-                font-size: 0.85rem;
-                margin-top: 0.8rem;
-                padding-top: 0.5rem;
-            }
-            
-            .code-entry {
-                margin: 1rem 0 0.5rem 0;
-            }
+        /* 应用区域: 正方形网格布局 - 无圆角 */
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 20px 16px;
+            padding: 16px 20px 30px;
+            background: white;
         }
 
-        @media (max-width: 380px) {
-            h1 {
-                font-size: 1.5rem;
+        /* 每个正方形应用卡片 - 无圆角，无按钮样式 */
+        .app-card {
+            aspect-ratio: 1 / 1;
+            background: #f9fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0,0,0,0.02);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            cursor: pointer;
+            padding: 16px 8px;
+        }
+        .app-card:hover {
+            transform: translateY(-4px);
+            background: #ffffff;
+            box-shadow: 0 18px 28px -8px rgba(0, 0, 0, 0.12);
+            border-color: rgba(43, 76, 138, 0.2);
+        }
+        /* 应用图标样式 */
+        .app-icon {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            margin-bottom: 14px;
+            display: block;
+            background: #f0f2f5;
+            padding: 4px;
+        }
+        .app-name {
+            font-size: 0.9rem;
+            font-weight: 590;
+            color: #1f2937;
+            text-align: center;
+            word-break: break-word;
+            line-height: 1.3;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        /* 加载状态 & 空状态 */
+        .loading-tip, .empty-tip {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+            font-size: 0.9rem;
+            background: white;
+        }
+        .error-tip {
+            color: #c62828;
+            background: #fff5f5;
+            margin: 20px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .apps-grid {
+                gap: 14px 12px;
+                padding: 16px 16px 30px;
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             }
-            
-            .refresh-btn {
-                padding: 0.4rem 1.2rem;
-                font-size: 0.9rem;
+            .app-icon {
+                width: 52px;
+                height: 52px;
             }
-            
-            .subject-filter-select {
-                font-size: 0.9rem;
+            .app-name {
+                font-size: 0.8rem;
             }
-            
-            .time-hint {
-                font-size: 0.6rem;
+            .main-header h1 {
+                font-size: 1.6rem;
             }
-            
-            .homework-name {
-                font-size: 1rem;
+            .apps-title {
+                font-size: 1.2rem;
             }
         }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <!-- 滚动公告条容器 -->
-        <div id="noticeBoard" class="notice-board" style="display: none;">
-            <div class="notice-board-content" id="noticeBoardContent"></div>
-        </div>
-
-        <!-- 头部 -->
-        <div class="header">
-            <h1>初二五班电子作业提交</h1>
-        </div>
-
-        <!-- 提示文字 -->
-        <div class="notice-text">
-            如果你不是广州市第四十一中学初二五班的学生，请退出本网页
-        </div>
-
-        <!-- 工具栏 -->
-        <div class="toolbar">
-            <div class="refresh-container">
-                <button class="refresh-btn" id="refreshBtn" title="刷新作业列表">
-                    <svg viewBox="0 0 24 24" width="18" height="18">
-                        <path d="M23 4v6h-6M1 20v-6h6" />
-                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-                    </svg>
-                    刷新
-                </button>
-            </div>
-
-            <div class="subject-filter">
-                <select id="subjectFilter" class="subject-filter-select">
-                    <option value="all">所有学科</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- 加载中提示容器 -->
-        <div id="loadingContainer" class="loading-message" style="display: block;">
-            正在获取作业信息...
-        </div>
-
-        <!-- 作业内容将动态渲染到这里 -->
-        <div id="homeworkContainer" style="display: none;"></div>
-
-        <!-- 空状态提示容器（无作业时显示） -->
-        <div id="emptyContainer" class="empty-message" style="display: none;">
-            当前暂无需要通过此网页提交的作业或管理员未发布新的作业
-        </div>
-
-        <!-- 不显眼的作业码入口 -->
-        <div id="codeEntry" class="code-entry" style="display: none;">
-            <button class="code-link" id="codeLink">输入作业码</button>
-        </div>
-
-        <!-- 弹窗容器 -->
-        <div id="modalContainer" style="display: none;"></div>
-
-        <!-- 作业码弹窗容器 -->
-        <div id="codeModalContainer" style="display: none;"></div>
-
-        <div class="class-line" aria-hidden="true"></div>
+<div class="platform-container">
+    <div class="main-header">
+        <h1>初二五班在线应用平台</h1>
     </div>
 
-    <script>
-        (function() {
-            // 存储原始作业数据
-            let originalItems = [];
-            let filteredItems = [];
-            let currentSubject = 'all';
-            
-            // 存储作业码映射
-            let codeMap = new Map();
+    <!-- 轮播图区域 -->
+    <div class="carousel-section" id="carouselSection" style="display: none;">
+        <div class="carousel-wrapper">
+            <div class="carousel-track" id="carouselTrack"></div>
+        </div>
+        <div class="carousel-dots" id="carouselDots"></div>
+    </div>
 
-            // 解析RGB颜色字符串
-            function parseRgbColor(colorStr) {
-                if (!colorStr) return null;
-                const match = colorStr.match(/\[\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\]/);
+    <!-- 全部应用标题 -->
+    <div class="apps-header" id="appsHeader" style="display: none;">
+        <h2 class="apps-title">全部应用</h2>
+    </div>
+
+    <!-- 应用网格区域 -->
+    <div class="apps-grid" id="appsGrid">
+        <div class="loading-tip">⏳ 加载应用中...</div>
+    </div>
+</div>
+
+<script>
+    // ---------- 全局变量 ----------
+    let slidesData = [];      // 存储轮播图片对象 [{ imgUrl, linkUrl }]
+    let currentIndex = 0;
+    let autoInterval = null;
+    let totalSlides = 0;
+
+    // DOM 元素
+    const carouselSection = document.getElementById('carouselSection');
+    const carouselTrack = document.getElementById('carouselTrack');
+    const dotsContainer = document.getElementById('carouselDots');
+    const appsGrid = document.getElementById('appsGrid');
+    const appsHeader = document.getElementById('appsHeader');
+
+    // ---------- 解析 5app.txt 文件 ----------
+    async function loadDataFromFile() {
+        try {
+            const response = await fetch('./5app.txt', { cache: 'no-store' });
+            if (!response.ok) {
+                throw new Error(`无法读取文件 (HTTP ${response.status})`);
+            }
+            const text = await response.text();
+            parseAppTxt(text);
+        } catch (error) {
+            console.error('读取5app.txt失败:', error);
+            appsGrid.innerHTML = `<div class="error-tip">⚠️ 加载数据失败，请确保 “5app.txt” 文件存在于同目录下。<br>格式参考：<br>pic<br>[p=图片链接 l=跳转链接]<br>app<br>[n=应用名 p=图标 l=链接]</div>`;
+            carouselSection.style.display = 'none';
+            if (appsHeader) appsHeader.style.display = 'none';
+        }
+    }
+
+    // 解析文本
+    function parseAppTxt(rawText) {
+        const lines = rawText.split(/\r?\n/);
+        let mode = null;
+        let picItems = [];
+        let appItems = [];
+
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (line === '') continue;
+            if (line.toLowerCase() === 'pic') {
+                mode = 'pic';
+                continue;
+            } else if (line.toLowerCase() === 'app') {
+                mode = 'app';
+                continue;
+            }
+
+            if (mode === 'pic') {
+                const match = line.match(/\[p=([^\s\]]+)\s+l=([^\s\]]+)\]/);
                 if (match) {
-                    const r = parseInt(match[1]);
-                    const g = parseInt(match[2]);
-                    const b = parseInt(match[3]);
-                    if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
-                        return `rgb(${r}, ${g}, ${b})`;
-                    }
-                }
-                return null;
-            }
-
-            // 解析日期时间字符串
-            function parseDateTime(dateTimeStr) {
-                if (!dateTimeStr) return null;
-                const parts = dateTimeStr.split(' ');
-                if (parts.length !== 2) return null;
-                
-                const datePart = parts[0];
-                const timePart = parts[1];
-                
-                const dateParts = datePart.split('/');
-                if (dateParts.length !== 3) return null;
-                
-                const year = parseInt(dateParts[0]);
-                const month = parseInt(dateParts[1]) - 1;
-                const day = parseInt(dateParts[2]);
-                
-                const timeParts = timePart.split(':');
-                if (timeParts.length !== 2) return null;
-                
-                const hour = parseInt(timeParts[0]);
-                const minute = parseInt(timeParts[1]);
-                
-                return new Date(year, month, day, hour, minute, 0);
-            }
-
-            // 解析作业码块
-            function parseCodeBlock(block) {
-                const lines = block.split('\n');
-                const codes = [];
-                
-                for (let line of lines) {
-                    line = line.trim();
-                    if (line === '') continue;
-                    
-                    // 解析格式: num=作业码,link=访问链接
-                    const numMatch = line.match(/num=([^,]+)/);
-                    const linkMatch = line.match(/link=(\S+)/);
-                    
-                    if (numMatch && linkMatch) {
-                        const code = numMatch[1].trim();
-                        const link = linkMatch[1].trim();
-                        if (code && link) {
-                            codes.push({ code, link });
-                        }
-                    }
-                }
-                
-                return codes;
-            }
-
-            // 解析作业函数 - 只解析"""内的内容
-            function parseHomework(text) {
-                const items = [];
-                
-                // 先查找最后一个【】块（作业码块）- 这个可能在"""外部
-                const lastBracketMatch = text.match(/【([^】]*)】\s*$/);
-                let hasCodeBlock = false;
-                
-                if (lastBracketMatch) {
-                    // 提取作业码块
-                    const codeBlock = lastBracketMatch[1];
-                    const codes = parseCodeBlock(codeBlock);
-                    
-                    // 清空并重新填充codeMap
-                    codeMap.clear();
-                    codes.forEach(({ code, link }) => {
-                        codeMap.set(code, link);
+                    picItems.push({
+                        imgUrl: match[1].trim(),
+                        linkUrl: match[2].trim()
                     });
-                    
-                    // 标记有作业码块
-                    hasCodeBlock = codes.length > 0;
-                    
-                    // 移除最后一个【】块，处理剩余部分作为作业内容
-                    const lastBracketIndex = text.lastIndexOf('【');
-                    text = text.substring(0, lastBracketIndex).trim();
-                }
-                
-                // 解析作业内容 - 只处理"""内的内容
-                const rawBlocks = text.split(/"""/);
-                
-                for (let i = 0; i < rawBlocks.length; i++) {
-                    // 只处理奇数索引（即"""之间的内容）
-                    // 索引0是第一个"""之前的内容，索引1是第一个和第二个"""之间的内容，以此类推
-                    if (i % 2 === 1) {
-                        let block = rawBlocks[i].trim();
-                        if (block === '') continue;
-                        
-                        const lines = block.split('\n');
-                        let sub = '', name = '', link = '';
-                        let more = '';
-                        let moreColor = null;
-                        let startTimeStr = '';
-                        let endTimeStr = '';
-                        
-                        for (let line of lines) {
-                            line = line.trim();
-                            
-                            // 检查 more_colour[,,]
-                            const colorMatch = line.match(/more_colour\s*\[\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\]/);
-                            if (colorMatch) {
-                                const r = parseInt(colorMatch[1]);
-                                const g = parseInt(colorMatch[2]);
-                                const b = parseInt(colorMatch[3]);
-                                if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
-                                    moreColor = `rgb(${r}, ${g}, ${b})`;
-                                }
-                                continue;
-                            }
-                            
-                            if (line.startsWith('sub=')) {
-                                sub = line.substring(4).trim();
-                            } else if (line.startsWith('name=')) {
-                                name = line.substring(5).trim();
-                            } else if (line.startsWith('link=')) {
-                                link = line.substring(5).trim();
-                            } else if (line.startsWith('more=')) {
-                                more = line.substring(5).trim();
-                            } else if (line.startsWith('start_time=')) {
-                                startTimeStr = line.substring(11).trim();
-                            } else if (line.startsWith('end_time=')) {
-                                endTimeStr = line.substring(9).trim();
-                            }
-                        }
-                        
-                        const startTime = parseDateTime(startTimeStr);
-                        const endTime = parseDateTime(endTimeStr);
-                        
-                        if (sub || name || link || more || startTimeStr || endTimeStr) {
-                            items.push({ 
-                                sub: sub || '其他',
-                                name: name || '未命名作业',
-                                link,
-                                more: more,
-                                moreColor: moreColor,
-                                startTime: startTime,
-                                endTime: endTime,
-                                startTimeStr: startTimeStr,
-                                endTimeStr: endTimeStr
-                            });
-                        }
-                    }
-                }
-                
-                // 返回作业项和是否有作业码块的标记
-                return { items, hasCodeBlock };
-            }
-
-            // 解析通知文件
-            function parseNoticeFile(text) {
-                const lines = text.split('\n');
-                let head = '';
-                let message = '';
-                let board = '';
-                
-                for (let line of lines) {
-                    line = line.trim();
-                    if (line.startsWith('Head=')) {
-                        head = line.substring(5).trim();
-                    } else if (line.startsWith('Message=')) {
-                        message = line.substring(8).trim();
-                    } else if (line.startsWith('Board=')) {
-                        board = line.substring(6).trim();
-                    }
-                }
-                
-                return { head, message, board };
-            }
-
-            // 显示普通弹窗
-            function showModal(head, message) {
-                const modalContainer = document.getElementById('modalContainer');
-                
-                const modalOverlay = document.createElement('div');
-                modalOverlay.className = 'modal-overlay';
-                
-                const modal = document.createElement('div');
-                modal.className = 'modal';
-                
-                let modalHTML = '';
-                
-                modalHTML += '<button class="modal-close" id="modalCloseBtn">&times;</button>';
-                
-                if (head && head.trim() !== '') {
-                    modalHTML += `
-                        <div class="modal-header">
-                            <h2>${head}</h2>
-                        </div>
-                    `;
                 } else {
-                    modal.className += ' no-header';
-                }
-                
-                modalHTML += `
-                    <div class="modal-content">
-                        ${message.replace(/\n/g, '<br>')}
-                    </div>
-                    <div class="modal-footer">
-                        <button class="modal-btn" id="modalConfirmBtn">知道了</button>
-                    </div>
-                `;
-                
-                modal.innerHTML = modalHTML;
-                
-                modalOverlay.appendChild(modal);
-                modalContainer.innerHTML = '';
-                modalContainer.appendChild(modalOverlay);
-                modalContainer.style.display = 'block';
-                
-                document.getElementById('modalCloseBtn').addEventListener('click', function() {
-                    modalContainer.style.display = 'none';
-                });
-                
-                document.getElementById('modalConfirmBtn').addEventListener('click', function() {
-                    modalContainer.style.display = 'none';
-                });
-                
-                modalOverlay.addEventListener('click', function(e) {
-                    if (e.target === modalOverlay) {
-                        modalContainer.style.display = 'none';
-                    }
-                });
-            }
-
-            // 显示作业码弹窗
-            function showCodeModal() {
-                const codeModalContainer = document.getElementById('codeModalContainer');
-                
-                const modalOverlay = document.createElement('div');
-                modalOverlay.className = 'modal-overlay';
-                
-                const modal = document.createElement('div');
-                modal.className = 'modal';
-                
-                modal.innerHTML = `
-                    <button class="modal-close" id="codeModalCloseBtn">&times;</button>
-                    <div class="code-modal-content">
-                        <div class="code-modal-title">输入作业码</div>
-                        <input type="text" id="codeModalInput" class="code-modal-input" placeholder="请输入作业码" autocomplete="off">
-                        <div id="codeModalMessage" class="code-modal-message"></div>
-                        <div class="code-modal-buttons">
-                            <button class="code-modal-cancel" id="codeModalCancelBtn">取消</button>
-                            <button class="code-modal-submit" id="codeModalSubmitBtn">前往作业</button>
-                        </div>
-                    </div>
-                `;
-                
-                modalOverlay.appendChild(modal);
-                codeModalContainer.innerHTML = '';
-                codeModalContainer.appendChild(modalOverlay);
-                codeModalContainer.style.display = 'block';
-                
-                const input = document.getElementById('codeModalInput');
-                input.focus();
-                
-                // 关闭弹窗函数
-                function closeCodeModal() {
-                    codeModalContainer.style.display = 'none';
-                }
-                
-                // 处理作业码提交
-                function handleCodeSubmit() {
-                    const code = input.value.trim();
-                    const messageEl = document.getElementById('codeModalMessage');
-                    
-                    if (!code) {
-                        messageEl.className = 'code-modal-message error';
-                        messageEl.textContent = '请输入作业码';
-                        return;
-                    }
-                    
-                    const link = codeMap.get(code);
-                    
-                    if (link) {
-                        window.open(link, '_blank');
-                        messageEl.className = 'code-modal-message success';
-                        messageEl.textContent = '正在跳转...';
-                        input.value = '';
-                        
-                        setTimeout(() => {
-                            closeCodeModal();
-                        }, 500);
-                    } else {
-                        messageEl.className = 'code-modal-message error';
-                        messageEl.textContent = '作业码无效，请重新输入';
-                        input.value = '';
-                        input.focus();
-                        
-                        setTimeout(() => {
-                            messageEl.textContent = '';
-                            messageEl.className = 'code-modal-message';
-                        }, 2000);
+                    const altMatch = line.match(/\[p=(.+?)\s+l=(.+?)\]/);
+                    if (altMatch) {
+                        picItems.push({
+                            imgUrl: altMatch[1].trim(),
+                            linkUrl: altMatch[2].trim()
+                        });
                     }
                 }
-                
-                // 绑定事件
-                document.getElementById('codeModalCloseBtn').addEventListener('click', closeCodeModal);
-                document.getElementById('codeModalCancelBtn').addEventListener('click', closeCodeModal);
-                document.getElementById('codeModalSubmitBtn').addEventListener('click', handleCodeSubmit);
-                
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        handleCodeSubmit();
-                    }
-                });
-                
-                modalOverlay.addEventListener('click', function(e) {
-                    if (e.target === modalOverlay) {
-                        closeCodeModal();
-                    }
-                });
-            }
-
-            // 显示滚动公告
-            function showNoticeBoard(board) {
-                const noticeBoard = document.getElementById('noticeBoard');
-                const noticeBoardContent = document.getElementById('noticeBoardContent');
-                
-                if (board) {
-                    noticeBoardContent.textContent = board;
-                    noticeBoard.style.display = 'block';
-                } else {
-                    noticeBoard.style.display = 'none';
-                }
-            }
-
-            // 显示/隐藏作业码入口
-            function updateCodeEntry() {
-                const codeEntry = document.getElementById('codeEntry');
-                if (codeMap.size > 0) {
-                    codeEntry.style.display = 'block';
-                } else {
-                    codeEntry.style.display = 'none';
-                }
-            }
-
-            function getSubjectClass(sub) {
-                if (!sub) return 'subject-other';
-                const subLower = sub.trim().toLowerCase();
-                if (subLower.includes('语文')) return 'subject-chinese';
-                if (subLower.includes('数学')) return 'subject-math';
-                if (subLower.includes('英语')) return 'subject-english';
-                return 'subject-other';
-            }
-
-            function getSubjectText(sub) {
-                return sub || '作业';
-            }
-
-            function getButtonState(item) {
-                const now = new Date();
-                
-                if (!item.link || item.link.trim() === '') {
-                    return { disabled: true, text: '已截止' };
-                }
-                
-                if (item.startTime && now < item.startTime) {
-                    return { disabled: true, text: '待开始' };
-                }
-                
-                if (item.endTime && now > item.endTime) {
-                    return { disabled: true, text: '已截止' };
-                }
-                
-                return { disabled: false, text: '去提交' };
-            }
-
-            function getTimeHint(item) {
-                const now = new Date();
-                
-                if (!item.startTime && !item.endTime) {
-                    return null;
-                }
-                
-                if (item.startTime && now < item.startTime) {
-                    return `开始：${item.startTimeStr}`;
-                }
-                
-                if (item.endTime) {
-                    return `截止：${item.endTimeStr}`;
-                }
-                
-                return null;
-            }
-
-            function getUniqueSubjects(items) {
-                const subjects = new Set();
-                items.forEach(item => {
-                    if (item.sub) {
-                        subjects.add(item.sub);
-                    }
-                });
-                return Array.from(subjects).sort();
-            }
-
-            function updateSubjectFilter(items) {
-                const subjectFilter = document.getElementById('subjectFilter');
-                const subjects = getUniqueSubjects(items);
-                
-                const currentValue = subjectFilter.value;
-                
-                subjectFilter.innerHTML = '<option value="all">所有学科</option>';
-                subjects.forEach(subject => {
-                    const option = document.createElement('option');
-                    option.value = subject;
-                    option.textContent = subject;
-                    subjectFilter.appendChild(option);
-                });
-                
-                if (subjects.includes(currentValue)) {
-                    subjectFilter.value = currentValue;
-                    currentSubject = currentValue;
-                } else {
-                    subjectFilter.value = 'all';
-                    currentSubject = 'all';
-                }
-            }
-
-            function filterItems() {
-                if (!originalItems.length) return [];
-                
-                if (currentSubject === 'all') {
-                    return [...originalItems];
-                } else {
-                    return originalItems.filter(item => item.sub === currentSubject);
-                }
-            }
-
-            function applyFilter() {
-                filteredItems = filterItems();
-                renderHomework(filteredItems);
-            }
-
-            function renderHomework(items) {
-                const loadingEl = document.getElementById('loadingContainer');
-                const homeworkEl = document.getElementById('homeworkContainer');
-                const emptyEl = document.getElementById('emptyContainer');
-                
-                if (!homeworkEl) return;
-
-                loadingEl.style.display = 'none';
-
-                if (items.length === 0) {
-                    if (originalItems.length === 0) {
-                        homeworkEl.style.display = 'none';
-                        emptyEl.style.display = 'block';
-                    } else {
-                        homeworkEl.style.display = 'none';
-                        emptyEl.style.display = 'none';
-                        const tempDiv = document.createElement('div');
-                        tempDiv.className = 'empty-message';
-                        tempDiv.textContent = '没有找到该学科的作业';
-                        homeworkEl.parentNode.insertBefore(tempDiv, homeworkEl.nextSibling);
-                        setTimeout(() => {
-                            if (tempDiv.parentNode) tempDiv.remove();
-                        }, 2000);
-                    }
-                } else {
-                    homeworkEl.style.display = 'block';
-                    emptyEl.style.display = 'none';
-                    homeworkEl.innerHTML = '';
-
-                    const section = document.createElement('div');
-                    section.className = 'homework-section';
-
-                    items.forEach(item => {
-                        const subjectClass = getSubjectClass(item.sub);
-                        const subjectDisplay = getSubjectText(item.sub);
-                        
-                        const itemDiv = document.createElement('div');
-                        itemDiv.className = 'homework-item';
-
-                        const rowDiv = document.createElement('div');
-                        rowDiv.className = 'homework-row';
-
-                        const subjectContainer = document.createElement('div');
-                        subjectContainer.className = 'subject-container';
-
-                        const subSpan = document.createElement('span');
-                        subSpan.className = `subject-tag ${subjectClass}`;
-                        subSpan.textContent = subjectDisplay;
-                        subjectContainer.appendChild(subSpan);
-
-                        const nameContainer = document.createElement('div');
-                        nameContainer.className = 'name-container';
-
-                        const timeHint = getTimeHint(item);
-                        if (timeHint) {
-                            const hintDiv = document.createElement('div');
-                            hintDiv.className = 'time-hint';
-                            hintDiv.textContent = timeHint;
-                            nameContainer.appendChild(hintDiv);
-                        }
-
-                        const nameSpan = document.createElement('span');
-                        nameSpan.className = 'homework-name';
-                        nameSpan.textContent = item.name || '未命名作业';
-                        nameContainer.appendChild(nameSpan);
-
-                        const buttonState = getButtonState(item);
-                        
-                        let linkBtn;
-                        if (buttonState.disabled) {
-                            linkBtn = document.createElement('span');
-                            linkBtn.className = 'homework-link-disabled';
-                            linkBtn.textContent = buttonState.text;
-                        } else {
-                            linkBtn = document.createElement('a');
-                            linkBtn.className = 'homework-link';
-                            linkBtn.href = item.link;
-                            linkBtn.target = '_blank';
-                            linkBtn.rel = 'noopener noreferrer';
-                            linkBtn.textContent = buttonState.text;
-                        }
-
-                        rowDiv.appendChild(subjectContainer);
-                        rowDiv.appendChild(nameContainer);
-                        rowDiv.appendChild(linkBtn);
-                        itemDiv.appendChild(rowDiv);
-
-                        // 只保留more=内容的显示
-                        if (item.more) {
-                            const msgDiv = document.createElement('div');
-                            msgDiv.className = 'more-message';
-                            msgDiv.textContent = item.more;
-                            if (item.moreColor) {
-                                msgDiv.style.color = item.moreColor;
-                            }
-                            itemDiv.appendChild(msgDiv);
-                        }
-                        
-                        section.appendChild(itemDiv);
+            } 
+            else if (mode === 'app') {
+                const match = line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)\]/);
+                if (match) {
+                    appItems.push({
+                        name: match[1].trim(),
+                        icon: match[2].trim(),
+                        link: match[3].trim()
                     });
-
-                    homeworkEl.appendChild(section);
-                }
-                
-                // 更新作业码入口显示 - 只要codeMap有内容就显示，无论是否有作业
-                updateCodeEntry();
-            }
-
-            // 加载通知文件
-            function loadNoticeFile() {
-                const url = './homework-notice.txt?t=' + new Date().getTime();
-                
-                return fetch(url, {
-                    cache: 'no-store',
-                    headers: {
-                        'Pragma': 'no-cache',
-                        'Cache-Control': 'no-cache'
+                } else {
+                    const altMatch = line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)\]/);
+                    if (altMatch) {
+                        appItems.push({
+                            name: altMatch[1].trim(),
+                            icon: altMatch[2].trim(),
+                            link: altMatch[3].trim()
+                        });
                     }
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`无法读取通知文件`);
-                        }
-                        return response.text();
-                    })
-                    .then(text => {
-                        const { head, message, board } = parseNoticeFile(text);
-                        
-                        showNoticeBoard(board);
-                        
-                        if (head) {
-                            showModal(head, message || '');
-                        }
-                    })
-                    .catch(error => {
-                        console.warn('读取 homework-notice.txt 失败', error);
-                    });
-            }
-
-            // 加载作业数据
-            function loadHomework() {
-                setLoadingState(true);
-                
-                const url = './homework.txt?t=' + new Date().getTime();
-                
-                fetch(url, {
-                    cache: 'no-store',
-                    headers: {
-                        'Pragma': 'no-cache',
-                        'Cache-Control': 'no-cache'
-                    }
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`无法读取文件 (${response.status})`);
-                        }
-                        return response.text();
-                    })
-                    .then(text => {
-                        const { items, hasCodeBlock } = parseHomework(text);
-                        originalItems = items;
-                        filteredItems = [...originalItems];
-                        
-                        updateSubjectFilter(originalItems);
-                        
-                        currentSubject = 'all';
-                        document.getElementById('subjectFilter').value = 'all';
-                        
-                        renderHomework(filteredItems);
-                        
-                        // 注意：updateCodeEntry已经在renderHomework中调用
-                    })
-                    .catch(error => {
-                        console.warn('读取 homework.txt 失败，视为空文件。', error);
-                        originalItems = [];
-                        filteredItems = [];
-                        renderHomework([]);
-                    });
-            }
-
-            function setLoadingState(isLoading) {
-                const loadingEl = document.getElementById('loadingContainer');
-                const homeworkEl = document.getElementById('homeworkContainer');
-                const emptyEl = document.getElementById('emptyContainer');
-                
-                if (isLoading) {
-                    loadingEl.style.display = 'block';
-                    homeworkEl.style.display = 'none';
-                    emptyEl.style.display = 'none';
                 }
             }
+        }
 
-            // 初始化
-            function initialize() {
-                loadNoticeFile().finally(() => {
-                    loadHomework();
-                });
-            }
+        // 处理轮播图
+        if (picItems.length > 0) {
+            slidesData = picItems;
+            renderCarousel();
+            carouselSection.style.display = 'block';
+            startAutoSlide();
+        } else {
+            carouselSection.style.display = 'none';
+            if (autoInterval) clearInterval(autoInterval);
+        }
 
-            // 绑定刷新按钮事件
-            document.getElementById('refreshBtn').addEventListener('click', function() {
-                loadHomework();
+        // 处理应用网格
+        if (appItems.length > 0) {
+            // 显示"全部应用"标题
+            if (appsHeader) appsHeader.style.display = 'block';
+            renderApps(appItems);
+        } else {
+            appsGrid.innerHTML = '<div class="empty-tip">📭 暂无应用数据，请在5app.txt的[app]下方添加应用</div>';
+            if (appsHeader) appsHeader.style.display = 'none';
+        }
+    }
+
+    // ---------- 轮播图渲染 (支持触摸滑动，无左右箭头) ----------
+    function renderCarousel() {
+        if (!carouselTrack) return;
+        totalSlides = slidesData.length;
+        if (totalSlides === 0) return;
+
+        let slidesHtml = '';
+        for (let i = 0; i < slidesData.length; i++) {
+            const slide = slidesData[i];
+            const link = slide.linkUrl && slide.linkUrl.startsWith('http') ? slide.linkUrl : (slide.linkUrl ? slide.linkUrl : 'javascript:void(0)');
+            slidesHtml += `
+                <div class="carousel-slide">
+                    <a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">
+                        <img src="${escapeHtml(slide.imgUrl)}" alt="轮播图 ${i+1}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22400%22%20height%3D%22225%22%20viewBox%3D%220%200%20400%20225%22%3E%3Crect%20width%3D%22400%22%20height%3D%22225%22%20fill%3D%22%23cccccc%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20fill%3D%22%23666%22%3E%E5%9B%BE%E7%89%87%E5%8A%A0%E8%BD%BD%E5%A4%B1%E8%B4%A5%3C%2Ftext%3E%3C%2Fsvg%3E'">
+                    </a>
+                </div>
+            `;
+        }
+        carouselTrack.innerHTML = slidesHtml;
+        
+        let dotsHtml = '';
+        for (let i = 0; i < totalSlides; i++) {
+            dotsHtml += `<div class="dot ${i === currentIndex ? 'active' : ''}" data-index="${i}"></div>`;
+        }
+        dotsContainer.innerHTML = dotsHtml;
+        updateCarouselPosition();
+
+        document.querySelectorAll('.dot').forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                const idx = parseInt(dot.getAttribute('data-index'), 10);
+                if (!isNaN(idx) && idx !== currentIndex) {
+                    currentIndex = idx;
+                    updateCarouselPosition();
+                    resetAutoSlide();
+                    updateDotsActive();
+                }
+                e.stopPropagation();
             });
+        });
 
-            // 绑定学科筛选事件
-            document.getElementById('subjectFilter').addEventListener('change', function(e) {
-                currentSubject = e.target.value;
-                applyFilter();
-            });
+        initSwipe();
+    }
 
-            // 绑定作业码入口点击事件
-            document.getElementById('codeLink').addEventListener('click', function() {
-                showCodeModal();
-            });
+    function updateCarouselPosition() {
+        if (!carouselTrack) return;
+        const shift = -currentIndex * 100;
+        carouselTrack.style.transform = `translateX(${shift}%)`;
+    }
 
-            window.addEventListener('load', initialize);
-        })();
-    </script>
+    function updateDotsActive() {
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((dot, idx) => {
+            if (idx === currentIndex) dot.classList.add('active');
+            else dot.classList.remove('active');
+        });
+    }
+
+    function nextSlide() {
+        if (totalSlides === 0) return;
+        currentIndex = (currentIndex + 1) % totalSlides;
+        updateCarouselPosition();
+        updateDotsActive();
+    }
+
+    function prevSlide() {
+        if (totalSlides === 0) return;
+        currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+        updateCarouselPosition();
+        updateDotsActive();
+    }
+
+    function startAutoSlide() {
+        if (autoInterval) clearInterval(autoInterval);
+        if (totalSlides <= 1) return;
+        autoInterval = setInterval(() => {
+            nextSlide();
+        }, 5000);
+    }
+
+    function resetAutoSlide() {
+        if (totalSlides <= 1) return;
+        if (autoInterval) clearInterval(autoInterval);
+        autoInterval = setInterval(() => {
+            nextSlide();
+        }, 5000);
+    }
+
+    // 手动滑动（触摸/鼠标拖拽）
+    function initSwipe() {
+        if (!carouselTrack) return;
+        const wrapper = carouselTrack.parentElement;
+        if (!wrapper) return;
+
+        let startX = 0;
+        let startY = 0;
+        let isSwiping = false;
+        let startTransform = 0;
+
+        const onTouchStart = (e) => {
+            if (totalSlides <= 1) return;
+            const touch = e.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+            isSwiping = true;
+            startTransform = currentIndex;
+            carouselTrack.style.transition = 'none';
+            if (autoInterval) clearInterval(autoInterval);
+        };
+
+        const onTouchMove = (e) => {
+            if (!isSwiping || totalSlides <= 1) return;
+            const touch = e.touches[0];
+            const diffX = touch.clientX - startX;
+            const diffY = touch.clientY - startY;
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 8) {
+                e.preventDefault();
+            }
+            const wrapperWidth = wrapper.clientWidth;
+            const offsetPercent = (diffX / wrapperWidth) * 100;
+            let newPercent = -startTransform * 100 + offsetPercent;
+            if (startTransform === 0 && diffX > 0) newPercent = newPercent * 0.3;
+            if (startTransform === totalSlides - 1 && diffX < 0) newPercent = -startTransform * 100 + (diffX / wrapperWidth) * 100 * 0.3;
+            carouselTrack.style.transform = `translateX(${newPercent}%)`;
+        };
+
+        const onTouchEnd = (e) => {
+            if (!isSwiping || totalSlides <= 1) {
+                isSwiping = false;
+                carouselTrack.style.transition = '';
+                resetAutoSlide();
+                return;
+            }
+            isSwiping = false;
+            const endX = e.changedTouches ? e.changedTouches[0].clientX : startX;
+            const diffX = endX - startX;
+            const threshold = 35;
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) {
+                    prevSlide();
+                } else {
+                    nextSlide();
+                }
+            }
+            updateCarouselPosition();
+            carouselTrack.style.transition = '';
+            resetAutoSlide();
+        };
+
+        let mouseDown = false;
+        let mouseStartX = 0;
+        let mouseStartTransform = 0;
+        const onMouseDown = (e) => {
+            if (totalSlides <= 1) return;
+            e.preventDefault();
+            mouseDown = true;
+            mouseStartX = e.clientX;
+            mouseStartTransform = currentIndex;
+            carouselTrack.style.transition = 'none';
+            if (autoInterval) clearInterval(autoInterval);
+        };
+        const onMouseMove = (e) => {
+            if (!mouseDown || totalSlides <= 1) return;
+            const diffX = e.clientX - mouseStartX;
+            const wrapperWidth = wrapper.clientWidth;
+            const offsetPercent = (diffX / wrapperWidth) * 100;
+            let newPercent = -mouseStartTransform * 100 + offsetPercent;
+            if (mouseStartTransform === 0 && diffX > 0) newPercent = newPercent * 0.3;
+            if (mouseStartTransform === totalSlides - 1 && diffX < 0) newPercent = -mouseStartTransform * 100 + (diffX / wrapperWidth) * 100 * 0.3;
+            carouselTrack.style.transform = `translateX(${newPercent}%)`;
+        };
+        const onMouseUp = (e) => {
+            if (!mouseDown) return;
+            mouseDown = false;
+            const diffX = e.clientX - mouseStartX;
+            const threshold = 35;
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) prevSlide();
+                else nextSlide();
+            }
+            updateCarouselPosition();
+            carouselTrack.style.transition = '';
+            resetAutoSlide();
+        };
+
+        wrapper.addEventListener('touchstart', onTouchStart, { passive: false });
+        wrapper.addEventListener('touchmove', onTouchMove, { passive: false });
+        wrapper.addEventListener('touchend', onTouchEnd);
+        wrapper.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+    }
+
+    // 应用网格渲染
+    function renderApps(apps) {
+        if (!appsGrid) return;
+        if (!apps.length) {
+            appsGrid.innerHTML = '<div class="empty-tip">✨ 暂无应用，请联系老师添加</div>';
+            return;
+        }
+        let appsHtml = '';
+        for (let app of apps) {
+            const name = escapeHtml(app.name) || '应用';
+            const iconUrl = app.icon && app.icon.trim() !== '' ? app.icon : 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2256%22%20height%3D%2256%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%234a90e2%22%3E%3Cpath%20d%3D%22M4%204h16v16H4z%22%20fill%3D%22%23eef2ff%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dy%3D%22.3em%22%20text-anchor%3D%22middle%22%20fill%3D%22%23333%22%3E📱%3C%2Ftext%3E%3C%2Fsvg%3E';
+            const link = app.link && app.link.startsWith('http') ? app.link : (app.link ? app.link : 'javascript:void(0)');
+            appsHtml += `
+                <a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer" class="app-card">
+                    <img class="app-icon" src="${escapeHtml(iconUrl)}" alt="${name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2256%22%20height%3D%2256%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%23999%22%3E%3Crect%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23666%22%3E?%3C%2Ftext%3E%3C%2Fsvg%3E'">
+                    <span class="app-name">${name}</span>
+                </a>
+            `;
+        }
+        appsGrid.innerHTML = appsHtml;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            if (autoInterval) clearInterval(autoInterval);
+        } else {
+            if (totalSlides > 1 && carouselSection.style.display !== 'none') {
+                if (autoInterval) clearInterval(autoInterval);
+                autoInterval = setInterval(() => nextSlide(), 5000);
+            }
+        }
+    });
+
+    loadDataFromFile();
+</script>
 </body>
 </html>
