@@ -251,4 +251,183 @@
             if (isLoading) return false;
 
             isLoading = true;
-            schoolListContainer.innerHTML = '<div class="loading-text">加载规则文件中...<
+            schoolListContainer.innerHTML = '<div class="loading-text">加载规则文件中...</div>';
+            try {
+                const url = 'zrrule.txt?_=' + Date.now();
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const text = await response.text();
+                // 解析文本: 每行格式 "[学校名][规则]"
+                // 示例: [第一中学][值日码为年级+班级+学号后两位]
+                //      [光明小学][规则: 学号前两位代表年份]
+                const lines = text.split(/\r?\n/);
+                const parsed = [];
+                for (let line of lines) {
+                    line = line.trim();
+                    if (line === "") continue;
+                    
+                    // 匹配两对中括号: [学校名][规则]
+                    // 使用正则匹配第一个 [xxx] 和第二个 [xxx]
+                    const bracketPattern = /^\[([^\]]+)\]\[(.*)\]$/;
+                    const match = line.match(bracketPattern);
+                    
+                    if (match) {
+                        let schoolName = match[1].trim();
+                        let ruleContent = match[2].trim();
+                        if (schoolName !== "") {
+                            parsed.push({ name: schoolName, rule: ruleContent || "(无具体规则文本)" });
+                        }
+                    } else {
+                        // 格式错误，静默跳过，不显示警告
+                        console.warn(`跳过无效行: ${line}`);
+                        continue;
+                    }
+                }
+                
+                if (parsed.length === 0) {
+                    // 没有有效数据，显示"暂无支持的学校"
+                    schoolListContainer.innerHTML = '<div class="empty-text">暂无支持的学校</div>';
+                    loadError = true;
+                    isLoading = false;
+                    return false;
+                }
+                schoolsData = parsed;
+                renderSchoolList();
+                isLoading = false;
+                return true;
+            } catch (err) {
+                console.error("读取规则文件失败: ", err);
+                schoolListContainer.innerHTML = '<div class="empty-text">暂无支持的学校</div>';
+                loadError = true;
+                isLoading = false;
+                return false;
+            }
+        }
+
+        // 渲染学校列表
+        function renderSchoolList() {
+            if (!schoolListContainer) return;
+            if (schoolsData.length === 0) {
+                schoolListContainer.innerHTML = '<div class="empty-text">暂无支持的学校</div>';
+                return;
+            }
+            schoolListContainer.innerHTML = '';
+            for (let i = 0; i < schoolsData.length; i++) {
+                const school = schoolsData[i];
+                const divItem = document.createElement('div');
+                divItem.className = 'school-item';
+                divItem.textContent = school.name;
+                divItem.addEventListener('click', (function(idx) {
+                    return function() { showRuleDetail(idx); };
+                })(i));
+                schoolListContainer.appendChild(divItem);
+            }
+        }
+
+        // 显示某个学校的规则详情
+        function showRuleDetail(index) {
+            if (!schoolsData[index]) return;
+            const school = schoolsData[index];
+            const detailHtml = `
+                <div class="rule-detail">
+                    <strong>${escapeHtml(school.name)}</strong><br>
+                    <span style="display:inline-block; margin-top:6px;">${escapeHtml(school.rule)}</span>
+                </div>
+                <button id="closeDetailBtn" class="close-detail">关闭详情</button>
+            `;
+            ruleDetailArea.innerHTML = detailHtml;
+            ruleDetailArea.style.display = 'block';
+            const closeBtn = document.getElementById('closeDetailBtn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    ruleDetailArea.style.display = 'none';
+                    ruleDetailArea.innerHTML = '';
+                });
+            }
+            ruleDetailArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // 简易防XSS
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        // 处理面板的显示/隐藏
+        let panelVisible = false;
+        async function toggleRulePanel() {
+            if (panelVisible) {
+                rulePanel.classList.remove('show');
+                panelVisible = false;
+                return;
+            }
+            rulePanel.classList.add('show');
+            panelVisible = true;
+            
+            // 如果还没有加载数据且没有加载错误，则加载文件
+            if (schoolsData.length === 0 && !loadError) {
+                await fetchRuleFile();
+            } else if (schoolsData.length === 0 && loadError) {
+                // 已经尝试加载过但无数据，列表中已显示"暂无支持的学校"
+                // 无需额外操作
+            } else if (schoolsData.length > 0 && schoolListContainer.children.length === 0) {
+                renderSchoolList();
+            }
+        }
+
+        // 查询跳转函数
+        function performQuery() {
+            let rawValue = studentInput.value;
+            const trimmed = rawValue.trim();
+            if (trimmed === '') {
+                setWarning('学号或码号不能为空');
+                studentInput.focus();
+                return;
+            }
+            clearWarning();
+            const encoded = encodeURIComponent(trimmed);
+            const targetUrl = `https://luckynum.top/zhiri?${encoded}`;
+            window.location.href = targetUrl;
+        }
+
+        // 绑定查询按钮 + 回车
+        queryBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            performQuery();
+        });
+        studentInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performQuery();
+            }
+        });
+        studentInput.addEventListener('input', function() {
+            if (warningDiv.innerText !== '') warningDiv.innerText = '';
+        });
+
+        // 蓝体字超链接点击事件
+        toggleRuleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            toggleRulePanel();
+        });
+
+        // 页面加载时静默预加载规则文件
+        function silentPreloadRules() {
+            if (schoolsData.length === 0 && !loadError && !isLoading) {
+                fetchRuleFile().catch(e => console.warn);
+            }
+        }
+        window.addEventListener('load', function() {
+            setTimeout(silentPreloadRules, 300);
+        });
+    })();
+</script>
+</body>
+</html>
