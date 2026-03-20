@@ -203,7 +203,7 @@
     
     <!-- 蓝体字超链接：放在输入框下方，查询按钮上方 -->
     <div>
-        <span id="toggleRuleBtn" class="rule-link">查询值日码规则</span>
+        <span id="toggleRuleBtn" class="rule-link">查询码号规则</span>
     </div>
     
     <button class="query-btn" id="queryBtn">查询</button>
@@ -211,7 +211,7 @@
     <!-- 规则展示面板 -->
     <div id="rulePanel" class="rule-panel">
         <div id="schoolListContainer" class="school-list">
-            <div class="loading-text">加载规则文件中...</div>
+            <div class="loading-text">查找学校中...</div>
         </div>
         <div id="ruleDetailArea" style="display: none;">
             <!-- 动态显示学校规则详情 -->
@@ -251,7 +251,7 @@
             if (isLoading) return false;
 
             isLoading = true;
-            schoolListContainer.innerHTML = '<div class="loading-text">加载规则文件中...</div>';
+            schoolListContainer.innerHTML = '<div class="loading-text">查找学校中...</div>';
             try {
                 const url = 'zrrule.txt?_=' + Date.now();
                 const response = await fetch(url);
