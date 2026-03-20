@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>初二五班在线应用平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖动图片时产生不友好效果，不影响点击 */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f5f7fc 0%, #eef2f8 100%);
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            padding: 0 0 40px 0;
+            min-height: 100vh;
+        }
+
+        /* 主容器 */
+        .platform-container {
+            max-width: 550px;
+            margin: 0 auto;
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border-radius: 0 0 32px 32px;
+            overflow-x: hidden;
+        }
+
+        /* 标题置顶端居中 */
+        .main-header {
+            text-align: center;
+            padding: 20px 16px 12px;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: blur(0px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .main-header h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e3c72, #2b4c8a);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        /* 轮播区样式 */
+        .carousel-section {
+            margin: 12px 16px 24px;
+            border-radius: 28px;
+            background: #f0f2f6;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        .carousel-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 28px;
+        }
+        .carousel-track {
+            display: flex;
+            transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            cursor: grab;
+        }
+        .carousel-track:active {
+            cursor: grabbing;
+        }
+        .carousel-slide {
+            flex: 0 0 100%;
+            width: 100%;
+            position: relative;
+        }
+        .carousel-slide a {
+            display: block;
+            width: 100%;
+            text-decoration: none;
+        }
+        .carousel-slide img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+            background: #d9dde3;
+            aspect-ratio: 16 / 9; /* 统一比例，美观，但根据实际图片自适应 */
+            pointer-events: auto;
+        }
+
+        /* 左右滑动按钮 (箭头) */
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(6px);
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .carousel-btn:hover {
+            background: rgba(0, 0, 0, 0.65);
+            transform: translateY(-50%) scale(1.02);
+        }
+        .btn-prev {
+            left: 12px;
+        }
+        .btn-next {
+            right: 12px;
+        }
+        /* 指示点 */
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 0 14px;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(4px);
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: #bbb;
+            border-radius: 50%;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .dot.active {
+            width: 24px;
+            background: #2b4c8a;
+            border-radius: 12px;
+        }
+
+        /* 应用区域: 正方形网格布局 */
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 20px 16px;
+            padding: 16px 20px 30px;
+            background: white;
+        }
+
+        /* 每个正方形应用卡片 - 图标在上，文字在下，都在正方形内，无按钮样式 */
+        .app-card {
+            aspect-ratio: 1 / 1; /* 强制正方形 */
+            background: #f9fafc;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0,0,0,0.02);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            cursor: pointer;
+            padding: 16px 8px;
+        }
+        .app-card:hover {
+            transform: translateY(-4px);
+            background: #ffffff;
+            box-shadow: 0 18px 28px -8px rgba(0, 0, 0, 0.12);
+            border-color: rgba(43, 76, 138, 0.2);
+        }
+        /* 应用图标样式 */
+        .app-icon {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            margin-bottom: 14px;
+            display: block;
+            border-radius: 16px;
+            background: #f0f2f5;
+            padding: 4px;
+        }
+        .app-name {
+            font-size: 0.9rem;
+            font-weight: 590;
+            color: #1f2937;
+            text-align: center;
+            word-break: break-word;
+            line-height: 1.3;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        /* 加载状态 & 空状态 */
+        .loading-tip, .empty-tip {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+            font-size: 0.9rem;
+            background: white;
+        }
+        .error-tip {
+            color: #c62828;
+            background: #fff5f5;
+            border-radius: 20px;
+            margin: 20px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .apps-grid {
+                gap: 14px 12px;
+                padding: 16px 16px 30px;
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+            .app-icon {
+                width: 52px;
+                height: 52px;
+            }
+            .app-name {
+                font-size: 0.8rem;
+            }
+            .main-header h1 {
+                font-size: 1.6rem;
+            }
+        }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #aaa;
+            padding: 16px;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+<div class="platform-container">
+    <div class="main-header">
+        <h1>📱 初二五班在线应用平台</h1>
+    </div>
+
+    <!-- 轮播图区域 -->
+    <div class="carousel-section" id="carouselSection" style="display: none;">
+        <div class="carousel-wrapper">
+            <div class="carousel-track" id="carouselTrack"></div>
+            <button class="carousel-btn btn-prev" id="prevBtn" aria-label="上一张">‹</button>
+            <button class="carousel-btn btn-next" id="nextBtn" aria-label="下一张">›</button>
+        </div>
+        <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+
+    <!-- 应用网格区域 -->
+    <div class="apps-grid" id="appsGrid">
+        <div class="loading-tip">⏳ 加载应用中...</div>
+    </div>
+    <footer>初二五班 · 智慧校园</footer>
+</div>
+
+<script>
+    // ---------- 全局变量 ----------
+    let slidesData = [];      // 存储轮播图片对象 [{ imgUrl, linkUrl }]
+    let currentIndex = 0;
+    let autoInterval = null;
+    let isDragging = false;
+    let startX = 0;
+    let currentTranslate = 0;
+    let track = null;
+    let totalSlides = 0;
+
+    // DOM 元素
+    const carouselSection = document.getElementById('carouselSection');
+    const carouselTrack = document.getElementById('carouselTrack');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const dotsContainer = document.getElementById('carouselDots');
+    const appsGrid = document.getElementById('appsGrid');
+
+    // ---------- 解析 5app.txt 文件 ----------
+    // 文件格式: 第一部分 [pic] 段落, 第二部分 [app] 段落
+    // 示例内容:
+    // pic
+    // [p=图片链接 l=点击图片后转跳的链接]
+    // [p=图片2链接 l=点击图片2后转跳的链接]
+    // app
+    // [n=应用名 p=图标 l=点击后转跳链接]
+    // [n=应用2名 p=图标2 l=链接2]
+    async function loadDataFromFile() {
+        try {
+            const response = await fetch('./5app.txt', { cache: 'no-store' });
+            if (!response.ok) {
+                throw new Error(`无法读取文件 (HTTP ${response.status})`);
+            }
+            const text = await response.text();
+            parseAppTxt(text);
+        } catch (error) {
+            console.error('读取5app.txt失败:', error);
+            appsGrid.innerHTML = `<div class="error-tip">⚠️ 加载数据失败，请确保 “5app.txt” 文件存在于同目录下。<br>格式参考：<br>pic<br>[p=图片链接 l=跳转链接]<br>app<br>[n=应用名 p=图标 l=链接]</div>`;
+            carouselSection.style.display = 'none';
+        }
+    }
+
+    // 解析文本
+    function parseAppTxt(rawText) {
+        // 按行处理，但注意可能包含换行符，我们按行分割
+        const lines = rawText.split(/\r?\n/);
+        let mode = null; // 'pic' or 'app'
+        let picItems = [];
+        let appItems = [];
+
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (line === '') continue;
+            // 识别模式标记
+            if (line.toLowerCase() === 'pic') {
+                mode = 'pic';
+                continue;
+            } else if (line.toLowerCase() === 'app') {
+                mode = 'app';
+                continue;
+            }
+
+            // 根据当前模式解析
+            if (mode === 'pic') {
+                // 匹配 [p=... l=...]
+                const match = line.match(/\[p=([^\s\]]+)\s+l=([^\s\]]+)\]/);
+                if (match) {
+                    picItems.push({
+                        imgUrl: match[1].trim(),
+                        linkUrl: match[2].trim()
+                    });
+                } else {
+                    // 宽松匹配，防止格式微小差异: 可能含有空格
+                    const altMatch = line.match(/\[p=(.+?)\s+l=(.+?)\]/);
+                    if (altMatch) {
+                        picItems.push({
+                            imgUrl: altMatch[1].trim(),
+                            linkUrl: altMatch[2].trim()
+                        });
+                    }
+                }
+            } 
+            else if (mode === 'app') {
+                // 匹配 [n=... p=... l=...]
+                const match = line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)\]/);
+                if (match) {
+                    appItems.push({
+                        name: match[1].trim(),
+                        icon: match[2].trim(),
+                        link: match[3].trim()
+                    });
+                } else {
+                    // 更宽松匹配，可能名称中有空格的情况，但通常不会有, 为了健壮
+                    const altMatch = line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)\]/);
+                    if (altMatch) {
+                        appItems.push({
+                            name: altMatch[1].trim(),
+                            icon: altMatch[2].trim(),
+                            link: altMatch[3].trim()
+                        });
+                    }
+                }
+            }
+        }
+
+        // 处理轮播图
+        if (picItems.length > 0) {
+            slidesData = picItems;
+            renderCarousel();
+            carouselSection.style.display = 'block';
+            startAutoSlide();
+        } else {
+            carouselSection.style.display = 'none';
+            if (autoInterval) clearInterval(autoInterval);
+        }
+
+        // 处理应用网格
+        if (appItems.length > 0) {
+            renderApps(appItems);
+        } else {
+            appsGrid.innerHTML = '<div class="empty-tip">📭 暂无应用数据，请在5app.txt的[app]下方添加应用</div>';
+        }
+    }
+
+    // ---------- 轮播图渲染 (支持触摸滑动 & 手动箭头 & 自动滑动) ----------
+    function renderCarousel() {
+        if (!carouselTrack) return;
+        totalSlides = slidesData.length;
+        if (totalSlides === 0) return;
+
+        // 生成slide HTML
+        let slidesHtml = '';
+        for (let i = 0; i < slidesData.length; i++) {
+            const slide = slidesData[i];
+            const link = slide.linkUrl && slide.linkUrl.startsWith('http') ? slide.linkUrl : (slide.linkUrl ? slide.linkUrl : 'javascript:void(0)');
+            // 如果链接为空或不规范也保留
+            slidesHtml += `
+                <div class="carousel-slide">
+                    <a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">
+                        <img src="${escapeHtml(slide.imgUrl)}" alt="轮播图 ${i+1}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22400%22%20height%3D%22225%22%20viewBox%3D%220%200%20400%20225%22%3E%3Crect%20width%3D%22400%22%20height%3D%22225%22%20fill%3D%22%23cccccc%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20fill%3D%22%23666%22%3E%E5%9B%BE%E7%89%87%E5%8A%A0%E8%BD%BD%E5%A4%B1%E8%B4%A5%3C%2Ftext%3E%3C%2Fsvg%3E'">
+                    </a>
+                </div>
+            `;
+        }
+        carouselTrack.innerHTML = slidesHtml;
+        // 生成点
+        let dotsHtml = '';
+        for (let i = 0; i < totalSlides; i++) {
+            dotsHtml += `<div class="dot ${i === currentIndex ? 'active' : ''}" data-index="${i}"></div>`;
+        }
+        dotsContainer.innerHTML = dotsHtml;
+        updateCarouselPosition();
+
+        // 绑定点点击事件
+        document.querySelectorAll('.dot').forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                const idx = parseInt(dot.getAttribute('data-index'), 10);
+                if (!isNaN(idx) && idx !== currentIndex) {
+                    currentIndex = idx;
+                    updateCarouselPosition();
+                    resetAutoSlide();
+                    updateDotsActive();
+                }
+                e.stopPropagation();
+            });
+        });
+
+        // 注册左右箭头事件 (重新绑定避免重复)
+        if (prevBtn) {
+            prevBtn.replaceWith(prevBtn.cloneNode(true));
+            const newPrev = document.getElementById('prevBtn');
+            if (newPrev) {
+                newPrev.addEventListener('click', () => {
+                    prevSlide();
+                    resetAutoSlide();
+                });
+            }
+        }
+        if (nextBtn) {
+            nextBtn.replaceWith(nextBtn.cloneNode(true));
+            const newNext = document.getElementById('nextBtn');
+            if (newNext) {
+                newNext.addEventListener('click', () => {
+                    nextSlide();
+                    resetAutoSlide();
+                });
+            }
+        }
+        // 重新获取按钮引用
+        window.prevBtn = document.getElementById('prevBtn');
+        window.nextBtn = document.getElementById('nextBtn');
+
+        // 添加触摸滑动 / 鼠标拖动
+        initSwipe();
+    }
+
+    function updateCarouselPosition() {
+        if (!carouselTrack) return;
+        const shift = -currentIndex * 100;
+        carouselTrack.style.transform = `translateX(${shift}%)`;
+    }
+
+    function updateDotsActive() {
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((dot, idx) => {
+            if (idx === currentIndex) dot.classList.add('active');
+            else dot.classList.remove('active');
+        });
+    }
+
+    function nextSlide() {
+        if (totalSlides === 0) return;
+        currentIndex = (currentIndex + 1) % totalSlides;
+        updateCarouselPosition();
+        updateDotsActive();
+    }
+
+    function prevSlide() {
+        if (totalSlides === 0) return;
+        currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+        updateCarouselPosition();
+        updateDotsActive();
+    }
+
+    function startAutoSlide() {
+        if (autoInterval) clearInterval(autoInterval);
+        if (totalSlides <= 1) return;
+        autoInterval = setInterval(() => {
+            nextSlide();
+        }, 5000);
+    }
+
+    function resetAutoSlide() {
+        if (totalSlides <= 1) return;
+        if (autoInterval) clearInterval(autoInterval);
+        autoInterval = setInterval(() => {
+            nextSlide();
+        }, 5000);
+    }
+
+    // 手动滑动（触摸/鼠标拖拽）
+    function initSwipe() {
+        if (!carouselTrack) return;
+        const wrapper = carouselTrack.parentElement;
+        if (!wrapper) return;
+
+        let startX = 0;
+        let startY = 0;
+        let isSwiping = false;
+        let startTransform = 0;
+
+        const onTouchStart = (e) => {
+            if (totalSlides <= 1) return;
+            // 阻止默认避免页面滚动混淆，但只有横向滑动明显时阻止
+            const touch = e.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+            isSwiping = true;
+            startTransform = currentIndex;
+            carouselTrack.style.transition = 'none';
+            if (autoInterval) clearInterval(autoInterval);
+        };
+
+        const onTouchMove = (e) => {
+            if (!isSwiping || totalSlides <= 1) return;
+            const touch = e.touches[0];
+            const diffX = touch.clientX - startX;
+            const diffY = touch.clientY - startY;
+            // 横向滑动明显时阻止垂直滚动
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 8) {
+                e.preventDefault();
+            }
+            const wrapperWidth = wrapper.clientWidth;
+            const offsetPercent = (diffX / wrapperWidth) * 100;
+            let newPercent = -startTransform * 100 + offsetPercent;
+            // 边界阻尼
+            if (startTransform === 0 && diffX > 0) newPercent = newPercent * 0.3;
+            if (startTransform === totalSlides - 1 && diffX < 0) newPercent = -startTransform * 100 + (diffX / wrapperWidth) * 100 * 0.3;
+            carouselTrack.style.transform = `translateX(${newPercent}%)`;
+        };
+
+        const onTouchEnd = (e) => {
+            if (!isSwiping || totalSlides <= 1) {
+                isSwiping = false;
+                carouselTrack.style.transition = '';
+                resetAutoSlide();
+                return;
+            }
+            isSwiping = false;
+            const endX = e.changedTouches ? e.changedTouches[0].clientX : startX;
+            const diffX = endX - startX;
+            const threshold = 35; // 滑动阈值
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) {
+                    // 向右滑，上一张
+                    prevSlide();
+                } else {
+                    nextSlide();
+                }
+            }
+            updateCarouselPosition();
+            carouselTrack.style.transition = '';
+            resetAutoSlide();
+        };
+
+        // 鼠标拖拽支持 (pc)
+        let mouseDown = false;
+        let mouseStartX = 0;
+        let mouseStartTransform = 0;
+        const onMouseDown = (e) => {
+            if (totalSlides <= 1) return;
+            e.preventDefault();
+            mouseDown = true;
+            mouseStartX = e.clientX;
+            mouseStartTransform = currentIndex;
+            carouselTrack.style.transition = 'none';
+            if (autoInterval) clearInterval(autoInterval);
+        };
+        const onMouseMove = (e) => {
+            if (!mouseDown || totalSlides <= 1) return;
+            const diffX = e.clientX - mouseStartX;
+            const wrapperWidth = wrapper.clientWidth;
+            const offsetPercent = (diffX / wrapperWidth) * 100;
+            let newPercent = -mouseStartTransform * 100 + offsetPercent;
+            if (mouseStartTransform === 0 && diffX > 0) newPercent = newPercent * 0.3;
+            if (mouseStartTransform === totalSlides - 1 && diffX < 0) newPercent = -mouseStartTransform * 100 + (diffX / wrapperWidth) * 100 * 0.3;
+            carouselTrack.style.transform = `translateX(${newPercent}%)`;
+        };
+        const onMouseUp = (e) => {
+            if (!mouseDown) return;
+            mouseDown = false;
+            const diffX = e.clientX - mouseStartX;
+            const threshold = 35;
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) prevSlide();
+                else nextSlide();
+            }
+            updateCarouselPosition();
+            carouselTrack.style.transition = '';
+            resetAutoSlide();
+        };
+
+        wrapper.addEventListener('touchstart', onTouchStart, { passive: false });
+        wrapper.addEventListener('touchmove', onTouchMove, { passive: false });
+        wrapper.addEventListener('touchend', onTouchEnd);
+        wrapper.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+    }
+
+    // 应用网格渲染（正方形图标+文字）
+    function renderApps(apps) {
+        if (!appsGrid) return;
+        if (!apps.length) {
+            appsGrid.innerHTML = '<div class="empty-tip">✨ 暂无应用，请联系老师添加</div>';
+            return;
+        }
+        let appsHtml = '';
+        for (let app of apps) {
+            const name = escapeHtml(app.name) || '应用';
+            const iconUrl = app.icon && app.icon.trim() !== '' ? app.icon : 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2256%22%20height%3D%2256%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%234a90e2%22%3E%3Cpath%20d%3D%22M4%204h16v16H4z%22%20fill%3D%22%23eef2ff%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dy%3D%22.3em%22%20text-anchor%3D%22middle%22%20fill%3D%22%23333%22%3E📱%3C%2Ftext%3E%3C%2Fsvg%3E';
+            const link = app.link && app.link.startsWith('http') ? app.link : (app.link ? app.link : 'javascript:void(0)');
+            appsHtml += `
+                <a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer" class="app-card">
+                    <img class="app-icon" src="${escapeHtml(iconUrl)}" alt="${name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2256%22%20height%3D%2256%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%23999%22%3E%3Crect%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23666%22%3E?%3C%2Ftext%3E%3C%2Fsvg%3E'">
+                    <span class="app-name">${name}</span>
+                </a>
+            `;
+        }
+        appsGrid.innerHTML = appsHtml;
+    }
+
+    // 简易防XSS
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+
+    // 页面可见性变化时处理自动滑动 (节省资源)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            if (autoInterval) clearInterval(autoInterval);
+        } else {
+            if (totalSlides > 1 && carouselSection.style.display !== 'none') {
+                if (autoInterval) clearInterval(autoInterval);
+                autoInterval = setInterval(() => nextSlide(), 5000);
+            }
+        }
+    });
+
+    // 启动应用
+    loadDataFromFile();
+</script>
+</body>
+</html>
