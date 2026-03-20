@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>E值日（值日码查询系统）</title>
+    <title>e值日（值日码查询系统）</title>
     <style>
         /* 极端简陋风格: 无圆角, 无阴影, 无渐变, 无复杂装饰 */
         * {
@@ -14,7 +14,7 @@
 
         body {
             background: #ffffff;
-            font-family: 'Courier New', Courier, '宋体', monospace;
+            font-family: 'Courier New', Courier, '微软雅黑', monospace;
             padding: 24px 16px;
             color: #000000;
             line-height: 1.4;
@@ -195,7 +195,7 @@
 </head>
 <body>
 <div class="system-container">
-    <h1>E值日（值日码查询系统）</h1>
+    <h1>e值日（值日码查询系统）</h1>
 
     <div class="input-label">请输入你的码号（不同学校设置的规则不同，请点击下方按钮查询）</div>
     <input type="text" id="studentCode" placeholder="" autocomplete="off" autofocus>
@@ -259,9 +259,7 @@
                     throw new Error(`HTTP ${response.status}`);
                 }
                 const text = await response.text();
-                // 解析文本: 每行格式 "[学校名][规则]"
-                // 示例: [第一中学][值日码为年级+班级+学号后两位]
-                //      [光明小学][规则: 学号前两位代表年份]
+          
                 const lines = text.split(/\r?\n/);
                 const parsed = [];
                 for (let line of lines) {
@@ -387,7 +385,7 @@
             let rawValue = studentInput.value;
             const trimmed = rawValue.trim();
             if (trimmed === '') {
-                setWarning('学号或码号不能为空');
+                setWarning('码号不能为空');
                 studentInput.focus();
                 return;
             }
