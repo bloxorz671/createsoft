@@ -1,1 +1,7 @@
- 
+pic
+[p=test1.jpg l=text1.jpg]
+[p=test2.jpg l=test2.jpg]
+
+app
+[n=测试1 p=test1.jpg l=test1.jpg]
+[n=测试2 p=test2.jpg l=test1.jpg] 
