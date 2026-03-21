@@ -5,3 +5,4 @@ pic
 app
 [n=作业提交平台 p=homeworkapp.jpg l=homeworkapp]
 [n=电子值日码 p=ezr.jpg l=ezr] 
+[n=转载-学校清洁物业服务满意度调查 p= l=https://www.wjx.cn/vm/OrTZVNr.aspx]
