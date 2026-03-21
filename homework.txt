@@ -10,8 +10,7 @@
 """
 sub=音乐
 name=音乐2026考试资料 
-link=https://www.kdocs.cn/join/goy6qbd%20
-邀请你加入「音乐2026考试资料」，一起文档协作
+link=https://kdocs.cn/join/gz6ep1m?f=101
 more=在本链接查看、下载音乐考试资料
 more_colour[0，0，0]
 start_time==2025/1/1 00:00
