@@ -131,30 +131,33 @@
             background: #2b4c8a;
         }
 
-        /* 应用区域: 使用grid布局，每行自动对齐高度 */
+        /* 应用区域: 使用grid布局，关键：grid-auto-rows: 1fr 确保同一行高度一致 */
         .apps-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
             gap: 20px 16px;
             padding: 16px 20px 30px;
             background: white;
-            align-items: start; /* 让每个卡片从顶部开始，高度由内容撑开 */
+            /* 关键设置：让每一行的所有单元格高度由该行最高单元格决定，并且自动拉伸 */
+            grid-auto-rows: 1fr;
+            align-items: stretch; /* 让每个卡片填满整个网格单元格高度 */
         }
 
-        /* 每个应用卡片 - 无圆角，无按钮样式，高度由内容自动撑开 */
+        /* 每个应用卡片 - 使用flex布局，高度由内容撑开但会被grid拉伸 */
         .app-card {
             background: #f9fafc;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* 内容从顶部开始 */
+            justify-content: flex-start;
             text-decoration: none;
             transition: all 0.25s ease;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0,0,0,0.02);
             border: 1px solid rgba(0, 0, 0, 0.03);
             cursor: pointer;
             padding: 16px 8px;
-            /* 移除固定宽高比，让高度由内容决定 */
+            /* 高度自动，但会被父网格的 stretch 拉伸到同行最高 */
+            height: 100%;
             min-height: 120px;
         }
         .app-card:hover {
@@ -173,7 +176,7 @@
             display: block;
             background: #f0f2f5;
             padding: 4px;
-            flex-shrink: 0; /* 防止图标被压缩 */
+            flex-shrink: 0;
         }
         
         /* 应用名称样式 - 允许自动换行，完整显示 */
@@ -185,8 +188,8 @@
             word-break: break-word;
             line-height: 1.4;
             max-width: 100%;
-            overflow: visible; /* 改为可见，不截断 */
-            white-space: normal; /* 允许换行 */
+            overflow: visible;
+            white-space: normal;
             width: 100%;
         }
 
@@ -382,7 +385,6 @@
         if (!iconPath || iconPath.trim() === '') {
             return DEFAULT_ICON;
         }
-        // 如果图标路径已经是完整URL或相对路径，直接使用，但若加载失败会由onerror处理
         return iconPath.trim();
     }
 
@@ -578,11 +580,11 @@
         window.addEventListener('mouseup', onMouseUp);
     }
 
-    // 应用网格渲染 - 支持名称过长自动延伸矩形，同一列自动对齐
+    // 应用网格渲染 - 支持名称过长自动延伸矩形，同一行自动对齐
     function renderApps(apps) {
         if (!appsGrid) return;
         if (!apps.length) {
-            appsGrid.innerHTML = '<div class="empty-tip">暂无应用，请联系管理员添加</div>';
+            appsGrid.innerHTML = '<div class="empty-tip">✨ 暂无应用，请联系老师添加</div>';
             return;
         }
         
@@ -605,9 +607,95 @@
         }
         appsGrid.innerHTML = appsHtml;
         
-        // 由于使用了grid布局且每个卡片高度由内容撑开，grid会自动让同一行的卡片高度对齐
-        // 但为了确保同一列在不同行也能对齐，grid的默认行为已经是每行内高度一致
-        // 这里不需要额外处理，CSS中的align-items: start确保每行从顶部开始，高度由最高的卡片决定
+        // 使用ResizeObserver来确保同一行的卡片高度对齐
+        // 由于CSS已经设置了grid-auto-rows: 1fr和align-items: stretch，理论上同一行的卡片会自动拉伸到相同高度
+        // 但为了更可靠地处理动态内容（如图片加载导致的布局变化），添加一个额外的对齐函数
+        alignSameRowHeights();
+        
+        // 监听图片加载完成后重新对齐
+        const images = appsGrid.querySelectorAll('.app-icon');
+        let loadedCount = 0;
+        if (images.length > 0) {
+            images.forEach(img => {
+                if (img.complete) {
+                    loadedCount++;
+                    if (loadedCount === images.length) {
+                        alignSameRowHeights();
+                    }
+                } else {
+                    img.addEventListener('load', () => {
+                        alignSameRowHeights();
+                    });
+                    img.addEventListener('error', () => {
+                        alignSameRowHeights();
+                    });
+                }
+            });
+        }
+        
+        // 使用ResizeObserver监听网格变化，确保布局稳定
+        if (window.ResizeObserver) {
+            const resizeObserver = new ResizeObserver(() => {
+                alignSameRowHeights();
+            });
+            resizeObserver.observe(appsGrid);
+        }
+    }
+    
+    // 确保同一行的卡片高度一致
+    function alignSameRowHeights() {
+        const cards = document.querySelectorAll('.app-card');
+        if (!cards.length) return;
+        
+        // 获取所有卡片的位置信息
+        const cardRects = Array.from(cards).map(card => {
+            const rect = card.getBoundingClientRect();
+            return {
+                element: card,
+                top: rect.top,
+                bottom: rect.bottom,
+                height: rect.height
+            };
+        });
+        
+        // 按top值分组（同一行）
+        const rows = [];
+        const tolerance = 5; // 容差像素
+        
+        for (let i = 0; i < cardRects.length; i++) {
+            const card = cardRects[i];
+            let addedToRow = false;
+            
+            for (let row of rows) {
+                // 如果当前卡片的top与行中第一个卡片的top接近，则属于同一行
+                if (Math.abs(card.top - row[0].top) <= tolerance) {
+                    row.push(card);
+                    addedToRow = true;
+                    break;
+                }
+            }
+            
+            if (!addedToRow) {
+                rows.push([card]);
+            }
+        }
+        
+        // 为每一行设置统一高度（取该行最高卡片的高度）
+        for (let row of rows) {
+            if (row.length <= 1) continue;
+            
+            let maxHeight = 0;
+            for (let card of row) {
+                if (card.height > maxHeight) {
+                    maxHeight = card.height;
+                }
+            }
+            
+            // 为该行所有卡片设置相同的高度
+            for (let card of row) {
+                card.element.style.height = maxHeight + 'px';
+            }
+        }
     }
 
     function escapeHtml(str) {
@@ -621,6 +709,15 @@
             return c;
         });
     }
+
+    // 监听窗口大小变化，重新对齐高度
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            alignSameRowHeights();
+        }, 100);
+    });
 
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
