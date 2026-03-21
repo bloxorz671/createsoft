@@ -1,6 +1,6 @@
 pic
-[p=homeworkapp.jpg l=homeworkapp]
-[p=ezr.jpg l=ezr]
+[p=1homeworkapp.jpg l=homeworkapp]
+[p=1ezr.jpg l=ezr]
 
 app
 [n=作业提交平台 p=homeworkapp.jpg l=homeworkapp]
