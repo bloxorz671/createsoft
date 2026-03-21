@@ -131,29 +131,31 @@
             background: #2b4c8a;
         }
 
-        /* 应用区域: 正方形网格布局 - 无圆角 */
+        /* 应用区域: 使用grid布局，每行自动对齐高度 */
         .apps-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
             gap: 20px 16px;
             padding: 16px 20px 30px;
             background: white;
+            align-items: start; /* 让每个卡片从顶部开始，高度由内容撑开 */
         }
 
-        /* 每个正方形应用卡片 - 无圆角，无按钮样式 */
+        /* 每个应用卡片 - 无圆角，无按钮样式，高度由内容自动撑开 */
         .app-card {
-            aspect-ratio: 1 / 1;
             background: #f9fafc;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* 内容从顶部开始 */
             text-decoration: none;
             transition: all 0.25s ease;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0,0,0,0.02);
             border: 1px solid rgba(0, 0, 0, 0.03);
             cursor: pointer;
             padding: 16px 8px;
+            /* 移除固定宽高比，让高度由内容决定 */
+            min-height: 120px;
         }
         .app-card:hover {
             transform: translateY(-4px);
@@ -161,6 +163,7 @@
             box-shadow: 0 18px 28px -8px rgba(0, 0, 0, 0.12);
             border-color: rgba(43, 76, 138, 0.2);
         }
+        
         /* 应用图标样式 */
         .app-icon {
             width: 58px;
@@ -170,20 +173,21 @@
             display: block;
             background: #f0f2f5;
             padding: 4px;
+            flex-shrink: 0; /* 防止图标被压缩 */
         }
+        
+        /* 应用名称样式 - 允许自动换行，完整显示 */
         .app-name {
             font-size: 0.9rem;
             font-weight: 590;
             color: #1f2937;
             text-align: center;
             word-break: break-word;
-            line-height: 1.3;
+            line-height: 1.4;
             max-width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+            overflow: visible; /* 改为可见，不截断 */
+            white-space: normal; /* 允许换行 */
+            width: 100%;
         }
 
         /* 加载状态 & 空状态 */
@@ -215,12 +219,23 @@
             }
             .app-name {
                 font-size: 0.8rem;
+                line-height: 1.3;
             }
             .main-header h1 {
                 font-size: 1.6rem;
             }
             .apps-title {
                 font-size: 1.2rem;
+            }
+            .app-card {
+                padding: 14px 6px;
+            }
+        }
+
+        /* 针对超长名称的额外优化 */
+        @media (max-width: 380px) {
+            .app-name {
+                font-size: 0.75rem;
             }
         }
     </style>
@@ -263,6 +278,9 @@
     const dotsContainer = document.getElementById('carouselDots');
     const appsGrid = document.getElementById('appsGrid');
     const appsHeader = document.getElementById('appsHeader');
+
+    // 默认图片路径（当应用未设置图标或图标加载失败时显示）
+    const DEFAULT_ICON = 'null.jpg';
 
     // ---------- 解析 5app.txt 文件 ----------
     async function loadDataFromFile() {
@@ -357,6 +375,15 @@
             appsGrid.innerHTML = '<div class="empty-tip">📭 暂无应用数据，请在5app.txt的[app]下方添加应用</div>';
             if (appsHeader) appsHeader.style.display = 'none';
         }
+    }
+
+    // 处理图标URL，如果为空或无效则返回默认图片
+    function getIconUrl(iconPath) {
+        if (!iconPath || iconPath.trim() === '') {
+            return DEFAULT_ICON;
+        }
+        // 如果图标路径已经是完整URL或相对路径，直接使用，但若加载失败会由onerror处理
+        return iconPath.trim();
     }
 
     // ---------- 轮播图渲染 (支持触摸滑动，无左右箭头) ----------
@@ -551,26 +578,36 @@
         window.addEventListener('mouseup', onMouseUp);
     }
 
-    // 应用网格渲染
+    // 应用网格渲染 - 支持名称过长自动延伸矩形，同一列自动对齐
     function renderApps(apps) {
         if (!appsGrid) return;
         if (!apps.length) {
-            appsGrid.innerHTML = '<div class="empty-tip">✨ 暂无应用，请联系老师添加</div>';
+            appsGrid.innerHTML = '<div class="empty-tip">暂无应用，请联系管理员添加</div>';
             return;
         }
+        
         let appsHtml = '';
         for (let app of apps) {
             const name = escapeHtml(app.name) || '应用';
-            const iconUrl = app.icon && app.icon.trim() !== '' ? app.icon : 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2256%22%20height%3D%2256%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%234a90e2%22%3E%3Cpath%20d%3D%22M4%204h16v16H4z%22%20fill%3D%22%23eef2ff%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dy%3D%22.3em%22%20text-anchor%3D%22middle%22%20fill%3D%22%23333%22%3E📱%3C%2Ftext%3E%3C%2Fsvg%3E';
+            // 处理图标：如果为空则使用默认图片 null.jpg
+            let iconUrl = getIconUrl(app.icon);
             const link = app.link && app.link.startsWith('http') ? app.link : (app.link ? app.link : 'javascript:void(0)');
+            
+            // 转义图标URL
+            const escapedIconUrl = escapeHtml(iconUrl);
+            
             appsHtml += `
                 <a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer" class="app-card">
-                    <img class="app-icon" src="${escapeHtml(iconUrl)}" alt="${name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2256%22%20height%3D%2256%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%23999%22%3E%3Crect%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23666%22%3E?%3C%2Ftext%3E%3C%2Fsvg%3E'">
+                    <img class="app-icon" src="${escapedIconUrl}" alt="${name}" loading="lazy" onerror="this.onerror=null; this.src='${DEFAULT_ICON}'; this.alt='图标加载失败'">
                     <span class="app-name">${name}</span>
                 </a>
             `;
         }
         appsGrid.innerHTML = appsHtml;
+        
+        // 由于使用了grid布局且每个卡片高度由内容撑开，grid会自动让同一行的卡片高度对齐
+        // 但为了确保同一列在不同行也能对齐，grid的默认行为已经是每行内高度一致
+        // 这里不需要额外处理，CSS中的align-items: start确保每行从顶部开始，高度由最高的卡片决定
     }
 
     function escapeHtml(str) {
@@ -580,6 +617,8 @@
             if (m === '<') return '&lt;';
             if (m === '>') return '&gt;';
             return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
         });
     }
 
