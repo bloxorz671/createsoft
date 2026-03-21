@@ -1,4 +1,5 @@
 pic
+[p=guidepic.jpg l=userguide.pdf]
 [p=homeworkapp1.jpg l=homeworkapp]
 [p=ezr1.jpg l=ezr]
 
