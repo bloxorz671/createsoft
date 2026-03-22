@@ -256,4 +256,1002 @@
 
         .window-btn {
             background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            min-width: 32px;
+            height: 32px;
+            padding: 0 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .window-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.02);
+        }
+
+        .window-btn.close-btn:hover {
+            background: #e74c3c;
+        }
+
+        .window-btn.fullscreen-btn:hover {
+            background: #27ae60;
+        }
+
+        .window-btn.browser-btn:hover {
+            background: #3498db;
+        }
+
+        /* 窗口内容区域 */
+        .window-content {
+            flex: 1;
+            background: #f5f5f5;
+            overflow: auto;
+            position: relative;
+            min-height: 0;
+        }
+
+        .window-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* 全屏模式样式 */
+        .modal-window.fullscreen-mode {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            min-width: 100% !important;
+            min-height: 100% !important;
+            border-radius: 0 !important;
+            resize: none !important;
+            z-index: 1001;
+        }
+
+        /* 拖拽时的样式 */
+        .modal-window.dragging {
+            opacity: 0.98;
+            cursor: grabbing;
+            transition: none;
+        }
+
+        /* 调整大小手柄区域 - 右下角可触摸区域 */
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 30px;
+            height: 30px;
+            cursor: nw-resize;
+            z-index: 10;
+            background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.2) 50%);
+            border-bottom-right-radius: 12px;
+            pointer-events: auto;
+        }
+
+        /* 移动端增大触摸区域 */
+        @media (max-width: 768px) {
+            .resize-handle {
+                width: 44px;
+                height: 44px;
+            }
+            .window-btn {
+                min-width: 36px;
+                height: 36px;
+                padding: 0 10px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .apps-grid {
+                gap: 14px 12px;
+                padding: 16px 16px 30px;
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+            .app-icon {
+                width: 52px;
+                height: 52px;
+            }
+            .app-name {
+                font-size: 0.8rem;
+                line-height: 1.3;
+            }
+            .main-header h1 {
+                font-size: 1.6rem;
+            }
+            .apps-title {
+                font-size: 1.2rem;
+            }
+            .app-card {
+                padding: 14px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="platform-container">
+    <div class="main-header">
+        <h1>初二五班在线应用平台</h1>
+    </div>
+
+    <!-- 轮播图区域 -->
+    <div class="carousel-section" id="carouselSection" style="display: none;">
+        <div class="carousel-wrapper">
+            <div class="carousel-track" id="carouselTrack"></div>
+        </div>
+        <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+
+    <!-- 全部应用标题 -->
+    <div class="apps-header" id="appsHeader" style="display: none;">
+        <h2 class="apps-title">全部应用</h2>
+    </div>
+
+    <!-- 应用网格区域 -->
+    <div class="apps-grid" id="appsGrid">
+        <div class="loading-tip">⏳ 加载应用中...</div>
+    </div>
+</div>
+
+<script>
+    // ---------- 全局变量 ----------
+    let slidesData = [];
+    let currentIndex = 0;
+    let autoInterval = null;
+    let totalSlides = 0;
+    let openWindows = []; // 存储所有打开的窗口
+
+    // DOM 元素
+    const carouselSection = document.getElementById('carouselSection');
+    const carouselTrack = document.getElementById('carouselTrack');
+    const dotsContainer = document.getElementById('carouselDots');
+    const appsGrid = document.getElementById('appsGrid');
+    const appsHeader = document.getElementById('appsHeader');
+
+    // 默认图片路径
+    const DEFAULT_ICON = 'null.jpg';
+
+    // ---------- 解析 5app.txt 文件 ----------
+    async function loadDataFromFile() {
+        try {
+            const response = await fetch('./5app.txt', { cache: 'no-store' });
+            if (!response.ok) {
+                throw new Error(`无法读取文件 (HTTP ${response.status})`);
+            }
+            const text = await response.text();
+            parseAppTxt(text);
+        } catch (error) {
+            console.error('读取5app.txt失败:', error);
+            appsGrid.innerHTML = `<div class="error-tip">⚠️ 加载数据失败，请确保 “5app.txt” 文件存在于同目录下。<br>格式参考：<br>pic<br>[p=图片链接 l=跳转链接]<br>app<br>[n=应用名 p=图标 l=链接 mode=window]</div>`;
+            carouselSection.style.display = 'none';
+            if (appsHeader) appsHeader.style.display = 'none';
+        }
+    }
+
+    // 解析文本
+    function parseAppTxt(rawText) {
+        const lines = rawText.split(/\r?\n/);
+        let mode = null;
+        let picItems = [];
+        let appItems = [];
+
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (line === '') continue;
+            if (line.toLowerCase() === 'pic') {
+                mode = 'pic';
+                continue;
+            } else if (line.toLowerCase() === 'app') {
+                mode = 'app';
+                continue;
+            }
+
+            if (mode === 'pic') {
+                const match = line.match(/\[p=([^\s\]]+)\s+l=([^\s\]]+)\]/);
+                if (match) {
+                    picItems.push({
+                        imgUrl: match[1].trim(),
+                        linkUrl: match[2].trim()
+                    });
+                } else {
+                    const altMatch = line.match(/\[p=(.+?)\s+l=(.+?)\]/);
+                    if (altMatch) {
+                        picItems.push({
+                            imgUrl: altMatch[1].trim(),
+                            linkUrl: altMatch[2].trim()
+                        });
+                    }
+                }
+            } 
+            else if (mode === 'app') {
+                let match = line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)(?:\s+mode=([^\s\]]+))?\]/);
+                if (!match) {
+                    match = line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)(?:\s+mode=(.+?))?\]/);
+                }
+                if (match) {
+                    const appItem = {
+                        name: match[1].trim(),
+                        icon: match[2].trim(),
+                        link: match[3].trim(),
+                        mode: match[4] ? match[4].trim() : null
+                    };
+                    appItems.push(appItem);
+                }
+            }
+        }
+
+        // 处理轮播图
+        if (picItems.length > 0) {
+            slidesData = picItems;
+            renderCarousel();
+            carouselSection.style.display = 'block';
+            startAutoSlide();
+        } else {
+            carouselSection.style.display = 'none';
+            if (autoInterval) clearInterval(autoInterval);
+        }
+
+        // 处理应用网格
+        if (appItems.length > 0) {
+            if (appsHeader) appsHeader.style.display = 'block';
+            renderApps(appItems);
+        } else {
+            appsGrid.innerHTML = '<div class="empty-tip">📭 暂无应用数据，请在5app.txt的[app]下方添加应用</div>';
+            if (appsHeader) appsHeader.style.display = 'none';
+        }
+    }
+
+    // 处理图标URL
+    function getIconUrl(iconPath) {
+        if (!iconPath || iconPath.trim() === '') {
+            return DEFAULT_ICON;
+        }
+        return iconPath.trim();
+    }
+
+    // 获取自适应窗口尺寸（根据屏幕方向）
+    function getAdaptiveWindowSize() {
+        const isLandscape = window.innerWidth > window.innerHeight;
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
         
+        if (isLandscape) {
+            // 横屏模式：窗口宽度为屏幕的55%，高度为屏幕的75%
+            const width = Math.min(screenWidth * 0.55, 900);
+            const height = Math.min(screenHeight * 0.75, 650);
+            return { width, height };
+        } else {
+            // 竖屏模式：窗口宽度为屏幕的85%，高度为屏幕的55%
+            const width = Math.min(screenWidth * 0.85, 500);
+            const height = Math.min(screenHeight * 0.55, 550);
+            return { width, height };
+        }
+    }
+
+    // 生成随机位置（避免窗口重叠）
+    function getRandomPosition(windowWidth, windowHeight) {
+        const maxLeft = Math.max(0, window.innerWidth - windowWidth - 20);
+        const maxTop = Math.max(0, window.innerHeight - windowHeight - 20);
+        const left = Math.min(maxLeft, Math.random() * (maxLeft * 0.7) + 20);
+        const top = Math.min(maxTop, Math.random() * (maxTop * 0.7) + 60);
+        return { left: Math.max(10, left), top: Math.max(10, top) };
+    }
+
+    // 关闭所有窗口
+    function closeAllWindows() {
+        openWindows.forEach(windowInfo => {
+            if (windowInfo.windowDiv && windowInfo.windowDiv.parentNode) {
+                if (windowInfo.cleanup) windowInfo.cleanup();
+                windowInfo.windowDiv.remove();
+            }
+        });
+        openWindows = [];
+    }
+
+    // 关闭单个窗口
+    function closeWindow(windowId) {
+        const index = openWindows.findIndex(w => w.id === windowId);
+        if (index !== -1) {
+            const windowInfo = openWindows[index];
+            if (windowInfo.cleanup) windowInfo.cleanup();
+            if (windowInfo.windowDiv && windowInfo.windowDiv.parentNode) {
+                windowInfo.windowDiv.remove();
+            }
+            openWindows.splice(index, 1);
+        }
+    }
+
+    // 浏览器打开功能
+    function openInBrowser(url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    function createWindow(url, appName) {
+        // 创建窗口主体
+        const windowDiv = document.createElement('div');
+        windowDiv.className = 'modal-window';
+        
+        // 获取自适应窗口尺寸
+        let { width, height } = getAdaptiveWindowSize();
+        const { left, top } = getRandomPosition(width, height);
+        
+        windowDiv.style.width = `${width}px`;
+        windowDiv.style.height = `${height}px`;
+        windowDiv.style.left = `${left}px`;
+        windowDiv.style.top = `${top}px`;
+        
+        // 标题栏
+        const header = document.createElement('div');
+        header.className = 'window-header';
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'window-title';
+        titleDiv.innerHTML = `<span>${escapeHtml(appName)}</span>`;
+        
+        const controls = document.createElement('div');
+        controls.className = 'window-controls';
+        
+        // 浏览器打开按钮
+        const browserBtn = document.createElement('button');
+        browserBtn.className = 'window-btn browser-btn';
+        browserBtn.innerHTML = '在浏览器中打开';
+        browserBtn.title = '在浏览器中打开';
+        
+        // 全屏按钮
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'window-btn fullscreen-btn';
+        fullscreenBtn.innerHTML = '⛶';
+        fullscreenBtn.title = '全屏模式';
+        
+        // 关闭按钮
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'window-btn close-btn';
+        closeBtn.innerHTML = '✕';
+        closeBtn.title = '关闭窗口';
+        
+        controls.appendChild(browserBtn);
+        controls.appendChild(fullscreenBtn);
+        controls.appendChild(closeBtn);
+        header.appendChild(titleDiv);
+        header.appendChild(controls);
+        
+        // 内容区域 - iframe
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'window-content';
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.title = appName;
+        iframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation';
+        iframe.allow = 'fullscreen';
+        contentDiv.appendChild(iframe);
+        
+        // 添加调整大小手柄
+        const resizeHandle = document.createElement('div');
+        resizeHandle.className = 'resize-handle';
+        
+        windowDiv.appendChild(header);
+        windowDiv.appendChild(contentDiv);
+        windowDiv.appendChild(resizeHandle);
+        document.body.appendChild(windowDiv);
+        
+        const windowId = Date.now() + Math.random();
+        let isDraggingFlag = false;
+        let dragStartX = 0, dragStartY = 0;
+        let startLeft = 0, startTop = 0;
+        let isFullscreenFlag = false;
+        let savedRect = null;
+        let dragEnabledFlag = true;
+        
+        // 调整大小功能（优化触屏）
+        let isResizing = false;
+        let resizeStartX = 0, resizeStartY = 0;
+        let resizeStartWidth = 0, resizeStartHeight = 0;
+        let resizeStartLeft = 0, resizeStartTop = 0;
+        
+        const startResize = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            isResizing = true;
+            
+            const touch = e.touches ? e.touches[0] : e;
+            resizeStartX = touch.clientX;
+            resizeStartY = touch.clientY;
+            resizeStartWidth = windowDiv.offsetWidth;
+            resizeStartHeight = windowDiv.offsetHeight;
+            resizeStartLeft = windowDiv.offsetLeft;
+            resizeStartTop = windowDiv.offsetTop;
+            
+            windowDiv.style.transition = 'none';
+            document.body.style.userSelect = 'none';
+        };
+        
+        const onResizeMove = (e) => {
+            if (!isResizing) return;
+            e.preventDefault();
+            
+            const touch = e.touches ? e.touches[0] : e;
+            const deltaX = touch.clientX - resizeStartX;
+            const deltaY = touch.clientY - resizeStartY;
+            
+            let newWidth = resizeStartWidth + deltaX;
+            let newHeight = resizeStartHeight + deltaY;
+            
+            // 限制最小和最大尺寸
+            newWidth = Math.max(280, Math.min(window.innerWidth - 20, newWidth));
+            newHeight = Math.max(200, Math.min(window.innerHeight - 20, newHeight));
+            
+            // 调整宽度时保持左边界不变
+            windowDiv.style.width = `${newWidth}px`;
+            windowDiv.style.height = `${newHeight}px`;
+            
+            // 确保窗口不超出右边界和下边界
+            let currentLeft = windowDiv.offsetLeft;
+            let currentTop = windowDiv.offsetTop;
+            if (currentLeft + newWidth > window.innerWidth - 10) {
+                windowDiv.style.left = `${window.innerWidth - newWidth - 10}px`;
+            }
+            if (currentTop + newHeight > window.innerHeight - 10) {
+                windowDiv.style.top = `${window.innerHeight - newHeight - 10}px`;
+            }
+        };
+        
+        const endResize = () => {
+            if (isResizing) {
+                isResizing = false;
+                windowDiv.style.transition = '';
+                document.body.style.userSelect = '';
+                document.removeEventListener('mousemove', onResizeMove);
+                document.removeEventListener('mouseup', endResize);
+                document.removeEventListener('touchmove', onResizeMove);
+                document.removeEventListener('touchend', endResize);
+            }
+        };
+        
+        resizeHandle.addEventListener('mousedown', startResize);
+        resizeHandle.addEventListener('touchstart', startResize, { passive: false });
+        
+        // 鼠标拖拽移动
+        const onMouseMove = (e) => {
+            if (!isDraggingFlag) return;
+            let newLeft = startLeft + (e.clientX - dragStartX);
+            let newTop = startTop + (e.clientY - dragStartY);
+            newLeft = Math.max(-windowDiv.offsetWidth + 50, Math.min(window.innerWidth - 50, newLeft));
+            newTop = Math.max(0, Math.min(window.innerHeight - 50, newTop));
+            windowDiv.style.left = `${newLeft}px`;
+            windowDiv.style.top = `${newTop}px`;
+        };
+        
+        const onMouseUp = () => {
+            if (isDraggingFlag) {
+                isDraggingFlag = false;
+                windowDiv.classList.remove('dragging');
+                document.body.style.userSelect = '';
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+        };
+        
+        const startDragMouse = (e) => {
+            if (!dragEnabledFlag) return;
+            if (e.target.closest('.window-header') && !e.target.closest('.window-controls') && !e.target.closest('.resize-handle')) {
+                isDraggingFlag = true;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                startLeft = windowDiv.offsetLeft;
+                startTop = windowDiv.offsetTop;
+                windowDiv.classList.add('dragging');
+                document.body.style.userSelect = 'none';
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+                e.preventDefault();
+            }
+        };
+        
+        windowDiv.addEventListener('mousedown', startDragMouse);
+        
+        // 触摸拖拽移动
+        let touchDragging = false;
+        let touchStartX = 0, touchStartY = 0;
+        let touchStartLeft = 0, touchStartTop = 0;
+        
+        const onTouchStartDrag = (e) => {
+            if (!dragEnabledFlag) return;
+            if (e.target.closest('.window-header') && !e.target.closest('.window-controls') && !e.target.closest('.resize-handle')) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+                touchStartLeft = windowDiv.offsetLeft;
+                touchStartTop = windowDiv.offsetTop;
+                touchDragging = true;
+                windowDiv.classList.add('dragging');
+                document.body.style.userSelect = 'none';
+            }
+        };
+        
+        const onTouchMoveDrag = (e) => {
+            if (!touchDragging) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const deltaX = touch.clientX - touchStartX;
+            const deltaY = touch.clientY - touchStartY;
+            let newLeft = touchStartLeft + deltaX;
+            let newTop = touchStartTop + deltaY;
+            newLeft = Math.max(-windowDiv.offsetWidth + 50, Math.min(window.innerWidth - 50, newLeft));
+            newTop = Math.max(0, Math.min(window.innerHeight - 50, newTop));
+            windowDiv.style.left = `${newLeft}px`;
+            windowDiv.style.top = `${newTop}px`;
+        };
+        
+        const onTouchEndDrag = () => {
+            if (touchDragging) {
+                touchDragging = false;
+                windowDiv.classList.remove('dragging');
+                document.body.style.userSelect = '';
+            }
+        };
+        
+        header.addEventListener('touchstart', onTouchStartDrag, { passive: false });
+        header.addEventListener('touchmove', onTouchMoveDrag, { passive: false });
+        header.addEventListener('touchend', onTouchEndDrag);
+        
+        // 全屏逻辑
+        const toggleFullscreenLocal = () => {
+            if (!isFullscreenFlag) {
+                savedRect = {
+                    width: windowDiv.offsetWidth,
+                    height: windowDiv.offsetHeight,
+                    left: windowDiv.offsetLeft,
+                    top: windowDiv.offsetTop
+                };
+                windowDiv.classList.add('fullscreen-mode');
+                isFullscreenFlag = true;
+                fullscreenBtn.innerHTML = '❐';
+                fullscreenBtn.title = '退出全屏';
+                dragEnabledFlag = false;
+            } else {
+                windowDiv.classList.remove('fullscreen-mode');
+                if (savedRect) {
+                    windowDiv.style.width = `${savedRect.width}px`;
+                    windowDiv.style.height = `${savedRect.height}px`;
+                    windowDiv.style.left = `${savedRect.left}px`;
+                    windowDiv.style.top = `${savedRect.top}px`;
+                }
+                isFullscreenFlag = false;
+                fullscreenBtn.innerHTML = '⛶';
+                fullscreenBtn.title = '全屏模式';
+                dragEnabledFlag = true;
+            }
+        };
+        
+        // 浏览器打开
+        const browserOpenHandler = () => {
+            openInBrowser(url);
+        };
+        
+        const closeWindowHandler = () => {
+            closeWindow(windowId);
+        };
+        
+        browserBtn.addEventListener('click', browserOpenHandler);
+        fullscreenBtn.addEventListener('click', toggleFullscreenLocal);
+        closeBtn.addEventListener('click', closeWindowHandler);
+        
+        // ESC键退出全屏
+        const escHandlerGlobal = (e) => {
+            if (e.key === 'Escape' && isFullscreenFlag) {
+                toggleFullscreenLocal();
+            }
+        };
+        document.addEventListener('keydown', escHandlerGlobal);
+        
+        // 监听窗口大小变化
+        const resizeHandler = () => {
+            if (!isFullscreenFlag) {
+                let left = windowDiv.offsetLeft;
+                let top = windowDiv.offsetTop;
+                left = Math.max(-windowDiv.offsetWidth + 50, Math.min(window.innerWidth - 50, left));
+                top = Math.max(0, Math.min(window.innerHeight - 50, top));
+                if (left !== windowDiv.offsetLeft) windowDiv.style.left = `${left}px`;
+                if (top !== windowDiv.offsetTop) windowDiv.style.top = `${top}px`;
+            }
+        };
+        
+        window.addEventListener('resize', resizeHandler);
+        
+        // 屏幕方向变化时重新调整窗口位置和大小（仅非全屏状态）
+        const orientationHandler = () => {
+            if (!isFullscreenFlag) {
+                const { width, height } = getAdaptiveWindowSize();
+                // 如果当前窗口尺寸明显不适合新方向，则调整
+                const currentWidth = windowDiv.offsetWidth;
+                const currentHeight = windowDiv.offsetHeight;
+                const widthRatio = currentWidth / window.innerWidth;
+                const heightRatio = currentHeight / window.innerHeight;
+                
+                // 如果窗口占比过大或过小，重新调整
+                if (widthRatio > 0.9 || widthRatio < 0.3 || heightRatio > 0.8) {
+                    windowDiv.style.width = `${width}px`;
+                    windowDiv.style.height = `${height}px`;
+                    // 重新计算位置，避免超出屏幕
+                    let newLeft = Math.min(window.innerWidth - width - 20, Math.max(10, windowDiv.offsetLeft));
+                    let newTop = Math.min(window.innerHeight - height - 20, Math.max(10, windowDiv.offsetTop));
+                    windowDiv.style.left = `${newLeft}px`;
+                    windowDiv.style.top = `${newTop}px`;
+                } else {
+                    // 确保窗口不超出边界
+                    resizeHandler();
+                }
+            }
+        };
+        
+        window.addEventListener('orientationchange', orientationHandler);
+        window.addEventListener('resize', orientationHandler);
+        
+        // 清理函数
+        const cleanup = () => {
+            document.removeEventListener('keydown', escHandlerGlobal);
+            window.removeEventListener('resize', resizeHandler);
+            window.removeEventListener('orientationchange', orientationHandler);
+            window.removeEventListener('resize', orientationHandler);
+            header.removeEventListener('touchstart', onTouchStartDrag);
+            header.removeEventListener('touchmove', onTouchMoveDrag);
+            header.removeEventListener('touchend', onTouchEndDrag);
+            windowDiv.removeEventListener('mousedown', startDragMouse);
+            resizeHandle.removeEventListener('mousedown', startResize);
+            resizeHandle.removeEventListener('touchstart', startResize);
+            document.removeEventListener('mousemove', onResizeMove);
+            document.removeEventListener('mouseup', endResize);
+            document.removeEventListener('touchmove', onResizeMove);
+            document.removeEventListener('touchend', endResize);
+        };
+        
+        // 存储窗口信息
+        openWindows.push({
+            id: windowId,
+            windowDiv: windowDiv,
+            cleanup: cleanup
+        });
+    }
+
+    // ---------- 轮播图渲染 ----------
+    function renderCarousel() {
+        if (!carouselTrack) return;
+        totalSlides = slidesData.length;
+        if (totalSlides === 0) return;
+
+        let slidesHtml = '';
+        for (let i = 0; i < slidesData.length; i++) {
+            const slide = slidesData[i];
+            const link = slide.linkUrl && slide.linkUrl.startsWith('http') ? slide.linkUrl : (slide.linkUrl ? slide.linkUrl : 'javascript:void(0)');
+            slidesHtml += `
+                <div class="carousel-slide">
+                    <a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">
+                        <img src="${escapeHtml(slide.imgUrl)}" alt="轮播图 ${i+1}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22400%22%20height%3D%22225%22%20viewBox%3D%220%200%20400%20225%22%3E%3Crect%20width%3D%22400%22%20height%3D%22225%22%20fill%3D%22%23cccccc%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20fill%3D%22%23666%22%3E%E5%9B%BE%E7%89%87%E5%8A%A0%E8%BD%BD%E5%A4%B1%E8%B4%A5%3C%2Ftext%3E%3C%2Fsvg%3E'">
+                    </a>
+                </div>
+            `;
+        }
+        carouselTrack.innerHTML = slidesHtml;
+        
+        let dotsHtml = '';
+        for (let i = 0; i < totalSlides; i++) {
+            dotsHtml += `<div class="dot ${i === currentIndex ? 'active' : ''}" data-index="${i}"></div>`;
+        }
+        dotsContainer.innerHTML = dotsHtml;
+        updateCarouselPosition();
+
+        document.querySelectorAll('.dot').forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                const idx = parseInt(dot.getAttribute('data-index'), 10);
+                if (!isNaN(idx) && idx !== currentIndex) {
+                    currentIndex = idx;
+                    updateCarouselPosition();
+                    resetAutoSlide();
+                    updateDotsActive();
+                }
+                e.stopPropagation();
+            });
+        });
+
+        initSwipe();
+    }
+
+    function updateCarouselPosition() {
+        if (!carouselTrack) return;
+        const shift = -currentIndex * 100;
+        carouselTrack.style.transform = `translateX(${shift}%)`;
+    }
+
+    function updateDotsActive() {
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((dot, idx) => {
+            if (idx === currentIndex) dot.classList.add('active');
+            else dot.classList.remove('active');
+        });
+    }
+
+    function nextSlide() {
+        if (totalSlides === 0) return;
+        currentIndex = (currentIndex + 1) % totalSlides;
+        updateCarouselPosition();
+        updateDotsActive();
+    }
+
+    function prevSlide() {
+        if (totalSlides === 0) return;
+        currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+        updateCarouselPosition();
+        updateDotsActive();
+    }
+
+    function startAutoSlide() {
+        if (autoInterval) clearInterval(autoInterval);
+        if (totalSlides <= 1) return;
+        autoInterval = setInterval(() => {
+            nextSlide();
+        }, 5000);
+    }
+
+    function resetAutoSlide() {
+        if (totalSlides <= 1) return;
+        if (autoInterval) clearInterval(autoInterval);
+        autoInterval = setInterval(() => {
+            nextSlide();
+        }, 5000);
+    }
+
+    function initSwipe() {
+        if (!carouselTrack) return;
+        const wrapper = carouselTrack.parentElement;
+        if (!wrapper) return;
+
+        let startX = 0, startY = 0;
+        let isSwiping = false;
+        let startTransform = 0;
+
+        const onTouchStart = (e) => {
+            if (totalSlides <= 1) return;
+            const touch = e.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+            isSwiping = true;
+            startTransform = currentIndex;
+            carouselTrack.style.transition = 'none';
+            if (autoInterval) clearInterval(autoInterval);
+        };
+
+        const onTouchMove = (e) => {
+            if (!isSwiping || totalSlides <= 1) return;
+            const touch = e.touches[0];
+            const diffX = touch.clientX - startX;
+            const diffY = touch.clientY - startY;
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 8) {
+                e.preventDefault();
+            }
+            const wrapperWidth = wrapper.clientWidth;
+            const offsetPercent = (diffX / wrapperWidth) * 100;
+            let newPercent = -startTransform * 100 + offsetPercent;
+            if (startTransform === 0 && diffX > 0) newPercent = newPercent * 0.3;
+            if (startTransform === totalSlides - 1 && diffX < 0) newPercent = -startTransform * 100 + (diffX / wrapperWidth) * 100 * 0.3;
+            carouselTrack.style.transform = `translateX(${newPercent}%)`;
+        };
+
+        const onTouchEnd = (e) => {
+            if (!isSwiping || totalSlides <= 1) {
+                isSwiping = false;
+                carouselTrack.style.transition = '';
+                resetAutoSlide();
+                return;
+            }
+            isSwiping = false;
+            const endX = e.changedTouches ? e.changedTouches[0].clientX : startX;
+            const diffX = endX - startX;
+            const threshold = 35;
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) prevSlide();
+                else nextSlide();
+            }
+            updateCarouselPosition();
+            carouselTrack.style.transition = '';
+            resetAutoSlide();
+        };
+
+        wrapper.addEventListener('touchstart', onTouchStart, { passive: false });
+        wrapper.addEventListener('touchmove', onTouchMove, { passive: false });
+        wrapper.addEventListener('touchend', onTouchEnd);
+        
+        let mouseDown = false;
+        let mouseStartX = 0;
+        let mouseStartTransform = 0;
+        
+        const onMouseDown = (e) => {
+            if (totalSlides <= 1) return;
+            e.preventDefault();
+            mouseDown = true;
+            mouseStartX = e.clientX;
+            mouseStartTransform = currentIndex;
+            carouselTrack.style.transition = 'none';
+            if (autoInterval) clearInterval(autoInterval);
+        };
+        
+        const onMouseMove = (e) => {
+            if (!mouseDown || totalSlides <= 1) return;
+            const diffX = e.clientX - mouseStartX;
+            const wrapperWidth = wrapper.clientWidth;
+            const offsetPercent = (diffX / wrapperWidth) * 100;
+            let newPercent = -mouseStartTransform * 100 + offsetPercent;
+            if (mouseStartTransform === 0 && diffX > 0) newPercent = newPercent * 0.3;
+            if (mouseStartTransform === totalSlides - 1 && diffX < 0) newPercent = -mouseStartTransform * 100 + (diffX / wrapperWidth) * 100 * 0.3;
+            carouselTrack.style.transform = `translateX(${newPercent}%)`;
+        };
+        
+        const onMouseUp = (e) => {
+            if (!mouseDown) return;
+            mouseDown = false;
+            const diffX = e.clientX - mouseStartX;
+            const threshold = 35;
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) prevSlide();
+                else nextSlide();
+            }
+            updateCarouselPosition();
+            carouselTrack.style.transition = '';
+            resetAutoSlide();
+        };
+        
+        wrapper.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+    }
+
+    // 应用网格渲染
+    function renderApps(apps) {
+        if (!appsGrid) return;
+        if (!apps.length) {
+            appsGrid.innerHTML = '<div class="empty-tip">✨ 暂无应用，请联系老师添加</div>';
+            return;
+        }
+        
+        let appsHtml = '';
+        for (let app of apps) {
+            const name = escapeHtml(app.name) || '应用';
+            let iconUrl = getIconUrl(app.icon);
+            const link = app.link && app.link.startsWith('http') ? app.link : (app.link ? app.link : 'javascript:void(0)');
+            const mode = app.mode;
+            const escapedIconUrl = escapeHtml(iconUrl);
+            
+            appsHtml += `
+                <a href="javascript:void(0)" class="app-card" data-link="${escapeHtml(link)}" data-name="${escapeHtml(name)}" data-mode="${mode || ''}">
+                    <img class="app-icon" src="${escapedIconUrl}" alt="${name}" loading="lazy" onerror="this.onerror=null; this.src='${DEFAULT_ICON}'; this.alt='图标加载失败'">
+                    <span class="app-name">${name}</span>
+                </a>
+            `;
+        }
+        appsGrid.innerHTML = appsHtml;
+        
+        // 绑定点击事件
+        const appCards = document.querySelectorAll('.app-card');
+        appCards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                const link = card.getAttribute('data-link');
+                const name = card.getAttribute('data-name');
+                const mode = card.getAttribute('data-mode');
+                
+                if (mode === 'window') {
+                    createWindow(link, name);
+                } else {
+                    window.open(link, '_blank', 'noopener,noreferrer');
+                }
+            });
+        });
+        
+        alignSameRowHeights();
+        
+        const images = appsGrid.querySelectorAll('.app-icon');
+        let loadedCount = 0;
+        if (images.length > 0) {
+            images.forEach(img => {
+                if (img.complete) {
+                    loadedCount++;
+                    if (loadedCount === images.length) {
+                        alignSameRowHeights();
+                    }
+                } else {
+                    img.addEventListener('load', () => alignSameRowHeights());
+                    img.addEventListener('error', () => alignSameRowHeights());
+                }
+            });
+        }
+        
+        if (window.ResizeObserver) {
+            const resizeObserver = new ResizeObserver(() => alignSameRowHeights());
+            resizeObserver.observe(appsGrid);
+        }
+    }
+    
+    function alignSameRowHeights() {
+        const cards = document.querySelectorAll('.app-card');
+        if (!cards.length) return;
+        
+        const cardRects = Array.from(cards).map(card => {
+            const rect = card.getBoundingClientRect();
+            return { element: card, top: rect.top, height: rect.height };
+        });
+        
+        const rows = [];
+        const tolerance = 5;
+        
+        for (let i = 0; i < cardRects.length; i++) {
+            const card = cardRects[i];
+            let addedToRow = false;
+            
+            for (let row of rows) {
+                if (Math.abs(card.top - row[0].top) <= tolerance) {
+                    row.push(card);
+                    addedToRow = true;
+                    break;
+                }
+            }
+            
+            if (!addedToRow) {
+                rows.push([card]);
+            }
+        }
+        
+        for (let row of rows) {
+            if (row.length <= 1) continue;
+            let maxHeight = 0;
+            for (let card of row) {
+                if (card.height > maxHeight) maxHeight = card.height;
+            }
+            for (let card of row) {
+                card.element.style.height = maxHeight + 'px';
+            }
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => alignSameRowHeights(), 100);
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            if (autoInterval) clearInterval(autoInterval);
+        } else {
+            if (totalSlides > 1 && carouselSection.style.display !== 'none') {
+                if (autoInterval) clearInterval(autoInterval);
+                autoInterval = setInterval(() => nextSlide(), 5000);
+            }
+        }
+    });
+
+    loadDataFromFile();
+</script>
+</body>
+</html>
