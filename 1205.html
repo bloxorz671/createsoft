@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>初二五班在线应用平台</title>
+    <title>初二五班智慧应用平台</title>
     <style>
         * {
             margin: 0;
@@ -474,7 +474,7 @@
 <body>
 <div class="platform-container">
     <div class="main-header">
-        <h1>初二五班在线应用平台</h1>
+        <h1>初二五班智慧应用平台</h1>
         <button class="settings-btn" id="settingsBtn">⚙</button>
     </div>
 
@@ -487,7 +487,7 @@
             </label>
         </div>
         <div class="settings-hint">
-            💡 部分应用不支持以窗口模式使用，关闭后将以新标签页方式打开
+            部分应用不支持以窗口模式使用
         </div>
     </div>
 
@@ -520,7 +520,7 @@
     let totalSlides = 0;
     let openWindows = [];
     let nextZIndex = 1000;
-    let windowModeEnabled = !isMobileDevice(); // 手机默认关闭，电脑默认打开
+    let windowModeEnabled = !isMobileDevice();
 
     const carouselSection = document.getElementById('carouselSection');
     const carouselTrack = document.getElementById('carouselTrack');
@@ -538,7 +538,6 @@
         if (saved !== null) {
             windowModeEnabled = saved === 'true';
         } else {
-            // 如果没有保存过，使用根据UA判断的默认值
             windowModeEnabled = !isMobileDevice();
         }
         windowModeSwitch.checked = windowModeEnabled;
@@ -564,17 +563,45 @@
         }
     });
 
-    // 窗口置顶 - 关键修复：使用 pointer-events 和事件捕获确保任何点击都能触发
-    function bringToFront(windowDiv) {
-        nextZIndex++;
-        windowDiv.style.zIndex = nextZIndex;
-        windowDiv.classList.add('active-window');
-        openWindows.forEach(w => {
-            if (w.windowDiv !== windowDiv) {
-                w.windowDiv.classList.remove('active-window');
+    // 核心：全局点击监听，通过坐标判断点击了哪个窗口
+    function bringToFrontByClick(e) {
+        // 获取点击坐标
+        let clientX, clientY;
+        if (e.touches) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+        
+        // 遍历所有打开的窗口，找到包含点击坐标的窗口
+        let clickedWindow = null;
+        for (let i = openWindows.length - 1; i >= 0; i--) {
+            const win = openWindows[i];
+            const rect = win.windowDiv.getBoundingClientRect();
+            if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+                clickedWindow = win.windowDiv;
+                break;
             }
-        });
+        }
+        
+        // 如果点击到了窗口，将其置顶
+        if (clickedWindow) {
+            nextZIndex++;
+            clickedWindow.style.zIndex = nextZIndex;
+            clickedWindow.classList.add('active-window');
+            openWindows.forEach(w => {
+                if (w.windowDiv !== clickedWindow) {
+                    w.windowDiv.classList.remove('active-window');
+                }
+            });
+        }
     }
+    
+    // 在 document 上监听全局点击和触摸事件（捕获阶段确保优先执行）
+    document.addEventListener('mousedown', bringToFrontByClick, true);
+    document.addEventListener('touchstart', bringToFrontByClick, true);
 
     async function loadDataFromFile() {
         try {
@@ -753,17 +780,6 @@
         let isFullscreen = false;
         let savedRect = null;
         let dragEnabled = true;
-        
-        // 关键修复：为整个窗口添加点击置顶事件 - 使用事件捕获确保任何点击都能被捕获
-        // 不阻止冒泡，让按钮等功能正常触发
-        const bringToFrontHandler = (e) => {
-            // 无论点击哪里，都将窗口置顶
-            bringToFront(windowDiv);
-        };
-        
-        // 使用捕获阶段确保最优先响应（true表示捕获阶段）
-        windowDiv.addEventListener('mousedown', bringToFrontHandler, true);
-        windowDiv.addEventListener('touchstart', bringToFrontHandler, true);
         
         // 拖拽功能
         const startDrag = (e) => {
@@ -945,8 +961,6 @@
             document.removeEventListener('keydown', escHandler);
             window.removeEventListener('orientationchange', orientationHandler);
             window.removeEventListener('resize', orientationHandler);
-            windowDiv.removeEventListener('mousedown', bringToFrontHandler, true);
-            windowDiv.removeEventListener('touchstart', bringToFrontHandler, true);
             header.removeEventListener('mousedown', startDrag);
             header.removeEventListener('touchstart', startDrag);
             resizeHandle.removeEventListener('mousedown', startResize);
@@ -954,7 +968,10 @@
         };
         
         openWindows.push({ id: windowId, windowDiv, cleanup });
-        bringToFront(windowDiv);
+        // 新窗口自动置顶
+        nextZIndex++;
+        windowDiv.style.zIndex = nextZIndex;
+        windowDiv.classList.add('active-window');
     }
 
     function renderCarousel() {
