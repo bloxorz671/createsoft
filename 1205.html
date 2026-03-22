@@ -3,17 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>初二五班智慧应用平台</title>
-<!-- 百度统计代码 -->
-<script>
-var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "https://hm.baidu.com/hm.js?efaf77a4ecf8113659f6e5c8ee6857fd";
-  var s = document.getElementsByTagName("script")[0]; 
-  s.parentNode.insertBefore(hm, s);
-})();
-</script>
+    <title>初二五班在线应用平台</title>
     <style>
         * {
             margin: 0;
@@ -141,19 +131,18 @@ var _hmt = _hmt || [];
             background: #2b4c8a;
         }
 
-        /* 应用区域: 使用grid布局，关键：grid-auto-rows: 1fr 确保同一行高度一致 */
+        /* 应用区域: 使用grid布局 */
         .apps-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
             gap: 20px 16px;
             padding: 16px 20px 30px;
             background: white;
-            /* 关键设置：让每一行的所有单元格高度由该行最高单元格决定，并且自动拉伸 */
             grid-auto-rows: 1fr;
-            align-items: stretch; /* 让每个卡片填满整个网格单元格高度 */
+            align-items: stretch;
         }
 
-        /* 每个应用卡片 - 使用flex布局，高度由内容撑开但会被grid拉伸 */
+        /* 每个应用卡片 */
         .app-card {
             background: #f9fafc;
             display: flex;
@@ -166,7 +155,6 @@ var _hmt = _hmt || [];
             border: 1px solid rgba(0, 0, 0, 0.03);
             cursor: pointer;
             padding: 16px 8px;
-            /* 高度自动，但会被父网格的 stretch 拉伸到同行最高 */
             height: 100%;
             min-height: 120px;
         }
@@ -189,7 +177,7 @@ var _hmt = _hmt || [];
             flex-shrink: 0;
         }
         
-        /* 应用名称样式 - 允许自动换行，完整显示 */
+        /* 应用名称样式 */
         .app-name {
             font-size: 0.9rem;
             font-weight: 590;
@@ -219,8 +207,127 @@ var _hmt = _hmt || [];
             text-align: center;
         }
 
+        /* ========== 窗口样式 ========== */
+        .modal-window-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-window {
+            position: fixed;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 400px;
+            min-height: 300px;
+            width: 800px;
+            height: 600px;
+            resize: both;
+            z-index: 1001;
+            transition: box-shadow 0.2s;
+        }
+
+        /* 窗口标题栏 */
+        .window-header {
+            background: linear-gradient(135deg, #2c3e76 0%, #1e2a4a 100%);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            user-select: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .window-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .window-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .window-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .window-btn.close-btn:hover {
+            background: #e74c3c;
+        }
+
+        .window-btn.fullscreen-btn:hover {
+            background: #27ae60;
+        }
+
+        /* 窗口内容区域 */
+        .window-content {
+            flex: 1;
+            background: #f5f5f5;
+            overflow: auto;
+            position: relative;
+        }
+
+        .window-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* 全屏模式样式 */
+        .modal-window.fullscreen-mode {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            min-width: 100% !important;
+            min-height: 100% !important;
+            border-radius: 0 !important;
+            resize: none !important;
+            z-index: 1002;
+        }
+
+        /* 拖拽时的样式 */
+        .modal-window.dragging {
+            opacity: 0.98;
+            cursor: grabbing;
+            transition: none;
+        }
+
         /* 响应式调整 */
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
             .apps-grid {
                 gap: 14px 12px;
                 padding: 16px 16px 30px;
@@ -243,12 +350,11 @@ var _hmt = _hmt || [];
             .app-card {
                 padding: 14px 6px;
             }
-        }
-
-        /* 针对超长名称的额外优化 */
-        @media (max-width: 380px) {
-            .app-name {
-                font-size: 0.75rem;
+            .modal-window {
+                width: 90vw;
+                height: 70vh;
+                min-width: 300px;
+                min-height: 250px;
             }
         }
     </style>
@@ -256,7 +362,7 @@ var _hmt = _hmt || [];
 <body>
 <div class="platform-container">
     <div class="main-header">
-        <h1>初二五班智慧应用平台</h1>
+        <h1>初二五班在线应用平台</h1>
     </div>
 
     <!-- 轮播图区域 -->
@@ -280,10 +386,12 @@ var _hmt = _hmt || [];
 
 <script>
     // ---------- 全局变量 ----------
-    let slidesData = [];      // 存储轮播图片对象 [{ imgUrl, linkUrl }]
+    let slidesData = [];
     let currentIndex = 0;
     let autoInterval = null;
     let totalSlides = 0;
+    let currentWindow = null;
+    let currentOverlay = null;
 
     // DOM 元素
     const carouselSection = document.getElementById('carouselSection');
@@ -292,8 +400,11 @@ var _hmt = _hmt || [];
     const appsGrid = document.getElementById('appsGrid');
     const appsHeader = document.getElementById('appsHeader');
 
-    // 默认图片路径（当应用未设置图标或图标加载失败时显示）
+    // 默认图片路径
     const DEFAULT_ICON = 'null.jpg';
+
+    // 获取页面标题
+    const pageTitle = document.title;
 
     // ---------- 解析 5app.txt 文件 ----------
     async function loadDataFromFile() {
@@ -306,7 +417,7 @@ var _hmt = _hmt || [];
             parseAppTxt(text);
         } catch (error) {
             console.error('读取5app.txt失败:', error);
-            appsGrid.innerHTML = `<div class="error-tip">⚠️ 加载数据失败，请确保 “5app.txt” 文件存在于同目录下。<br>格式参考：<br>pic<br>[p=图片链接 l=跳转链接]<br>app<br>[n=应用名 p=图标 l=链接]</div>`;
+            appsGrid.innerHTML = `<div class="error-tip">⚠️ 加载数据失败，请确保 “5app.txt” 文件存在于同目录下。<br>格式参考：<br>pic<br>[p=图片链接 l=跳转链接]<br>app<br>[n=应用名 p=图标 l=链接 mode=window]</div>`;
             carouselSection.style.display = 'none';
             if (appsHeader) appsHeader.style.display = 'none';
         }
@@ -348,22 +459,20 @@ var _hmt = _hmt || [];
                 }
             } 
             else if (mode === 'app') {
-                const match = line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)\]/);
+                // 支持可选的 mode=window 参数
+                // 格式: [n=应用名 p=图标 l=链接] 或 [n=应用名 p=图标 l=链接 mode=window]
+                let match = line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)(?:\s+mode=([^\s\]]+))?\]/);
+                if (!match) {
+                    match = line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)(?:\s+mode=(.+?))?\]/);
+                }
                 if (match) {
-                    appItems.push({
+                    const appItem = {
                         name: match[1].trim(),
                         icon: match[2].trim(),
-                        link: match[3].trim()
-                    });
-                } else {
-                    const altMatch = line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)\]/);
-                    if (altMatch) {
-                        appItems.push({
-                            name: altMatch[1].trim(),
-                            icon: altMatch[2].trim(),
-                            link: altMatch[3].trim()
-                        });
-                    }
+                        link: match[3].trim(),
+                        mode: match[4] ? match[4].trim() : null
+                    };
+                    appItems.push(appItem);
                 }
             }
         }
@@ -381,7 +490,6 @@ var _hmt = _hmt || [];
 
         // 处理应用网格
         if (appItems.length > 0) {
-            // 显示"全部应用"标题
             if (appsHeader) appsHeader.style.display = 'block';
             renderApps(appItems);
         } else {
@@ -390,7 +498,7 @@ var _hmt = _hmt || [];
         }
     }
 
-    // 处理图标URL，如果为空或无效则返回默认图片
+    // 处理图标URL
     function getIconUrl(iconPath) {
         if (!iconPath || iconPath.trim() === '') {
             return DEFAULT_ICON;
@@ -398,7 +506,235 @@ var _hmt = _hmt || [];
         return iconPath.trim();
     }
 
-    // ---------- 轮播图渲染 (支持触摸滑动，无左右箭头) ----------
+    // ---------- 窗口管理功能 ----------
+    function closeWindow() {
+        if (currentWindow) {
+            if (currentWindow._cleanup) currentWindow._cleanup();
+            currentWindow.remove();
+            currentWindow = null;
+        }
+        if (currentOverlay) {
+            currentOverlay.remove();
+            currentOverlay = null;
+        }
+    }
+
+    function createWindow(url, appName) {
+        // 如果已经有窗口，先关闭
+        if (currentWindow) {
+            closeWindow();
+        }
+
+        // 创建遮罩层（无点击关闭功能）
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-window-overlay';
+        document.body.appendChild(overlay);
+        
+        // 创建窗口主体
+        const windowDiv = document.createElement('div');
+        windowDiv.className = 'modal-window';
+        
+        const windowWidth = Math.min(800, window.innerWidth - 100);
+        const windowHeight = Math.min(600, window.innerHeight - 150);
+        const left = (window.innerWidth - windowWidth) / 2;
+        const top = (window.innerHeight - windowHeight) / 3;
+        
+        windowDiv.style.width = `${windowWidth}px`;
+        windowDiv.style.height = `${windowHeight}px`;
+        windowDiv.style.left = `${left}px`;
+        windowDiv.style.top = `${top}px`;
+        
+        // 标题栏 - 使用页面标题
+        const header = document.createElement('div');
+        header.className = 'window-header';
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'window-title';
+        titleDiv.innerHTML = `<span>${escapeHtml(appName)}</span>`;
+        
+        const controls = document.createElement('div');
+        controls.className = 'window-controls';
+        
+        // 全屏按钮（退出全屏时显示❐）
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'window-btn fullscreen-btn';
+        fullscreenBtn.innerHTML = '⛶';
+        fullscreenBtn.title = '全屏模式';
+        
+        // 关闭按钮
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'window-btn close-btn';
+        closeBtn.innerHTML = '✕';
+        closeBtn.title = '关闭窗口';
+        
+        controls.appendChild(fullscreenBtn);
+        controls.appendChild(closeBtn);
+        header.appendChild(titleDiv);
+        header.appendChild(controls);
+        
+        // 内容区域 - iframe
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'window-content';
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.title = appName;
+        iframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation';
+        iframe.allow = 'fullscreen';
+        contentDiv.appendChild(iframe);
+        
+        windowDiv.appendChild(header);
+        windowDiv.appendChild(contentDiv);
+        document.body.appendChild(windowDiv);
+        
+        currentWindow = windowDiv;
+        currentOverlay = overlay;
+        
+        let isDraggingFlag = false;
+        let dragStartX = 0, dragStartY = 0;
+        let startLeft = 0, startTop = 0;
+        let isFullscreenFlag = false;
+        let savedRect = null;
+        let dragEnabledFlag = true;
+        
+        // 鼠标拖拽
+        const onMouseMove = (e) => {
+            if (!isDraggingFlag) return;
+            let newLeft = startLeft + (e.clientX - dragStartX);
+            let newTop = startTop + (e.clientY - dragStartY);
+            newLeft = Math.max(-windowDiv.offsetWidth + 50, Math.min(window.innerWidth - 50, newLeft));
+            newTop = Math.max(0, Math.min(window.innerHeight - 50, newTop));
+            windowDiv.style.left = `${newLeft}px`;
+            windowDiv.style.top = `${newTop}px`;
+        };
+        
+        const onMouseUp = () => {
+            if (isDraggingFlag) {
+                isDraggingFlag = false;
+                windowDiv.classList.remove('dragging');
+                document.body.style.userSelect = '';
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+        };
+        
+        const startDragMouse = (e) => {
+            if (!dragEnabledFlag) return;
+            if (e.target.closest('.window-header') && !e.target.closest('.window-controls')) {
+                isDraggingFlag = true;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                startLeft = windowDiv.offsetLeft;
+                startTop = windowDiv.offsetTop;
+                windowDiv.classList.add('dragging');
+                document.body.style.userSelect = 'none';
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+                e.preventDefault();
+            }
+        };
+        
+        windowDiv.addEventListener('mousedown', startDragMouse);
+        
+        // 触摸拖拽
+        let touchDragging = false;
+        let touchStartX = 0, touchStartY = 0;
+        let touchStartLeft = 0, touchStartTop = 0;
+        
+        const onTouchStart = (e) => {
+            if (!dragEnabledFlag) return;
+            if (e.target.closest('.window-header') && !e.target.closest('.window-controls')) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+                touchStartLeft = windowDiv.offsetLeft;
+                touchStartTop = windowDiv.offsetTop;
+                touchDragging = true;
+                windowDiv.classList.add('dragging');
+                document.body.style.userSelect = 'none';
+            }
+        };
+        
+        const onTouchMove = (e) => {
+            if (!touchDragging) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const deltaX = touch.clientX - touchStartX;
+            const deltaY = touch.clientY - touchStartY;
+            let newLeft = touchStartLeft + deltaX;
+            let newTop = touchStartTop + deltaY;
+            newLeft = Math.max(-windowDiv.offsetWidth + 50, Math.min(window.innerWidth - 50, newLeft));
+            newTop = Math.max(0, Math.min(window.innerHeight - 50, newTop));
+            windowDiv.style.left = `${newLeft}px`;
+            windowDiv.style.top = `${newTop}px`;
+        };
+        
+        const onTouchEnd = () => {
+            if (touchDragging) {
+                touchDragging = false;
+                windowDiv.classList.remove('dragging');
+                document.body.style.userSelect = '';
+            }
+        };
+        
+        header.addEventListener('touchstart', onTouchStart, { passive: false });
+        header.addEventListener('touchmove', onTouchMove, { passive: false });
+        header.addEventListener('touchend', onTouchEnd);
+        
+        // 全屏逻辑
+        const toggleFullscreenLocal = () => {
+            if (!isFullscreenFlag) {
+                // 进入全屏：保存当前窗口位置和大小
+                savedRect = {
+                    width: windowDiv.offsetWidth,
+                    height: windowDiv.offsetHeight,
+                    left: windowDiv.offsetLeft,
+                    top: windowDiv.offsetTop
+                };
+                windowDiv.classList.add('fullscreen-mode');
+                isFullscreenFlag = true;
+                fullscreenBtn.innerHTML = '❐';
+                fullscreenBtn.title = '退出全屏';
+                dragEnabledFlag = false;
+            } else {
+                // 退出全屏：恢复原来大小和位置
+                windowDiv.classList.remove('fullscreen-mode');
+                if (savedRect) {
+                    windowDiv.style.width = `${savedRect.width}px`;
+                    windowDiv.style.height = `${savedRect.height}px`;
+                    windowDiv.style.left = `${savedRect.left}px`;
+                    windowDiv.style.top = `${savedRect.top}px`;
+                }
+                isFullscreenFlag = false;
+                fullscreenBtn.innerHTML = '⛶';
+                fullscreenBtn.title = '全屏模式';
+                dragEnabledFlag = true;
+            }
+        };
+        
+        const closeWindowHandler = () => closeWindow();
+        
+        fullscreenBtn.addEventListener('click', toggleFullscreenLocal);
+        closeBtn.addEventListener('click', closeWindowHandler);
+        
+        // ESC键退出全屏（但不关闭窗口）
+        const escHandlerGlobal = (e) => {
+            if (e.key === 'Escape' && isFullscreenFlag) {
+                toggleFullscreenLocal();
+            }
+        };
+        document.addEventListener('keydown', escHandlerGlobal);
+        
+        // 清理函数
+        windowDiv._cleanup = () => {
+            document.removeEventListener('keydown', escHandlerGlobal);
+            header.removeEventListener('touchstart', onTouchStart);
+            header.removeEventListener('touchmove', onTouchMove);
+            header.removeEventListener('touchend', onTouchEnd);
+            windowDiv.removeEventListener('mousedown', startDragMouse);
+        };
+    }
+
+    // ---------- 轮播图渲染 ----------
     function renderCarousel() {
         if (!carouselTrack) return;
         totalSlides = slidesData.length;
@@ -485,14 +821,12 @@ var _hmt = _hmt || [];
         }, 5000);
     }
 
-    // 手动滑动（触摸/鼠标拖拽）
     function initSwipe() {
         if (!carouselTrack) return;
         const wrapper = carouselTrack.parentElement;
         if (!wrapper) return;
 
-        let startX = 0;
-        let startY = 0;
+        let startX = 0, startY = 0;
         let isSwiping = false;
         let startTransform = 0;
 
@@ -535,20 +869,23 @@ var _hmt = _hmt || [];
             const diffX = endX - startX;
             const threshold = 35;
             if (Math.abs(diffX) > threshold) {
-                if (diffX > 0) {
-                    prevSlide();
-                } else {
-                    nextSlide();
-                }
+                if (diffX > 0) prevSlide();
+                else nextSlide();
             }
             updateCarouselPosition();
             carouselTrack.style.transition = '';
             resetAutoSlide();
         };
 
+        wrapper.addEventListener('touchstart', onTouchStart, { passive: false });
+        wrapper.addEventListener('touchmove', onTouchMove, { passive: false });
+        wrapper.addEventListener('touchend', onTouchEnd);
+        
+        // 鼠标拖拽支持
         let mouseDown = false;
         let mouseStartX = 0;
         let mouseStartTransform = 0;
+        
         const onMouseDown = (e) => {
             if (totalSlides <= 1) return;
             e.preventDefault();
@@ -558,6 +895,7 @@ var _hmt = _hmt || [];
             carouselTrack.style.transition = 'none';
             if (autoInterval) clearInterval(autoInterval);
         };
+        
         const onMouseMove = (e) => {
             if (!mouseDown || totalSlides <= 1) return;
             const diffX = e.clientX - mouseStartX;
@@ -568,6 +906,7 @@ var _hmt = _hmt || [];
             if (mouseStartTransform === totalSlides - 1 && diffX < 0) newPercent = -mouseStartTransform * 100 + (diffX / wrapperWidth) * 100 * 0.3;
             carouselTrack.style.transform = `translateX(${newPercent}%)`;
         };
+        
         const onMouseUp = (e) => {
             if (!mouseDown) return;
             mouseDown = false;
@@ -581,35 +920,31 @@ var _hmt = _hmt || [];
             carouselTrack.style.transition = '';
             resetAutoSlide();
         };
-
-        wrapper.addEventListener('touchstart', onTouchStart, { passive: false });
-        wrapper.addEventListener('touchmove', onTouchMove, { passive: false });
-        wrapper.addEventListener('touchend', onTouchEnd);
+        
         wrapper.addEventListener('mousedown', onMouseDown);
         window.addEventListener('mousemove', onMouseMove);
         window.addEventListener('mouseup', onMouseUp);
     }
 
-    // 应用网格渲染 - 支持名称过长自动延伸矩形，同一行自动对齐
+    // 应用网格渲染
     function renderApps(apps) {
         if (!appsGrid) return;
         if (!apps.length) {
-            appsGrid.innerHTML = '<div class="empty-tip">暂无应用，请联系管理员添加</div>';
+            appsGrid.innerHTML = '<div class="empty-tip">✨ 暂无应用，请联系老师添加</div>';
             return;
         }
         
         let appsHtml = '';
         for (let app of apps) {
             const name = escapeHtml(app.name) || '应用';
-            // 处理图标：如果为空则使用默认图片 null.jpg
             let iconUrl = getIconUrl(app.icon);
             const link = app.link && app.link.startsWith('http') ? app.link : (app.link ? app.link : 'javascript:void(0)');
-            
-            // 转义图标URL
+            const mode = app.mode;
             const escapedIconUrl = escapeHtml(iconUrl);
             
+            // 存储 mode 参数到 data 属性，用于点击时判断
             appsHtml += `
-                <a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer" class="app-card">
+                <a href="javascript:void(0)" class="app-card" data-link="${escapeHtml(link)}" data-name="${escapeHtml(name)}" data-mode="${mode || ''}">
                     <img class="app-icon" src="${escapedIconUrl}" alt="${name}" loading="lazy" onerror="this.onerror=null; this.src='${DEFAULT_ICON}'; this.alt='图标加载失败'">
                     <span class="app-name">${name}</span>
                 </a>
@@ -617,12 +952,28 @@ var _hmt = _hmt || [];
         }
         appsGrid.innerHTML = appsHtml;
         
-        // 使用ResizeObserver来确保同一行的卡片高度对齐
-        // 由于CSS已经设置了grid-auto-rows: 1fr和align-items: stretch，理论上同一行的卡片会自动拉伸到相同高度
-        // 但为了更可靠地处理动态内容（如图片加载导致的布局变化），添加一个额外的对齐函数
+        // 绑定点击事件
+        const appCards = document.querySelectorAll('.app-card');
+        appCards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                const link = card.getAttribute('data-link');
+                const name = card.getAttribute('data-name');
+                const mode = card.getAttribute('data-mode');
+                
+                if (mode === 'window') {
+                    // 窗口模式：打开可拖拽窗口
+                    createWindow(link, name);
+                } else {
+                    // 普通模式：直接跳转
+                    window.open(link, '_blank', 'noopener,noreferrer');
+                }
+            });
+        });
+        
+        // 确保同一行高度对齐
         alignSameRowHeights();
         
-        // 监听图片加载完成后重新对齐
         const images = appsGrid.querySelectorAll('.app-icon');
         let loadedCount = 0;
         if (images.length > 0) {
@@ -633,51 +984,35 @@ var _hmt = _hmt || [];
                         alignSameRowHeights();
                     }
                 } else {
-                    img.addEventListener('load', () => {
-                        alignSameRowHeights();
-                    });
-                    img.addEventListener('error', () => {
-                        alignSameRowHeights();
-                    });
+                    img.addEventListener('load', () => alignSameRowHeights());
+                    img.addEventListener('error', () => alignSameRowHeights());
                 }
             });
         }
         
-        // 使用ResizeObserver监听网格变化，确保布局稳定
         if (window.ResizeObserver) {
-            const resizeObserver = new ResizeObserver(() => {
-                alignSameRowHeights();
-            });
+            const resizeObserver = new ResizeObserver(() => alignSameRowHeights());
             resizeObserver.observe(appsGrid);
         }
     }
     
-    // 确保同一行的卡片高度一致
     function alignSameRowHeights() {
         const cards = document.querySelectorAll('.app-card');
         if (!cards.length) return;
         
-        // 获取所有卡片的位置信息
         const cardRects = Array.from(cards).map(card => {
             const rect = card.getBoundingClientRect();
-            return {
-                element: card,
-                top: rect.top,
-                bottom: rect.bottom,
-                height: rect.height
-            };
+            return { element: card, top: rect.top, height: rect.height };
         });
         
-        // 按top值分组（同一行）
         const rows = [];
-        const tolerance = 5; // 容差像素
+        const tolerance = 5;
         
         for (let i = 0; i < cardRects.length; i++) {
             const card = cardRects[i];
             let addedToRow = false;
             
             for (let row of rows) {
-                // 如果当前卡片的top与行中第一个卡片的top接近，则属于同一行
                 if (Math.abs(card.top - row[0].top) <= tolerance) {
                     row.push(card);
                     addedToRow = true;
@@ -690,18 +1025,12 @@ var _hmt = _hmt || [];
             }
         }
         
-        // 为每一行设置统一高度（取该行最高卡片的高度）
         for (let row of rows) {
             if (row.length <= 1) continue;
-            
             let maxHeight = 0;
             for (let card of row) {
-                if (card.height > maxHeight) {
-                    maxHeight = card.height;
-                }
+                if (card.height > maxHeight) maxHeight = card.height;
             }
-            
-            // 为该行所有卡片设置相同的高度
             for (let card of row) {
                 card.element.style.height = maxHeight + 'px';
             }
@@ -715,18 +1044,13 @@ var _hmt = _hmt || [];
             if (m === '<') return '&lt;';
             if (m === '>') return '&gt;';
             return m;
-        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-            return c;
         });
     }
 
-    // 监听窗口大小变化，重新对齐高度
     let resizeTimer;
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            alignSameRowHeights();
-        }, 100);
+        resizeTimer = setTimeout(() => alignSameRowHeights(), 100);
     });
 
     document.addEventListener('visibilitychange', () => {
