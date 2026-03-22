@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>初二五班智慧应用平台</title>
+    <title>初二五班在线应用平台</title>
     <style>
         * {
             margin: 0;
@@ -19,14 +19,12 @@
             position: relative;
         }
 
-        /* 主容器 - 无框，无圆角 */
         .platform-container {
             max-width: 550px;
             margin: 0 auto;
             background: #ffffff;
         }
 
-        /* 标题置顶端居中 - 右侧添加设置按钮 */
         .main-header {
             text-align: center;
             padding: 20px 16px 12px;
@@ -61,14 +59,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
         }
         .settings-btn:hover {
             background: rgba(0, 0, 0, 0.05);
             transform: rotate(15deg);
         }
 
-        /* 设置面板 - 在设置按钮正下方 */
         .settings-panel {
             position: fixed;
             top: 70px;
@@ -82,7 +78,6 @@
             display: none;
             border: 1px solid rgba(0, 0, 0, 0.1);
         }
-        /* 响应式调整设置面板位置 */
         @media (max-width: 600px) {
             .settings-panel {
                 right: 16px;
@@ -111,7 +106,6 @@
             border-top: 1px solid #eee;
             line-height: 1.4;
         }
-        /* 开关样式 */
         .switch {
             position: relative;
             display: inline-block;
@@ -152,7 +146,6 @@
             transform: translateX(24px);
         }
 
-        /* 轮播区样式 */
         .carousel-section {
             margin: 12px 16px 24px;
             background: #f0f2f6;
@@ -309,7 +302,6 @@
             text-align: center;
         }
 
-        /* ========== 窗口样式 ========== */
         .modal-window {
             position: fixed;
             background: #fff;
@@ -482,11 +474,10 @@
 <body>
 <div class="platform-container">
     <div class="main-header">
-        <h1>初二五班智慧应用平台</h1>
+        <h1>初二五班在线应用平台</h1>
         <button class="settings-btn" id="settingsBtn">⚙</button>
     </div>
 
-    <!-- 设置面板 -->
     <div class="settings-panel" id="settingsPanel">
         <div class="settings-item">
             <span class="settings-label">使用窗口模式打开应用</span>
@@ -496,7 +487,7 @@
             </label>
         </div>
         <div class="settings-hint">
-            部分应用不支持以窗口模式使用
+            💡 部分应用不支持以窗口模式使用，关闭后将以新标签页方式打开
         </div>
     </div>
 
@@ -517,6 +508,11 @@
 </div>
 
 <script>
+    // 检测是否为移动设备
+    function isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    }
+
     // 全局变量
     let slidesData = [];
     let currentIndex = 0;
@@ -524,9 +520,8 @@
     let totalSlides = 0;
     let openWindows = [];
     let nextZIndex = 1000;
-    let windowModeEnabled = true; // 默认窗口模式开启
+    let windowModeEnabled = !isMobileDevice(); // 手机默认关闭，电脑默认打开
 
-    // DOM 元素
     const carouselSection = document.getElementById('carouselSection');
     const carouselTrack = document.getElementById('carouselTrack');
     const dotsContainer = document.getElementById('carouselDots');
@@ -538,45 +533,42 @@
 
     const DEFAULT_ICON = 'null.jpg';
 
-    // 加载设置
     function loadSettings() {
         const saved = localStorage.getItem('windowModeEnabled');
         if (saved !== null) {
             windowModeEnabled = saved === 'true';
+        } else {
+            // 如果没有保存过，使用根据UA判断的默认值
+            windowModeEnabled = !isMobileDevice();
         }
         windowModeSwitch.checked = windowModeEnabled;
     }
 
-    // 保存设置
     function saveSettings() {
         localStorage.setItem('windowModeEnabled', windowModeEnabled);
     }
 
-    // 设置面板开关
     windowModeSwitch.addEventListener('change', (e) => {
         windowModeEnabled = e.target.checked;
         saveSettings();
     });
 
-    // 设置按钮点击 - 切换面板显示
     settingsBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         settingsPanel.classList.toggle('show');
     });
     
-    // 点击其他地方关闭设置面板
     document.addEventListener('click', (e) => {
         if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
             settingsPanel.classList.remove('show');
         }
     });
 
-    // 窗口置顶 - 点击窗口任意位置都置顶
+    // 窗口置顶 - 关键修复：使用 pointer-events 和事件捕获确保任何点击都能触发
     function bringToFront(windowDiv) {
         nextZIndex++;
         windowDiv.style.zIndex = nextZIndex;
         windowDiv.classList.add('active-window');
-        // 移除其他窗口的active标记
         openWindows.forEach(w => {
             if (w.windowDiv !== windowDiv) {
                 w.windowDiv.classList.remove('active-window');
@@ -592,7 +584,7 @@
             parseAppTxt(text);
         } catch (error) {
             console.error('读取5app.txt失败:', error);
-            appsGrid.innerHTML = `<div class="error-tip">⚠️ 加载数据失败，请确保 “5app.txt” 文件存在。<br>格式：pic<br>[p=图片 l=链接]<br>app<br>[n=名称 p=图标 l=链接 mode=window]</div>`;
+            appsGrid.innerHTML = `<div class="error-tip">⚠️ 加载数据失败，请确保 "5app.txt" 文件存在。<br>格式：pic<br>[p=图片 l=链接]<br>app<br>[n=名称 p=图标 l=链接 mode=window]</div>`;
             carouselSection.style.display = 'none';
             if (appsHeader) appsHeader.style.display = 'none';
         }
@@ -762,19 +754,18 @@
         let savedRect = null;
         let dragEnabled = true;
         
-        // 关键修复：为整个窗口添加点击置顶事件，使用 mousedown 和 touchstart 确保任何点击都能触发
-        // 但需要避免干扰拖拽和按钮点击（按钮点击会冒泡，但置顶和按钮功能可以共存）
+        // 关键修复：为整个窗口添加点击置顶事件 - 使用事件捕获确保任何点击都能被捕获
+        // 不阻止冒泡，让按钮等功能正常触发
         const bringToFrontHandler = (e) => {
-            // 不管点击哪里，都将窗口置顶
-            // 不阻止冒泡，让按钮等其他事件也能正常触发
+            // 无论点击哪里，都将窗口置顶
             bringToFront(windowDiv);
         };
         
-        // 为整个窗口添加点击置顶事件 - 使用 mousedown 和 touchstart 确保最优先响应
-        windowDiv.addEventListener('mousedown', bringToFrontHandler);
-        windowDiv.addEventListener('touchstart', bringToFrontHandler);
+        // 使用捕获阶段确保最优先响应（true表示捕获阶段）
+        windowDiv.addEventListener('mousedown', bringToFrontHandler, true);
+        windowDiv.addEventListener('touchstart', bringToFrontHandler, true);
         
-        // 拖拽功能 - 只有点击标题栏才拖拽
+        // 拖拽功能
         const startDrag = (e) => {
             if (!dragEnabled) return;
             const isHeader = e.target.closest('.window-header');
@@ -782,7 +773,6 @@
             const isResize = e.target.closest('.resize-handle');
             if (!isHeader || isControl || isResize) return;
             
-            // 拖拽时阻止冒泡，但置顶已经通过前面的监听触发了
             e.stopPropagation();
             e.preventDefault();
             isDragging = true;
@@ -830,7 +820,7 @@
         header.addEventListener('mousedown', startDrag);
         header.addEventListener('touchstart', startDrag, { passive: false });
         
-        // 调整大小功能
+        // 调整大小
         let isResizing = false;
         let resizeStartX = 0, resizeStartY = 0;
         let resizeStartW = 0, resizeStartH = 0;
@@ -889,7 +879,6 @@
         resizeHandle.addEventListener('mousedown', startResize);
         resizeHandle.addEventListener('touchstart', startResize, { passive: false });
         
-        // 全屏逻辑
         const toggleFullscreen = () => {
             if (!isFullscreen) {
                 savedRect = { width: windowDiv.offsetWidth, height: windowDiv.offsetHeight, left: windowDiv.offsetLeft, top: windowDiv.offsetTop };
@@ -956,8 +945,8 @@
             document.removeEventListener('keydown', escHandler);
             window.removeEventListener('orientationchange', orientationHandler);
             window.removeEventListener('resize', orientationHandler);
-            windowDiv.removeEventListener('mousedown', bringToFrontHandler);
-            windowDiv.removeEventListener('touchstart', bringToFrontHandler);
+            windowDiv.removeEventListener('mousedown', bringToFrontHandler, true);
+            windowDiv.removeEventListener('touchstart', bringToFrontHandler, true);
             header.removeEventListener('mousedown', startDrag);
             header.removeEventListener('touchstart', startDrag);
             resizeHandle.removeEventListener('mousedown', startResize);
@@ -968,7 +957,6 @@
         bringToFront(windowDiv);
     }
 
-    // 轮播图渲染
     function renderCarousel() {
         if (!carouselTrack) return;
         totalSlides = slidesData.length;
@@ -1085,7 +1073,6 @@
                 const link = card.dataset.link;
                 const name = card.dataset.name;
                 const hasWindowMode = card.dataset.hasWindowMode === 'true';
-                // 判断是否使用窗口模式：如果全局开关开启且应用本身支持窗口模式，则使用窗口模式
                 const useWindow = windowModeEnabled && hasWindowMode;
                 if (useWindow) {
                     createWindow(link, name);
