@@ -1,7 +1,6 @@
 pic
 [p=guidepic.jpg l=userguide.png]
-[p=homeworkapp1.jpg l=homeworkapp]
-[p=ezr1.jpg l=ezr]
+
 
 app
 [n=作业提交平台 p=homeworkapp.jpg l=homeworkapp mode=window]
