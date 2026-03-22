@@ -226,13 +226,17 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            min-width: 400px;
-            min-height: 300px;
-            width: 800px;
-            height: 600px;
-            resize: both;
+            min-width: 300px;
+            min-height: 250px;
             z-index: 1001;
             transition: box-shadow 0.2s;
+            resize: both;
+        }
+
+        /* 允许右下角调整大小 */
+        .modal-window {
+            resize: both;
+            overflow: auto;
         }
 
         /* 窗口标题栏 */
@@ -246,6 +250,7 @@
             cursor: move;
             user-select: none;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
         }
 
         .window-title {
@@ -254,32 +259,37 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .window-controls {
             display: flex;
-            gap: 12px;
+            gap: 8px;
         }
 
         .window-btn {
             background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
-            width: 32px;
+            min-width: 32px;
             height: 32px;
+            padding: 0 8px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
-            font-weight: bold;
+            font-weight: 500;
+            white-space: nowrap;
         }
 
         .window-btn:hover {
             background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.05);
+            transform: scale(1.02);
         }
 
         .window-btn.close-btn:hover {
@@ -290,12 +300,17 @@
             background: #27ae60;
         }
 
+        .window-btn.browser-btn:hover {
+            background: #3498db;
+        }
+
         /* 窗口内容区域 */
         .window-content {
             flex: 1;
             background: #f5f5f5;
             overflow: auto;
             position: relative;
+            min-height: 0;
         }
 
         .window-content iframe {
@@ -326,6 +341,13 @@
             transition: none;
         }
 
+        /* 调整大小手柄样式 */
+        .modal-window::-webkit-resizer {
+            border-width: 8px;
+            border-style: solid;
+            border-color: transparent #2c3e76 #2c3e76 transparent;
+        }
+
         /* 响应式调整 */
         @media (max-width: 768px) {
             .apps-grid {
@@ -350,11 +372,19 @@
             .app-card {
                 padding: 14px 6px;
             }
+            .window-btn {
+                min-width: 28px;
+                height: 28px;
+                padding: 0 6px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* 横屏适配 */
+        @media (orientation: landscape) and (max-height: 600px) {
             .modal-window {
-                width: 90vw;
-                height: 70vh;
-                min-width: 300px;
-                min-height: 250px;
+                width: 70vw;
+                height: 80vh;
             }
         }
     </style>
@@ -460,7 +490,6 @@
             } 
             else if (mode === 'app') {
                 // 支持可选的 mode=window 参数
-                // 格式: [n=应用名 p=图标 l=链接] 或 [n=应用名 p=图标 l=链接 mode=window]
                 let match = line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)(?:\s+mode=([^\s\]]+))?\]/);
                 if (!match) {
                     match = line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)(?:\s+mode=(.+?))?\]/);
@@ -506,6 +535,25 @@
         return iconPath.trim();
     }
 
+    // 获取自适应窗口尺寸（根据屏幕方向）
+    function getAdaptiveWindowSize() {
+        const isLandscape = window.innerWidth > window.innerHeight;
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        
+        if (isLandscape) {
+            // 横屏模式：窗口宽度为屏幕的60%，高度为屏幕的80%
+            const width = Math.min(screenWidth * 0.6, 1000);
+            const height = Math.min(screenHeight * 0.8, 700);
+            return { width, height };
+        } else {
+            // 竖屏模式：窗口宽度为屏幕的85%，高度为屏幕的60%
+            const width = Math.min(screenWidth * 0.85, 500);
+            const height = Math.min(screenHeight * 0.6, 600);
+            return { width, height };
+        }
+    }
+
     // ---------- 窗口管理功能 ----------
     function closeWindow() {
         if (currentWindow) {
@@ -519,13 +567,18 @@
         }
     }
 
+    // 浏览器打开功能
+    function openInBrowser(url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
     function createWindow(url, appName) {
         // 如果已经有窗口，先关闭
         if (currentWindow) {
             closeWindow();
         }
 
-        // 创建遮罩层（无点击关闭功能）
+        // 创建遮罩层
         const overlay = document.createElement('div');
         overlay.className = 'modal-window-overlay';
         document.body.appendChild(overlay);
@@ -534,17 +587,17 @@
         const windowDiv = document.createElement('div');
         windowDiv.className = 'modal-window';
         
-        const windowWidth = Math.min(800, window.innerWidth - 100);
-        const windowHeight = Math.min(600, window.innerHeight - 150);
-        const left = (window.innerWidth - windowWidth) / 2;
-        const top = (window.innerHeight - windowHeight) / 3;
+        // 获取自适应窗口尺寸
+        const { width, height } = getAdaptiveWindowSize();
+        const left = (window.innerWidth - width) / 2;
+        const top = Math.max(20, (window.innerHeight - height) / 3);
         
-        windowDiv.style.width = `${windowWidth}px`;
-        windowDiv.style.height = `${windowHeight}px`;
+        windowDiv.style.width = `${width}px`;
+        windowDiv.style.height = `${height}px`;
         windowDiv.style.left = `${left}px`;
         windowDiv.style.top = `${top}px`;
         
-        // 标题栏 - 使用页面标题
+        // 标题栏
         const header = document.createElement('div');
         header.className = 'window-header';
         const titleDiv = document.createElement('div');
@@ -554,7 +607,13 @@
         const controls = document.createElement('div');
         controls.className = 'window-controls';
         
-        // 全屏按钮（退出全屏时显示❐）
+        // 浏览器打开按钮
+        const browserBtn = document.createElement('button');
+        browserBtn.className = 'window-btn browser-btn';
+        browserBtn.innerHTML = '浏览器';
+        browserBtn.title = '在浏览器中打开';
+        
+        // 全屏按钮
         const fullscreenBtn = document.createElement('button');
         fullscreenBtn.className = 'window-btn fullscreen-btn';
         fullscreenBtn.innerHTML = '⛶';
@@ -566,6 +625,7 @@
         closeBtn.innerHTML = '✕';
         closeBtn.title = '关闭窗口';
         
+        controls.appendChild(browserBtn);
         controls.appendChild(fullscreenBtn);
         controls.appendChild(closeBtn);
         header.appendChild(titleDiv);
@@ -600,6 +660,7 @@
             if (!isDraggingFlag) return;
             let newLeft = startLeft + (e.clientX - dragStartX);
             let newTop = startTop + (e.clientY - dragStartY);
+            // 边界限制
             newLeft = Math.max(-windowDiv.offsetWidth + 50, Math.min(window.innerWidth - 50, newLeft));
             newTop = Math.max(0, Math.min(window.innerHeight - 50, newTop));
             windowDiv.style.left = `${newLeft}px`;
@@ -617,6 +678,7 @@
         };
         
         const startDragMouse = (e) => {
+            // 只有点击标题栏区域且不是按钮时才启动拖拽
             if (!dragEnabledFlag) return;
             if (e.target.closest('.window-header') && !e.target.closest('.window-controls')) {
                 isDraggingFlag = true;
@@ -711,8 +773,14 @@
             }
         };
         
+        // 浏览器打开
+        const browserOpenHandler = () => {
+            openInBrowser(url);
+        };
+        
         const closeWindowHandler = () => closeWindow();
         
+        browserBtn.addEventListener('click', browserOpenHandler);
         fullscreenBtn.addEventListener('click', toggleFullscreenLocal);
         closeBtn.addEventListener('click', closeWindowHandler);
         
@@ -724,9 +792,24 @@
         };
         document.addEventListener('keydown', escHandlerGlobal);
         
+        // 监听窗口大小变化，非全屏时调整边界
+        const resizeHandler = () => {
+            if (!isFullscreenFlag && currentWindow === windowDiv) {
+                let left = windowDiv.offsetLeft;
+                let top = windowDiv.offsetTop;
+                left = Math.max(-windowDiv.offsetWidth + 50, Math.min(window.innerWidth - 50, left));
+                top = Math.max(0, Math.min(window.innerHeight - 50, top));
+                if (left !== windowDiv.offsetLeft) windowDiv.style.left = `${left}px`;
+                if (top !== windowDiv.offsetTop) windowDiv.style.top = `${top}px`;
+            }
+        };
+        
+        window.addEventListener('resize', resizeHandler);
+        
         // 清理函数
         windowDiv._cleanup = () => {
             document.removeEventListener('keydown', escHandlerGlobal);
+            window.removeEventListener('resize', resizeHandler);
             header.removeEventListener('touchstart', onTouchStart);
             header.removeEventListener('touchmove', onTouchMove);
             header.removeEventListener('touchend', onTouchEnd);
@@ -942,7 +1025,6 @@
             const mode = app.mode;
             const escapedIconUrl = escapeHtml(iconUrl);
             
-            // 存储 mode 参数到 data 属性，用于点击时判断
             appsHtml += `
                 <a href="javascript:void(0)" class="app-card" data-link="${escapeHtml(link)}" data-name="${escapeHtml(name)}" data-mode="${mode || ''}">
                     <img class="app-icon" src="${escapedIconUrl}" alt="${name}" loading="lazy" onerror="this.onerror=null; this.src='${DEFAULT_ICON}'; this.alt='图标加载失败'">
