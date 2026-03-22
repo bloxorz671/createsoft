@@ -320,7 +320,8 @@
             overflow: hidden;
             min-width: 280px;
             min-height: 200px;
-            transition: box-shadow 0.2s, z-index 0s;
+            transition: box-shadow 0.2s;
+            cursor: default;
         }
         .modal-window.active-window {
             z-index: 1002;
@@ -373,6 +374,8 @@
             transition: all 0.2s;
             font-weight: 500;
             white-space: nowrap;
+            position: relative;
+            z-index: 5;
         }
 
         .window-btn:hover {
@@ -759,15 +762,15 @@
         let savedRect = null;
         let dragEnabled = true;
         
-        // 关键修复：点击窗口任意位置（包括内容区域、边框等）都置顶
-        // 为整个窗口添加点击置顶事件，但要避免干扰拖拽和按钮点击
+        // 关键修复：为整个窗口添加点击置顶事件，使用 mousedown 和 touchstart 确保任何点击都能触发
+        // 但需要避免干扰拖拽和按钮点击（按钮点击会冒泡，但置顶和按钮功能可以共存）
         const bringToFrontHandler = (e) => {
-            // 阻止事件冒泡到document，避免重复触发
-            e.stopPropagation();
+            // 不管点击哪里，都将窗口置顶
+            // 不阻止冒泡，让按钮等其他事件也能正常触发
             bringToFront(windowDiv);
         };
         
-        // 为整个窗口添加点击置顶事件
+        // 为整个窗口添加点击置顶事件 - 使用 mousedown 和 touchstart 确保最优先响应
         windowDiv.addEventListener('mousedown', bringToFrontHandler);
         windowDiv.addEventListener('touchstart', bringToFrontHandler);
         
@@ -779,7 +782,7 @@
             const isResize = e.target.closest('.resize-handle');
             if (!isHeader || isControl || isResize) return;
             
-            // 拖拽时阻止冒泡，避免触发置顶的重复操作
+            // 拖拽时阻止冒泡，但置顶已经通过前面的监听触发了
             e.stopPropagation();
             e.preventDefault();
             isDragging = true;
