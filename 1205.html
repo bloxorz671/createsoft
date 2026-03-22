@@ -61,17 +61,18 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
         .settings-btn:hover {
             background: rgba(0, 0, 0, 0.05);
             transform: rotate(15deg);
         }
 
-        /* 设置面板 */
+        /* 设置面板 - 在设置按钮正下方 */
         .settings-panel {
             position: fixed;
             top: 70px;
-            right: 20px;
+            right: calc(50% - 275px + 20px);
             background: white;
             border-radius: 12px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
@@ -81,6 +82,13 @@
             display: none;
             border: 1px solid rgba(0, 0, 0, 0.1);
         }
+        /* 响应式调整设置面板位置 */
+        @media (max-width: 600px) {
+            .settings-panel {
+                right: 16px;
+                top: 70px;
+            }
+        }
         .settings-panel.show {
             display: block;
         }
@@ -88,12 +96,20 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
+            padding: 8px 0;
         }
         .settings-label {
             font-size: 0.95rem;
             color: #333;
             font-weight: 500;
+        }
+        .settings-hint {
+            font-size: 0.7rem;
+            color: #999;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #eee;
+            line-height: 1.4;
         }
         /* 开关样式 */
         .switch {
@@ -136,7 +152,7 @@
             transform: translateX(24px);
         }
 
-        /* 轮播区样式 - 无圆角 */
+        /* 轮播区样式 */
         .carousel-section {
             margin: 12px 16px 24px;
             background: #f0f2f6;
@@ -176,7 +192,6 @@
             pointer-events: auto;
         }
 
-        /* 指示点 */
         .carousel-dots {
             display: flex;
             justify-content: center;
@@ -201,7 +216,6 @@
             border-radius: 12px;
         }
 
-        /* 全部应用标题区域 */
         .apps-header {
             padding: 20px 20px 8px 20px;
             background: white;
@@ -224,7 +238,6 @@
             background: #2b4c8a;
         }
 
-        /* 应用区域 */
         .apps-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -307,7 +320,6 @@
             overflow: hidden;
             min-width: 280px;
             min-height: 200px;
-            z-index: 1000;
             transition: box-shadow 0.2s, z-index 0s;
         }
         .modal-window.active-window {
@@ -413,7 +425,6 @@
             transition: none;
         }
 
-        /* 增大触摸区域的手柄 */
         .resize-handle {
             position: absolute;
             bottom: 0;
@@ -479,6 +490,9 @@
                 <span class="slider"></span>
             </label>
         </div>
+        <div class="settings-hint">
+            部分应用不支持以窗口模式使用
+        </div>
     </div>
 
     <div class="carousel-section" id="carouselSection" style="display: none;">
@@ -539,10 +553,13 @@
         saveSettings();
     });
 
+    // 设置按钮点击 - 切换面板显示
     settingsBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         settingsPanel.classList.toggle('show');
     });
+    
+    // 点击其他地方关闭设置面板
     document.addEventListener('click', (e) => {
         if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
             settingsPanel.classList.remove('show');
@@ -662,7 +679,6 @@
         window.open(url, '_blank', 'noopener,noreferrer');
     }
 
-    // 刷新窗口
     function refreshWindow(iframeElement) {
         if (iframeElement) {
             iframeElement.src = iframeElement.src;
@@ -746,13 +762,9 @@
         windowDiv.addEventListener('mousedown', bringToFrontHandler);
         windowDiv.addEventListener('touchstart', bringToFrontHandler);
         
-        // 优化触屏拖拽 - 使用更好的触摸处理
-        let touchMoveHandler = null;
-        let touchEndHandler = null;
-        
+        // 拖拽功能
         const startDrag = (e) => {
             if (!dragEnabled) return;
-            // 只有点击标题栏且不是按钮区域才拖拽
             const isHeader = e.target.closest('.window-header');
             const isControl = e.target.closest('.window-controls');
             const isResize = e.target.closest('.resize-handle');
@@ -805,7 +817,7 @@
         header.addEventListener('mousedown', startDrag);
         header.addEventListener('touchstart', startDrag, { passive: false });
         
-        // 调整大小功能（优化触屏）
+        // 调整大小功能
         let isResizing = false;
         let resizeStartX = 0, resizeStartY = 0;
         let resizeStartW = 0, resizeStartH = 0;
@@ -934,7 +946,7 @@
         bringToFront(windowDiv);
     }
 
-    // 轮播图渲染（保持原有逻辑）
+    // 轮播图渲染
     function renderCarousel() {
         if (!carouselTrack) return;
         totalSlides = slidesData.length;
@@ -956,13 +968,81 @@
         }));
         initSwipe();
     }
+    
     function updateCarouselPosition() { if (carouselTrack) carouselTrack.style.transform = `translateX(${-currentIndex * 100}%)`; }
     function updateDotsActive() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentIndex)); }
     function nextSlide() { if (totalSlides) { currentIndex = (currentIndex + 1) % totalSlides; updateCarouselPosition(); updateDotsActive(); } }
     function prevSlide() { if (totalSlides) { currentIndex = (currentIndex - 1 + totalSlides) % totalSlides; updateCarouselPosition(); updateDotsActive(); } }
     function startAutoSlide() { if (autoInterval) clearInterval(autoInterval); if (totalSlides > 1) autoInterval = setInterval(nextSlide, 5000); }
     function resetAutoSlide() { startAutoSlide(); }
-    function initSwipe() { /* 保持原有简单滑动逻辑，省略复杂代码保证简洁，不影响功能 */ }
+    
+    function initSwipe() {
+        if (!carouselTrack) return;
+        const wrapper = carouselTrack.parentElement;
+        if (!wrapper) return;
+        let startX = 0, isSwiping = false, startTransform = 0;
+        const onTouchStart = (e) => {
+            if (totalSlides <= 1) return;
+            startX = e.touches[0].clientX;
+            isSwiping = true;
+            startTransform = currentIndex;
+            carouselTrack.style.transition = 'none';
+            if (autoInterval) clearInterval(autoInterval);
+        };
+        const onTouchMove = (e) => {
+            if (!isSwiping) return;
+            const diffX = e.touches[0].clientX - startX;
+            const percent = (diffX / wrapper.clientWidth) * 100;
+            let newPercent = -startTransform * 100 + percent;
+            if (startTransform === 0 && diffX > 0) newPercent *= 0.3;
+            if (startTransform === totalSlides - 1 && diffX < 0) newPercent = -startTransform * 100 + percent * 0.3;
+            carouselTrack.style.transform = `translateX(${newPercent}%)`;
+        };
+        const onTouchEnd = (e) => {
+            if (!isSwiping) { carouselTrack.style.transition = ''; resetAutoSlide(); return; }
+            isSwiping = false;
+            const diffX = e.changedTouches[0].clientX - startX;
+            if (Math.abs(diffX) > 35) diffX > 0 ? prevSlide() : nextSlide();
+            updateCarouselPosition();
+            carouselTrack.style.transition = '';
+            resetAutoSlide();
+        };
+        wrapper.addEventListener('touchstart', onTouchStart, { passive: false });
+        wrapper.addEventListener('touchmove', onTouchMove, { passive: false });
+        wrapper.addEventListener('touchend', onTouchEnd);
+        
+        let mouseDown = false, mouseStartX = 0, mouseStartTransform = 0;
+        const onMouseDown = (e) => {
+            if (totalSlides <= 1) return;
+            e.preventDefault();
+            mouseDown = true;
+            mouseStartX = e.clientX;
+            mouseStartTransform = currentIndex;
+            carouselTrack.style.transition = 'none';
+            if (autoInterval) clearInterval(autoInterval);
+        };
+        const onMouseMove = (e) => {
+            if (!mouseDown) return;
+            const diffX = e.clientX - mouseStartX;
+            const percent = (diffX / wrapper.clientWidth) * 100;
+            let newPercent = -mouseStartTransform * 100 + percent;
+            if (mouseStartTransform === 0 && diffX > 0) newPercent *= 0.3;
+            if (mouseStartTransform === totalSlides - 1 && diffX < 0) newPercent = -mouseStartTransform * 100 + percent * 0.3;
+            carouselTrack.style.transform = `translateX(${newPercent}%)`;
+        };
+        const onMouseUp = (e) => {
+            if (!mouseDown) return;
+            mouseDown = false;
+            const diffX = e.clientX - mouseStartX;
+            if (Math.abs(diffX) > 35) diffX > 0 ? prevSlide() : nextSlide();
+            updateCarouselPosition();
+            carouselTrack.style.transition = '';
+            resetAutoSlide();
+        };
+        wrapper.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+    }
 
     function renderApps(apps) {
         if (!appsGrid) return;
@@ -973,7 +1053,7 @@
             let iconUrl = getIconUrl(app.icon);
             const link = app.link?.startsWith('http') ? app.link : (app.link || 'javascript:void(0)');
             const hasWindowMode = app.mode === 'window';
-            appsHtml += `<a href="javascript:void(0)" class="app-card" data-link="${escapeHtml(link)}" data-name="${escapeHtml(name)}" data-window-mode="${hasWindowMode}">
+            appsHtml += `<a href="javascript:void(0)" class="app-card" data-link="${escapeHtml(link)}" data-name="${escapeHtml(name)}" data-has-window-mode="${hasWindowMode}">
                 <img class="app-icon" src="${escapeHtml(iconUrl)}" onerror="this.src='${DEFAULT_ICON}'"><span class="app-name">${name}</span></a>`;
         }
         appsGrid.innerHTML = appsHtml;
@@ -982,9 +1062,10 @@
                 e.preventDefault();
                 const link = card.dataset.link;
                 const name = card.dataset.name;
-                const hasWindowMode = card.dataset.windowMode === 'true';
-                // 优先使用txt中的mode=window，如果设置了全局窗口模式且txt中没有强制普通模式，则使用窗口模式
-                const useWindow = hasWindowMode || (windowModeEnabled && !hasWindowMode === false);
+                const hasWindowMode = card.dataset.hasWindowMode === 'true';
+                // 判断是否使用窗口模式：如果全局开关开启且应用本身支持窗口模式（或txt中标记了mode=window），则使用窗口模式
+                // 关闭窗口模式开关后，直接转跳，不再使用窗口
+                const useWindow = windowModeEnabled && hasWindowMode;
                 if (useWindow) {
                     createWindow(link, name);
                 } else {
