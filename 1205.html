@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>初二五班在线应用平台</title>
+    <title>初二五班智慧应用平台</title>
     <style>
         * {
             margin: 0;
@@ -398,12 +398,14 @@
             overflow: auto;
             position: relative;
             min-height: 0;
+            cursor: default;
         }
         .window-content iframe {
             width: 100%;
             height: 100%;
             border: none;
             display: block;
+            pointer-events: auto;
         }
 
         .modal-window.fullscreen-mode {
@@ -477,7 +479,7 @@
 <body>
 <div class="platform-container">
     <div class="main-header">
-        <h1>初二五班在线应用平台</h1>
+        <h1>初二五班智慧应用平台</h1>
         <button class="settings-btn" id="settingsBtn">⚙</button>
     </div>
 
@@ -566,7 +568,7 @@
         }
     });
 
-    // 窗口置顶
+    // 窗口置顶 - 点击窗口任意位置都置顶
     function bringToFront(windowDiv) {
         nextZIndex++;
         windowDiv.style.zIndex = nextZIndex;
@@ -757,12 +759,19 @@
         let savedRect = null;
         let dragEnabled = true;
         
-        // 点击窗口置顶
-        const bringToFrontHandler = () => bringToFront(windowDiv);
+        // 关键修复：点击窗口任意位置（包括内容区域、边框等）都置顶
+        // 为整个窗口添加点击置顶事件，但要避免干扰拖拽和按钮点击
+        const bringToFrontHandler = (e) => {
+            // 阻止事件冒泡到document，避免重复触发
+            e.stopPropagation();
+            bringToFront(windowDiv);
+        };
+        
+        // 为整个窗口添加点击置顶事件
         windowDiv.addEventListener('mousedown', bringToFrontHandler);
         windowDiv.addEventListener('touchstart', bringToFrontHandler);
         
-        // 拖拽功能
+        // 拖拽功能 - 只有点击标题栏才拖拽
         const startDrag = (e) => {
             if (!dragEnabled) return;
             const isHeader = e.target.closest('.window-header');
@@ -770,8 +779,9 @@
             const isResize = e.target.closest('.resize-handle');
             if (!isHeader || isControl || isResize) return;
             
-            e.preventDefault();
+            // 拖拽时阻止冒泡，避免触发置顶的重复操作
             e.stopPropagation();
+            e.preventDefault();
             isDragging = true;
             
             const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
@@ -900,9 +910,18 @@
             }
         };
         
-        const refreshHandler = () => refreshWindow(iframe);
-        const browserHandler = () => openInBrowser(url);
-        const closeHandler = () => closeWindow(windowId);
+        const refreshHandler = (e) => {
+            e.stopPropagation();
+            refreshWindow(iframe);
+        };
+        const browserHandler = (e) => {
+            e.stopPropagation();
+            openInBrowser(url);
+        };
+        const closeHandler = (e) => {
+            e.stopPropagation();
+            closeWindow(windowId);
+        };
         
         refreshBtn.addEventListener('click', refreshHandler);
         browserBtn.addEventListener('click', browserHandler);
@@ -1063,8 +1082,7 @@
                 const link = card.dataset.link;
                 const name = card.dataset.name;
                 const hasWindowMode = card.dataset.hasWindowMode === 'true';
-                // 判断是否使用窗口模式：如果全局开关开启且应用本身支持窗口模式（或txt中标记了mode=window），则使用窗口模式
-                // 关闭窗口模式开关后，直接转跳，不再使用窗口
+                // 判断是否使用窗口模式：如果全局开关开启且应用本身支持窗口模式，则使用窗口模式
                 const useWindow = windowModeEnabled && hasWindowMode;
                 if (useWindow) {
                     createWindow(link, name);
