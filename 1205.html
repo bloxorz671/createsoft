@@ -302,6 +302,117 @@
             text-align: center;
         }
 
+        /* 全屏预览遮罩 */
+        .fullscreen-preview {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            overflow: auto;
+        }
+        .preview-header {
+            position: sticky;
+            top: 0;
+            background: #2c3e76;
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        .preview-header h3 {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .preview-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        .preview-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .preview-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .preview-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: #f5f5f5;
+            min-height: calc(100% - 60px);
+        }
+        .preview-content img, .preview-content video {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+        .preview-content iframe {
+            width: 100%;
+            height: 85vh;
+            border: none;
+        }
+        .doc-preview {
+            width: 100%;
+            height: 85vh;
+            background: white;
+        }
+
+        /* 窗口模式下的预览窗口样式 */
+        .window-content .preview-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .window-content .preview-inner {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+            padding: 10px;
+        }
+        .window-content .preview-inner img, 
+        .window-content .preview-inner video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .window-content .preview-inner iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .window-preview-download {
+            padding: 8px 12px;
+            background: #f0f2f5;
+            border-top: 1px solid #ddd;
+            text-align: center;
+        }
+        .window-preview-download button {
+            background: #2b4c8a;
+            color: white;
+            border: none;
+            padding: 6px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
         .modal-window {
             position: fixed;
             background: #fff;
@@ -366,8 +477,6 @@
             transition: all 0.2s;
             font-weight: 500;
             white-space: nowrap;
-            position: relative;
-            z-index: 5;
         }
 
         .window-btn:hover {
@@ -380,12 +489,6 @@
         .window-btn.fullscreen-btn:hover {
             background: #27ae60;
         }
-        .window-btn.browser-btn:hover {
-            background: #3498db;
-        }
-        .window-btn.refresh-btn:hover {
-            background: #f39c12;
-        }
 
         .window-content {
             flex: 1;
@@ -393,14 +496,6 @@
             overflow: auto;
             position: relative;
             min-height: 0;
-            cursor: default;
-        }
-        .window-content iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-            pointer-events: auto;
         }
 
         .modal-window.fullscreen-mode {
@@ -487,7 +582,7 @@
             </label>
         </div>
         <div class="settings-hint">
-            部分应用不支持以窗口模式使用
+            💡 部分应用可能不支持窗口模式
         </div>
     </div>
 
@@ -533,187 +628,80 @@
 
     const DEFAULT_ICON = 'null.jpg';
 
-    function loadSettings() {
-        const saved = localStorage.getItem('windowModeEnabled');
-        if (saved !== null) {
-            windowModeEnabled = saved === 'true';
-        } else {
-            windowModeEnabled = !isMobileDevice();
-        }
-        windowModeSwitch.checked = windowModeEnabled;
+    // 判断文件类型
+    function getFileType(url) {
+        const ext = url.split('.').pop().toLowerCase();
+        const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico'];
+        const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'flv'];
+        const docExts = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'];
+        
+        if (imageExts.includes(ext)) return 'image';
+        if (videoExts.includes(ext)) return 'video';
+        if (docExts.includes(ext)) return 'document';
+        return 'link';
     }
 
-    function saveSettings() {
-        localStorage.setItem('windowModeEnabled', windowModeEnabled);
+    // 获取文档预览URL（使用Google Docs Viewer）
+    function getDocPreviewUrl(fileUrl) {
+        return `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=true`;
     }
 
-    windowModeSwitch.addEventListener('change', (e) => {
-        windowModeEnabled = e.target.checked;
-        saveSettings();
-    });
-
-    settingsBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        settingsPanel.classList.toggle('show');
-    });
-    
-    document.addEventListener('click', (e) => {
-        if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
-            settingsPanel.classList.remove('show');
-        }
-    });
-
-    // 核心：全局点击监听，通过坐标判断点击了哪个窗口
-    function bringToFrontByClick(e) {
-        // 获取点击坐标
-        let clientX, clientY;
-        if (e.touches) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
+    // 全屏预览
+    function showFullscreenPreview(url, fileName, fileType) {
+        const previewDiv = document.createElement('div');
+        previewDiv.className = 'fullscreen-preview';
+        
+        let contentHtml = '';
+        if (fileType === 'image') {
+            contentHtml = `<img src="${escapeHtml(url)}" alt="${escapeHtml(fileName)}">`;
+        } else if (fileType === 'video') {
+            contentHtml = `<video controls autoplay><source src="${escapeHtml(url)}" type="video/mp4">您的浏览器不支持视频播放</video>`;
+        } else if (fileType === 'document') {
+            const docUrl = getDocPreviewUrl(url);
+            contentHtml = `<iframe src="${escapeHtml(docUrl)}" title="文档预览"></iframe>`;
         } else {
-            clientX = e.clientX;
-            clientY = e.clientY;
+            contentHtml = `<iframe src="${escapeHtml(url)}" title="网页预览"></iframe>`;
         }
         
-        // 遍历所有打开的窗口，找到包含点击坐标的窗口
-        let clickedWindow = null;
-        for (let i = openWindows.length - 1; i >= 0; i--) {
-            const win = openWindows[i];
-            const rect = win.windowDiv.getBoundingClientRect();
-            if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
-                clickedWindow = win.windowDiv;
-                break;
-            }
-        }
+        previewDiv.innerHTML = `
+            <div class="preview-header">
+                <h3>${escapeHtml(fileName)}</h3>
+                <div class="preview-buttons">
+                    <button class="preview-btn download-btn">📥 下载</button>
+                    <button class="preview-btn close-btn">✕ 关闭</button>
+                </div>
+            </div>
+            <div class="preview-content">
+                ${contentHtml}
+            </div>
+        `;
         
-        // 如果点击到了窗口，将其置顶
-        if (clickedWindow) {
-            nextZIndex++;
-            clickedWindow.style.zIndex = nextZIndex;
-            clickedWindow.classList.add('active-window');
-            openWindows.forEach(w => {
-                if (w.windowDiv !== clickedWindow) {
-                    w.windowDiv.classList.remove('active-window');
-                }
-            });
-        }
-    }
-    
-    // 在 document 上监听全局点击和触摸事件（捕获阶段确保优先执行）
-    document.addEventListener('mousedown', bringToFrontByClick, true);
-    document.addEventListener('touchstart', bringToFrontByClick, true);
-
-    async function loadDataFromFile() {
-        try {
-            const response = await fetch('./5app.txt', { cache: 'no-store' });
-            if (!response.ok) throw new Error(`无法读取文件 (HTTP ${response.status})`);
-            const text = await response.text();
-            parseAppTxt(text);
-        } catch (error) {
-            console.error('读取5app.txt失败:', error);
-            appsGrid.innerHTML = `<div class="error-tip">⚠️ 加载数据失败，请确保 "5app.txt" 文件存在。<br>格式：pic<br>[p=图片 l=链接]<br>app<br>[n=名称 p=图标 l=链接 mode=window]</div>`;
-            carouselSection.style.display = 'none';
-            if (appsHeader) appsHeader.style.display = 'none';
-        }
+        document.body.appendChild(previewDiv);
+        
+        previewDiv.querySelector('.close-btn').addEventListener('click', () => {
+            previewDiv.remove();
+        });
+        
+        previewDiv.querySelector('.download-btn').addEventListener('click', () => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName.split('?')[0];
+            a.target = '_blank';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
     }
 
-    function parseAppTxt(rawText) {
-        const lines = rawText.split(/\r?\n/);
-        let mode = null;
-        let picItems = [];
-        let appItems = [];
-
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i].trim();
-            if (line === '') continue;
-            if (line.toLowerCase() === 'pic') { mode = 'pic'; continue; }
-            else if (line.toLowerCase() === 'app') { mode = 'app'; continue; }
-
-            if (mode === 'pic') {
-                const match = line.match(/\[p=([^\s\]]+)\s+l=([^\s\]]+)\]/);
-                if (match) picItems.push({ imgUrl: match[1].trim(), linkUrl: match[2].trim() });
-                else {
-                    const altMatch = line.match(/\[p=(.+?)\s+l=(.+?)\]/);
-                    if (altMatch) picItems.push({ imgUrl: altMatch[1].trim(), linkUrl: altMatch[2].trim() });
-                }
-            } else if (mode === 'app') {
-                let match = line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)(?:\s+mode=([^\s\]]+))?\]/);
-                if (!match) match = line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)(?:\s+mode=(.+?))?\]/);
-                if (match) {
-                    appItems.push({
-                        name: match[1].trim(),
-                        icon: match[2].trim(),
-                        link: match[3].trim(),
-                        mode: match[4] ? match[4].trim() : null
-                    });
-                }
-            }
-        }
-
-        if (picItems.length > 0) {
-            slidesData = picItems;
-            renderCarousel();
-            carouselSection.style.display = 'block';
-            startAutoSlide();
-        } else {
-            carouselSection.style.display = 'none';
-            if (autoInterval) clearInterval(autoInterval);
-        }
-
-        if (appItems.length > 0) {
-            if (appsHeader) appsHeader.style.display = 'block';
-            renderApps(appItems);
-        } else {
-            appsGrid.innerHTML = '<div class="empty-tip">暂无应用数据</div>';
-            if (appsHeader) appsHeader.style.display = 'none';
-        }
-    }
-
-    function getIconUrl(iconPath) {
-        if (!iconPath || iconPath.trim() === '') return DEFAULT_ICON;
-        return iconPath.trim();
-    }
-
-    function getAdaptiveWindowSize() {
-        const isLandscape = window.innerWidth > window.innerHeight;
-        if (isLandscape) {
-            return { width: Math.min(window.innerWidth * 0.55, 900), height: Math.min(window.innerHeight * 0.75, 650) };
-        } else {
-            return { width: Math.min(window.innerWidth * 0.85, 500), height: Math.min(window.innerHeight * 0.55, 550) };
-        }
-    }
-
-    function getRandomPosition(w, h) {
-        const maxLeft = Math.max(20, window.innerWidth - w - 30);
-        const maxTop = Math.max(20, window.innerHeight - h - 50);
-        return { left: Math.min(maxLeft, 30 + Math.random() * (maxLeft - 30)), top: Math.min(maxTop, 50 + Math.random() * (maxTop - 50)) };
-    }
-
-    function closeWindow(windowId) {
-        const index = openWindows.findIndex(w => w.id === windowId);
-        if (index !== -1) {
-            const win = openWindows[index];
-            if (win.cleanup) win.cleanup();
-            if (win.windowDiv && win.windowDiv.parentNode) win.windowDiv.remove();
-            openWindows.splice(index, 1);
-        }
-    }
-
-    function openInBrowser(url) {
-        window.open(url, '_blank', 'noopener,noreferrer');
-    }
-
-    function refreshWindow(iframeElement) {
-        if (iframeElement) {
-            iframeElement.src = iframeElement.src;
-        }
-    }
-
-    function createWindow(url, appName) {
+    // 窗口模式预览
+    function createPreviewWindow(url, fileName, fileType) {
         const windowDiv = document.createElement('div');
         windowDiv.className = 'modal-window';
         let { width, height } = getAdaptiveWindowSize();
-        const { left, top } = getRandomPosition(width, height);
+        width = Math.max(width, 600);
+        height = Math.max(height, 500);
+        const left = (window.innerWidth - width) / 2;
+        const top = Math.max(30, (window.innerHeight - height) / 4);
         windowDiv.style.width = `${width}px`;
         windowDiv.style.height = `${height}px`;
         windowDiv.style.left = `${left}px`;
@@ -724,20 +712,10 @@
         header.className = 'window-header';
         const titleDiv = document.createElement('div');
         titleDiv.className = 'window-title';
-        titleDiv.innerHTML = `<span>${escapeHtml(appName)}</span>`;
+        titleDiv.innerHTML = `<span>📄 ${escapeHtml(fileName)}</span>`;
         
         const controls = document.createElement('div');
         controls.className = 'window-controls';
-        
-        const refreshBtn = document.createElement('button');
-        refreshBtn.className = 'window-btn refresh-btn';
-        refreshBtn.innerHTML = '⟳';
-        refreshBtn.title = '刷新';
-        
-        const browserBtn = document.createElement('button');
-        browserBtn.className = 'window-btn browser-btn';
-        browserBtn.innerHTML = '浏览器';
-        browserBtn.title = '在浏览器中打开';
         
         const fullscreenBtn = document.createElement('button');
         fullscreenBtn.className = 'window-btn fullscreen-btn';
@@ -749,8 +727,6 @@
         closeBtn.innerHTML = '✕';
         closeBtn.title = '关闭窗口';
         
-        controls.appendChild(refreshBtn);
-        controls.appendChild(browserBtn);
         controls.appendChild(fullscreenBtn);
         controls.appendChild(closeBtn);
         header.appendChild(titleDiv);
@@ -758,12 +734,53 @@
         
         const contentDiv = document.createElement('div');
         contentDiv.className = 'window-content';
-        const iframe = document.createElement('iframe');
-        iframe.src = url;
-        iframe.title = appName;
-        iframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation';
-        iframe.allow = 'fullscreen';
-        contentDiv.appendChild(iframe);
+        
+        let previewHtml = '';
+        if (fileType === 'image') {
+            previewHtml = `
+                <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
+                    <div class="preview-inner" style="flex:1; display:flex; justify-content:center; align-items:center; overflow:auto;">
+                        <img src="${escapeHtml(url)}" alt="${escapeHtml(fileName)}" style="max-width:100%; max-height:100%; object-fit:contain;">
+                    </div>
+                    <div class="window-preview-download">
+                        <button class="preview-download-btn">📥 下载文件</button>
+                    </div>
+                </div>
+            `;
+        } else if (fileType === 'video') {
+            previewHtml = `
+                <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
+                    <div class="preview-inner" style="flex:1; display:flex; justify-content:center; align-items:center; overflow:auto;">
+                        <video controls style="max-width:100%; max-height:100%;"><source src="${escapeHtml(url)}">您的浏览器不支持视频播放</video>
+                    </div>
+                    <div class="window-preview-download">
+                        <button class="preview-download-btn">📥 下载文件</button>
+                    </div>
+                </div>
+            `;
+        } else if (fileType === 'document') {
+            const docUrl = getDocPreviewUrl(url);
+            previewHtml = `
+                <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
+                    <div class="preview-inner" style="flex:1;">
+                        <iframe src="${escapeHtml(docUrl)}" style="width:100%; height:100%; border:none;"></iframe>
+                    </div>
+                    <div class="window-preview-download">
+                        <button class="preview-download-btn">📥 下载文件</button>
+                    </div>
+                </div>
+            `;
+        } else {
+            previewHtml = `
+                <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
+                    <div class="preview-inner" style="flex:1;">
+                        <iframe src="${escapeHtml(url)}" style="width:100%; height:100%; border:none;"></iframe>
+                    </div>
+                </div>
+            `;
+        }
+        
+        contentDiv.innerHTML = previewHtml;
         
         const resizeHandle = document.createElement('div');
         resizeHandle.className = 'resize-handle';
@@ -780,6 +797,46 @@
         let isFullscreen = false;
         let savedRect = null;
         let dragEnabled = true;
+        
+        // 下载按钮事件
+        const downloadBtn = contentDiv.querySelector('.preview-download-btn');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', () => {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName.split('?')[0];
+                a.target = '_blank';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+        }
+        
+        // 全局点击置顶
+        function bringToFrontByClick(e) {
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            const rect = windowDiv.getBoundingClientRect();
+            if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+                nextZIndex++;
+                windowDiv.style.zIndex = nextZIndex;
+                windowDiv.classList.add('active-window');
+                openWindows.forEach(w => {
+                    if (w.windowDiv !== windowDiv) {
+                        w.windowDiv.classList.remove('active-window');
+                    }
+                });
+            }
+        }
+        
+        document.addEventListener('mousedown', bringToFrontByClick, true);
+        document.addEventListener('touchstart', bringToFrontByClick, true);
         
         // 拖拽功能
         const startDrag = (e) => {
@@ -918,17 +975,305 @@
             }
         };
         
-        const refreshHandler = (e) => {
-            e.stopPropagation();
-            refreshWindow(iframe);
+        const closeHandler = () => {
+            document.removeEventListener('mousedown', bringToFrontByClick, true);
+            document.removeEventListener('touchstart', bringToFrontByClick, true);
+            const index = openWindows.findIndex(w => w.id === windowId);
+            if (index !== -1) {
+                if (openWindows[index].cleanup) openWindows[index].cleanup();
+                openWindows.splice(index, 1);
+            }
+            windowDiv.remove();
         };
-        const browserHandler = (e) => {
-            e.stopPropagation();
-            openInBrowser(url);
+        
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        closeBtn.addEventListener('click', closeHandler);
+        
+        const escHandler = (e) => { if (e.key === 'Escape' && isFullscreen) toggleFullscreen(); };
+        document.addEventListener('keydown', escHandler);
+        
+        const cleanup = () => {
+            document.removeEventListener('keydown', escHandler);
+            document.removeEventListener('mousedown', bringToFrontByClick, true);
+            document.removeEventListener('touchstart', bringToFrontByClick, true);
+            header.removeEventListener('mousedown', startDrag);
+            header.removeEventListener('touchstart', startDrag);
+            resizeHandle.removeEventListener('mousedown', startResize);
+            resizeHandle.removeEventListener('touchstart', startResize);
         };
-        const closeHandler = (e) => {
+        
+        openWindows.push({ id: windowId, windowDiv, cleanup });
+        nextZIndex++;
+        windowDiv.style.zIndex = nextZIndex;
+        windowDiv.classList.add('active-window');
+    }
+
+    // 处理应用点击（支持文件预览）
+    function handleAppClick(link, name, hasWindowMode) {
+        const useWindow = windowModeEnabled && hasWindowMode;
+        const fileType = getFileType(link);
+        
+        // 如果是文件类型（图片/视频/文档），使用预览功能
+        if (fileType !== 'link') {
+            if (useWindow) {
+                createPreviewWindow(link, name, fileType);
+            } else {
+                showFullscreenPreview(link, name, fileType);
+            }
+        } else {
+            // 普通网页链接
+            if (useWindow) {
+                createWebWindow(link, name);
+            } else {
+                window.open(link, '_blank', 'noopener,noreferrer');
+            }
+        }
+    }
+
+    // 创建普通网页窗口
+    function createWebWindow(url, appName) {
+        const windowDiv = document.createElement('div');
+        windowDiv.className = 'modal-window';
+        let { width, height } = getAdaptiveWindowSize();
+        const { left, top } = getRandomPosition(width, height);
+        windowDiv.style.width = `${width}px`;
+        windowDiv.style.height = `${height}px`;
+        windowDiv.style.left = `${left}px`;
+        windowDiv.style.top = `${top}px`;
+        windowDiv.style.zIndex = ++nextZIndex;
+
+        const header = document.createElement('div');
+        header.className = 'window-header';
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'window-title';
+        titleDiv.innerHTML = `<span>${escapeHtml(appName)}</span>`;
+        
+        const controls = document.createElement('div');
+        controls.className = 'window-controls';
+        
+        const refreshBtn = document.createElement('button');
+        refreshBtn.className = 'window-btn refresh-btn';
+        refreshBtn.innerHTML = '⟳';
+        refreshBtn.title = '刷新';
+        
+        const browserBtn = document.createElement('button');
+        browserBtn.className = 'window-btn browser-btn';
+        browserBtn.innerHTML = '浏览器';
+        browserBtn.title = '在浏览器中打开';
+        
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'window-btn fullscreen-btn';
+        fullscreenBtn.innerHTML = '⛶';
+        fullscreenBtn.title = '全屏模式';
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'window-btn close-btn';
+        closeBtn.innerHTML = '✕';
+        closeBtn.title = '关闭窗口';
+        
+        controls.appendChild(refreshBtn);
+        controls.appendChild(browserBtn);
+        controls.appendChild(fullscreenBtn);
+        controls.appendChild(closeBtn);
+        header.appendChild(titleDiv);
+        header.appendChild(controls);
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'window-content';
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.title = appName;
+        iframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation';
+        iframe.allow = 'fullscreen';
+        contentDiv.appendChild(iframe);
+        
+        const resizeHandle = document.createElement('div');
+        resizeHandle.className = 'resize-handle';
+        
+        windowDiv.appendChild(header);
+        windowDiv.appendChild(contentDiv);
+        windowDiv.appendChild(resizeHandle);
+        document.body.appendChild(windowDiv);
+        
+        const windowId = Date.now() + Math.random();
+        let isDragging = false;
+        let dragStartX = 0, dragStartY = 0;
+        let startLeft = 0, startTop = 0;
+        let isFullscreen = false;
+        let savedRect = null;
+        let dragEnabled = true;
+        
+        function bringToFrontByClick(e) {
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            const rect = windowDiv.getBoundingClientRect();
+            if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+                nextZIndex++;
+                windowDiv.style.zIndex = nextZIndex;
+                windowDiv.classList.add('active-window');
+                openWindows.forEach(w => {
+                    if (w.windowDiv !== windowDiv) {
+                        w.windowDiv.classList.remove('active-window');
+                    }
+                });
+            }
+        }
+        
+        document.addEventListener('mousedown', bringToFrontByClick, true);
+        document.addEventListener('touchstart', bringToFrontByClick, true);
+        
+        const startDrag = (e) => {
+            if (!dragEnabled) return;
+            const isHeader = e.target.closest('.window-header');
+            const isControl = e.target.closest('.window-controls');
+            const isResize = e.target.closest('.resize-handle');
+            if (!isHeader || isControl || isResize) return;
+            
             e.stopPropagation();
-            closeWindow(windowId);
+            e.preventDefault();
+            isDragging = true;
+            
+            const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
+            const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
+            dragStartX = clientX;
+            dragStartY = clientY;
+            startLeft = windowDiv.offsetLeft;
+            startTop = windowDiv.offsetTop;
+            windowDiv.classList.add('dragging');
+            document.body.style.userSelect = 'none';
+            
+            const onMove = (moveEvent) => {
+                if (!isDragging) return;
+                moveEvent.preventDefault();
+                const currentX = moveEvent.clientX ?? (moveEvent.touches ? moveEvent.touches[0].clientX : 0);
+                const currentY = moveEvent.clientY ?? (moveEvent.touches ? moveEvent.touches[0].clientY : 0);
+                let newLeft = startLeft + (currentX - dragStartX);
+                let newTop = startTop + (currentY - dragStartY);
+                newLeft = Math.max(-windowDiv.offsetWidth + 80, Math.min(window.innerWidth - 80, newLeft));
+                newTop = Math.max(0, Math.min(window.innerHeight - 60, newTop));
+                windowDiv.style.left = `${newLeft}px`;
+                windowDiv.style.top = `${newTop}px`;
+            };
+            
+            const onEnd = () => {
+                if (isDragging) {
+                    isDragging = false;
+                    windowDiv.classList.remove('dragging');
+                    document.body.style.userSelect = '';
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onEnd);
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('touchend', onEnd);
+                }
+            };
+            
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onEnd);
+            document.addEventListener('touchmove', onMove, { passive: false });
+            document.addEventListener('touchend', onEnd);
+        };
+        
+        header.addEventListener('mousedown', startDrag);
+        header.addEventListener('touchstart', startDrag, { passive: false });
+        
+        let isResizing = false;
+        let resizeStartX = 0, resizeStartY = 0;
+        let resizeStartW = 0, resizeStartH = 0;
+        
+        const startResize = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            isResizing = true;
+            const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
+            const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
+            resizeStartX = clientX;
+            resizeStartY = clientY;
+            resizeStartW = windowDiv.offsetWidth;
+            resizeStartH = windowDiv.offsetHeight;
+            document.body.style.userSelect = 'none';
+            
+            const onResizeMove = (moveEvent) => {
+                if (!isResizing) return;
+                moveEvent.preventDefault();
+                const currentX = moveEvent.clientX ?? (moveEvent.touches ? moveEvent.touches[0].clientX : 0);
+                const currentY = moveEvent.clientY ?? (moveEvent.touches ? moveEvent.touches[0].clientY : 0);
+                let newW = resizeStartW + (currentX - resizeStartX);
+                let newH = resizeStartH + (currentY - resizeStartY);
+                newW = Math.max(280, Math.min(window.innerWidth - 50, newW));
+                newH = Math.max(200, Math.min(window.innerHeight - 50, newH));
+                windowDiv.style.width = `${newW}px`;
+                windowDiv.style.height = `${newH}px`;
+                
+                let curLeft = windowDiv.offsetLeft;
+                let curTop = windowDiv.offsetTop;
+                if (curLeft + newW > window.innerWidth - 20) {
+                    windowDiv.style.left = `${window.innerWidth - newW - 20}px`;
+                }
+                if (curTop + newH > window.innerHeight - 20) {
+                    windowDiv.style.top = `${window.innerHeight - newH - 20}px`;
+                }
+            };
+            
+            const onResizeEnd = () => {
+                if (isResizing) {
+                    isResizing = false;
+                    document.body.style.userSelect = '';
+                    document.removeEventListener('mousemove', onResizeMove);
+                    document.removeEventListener('mouseup', onResizeEnd);
+                    document.removeEventListener('touchmove', onResizeMove);
+                    document.removeEventListener('touchend', onResizeEnd);
+                }
+            };
+            
+            document.addEventListener('mousemove', onResizeMove);
+            document.addEventListener('mouseup', onResizeEnd);
+            document.addEventListener('touchmove', onResizeMove, { passive: false });
+            document.addEventListener('touchend', onResizeEnd);
+        };
+        
+        resizeHandle.addEventListener('mousedown', startResize);
+        resizeHandle.addEventListener('touchstart', startResize, { passive: false });
+        
+        const toggleFullscreen = () => {
+            if (!isFullscreen) {
+                savedRect = { width: windowDiv.offsetWidth, height: windowDiv.offsetHeight, left: windowDiv.offsetLeft, top: windowDiv.offsetTop };
+                windowDiv.classList.add('fullscreen-mode');
+                isFullscreen = true;
+                fullscreenBtn.innerHTML = '❐';
+                fullscreenBtn.title = '退出全屏';
+                dragEnabled = false;
+            } else {
+                windowDiv.classList.remove('fullscreen-mode');
+                if (savedRect) {
+                    windowDiv.style.width = `${savedRect.width}px`;
+                    windowDiv.style.height = `${savedRect.height}px`;
+                    windowDiv.style.left = `${savedRect.left}px`;
+                    windowDiv.style.top = `${savedRect.top}px`;
+                }
+                isFullscreen = false;
+                fullscreenBtn.innerHTML = '⛶';
+                fullscreenBtn.title = '全屏模式';
+                dragEnabled = true;
+            }
+        };
+        
+        const refreshHandler = () => { iframe.src = iframe.src; };
+        const browserHandler = () => window.open(url, '_blank', 'noopener,noreferrer');
+        const closeHandler = () => {
+            document.removeEventListener('mousedown', bringToFrontByClick, true);
+            document.removeEventListener('touchstart', bringToFrontByClick, true);
+            const index = openWindows.findIndex(w => w.id === windowId);
+            if (index !== -1) {
+                if (openWindows[index].cleanup) openWindows[index].cleanup();
+                openWindows.splice(index, 1);
+            }
+            windowDiv.remove();
         };
         
         refreshBtn.addEventListener('click', refreshHandler);
@@ -939,28 +1284,10 @@
         const escHandler = (e) => { if (e.key === 'Escape' && isFullscreen) toggleFullscreen(); };
         document.addEventListener('keydown', escHandler);
         
-        const orientationHandler = () => {
-            if (!isFullscreen) {
-                const { width, height } = getAdaptiveWindowSize();
-                const currentW = windowDiv.offsetWidth;
-                if (currentW > window.innerWidth * 0.9 || currentW < window.innerWidth * 0.3) {
-                    windowDiv.style.width = `${width}px`;
-                    windowDiv.style.height = `${height}px`;
-                    let newLeft = Math.min(window.innerWidth - width - 20, Math.max(10, windowDiv.offsetLeft));
-                    let newTop = Math.min(window.innerHeight - height - 20, Math.max(10, windowDiv.offsetTop));
-                    windowDiv.style.left = `${newLeft}px`;
-                    windowDiv.style.top = `${newTop}px`;
-                }
-            }
-        };
-        
-        window.addEventListener('orientationchange', orientationHandler);
-        window.addEventListener('resize', orientationHandler);
-        
         const cleanup = () => {
             document.removeEventListener('keydown', escHandler);
-            window.removeEventListener('orientationchange', orientationHandler);
-            window.removeEventListener('resize', orientationHandler);
+            document.removeEventListener('mousedown', bringToFrontByClick, true);
+            document.removeEventListener('touchstart', bringToFrontByClick, true);
             header.removeEventListener('mousedown', startDrag);
             header.removeEventListener('touchstart', startDrag);
             resizeHandle.removeEventListener('mousedown', startResize);
@@ -968,10 +1295,155 @@
         };
         
         openWindows.push({ id: windowId, windowDiv, cleanup });
-        // 新窗口自动置顶
         nextZIndex++;
         windowDiv.style.zIndex = nextZIndex;
         windowDiv.classList.add('active-window');
+    }
+
+    // 辅助函数
+    function getAdaptiveWindowSize() {
+        const isLandscape = window.innerWidth > window.innerHeight;
+        if (isLandscape) {
+            return { width: Math.min(window.innerWidth * 0.55, 900), height: Math.min(window.innerHeight * 0.75, 650) };
+        } else {
+            return { width: Math.min(window.innerWidth * 0.85, 500), height: Math.min(window.innerHeight * 0.55, 550) };
+        }
+    }
+
+    function getRandomPosition(w, h) {
+        const maxLeft = Math.max(20, window.innerWidth - w - 30);
+        const maxTop = Math.max(20, window.innerHeight - h - 50);
+        return { left: Math.min(maxLeft, 30 + Math.random() * (maxLeft - 30)), top: Math.min(maxTop, 50 + Math.random() * (maxTop - 50)) };
+    }
+
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+
+    // 加载设置和数据
+    function loadSettings() {
+        const saved = localStorage.getItem('windowModeEnabled');
+        if (saved !== null) {
+            windowModeEnabled = saved === 'true';
+        } else {
+            windowModeEnabled = !isMobileDevice();
+        }
+        windowModeSwitch.checked = windowModeEnabled;
+    }
+
+    function saveSettings() {
+        localStorage.setItem('windowModeEnabled', windowModeEnabled);
+    }
+
+    windowModeSwitch.addEventListener('change', (e) => {
+        windowModeEnabled = e.target.checked;
+        saveSettings();
+    });
+
+    settingsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        settingsPanel.classList.toggle('show');
+    });
+    
+    document.addEventListener('click', (e) => {
+        if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+            settingsPanel.classList.remove('show');
+        }
+    });
+
+    // 加载5app.txt
+    async function loadDataFromFile() {
+        try {
+            const response = await fetch('./5app.txt', { cache: 'no-store' });
+            if (!response.ok) throw new Error(`无法读取文件 (HTTP ${response.status})`);
+            const text = await response.text();
+            parseAppTxt(text);
+        } catch (error) {
+            console.error('读取5app.txt失败:', error);
+            appsGrid.innerHTML = `<div class="error-tip">⚠️ 加载数据失败，请确保 "5app.txt" 文件存在。<br>格式：pic<br>[p=图片 l=链接]<br>app<br>[n=名称 p=图标 l=链接 mode=window]</div>`;
+            carouselSection.style.display = 'none';
+            if (appsHeader) appsHeader.style.display = 'none';
+        }
+    }
+
+    function parseAppTxt(rawText) {
+        const lines = rawText.split(/\r?\n/);
+        let mode = null;
+        let picItems = [];
+        let appItems = [];
+
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (line === '') continue;
+            if (line.toLowerCase() === 'pic') { mode = 'pic'; continue; }
+            else if (line.toLowerCase() === 'app') { mode = 'app'; continue; }
+
+            if (mode === 'pic') {
+                const match = line.match(/\[p=([^\s\]]+)\s+l=([^\s\]]+)\]/);
+                if (match) picItems.push({ imgUrl: match[1].trim(), linkUrl: match[2].trim() });
+                else {
+                    const altMatch = line.match(/\[p=(.+?)\s+l=(.+?)\]/);
+                    if (altMatch) picItems.push({ imgUrl: altMatch[1].trim(), linkUrl: altMatch[2].trim() });
+                }
+            } else if (mode === 'app') {
+                let match = line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)(?:\s+mode=([^\s\]]+))?\]/);
+                if (!match) match = line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)(?:\s+mode=(.+?))?\]/);
+                if (match) {
+                    appItems.push({
+                        name: match[1].trim(),
+                        icon: match[2].trim(),
+                        link: match[3].trim(),
+                        mode: match[4] ? match[4].trim() : null
+                    });
+                }
+            }
+        }
+
+        if (picItems.length > 0) {
+            slidesData = picItems;
+            renderCarousel();
+            carouselSection.style.display = 'block';
+            startAutoSlide();
+        } else {
+            carouselSection.style.display = 'none';
+            if (autoInterval) clearInterval(autoInterval);
+        }
+
+        if (appItems.length > 0) {
+            if (appsHeader) appsHeader.style.display = 'block';
+            renderApps(appItems);
+        } else {
+            appsGrid.innerHTML = '<div class="empty-tip">暂无应用数据</div>';
+            if (appsHeader) appsHeader.style.display = 'none';
+        }
+    }
+
+    function getIconUrl(iconPath) {
+        if (!iconPath || iconPath.trim() === '') return DEFAULT_ICON;
+        return iconPath.trim();
+    }
+
+    function renderApps(apps) {
+        if (!appsGrid) return;
+        if (!apps.length) { appsGrid.innerHTML = '<div class="empty-tip">暂无应用</div>'; return; }
+        let appsHtml = '';
+        for (let app of apps) {
+            const name = escapeHtml(app.name);
+            let iconUrl = getIconUrl(app.icon);
+            const link = app.link?.startsWith('http') ? app.link : (app.link || 'javascript:void(0)');
+            const hasWindowMode = app.mode === 'window';
+            appsHtml += `<a href="javascript:void(0)" class="app-card" data-link="${escapeHtml(link)}" data-name="${escapeHtml(name)}" data-has-window-mode="${hasWindowMode}">
+                <img class="app-icon" src="${escapeHtml(iconUrl)}" onerror="this.src='${DEFAULT_ICON}'"><span class="app-name">${name}</span></a>`;
+        }
+        appsGrid.innerHTML = appsHtml;
+        document.querySelectorAll('.app-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                const link = card.dataset.link;
+                const name = card.dataset.name;
+                const hasWindowMode = card.dataset.hasWindowMode === 'true';
+                handleAppClick(link, name, hasWindowMode);
+            });
+        });
+        alignSameRowHeights();
     }
 
     function renderCarousel() {
@@ -995,14 +1467,14 @@
         }));
         initSwipe();
     }
-    
+
     function updateCarouselPosition() { if (carouselTrack) carouselTrack.style.transform = `translateX(${-currentIndex * 100}%)`; }
     function updateDotsActive() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentIndex)); }
     function nextSlide() { if (totalSlides) { currentIndex = (currentIndex + 1) % totalSlides; updateCarouselPosition(); updateDotsActive(); } }
     function prevSlide() { if (totalSlides) { currentIndex = (currentIndex - 1 + totalSlides) % totalSlides; updateCarouselPosition(); updateDotsActive(); } }
     function startAutoSlide() { if (autoInterval) clearInterval(autoInterval); if (totalSlides > 1) autoInterval = setInterval(nextSlide, 5000); }
     function resetAutoSlide() { startAutoSlide(); }
-    
+
     function initSwipe() {
         if (!carouselTrack) return;
         const wrapper = carouselTrack.parentElement;
@@ -1071,36 +1543,6 @@
         window.addEventListener('mouseup', onMouseUp);
     }
 
-    function renderApps(apps) {
-        if (!appsGrid) return;
-        if (!apps.length) { appsGrid.innerHTML = '<div class="empty-tip">暂无应用</div>'; return; }
-        let appsHtml = '';
-        for (let app of apps) {
-            const name = escapeHtml(app.name);
-            let iconUrl = getIconUrl(app.icon);
-            const link = app.link?.startsWith('http') ? app.link : (app.link || 'javascript:void(0)');
-            const hasWindowMode = app.mode === 'window';
-            appsHtml += `<a href="javascript:void(0)" class="app-card" data-link="${escapeHtml(link)}" data-name="${escapeHtml(name)}" data-has-window-mode="${hasWindowMode}">
-                <img class="app-icon" src="${escapeHtml(iconUrl)}" onerror="this.src='${DEFAULT_ICON}'"><span class="app-name">${name}</span></a>`;
-        }
-        appsGrid.innerHTML = appsHtml;
-        document.querySelectorAll('.app-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                e.preventDefault();
-                const link = card.dataset.link;
-                const name = card.dataset.name;
-                const hasWindowMode = card.dataset.hasWindowMode === 'true';
-                const useWindow = windowModeEnabled && hasWindowMode;
-                if (useWindow) {
-                    createWindow(link, name);
-                } else {
-                    window.open(link, '_blank', 'noopener,noreferrer');
-                }
-            });
-        });
-        alignSameRowHeights();
-    }
-    
     function alignSameRowHeights() {
         const cards = document.querySelectorAll('.app-card');
         if (!cards.length) return;
@@ -1115,8 +1557,6 @@
         });
         rows.forEach(row => { if (row.length > 1) { let maxH = Math.max(...row.map(r => r.height)); row.forEach(r => r.element.style.height = maxH + 'px'); } });
     }
-
-    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
 
     loadSettings();
     loadDataFromFile();
