@@ -412,12 +412,35 @@
             transform: scale(1.02);
         }
 
-        /* 窗口模式下的预览窗口样式 */
+        /* 窗口模式下的样式 */
+        .window-content {
+            flex: 1;
+            background: #f5f5f5;
+            position: relative;
+            min-height: 0;
+            overflow: auto;
+        }
+        
+        /* 网页窗口 iframe 样式 - 关键修复 */
+        .window-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        /* 预览容器样式 */
         .window-content .preview-container {
             width: 100%;
             height: 100%;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
         .window-content .preview-inner {
             flex: 1;
@@ -426,6 +449,7 @@
             align-items: center;
             overflow: auto;
             padding: 10px;
+            min-height: 0;
         }
         .window-content .preview-inner img, 
         .window-content .preview-inner video {
@@ -437,6 +461,7 @@
             width: 100%;
             height: 100%;
             border: none;
+            position: static;
         }
         .window-preview-download {
             padding: 8px 12px;
@@ -546,14 +571,6 @@
         }
         .window-btn.fullscreen-btn:hover {
             background: #27ae60;
-        }
-
-        .window-content {
-            flex: 1;
-            background: #f5f5f5;
-            overflow: auto;
-            position: relative;
-            min-height: 0;
         }
 
         .modal-window.fullscreen-mode {
@@ -705,33 +722,6 @@
         return 'link';
     }
 
-    // 检查是否是 GitHub raw 文件
-    function isGitHubRawFile(url) {
-        return url.includes('raw.githubusercontent.com') || url.includes('github.com') && url.includes('/raw/');
-    }
-
-    // 显示不支持的预览（全屏模式）
-    function showUnsupportedPreview(fileName, fileUrl, closeCallback) {
-        return `
-            <div class="unsupported-preview">
-                <h2>📄 该文件不支持预览</h2>
-                <p>${escapeHtml(fileName)}</p>
-                <button class="download-now-btn">立即下载</button>
-            </div>
-        `;
-    }
-
-    // 显示不支持的预览（窗口模式）
-    function showWindowUnsupportedPreview(fileName, fileUrl) {
-        return `
-            <div class="window-unsupported">
-                <h3>📄 该文件不支持预览</h3>
-                <p style="margin: 15px 0; color: #666;">${escapeHtml(fileName)}</p>
-                <button class="download-now-btn">立即下载</button>
-            </div>
-        `;
-    }
-
     // PDF.js 渲染PDF
     async function renderPDF(container, pdfUrl) {
         try {
@@ -804,7 +794,7 @@
             
         } catch (error) {
             console.error('PDF加载失败:', error);
-            container.innerHTML = `<div class="unsupported-preview"><h2>📄 PDF加载失败</h2><p>该文件无法预览</p><button class="download-now-btn">立即下载</button></div>`;
+            container.innerHTML = `<div class="unsupported-preview"><h2>PDF加载失败</h2><p>该文件无法预览</p><button class="download-now-btn">立即下载</button></div>`;
             const btn = container.querySelector('.download-now-btn');
             if (btn) {
                 btn.addEventListener('click', () => {
@@ -833,8 +823,13 @@
         } else if (fileType === 'pdf') {
             contentHtml = `<div id="pdfViewerContainer" class="pdf-viewer"></div>`;
         } else if (fileType === 'office') {
-            // Office 文档一律显示不支持预览
-            contentHtml = showUnsupportedPreview(fileName, url);
+            contentHtml = `
+                <div class="unsupported-preview">
+                    <h2>该文件不支持预览</h2>
+                    <p>${escapeHtml(fileName)}</p>
+                    <button class="download-now-btn">立即下载</button>
+                </div>
+            `;
         } else {
             contentHtml = `<iframe src="${escapeHtml(url)}" title="网页预览"></iframe>`;
         }
@@ -853,7 +848,6 @@
         
         document.body.appendChild(previewDiv);
         
-        // 如果是PDF，使用PDF.js渲染
         if (fileType === 'pdf') {
             const pdfContainer = previewDiv.querySelector('#pdfViewerContainer');
             if (pdfContainer) {
@@ -861,20 +855,17 @@
             }
         }
         
-        // 如果是Office文档，绑定下载按钮
-        if (fileType === 'office') {
-            const downloadBtn = previewDiv.querySelector('.download-now-btn');
-            if (downloadBtn) {
-                downloadBtn.addEventListener('click', () => {
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = fileName.split('?')[0];
-                    a.target = '_blank';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                });
-            }
+        const downloadBtn = previewDiv.querySelector('.download-now-btn');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', () => {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName.split('?')[0];
+                a.target = '_blank';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
         }
         
         previewDiv.querySelector('.close-btn').addEventListener('click', () => {
@@ -901,7 +892,7 @@
         header.className = 'window-header';
         const titleDiv = document.createElement('div');
         titleDiv.className = 'window-title';
-        titleDiv.innerHTML = `<span>📄 ${escapeHtml(fileName)}</span>`;
+        titleDiv.innerHTML = `<span>${escapeHtml(fileName)}</span>`;
         
         const controls = document.createElement('div');
         controls.className = 'window-controls';
@@ -959,11 +950,14 @@
                 </div>
             `;
         } else if (fileType === 'office') {
-            // Office 文档显示不支持预览
             previewHtml = `
                 <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
                     <div class="preview-inner" style="flex:1; display:flex; justify-content:center; align-items:center;">
-                        ${showWindowUnsupportedPreview(fileName, url)}
+                        <div class="window-unsupported">
+                            <h3>该文件不支持预览</h3>
+                            <p style="margin: 15px 0; color: #666;">${escapeHtml(fileName)}</p>
+                            <button class="download-now-btn">立即下载</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -989,7 +983,6 @@
         
         const windowId = Date.now() + Math.random();
         
-        // 如果是PDF，使用PDF.js渲染
         if (fileType === 'pdf') {
             setTimeout(() => {
                 const pdfContainer = contentDiv.querySelector('#pdfWindowViewer');
@@ -999,7 +992,6 @@
             }, 100);
         }
         
-        // 下载按钮事件
         const downloadBtn = contentDiv.querySelector('.preview-download-btn');
         if (downloadBtn) {
             downloadBtn.addEventListener('click', () => {
@@ -1013,7 +1005,6 @@
             });
         }
         
-        // Office文档的下载按钮
         const unsupportedDownloadBtn = contentDiv.querySelector('.download-now-btn');
         if (unsupportedDownloadBtn) {
             unsupportedDownloadBtn.addEventListener('click', () => {
@@ -1053,7 +1044,6 @@
         document.addEventListener('mousedown', bringToFrontByClick, true);
         document.addEventListener('touchstart', bringToFrontByClick, true);
         
-        // 拖拽功能
         let isDragging = false;
         let dragStartX = 0, dragStartY = 0;
         let startLeft = 0, startTop = 0;
@@ -1115,7 +1105,6 @@
         header.addEventListener('mousedown', startDrag);
         header.addEventListener('touchstart', startDrag, { passive: false });
         
-        // 调整大小
         let isResizing = false;
         let resizeStartX = 0, resizeStartY = 0;
         let resizeStartW = 0, resizeStartH = 0;
@@ -1250,7 +1239,7 @@
         }
     }
 
-    // 创建普通网页窗口（简化版）
+    // 创建普通网页窗口 - 修复iframe显示问题
     function createWebWindow(url, appName) {
         const windowDiv = document.createElement('div');
         windowDiv.className = 'modal-window';
@@ -1300,11 +1289,19 @@
         
         const contentDiv = document.createElement('div');
         contentDiv.className = 'window-content';
+        // 关键修复：设置相对定位，iframe绝对定位填满
+        contentDiv.style.position = 'relative';
         const iframe = document.createElement('iframe');
         iframe.src = url;
         iframe.title = appName;
         iframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation';
         iframe.allow = 'fullscreen';
+        iframe.style.position = 'absolute';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
         contentDiv.appendChild(iframe);
         
         const resizeHandle = document.createElement('div');
