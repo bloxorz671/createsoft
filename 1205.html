@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>初二五班智慧应用平台</title>
+    <!-- PDF.js 库 - 本地预览PDF，无需外网 -->
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -366,6 +368,17 @@
             height: 85vh;
             border: none;
         }
+        .pdf-viewer {
+            width: 100%;
+            height: 85vh;
+            overflow: auto;
+            background: #525659;
+        }
+        .pdf-canvas {
+            margin: 0 auto;
+            display: block;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
         .doc-fallback {
             text-align: center;
             padding: 40px;
@@ -642,8 +655,6 @@
     const windowModeSwitch = document.getElementById('windowModeSwitch');
 
     const DEFAULT_ICON = 'null.jpg';
-    // WPS WebOffice 预览服务地址
-    const WPS_PREVIEW_URL = 'https://wwo.wps.cn/office';
 
     // 判断文件类型
     function getFileType(url) {
@@ -651,41 +662,101 @@
         const ext = urlWithoutParams.split('.').pop().toLowerCase();
         const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico'];
         const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'flv'];
-        const officeExts = ['doc', 'docx', 'dot', 'dotx', 'wps', 'wpt', 'rtf', 'txt', 'xml', 'html', 'htm'];
+        const officeExts = ['doc', 'docx', 'dot', 'dotx', 'wps', 'wpt', 'rtf', 'txt', 'xml'];
         const excelExts = ['xls', 'xlt', 'xlsx', 'xltx', 'csv', 'xlsm', 'xltm', 'ett'];
-        const pptExts = ['ppt', 'pptx', 'pptm', 'ppsx', 'ppsm', 'pps', 'potx', 'potm', 'dpt', 'dps', 'pot'];
+        const pptExts = ['ppt', 'pptx', 'pptm', 'ppsx', 'ppsm', 'pps', 'potx', 'potm', 'dpt', 'dps'];
         const pdfExts = ['pdf'];
         
         if (imageExts.includes(ext)) return 'image';
         if (videoExts.includes(ext)) return 'video';
         if (pdfExts.includes(ext)) return 'pdf';
-        if (officeExts.includes(ext)) return 'word';
-        if (excelExts.includes(ext)) return 'excel';
-        if (pptExts.includes(ext)) return 'ppt';
+        if (officeExts.includes(ext) || excelExts.includes(ext) || pptExts.includes(ext)) return 'office';
         return 'link';
     }
 
-    // 获取文件类型对应的 WPS 预览类型代码
-    function getWpsType(fileType) {
-        switch(fileType) {
-            case 'word': return 'w';
-            case 'excel': return 's';
-            case 'ppt': return 'p';
-            case 'pdf': return 'f';
-            default: return 'w';
-        }
+    // 获取 Office 文档预览 URL（使用微软官方服务，国内稳定）
+    function getOfficePreviewUrl(fileUrl) {
+        return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
     }
 
-    // 生成 WPS 预览 URL
-    function getWpsPreviewUrl(fileUrl, fileName, fileType) {
-        const wpsType = getWpsType(fileType);
-        // 生成一个简单的文件ID（使用 URL 编码后的文件名）
-        const fileId = btoa(encodeURIComponent(fileUrl)).replace(/=/g, '');
-        // WPS 预览地址格式：https://wwo.wps.cn/office/{type}/{fileId}?_w_fname={fileName}&_w_url={fileUrl}
-        // 注意：实际使用时可能需要申请 AppId，但 WPS 提供免费的测试服务，有一定额度限制
-        // 这里使用直接 URL 参数方式，WPS 支持通过 _w_url 参数直接指定文件地址 [citation:6]
-        const previewUrl = `${WPS_PREVIEW_URL}/${wpsType}/${fileId}?_w_fname=${encodeURIComponent(fileName)}&_w_url=${encodeURIComponent(fileUrl)}`;
-        return previewUrl;
+    // PDF.js 渲染PDF
+    async function renderPDF(container, pdfUrl) {
+        try {
+            // 设置 PDF.js worker
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
+            
+            const loadingTask = pdfjsLib.getDocument(pdfUrl);
+            const pdf = await loadingTask.promise;
+            const totalPages = pdf.numPages;
+            
+            // 清空容器
+            container.innerHTML = '';
+            
+            // 添加页码控制
+            const controls = document.createElement('div');
+            controls.style.cssText = 'position:sticky; top:0; background:#2c3e76; padding:10px; text-align:center; z-index:10;';
+            controls.innerHTML = `
+                <button style="background:rgba(255,255,255,0.2); border:none; color:white; padding:5px 15px; margin:0 5px; border-radius:4px; cursor:pointer;" id="prevPage">◀ 上一页</button>
+                <span style="color:white; margin:0 15px;" id="pageInfo">第 1 / ${totalPages} 页</span>
+                <button style="background:rgba(255,255,255,0.2); border:none; color:white; padding:5px 15px; margin:0 5px; border-radius:4px; cursor:pointer;" id="nextPage">下一页 ▶</button>
+            `;
+            container.appendChild(controls);
+            
+            // 创建画布容器
+            const canvasContainer = document.createElement('div');
+            canvasContainer.style.cssText = 'display:flex; flex-direction:column; align-items:center; padding:20px;';
+            container.appendChild(canvasContainer);
+            
+            let currentPage = 1;
+            let currentCanvas = null;
+            
+            async function renderPage(pageNum) {
+                if (currentCanvas) {
+                    currentCanvas.remove();
+                }
+                
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 1.5 });
+                const canvas = document.createElement('canvas');
+                canvas.className = 'pdf-canvas';
+                canvas.style.marginBottom = '20px';
+                canvas.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                const context = canvas.getContext('2d');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                
+                await page.render(renderContext).promise;
+                canvasContainer.appendChild(canvas);
+                currentCanvas = canvas;
+                
+                document.getElementById('pageInfo').innerHTML = `第 ${pageNum} / ${totalPages} 页`;
+            }
+            
+            await renderPage(1);
+            
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderPage(currentPage);
+                }
+            });
+            
+            document.getElementById('nextPage').addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderPage(currentPage);
+                }
+            });
+            
+        } catch (error) {
+            console.error('PDF加载失败:', error);
+            container.innerHTML = `<div class="doc-fallback"><p>📄 PDF加载失败，请下载后查看</p><button onclick="window.open('${escapeHtml(pdfUrl)}', '_blank')">📥 下载查看</button></div>`;
+        }
     }
 
     // 全屏预览
@@ -699,14 +770,11 @@
         } else if (fileType === 'video') {
             contentHtml = `<video controls autoplay><source src="${escapeHtml(url)}" type="video/mp4">您的浏览器不支持视频播放</video>`;
         } else if (fileType === 'pdf') {
-            // PDF 使用浏览器原生预览
-            contentHtml = `<iframe src="${escapeHtml(url)}" title="PDF预览"></iframe>`;
-        } else if (fileType === 'word' || fileType === 'excel' || fileType === 'ppt') {
-            // 使用 WPS WebOffice 预览
-            const previewUrl = getWpsPreviewUrl(url, fileName, fileType);
-            contentHtml = `
-                <iframe src="${escapeHtml(previewUrl)}" title="文档预览" style="width:100%; height:85vh; border:none;"></iframe>
-            `;
+            // PDF 使用 PDF.js 渲染
+            contentHtml = `<div id="pdfViewerContainer" class="pdf-viewer"></div>`;
+        } else if (fileType === 'office') {
+            const previewUrl = getOfficePreviewUrl(url);
+            contentHtml = `<iframe src="${escapeHtml(previewUrl)}" title="文档预览"></iframe>`;
         } else {
             contentHtml = `<iframe src="${escapeHtml(url)}" title="网页预览"></iframe>`;
         }
@@ -726,26 +794,11 @@
         
         document.body.appendChild(previewDiv);
         
-        // 为 Office 文档添加 fallback 检测（如果 WPS 预览加载失败）
-        if (fileType === 'word' || fileType === 'excel' || fileType === 'ppt') {
-            const iframe = previewDiv.querySelector('iframe');
-            if (iframe) {
-                setTimeout(() => {
-                    try {
-                        // 尝试检测 iframe 是否加载了错误页面
-                        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-                        if (iframeDoc && iframeDoc.body && 
-                            (iframeDoc.body.innerText?.includes('无法') || 
-                             iframeDoc.body.innerText?.includes('error') ||
-                             iframeDoc.body.innerText?.includes('拒绝'))) {
-                            const fallbackHtml = showFallbackPreview(fileName, url);
-                            const contentDiv = previewDiv.querySelector('.preview-content');
-                            contentDiv.innerHTML = fallbackHtml;
-                        }
-                    } catch(e) {
-                        // 跨域无法检测，保持原样，用户可手动下载
-                    }
-                }, 5000);
+        // 如果是PDF，使用PDF.js渲染
+        if (fileType === 'pdf') {
+            const pdfContainer = previewDiv.querySelector('#pdfViewerContainer');
+            if (pdfContainer) {
+                renderPDF(pdfContainer, url);
             }
         }
         
@@ -762,18 +815,6 @@
             a.click();
             document.body.removeChild(a);
         });
-    }
-
-    // 显示预览失败的备用方案
-    function showFallbackPreview(fileName, fileUrl) {
-        return `
-            <div class="doc-fallback">
-                <p>📄 无法在线预览此文档</p>
-                <p style="font-size:0.85rem; margin:10px 0;">${escapeHtml(fileName)}</p>
-                <button onclick="window.open('${escapeHtml(fileUrl)}', '_blank')">📥 下载查看</button>
-                <button onclick="this.closest('.fullscreen-preview, .modal-window')?.remove()" style="margin-left:10px; background:#6c757d;">✕ 关闭</button>
-            </div>
-        `;
     }
 
     // 窗口模式预览
@@ -844,20 +885,20 @@
         } else if (fileType === 'pdf') {
             previewHtml = `
                 <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
-                    <div class="preview-inner" style="flex:1;">
-                        <iframe src="${escapeHtml(url)}" style="width:100%; height:100%; border:none;"></iframe>
+                    <div class="preview-inner" style="flex:1; overflow:auto;" id="pdfViewerInner">
+                        <div id="pdfWindowViewer" style="width:100%; height:100%;"></div>
                     </div>
                     <div class="window-preview-download">
                         <button class="preview-download-btn">📥 下载文件</button>
                     </div>
                 </div>
             `;
-        } else if (fileType === 'word' || fileType === 'excel' || fileType === 'ppt') {
-            const previewUrl = getWpsPreviewUrl(url, fileName, fileType);
+        } else if (fileType === 'office') {
+            const previewUrl = getOfficePreviewUrl(url);
             previewHtml = `
                 <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
                     <div class="preview-inner" style="flex:1;">
-                        <iframe id="wpsPreviewFrame" src="${escapeHtml(previewUrl)}" style="width:100%; height:100%; border:none;"></iframe>
+                        <iframe src="${escapeHtml(previewUrl)}" style="width:100%; height:100%; border:none;"></iframe>
                     </div>
                     <div class="window-preview-download">
                         <button class="preview-download-btn">📥 下载文件</button>
@@ -886,26 +927,14 @@
         
         const windowId = Date.now() + Math.random();
         
-        // 为 Office 文档添加 fallback
-        if (fileType === 'word' || fileType === 'excel' || fileType === 'ppt') {
-            const iframe = contentDiv.querySelector('#wpsPreviewFrame');
-            if (iframe) {
-                setTimeout(() => {
-                    try {
-                        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-                        if (iframeDoc && iframeDoc.body && 
-                            (iframeDoc.body.innerText?.includes('无法') || 
-                             iframeDoc.body.innerText?.includes('error') ||
-                             iframeDoc.body.innerText?.includes('拒绝'))) {
-                            const fallbackHtml = showFallbackPreview(fileName, url);
-                            const previewInner = contentDiv.querySelector('.preview-inner');
-                            previewInner.innerHTML = fallbackHtml;
-                        }
-                    } catch(e) {
-                        // 跨域无法检测，保持原样
-                    }
-                }, 5000);
-            }
+        // 如果是PDF，使用PDF.js渲染
+        if (fileType === 'pdf') {
+            setTimeout(() => {
+                const pdfContainer = contentDiv.querySelector('#pdfWindowViewer');
+                if (pdfContainer) {
+                    renderPDF(pdfContainer, url);
+                }
+            }, 100);
         }
         
         // 下载按钮事件
@@ -1145,7 +1174,7 @@
         }
     }
 
-    // 创建普通网页窗口（简化版，保留核心功能）
+    // 创建普通网页窗口
     function createWebWindow(url, appName) {
         const windowDiv = document.createElement('div');
         windowDiv.className = 'modal-window';
