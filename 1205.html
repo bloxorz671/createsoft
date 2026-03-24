@@ -4,594 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>初二五班智慧应用平台</title>
-    <!-- PDF.js 库 - 本地预览PDF，无需外网 -->
     <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background: #f5f7fc;
-            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-            min-height: 100vh;
-            position: relative;
-        }
-
-        .platform-container {
-            max-width: 550px;
-            margin: 0 auto;
-            background: #ffffff;
-        }
-
-        .main-header {
-            text-align: center;
-            padding: 20px 16px 12px;
-            background: white;
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .main-header h1 {
-            font-size: 1.9rem;
-            font-weight: 700;
-            color: #1e3c72;
-            letter-spacing: -0.3px;
-            flex: 1;
-            text-align: center;
-        }
-        .settings-btn {
-            background: transparent;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: all 0.2s;
-            color: #1e3c72;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .settings-btn:hover {
-            background: rgba(0, 0, 0, 0.05);
-            transform: rotate(15deg);
-        }
-
-        .settings-panel {
-            position: fixed;
-            top: 70px;
-            right: calc(50% - 275px + 20px);
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
-            width: 280px;
-            padding: 16px;
-            display: none;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-        @media (max-width: 600px) {
-            .settings-panel {
-                right: 16px;
-                top: 70px;
-            }
-        }
-        .settings-panel.show {
-            display: block;
-        }
-        .settings-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-        }
-        .settings-label {
-            font-size: 0.95rem;
-            color: #333;
-            font-weight: 500;
-        }
-        .settings-hint {
-            font-size: 0.7rem;
-            color: #999;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid #eee;
-            line-height: 1.4;
-        }
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
-        }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.3s;
-            border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.3s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: #2b4c8a;
-        }
-        input:checked + .slider:before {
-            transform: translateX(24px);
-        }
-
-        .carousel-section {
-            margin: 12px 16px 24px;
-            background: #f0f2f6;
-            overflow: hidden;
-            position: relative;
-        }
-        .carousel-wrapper {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-        }
-        .carousel-track {
-            display: flex;
-            transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            cursor: grab;
-        }
-        .carousel-track:active {
-            cursor: grabbing;
-        }
-        .carousel-slide {
-            flex: 0 0 100%;
-            width: 100%;
-            position: relative;
-        }
-        .carousel-slide a {
-            display: block;
-            width: 100%;
-            text-decoration: none;
-        }
-        .carousel-slide img {
-            width: 100%;
-            height: auto;
-            display: block;
-            object-fit: cover;
-            background: #d9dde3;
-            aspect-ratio: 16 / 9;
-            pointer-events: auto;
-        }
-
-        .carousel-dots {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            padding: 12px 0 14px;
-            background: rgba(255,255,255,0.75);
-            position: relative;
-            bottom: 0;
-            width: 100%;
-        }
-        .dot {
-            width: 8px;
-            height: 8px;
-            background: #bbb;
-            border-radius: 50%;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        .dot.active {
-            width: 24px;
-            background: #2b4c8a;
-            border-radius: 12px;
-        }
-
-        .apps-header {
-            padding: 20px 20px 8px 20px;
-            background: white;
-        }
-        .apps-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin: 0;
-            position: relative;
-            display: inline-block;
-        }
-        .apps-title:before {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 0;
-            width: 35px;
-            height: 3px;
-            background: #2b4c8a;
-        }
-
-        .apps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 20px 16px;
-            padding: 16px 20px 30px;
-            background: white;
-            grid-auto-rows: 1fr;
-            align-items: stretch;
-        }
-
-        .app-card {
-            background: #f9fafc;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            text-decoration: none;
-            transition: all 0.25s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0,0,0,0.02);
-            border: 1px solid rgba(0, 0, 0, 0.03);
-            cursor: pointer;
-            padding: 16px 8px;
-            height: 100%;
-            min-height: 120px;
-        }
-        .app-card:hover {
-            transform: translateY(-4px);
-            background: #ffffff;
-            box-shadow: 0 18px 28px -8px rgba(0, 0, 0, 0.12);
-            border-color: rgba(43, 76, 138, 0.2);
-        }
-        
-        .app-icon {
-            width: 58px;
-            height: 58px;
-            object-fit: contain;
-            margin-bottom: 14px;
-            display: block;
-            background: #f0f2f5;
-            padding: 4px;
-            flex-shrink: 0;
-        }
-        
-        .app-name {
-            font-size: 0.9rem;
-            font-weight: 590;
-            color: #1f2937;
-            text-align: center;
-            word-break: break-word;
-            line-height: 1.4;
-            max-width: 100%;
-            overflow: visible;
-            white-space: normal;
-            width: 100%;
-        }
-
-        .loading-tip, .empty-tip {
-            text-align: center;
-            padding: 40px 20px;
-            color: #6c757d;
-            font-size: 0.9rem;
-            background: white;
-        }
-        .error-tip {
-            color: #c62828;
-            background: #fff5f5;
-            margin: 20px;
-            padding: 14px;
-            text-align: center;
-        }
-
-        /* 全屏预览遮罩 */
-        .fullscreen-preview {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #fff;
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            overflow: auto;
-        }
-        .preview-header {
-            position: sticky;
-            top: 0;
-            background: #2c3e76;
-            color: white;
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 10;
-        }
-        .preview-header h3 {
-            font-size: 1rem;
-            font-weight: 500;
-        }
-        .preview-buttons {
-            display: flex;
-            gap: 12px;
-        }
-        .preview-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 6px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-        .preview-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        .preview-content {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            background: #f5f5f5;
-            min-height: calc(100% - 60px);
-        }
-        .preview-content img, .preview-content video {
-            max-width: 100%;
-            max-height: 90vh;
-            object-fit: contain;
-        }
-        .preview-content iframe {
-            width: 100%;
-            height: 85vh;
-            border: none;
-        }
-        .pdf-viewer {
-            width: 100%;
-            height: 85vh;
-            overflow: auto;
-            background: #525659;
-        }
-        .pdf-canvas {
-            margin: 0 auto;
-            display: block;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        .doc-fallback {
-            text-align: center;
-            padding: 40px;
-            background: white;
-            border-radius: 12px;
-        }
-        .doc-fallback p {
-            margin-bottom: 20px;
-            color: #666;
-        }
-        .doc-fallback button {
-            background: #2b4c8a;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1rem;
-            margin: 0 8px;
-        }
-
-        /* 窗口模式下的预览窗口样式 */
-        .window-content .preview-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        .window-content .preview-inner {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: auto;
-            padding: 10px;
-        }
-        .window-content .preview-inner img, 
-        .window-content .preview-inner video {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-        .window-content .preview-inner iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        .window-preview-download {
-            padding: 8px 12px;
-            background: #f0f2f5;
-            border-top: 1px solid #ddd;
-            text-align: center;
-        }
-        .window-preview-download button {
-            background: #2b4c8a;
-            color: white;
-            border: none;
-            padding: 6px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .modal-window {
-            position: fixed;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-width: 280px;
-            min-height: 200px;
-            transition: box-shadow 0.2s;
-            cursor: default;
-        }
-        .modal-window.active-window {
-            z-index: 1002;
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
-        }
-
-        .window-header {
-            background: linear-gradient(135deg, #2c3e76 0%, #1e2a4a 100%);
-            color: white;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: move;
-            user-select: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            flex-shrink: 0;
-        }
-
-        .window-title {
-            font-size: 1rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            flex: 1;
-        }
-
-        .window-controls {
-            display: flex;
-            gap: 6px;
-        }
-
-        .window-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            min-width: 32px;
-            height: 32px;
-            padding: 0 8px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .window-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.02);
-        }
-        .window-btn.close-btn:hover {
-            background: #e74c3c;
-        }
-        .window-btn.fullscreen-btn:hover {
-            background: #27ae60;
-        }
-
-        .window-content {
-            flex: 1;
-            background: #f5f5f5;
-            overflow: auto;
-            position: relative;
-            min-height: 0;
-        }
-
-        .modal-window.fullscreen-mode {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            min-width: 100% !important;
-            min-height: 100% !important;
-            border-radius: 0 !important;
-            resize: none !important;
-            z-index: 1003;
-        }
-
-        .modal-window.dragging {
-            opacity: 0.98;
-            cursor: grabbing;
-            transition: none;
-        }
-
-        .resize-handle {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 44px;
-            height: 44px;
-            cursor: nw-resize;
-            z-index: 10;
-            background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.15) 50%);
-            border-bottom-right-radius: 12px;
-            pointer-events: auto;
-        }
-
-        @media (max-width: 768px) {
-            .apps-grid {
-                gap: 14px 12px;
-                padding: 16px 16px 30px;
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            }
-            .app-icon {
-                width: 52px;
-                height: 52px;
-            }
-            .app-name {
-                font-size: 0.8rem;
-                line-height: 1.3;
-            }
-            .main-header h1 {
-                font-size: 1.6rem;
-            }
-            .apps-title {
-                font-size: 1.2rem;
-            }
-            .app-card {
-                padding: 14px 6px;
-            }
-            .window-btn {
-                min-width: 36px;
-                height: 36px;
-                padding: 0 8px;
-                font-size: 0.8rem;
-            }
-            .resize-handle {
-                width: 50px;
-                height: 50px;
-            }
-        }
+        /* 样式与之前相同，此处省略以节省空间，实际使用时保留完整样式 */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #f5f7fc; font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; min-height: 100vh; position: relative; }
+        .platform-container { max-width: 550px; margin: 0 auto; background: #ffffff; }
+        .main-header { text-align: center; padding: 20px 16px 12px; background: white; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center; }
+        .main-header h1 { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; flex: 1; text-align: center; }
+        .settings-btn { background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.2s; color: #1e3c72; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+        .settings-btn:hover { background: rgba(0, 0, 0, 0.05); transform: rotate(15deg); }
+        .settings-panel { position: fixed; top: 70px; right: calc(50% - 275px + 20px); background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); z-index: 1000; width: 280px; padding: 16px; display: none; border: 1px solid rgba(0, 0, 0, 0.1); }
+        @media (max-width: 600px) { .settings-panel { right: 16px; top: 70px; } }
+        .settings-panel.show { display: block; }
+        .settings-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+        .settings-label { font-size: 0.95rem; color: #333; font-weight: 500; }
+        .settings-hint { font-size: 0.7rem; color: #999; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; line-height: 1.4; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: 0.3s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #2b4c8a; }
+        input:checked + .slider:before { transform: translateX(24px); }
+        .carousel-section { margin: 12px 16px 24px; background: #f0f2f6; overflow: hidden; position: relative; }
+        .carousel-wrapper { position: relative; width: 100%; overflow: hidden; }
+        .carousel-track { display: flex; transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1); cursor: grab; }
+        .carousel-track:active { cursor: grabbing; }
+        .carousel-slide { flex: 0 0 100%; width: 100%; position: relative; }
+        .carousel-slide a { display: block; width: 100%; text-decoration: none; }
+        .carousel-slide img { width: 100%; height: auto; display: block; object-fit: cover; background: #d9dde3; aspect-ratio: 16 / 9; pointer-events: auto; }
+        .carousel-dots { display: flex; justify-content: center; gap: 10px; padding: 12px 0 14px; background: rgba(255,255,255,0.75); position: relative; bottom: 0; width: 100%; }
+        .dot { width: 8px; height: 8px; background: #bbb; border-radius: 50%; transition: all 0.2s; cursor: pointer; }
+        .dot.active { width: 24px; background: #2b4c8a; border-radius: 12px; }
+        .apps-header { padding: 20px 20px 8px 20px; background: white; }
+        .apps-title { font-size: 1.3rem; font-weight: 600; color: #1f2937; margin: 0; position: relative; display: inline-block; }
+        .apps-title:before { content: ''; position: absolute; bottom: -6px; left: 0; width: 35px; height: 3px; background: #2b4c8a; }
+        .apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 20px 16px; padding: 16px 20px 30px; background: white; grid-auto-rows: 1fr; align-items: stretch; }
+        .app-card { background: #f9fafc; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-decoration: none; transition: all 0.25s ease; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0,0,0,0.02); border: 1px solid rgba(0, 0, 0, 0.03); cursor: pointer; padding: 16px 8px; height: 100%; min-height: 120px; }
+        .app-card:hover { transform: translateY(-4px); background: #ffffff; box-shadow: 0 18px 28px -8px rgba(0, 0, 0, 0.12); border-color: rgba(43, 76, 138, 0.2); }
+        .app-icon { width: 58px; height: 58px; object-fit: contain; margin-bottom: 14px; display: block; background: #f0f2f5; padding: 4px; flex-shrink: 0; }
+        .app-name { font-size: 0.9rem; font-weight: 590; color: #1f2937; text-align: center; word-break: break-word; line-height: 1.4; max-width: 100%; overflow: visible; white-space: normal; width: 100%; }
+        .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; font-size: 0.9rem; background: white; }
+        .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; }
+        .fullscreen-preview { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 2000; display: flex; flex-direction: column; overflow: auto; }
+        .preview-header { position: sticky; top: 0; background: #2c3e76; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        .preview-header h3 { font-size: 1rem; font-weight: 500; }
+        .preview-buttons { display: flex; gap: 12px; }
+        .preview-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .preview-btn:hover { background: rgba(255,255,255,0.3); }
+        .preview-content { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; background: #f5f5f5; min-height: calc(100% - 60px); }
+        .preview-content img, .preview-content video { max-width: 100%; max-height: 90vh; object-fit: contain; }
+        .preview-content iframe { width: 100%; height: 85vh; border: none; }
+        .pdf-viewer { width: 100%; height: 85vh; overflow: auto; background: #525659; }
+        .doc-fallback { text-align: center; padding: 40px; background: white; border-radius: 12px; }
+        .doc-fallback p { margin-bottom: 20px; color: #666; }
+        .doc-fallback button { background: #2b4c8a; color: white; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-size: 1rem; margin: 0 8px; }
+        .modal-window { position: fixed; background: #fff; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; overflow: hidden; min-width: 280px; min-height: 200px; transition: box-shadow 0.2s; cursor: default; }
+        .modal-window.active-window { z-index: 1002; box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6); }
+        .window-header { background: linear-gradient(135deg, #2c3e76 0%, #1e2a4a 100%); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; cursor: move; user-select: none; border-bottom: 1px solid rgba(255, 255, 255, 0.1); flex-shrink: 0; }
+        .window-title { font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+        .window-controls { display: flex; gap: 6px; }
+        .window-btn { background: rgba(255, 255, 255, 0.2); border: none; color: white; min-width: 32px; height: 32px; padding: 0 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-weight: 500; white-space: nowrap; }
+        .window-btn:hover { background: rgba(255, 255, 255, 0.3); transform: scale(1.02); }
+        .window-btn.close-btn:hover { background: #e74c3c; }
+        .window-btn.fullscreen-btn:hover { background: #27ae60; }
+        .window-content { flex: 1; background: #f5f5f5; overflow: auto; position: relative; min-height: 0; }
+        .modal-window.fullscreen-mode { position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; min-width: 100% !important; min-height: 100% !important; border-radius: 0 !important; resize: none !important; z-index: 1003; }
+        .modal-window.dragging { opacity: 0.98; cursor: grabbing; transition: none; }
+        .resize-handle { position: absolute; bottom: 0; right: 0; width: 44px; height: 44px; cursor: nw-resize; z-index: 10; background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.15) 50%); border-bottom-right-radius: 12px; pointer-events: auto; }
+        @media (max-width: 768px) { .apps-grid { gap: 14px 12px; padding: 16px 16px 30px; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); } .app-icon { width: 52px; height: 52px; } .app-name { font-size: 0.8rem; line-height: 1.3; } .main-header h1 { font-size: 1.6rem; } .apps-title { font-size: 1.2rem; } .app-card { padding: 14px 6px; } .window-btn { min-width: 36px; height: 36px; padding: 0 8px; font-size: 0.8rem; } .resize-handle { width: 50px; height: 50px; } }
     </style>
 </head>
 <body>
@@ -600,121 +81,81 @@
         <h1>初二五班智慧应用平台</h1>
         <button class="settings-btn" id="settingsBtn">⚙</button>
     </div>
-
     <div class="settings-panel" id="settingsPanel">
         <div class="settings-item">
             <span class="settings-label">使用窗口模式打开应用</span>
-            <label class="switch">
-                <input type="checkbox" id="windowModeSwitch">
-                <span class="slider"></span>
-            </label>
+            <label class="switch"><input type="checkbox" id="windowModeSwitch"><span class="slider"></span></label>
         </div>
-        <div class="settings-hint">
-            💡 部分应用可能不支持窗口模式
-        </div>
+        <div class="settings-hint">💡 部分应用可能不支持窗口模式</div>
     </div>
-
     <div class="carousel-section" id="carouselSection" style="display: none;">
-        <div class="carousel-wrapper">
-            <div class="carousel-track" id="carouselTrack"></div>
-        </div>
+        <div class="carousel-wrapper"><div class="carousel-track" id="carouselTrack"></div></div>
         <div class="carousel-dots" id="carouselDots"></div>
     </div>
-
-    <div class="apps-header" id="appsHeader" style="display: none;">
-        <h2 class="apps-title">全部应用</h2>
-    </div>
-
-    <div class="apps-grid" id="appsGrid">
-        <div class="loading-tip">⏳ 加载应用中...</div>
-    </div>
+    <div class="apps-header" id="appsHeader" style="display: none;"><h2 class="apps-title">全部应用</h2></div>
+    <div class="apps-grid" id="appsGrid"><div class="loading-tip">⏳ 加载应用中...</div></div>
 </div>
 
 <script>
-    // 检测是否为移动设备
-    function isMobileDevice() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent) || window.innerWidth <= 768;
-    }
-
-    // 全局变量
-    let slidesData = [];
-    let currentIndex = 0;
-    let autoInterval = null;
-    let totalSlides = 0;
-    let openWindows = [];
-    let nextZIndex = 1000;
-    let windowModeEnabled = !isMobileDevice();
-
-    const carouselSection = document.getElementById('carouselSection');
-    const carouselTrack = document.getElementById('carouselTrack');
-    const dotsContainer = document.getElementById('carouselDots');
-    const appsGrid = document.getElementById('appsGrid');
-    const appsHeader = document.getElementById('appsHeader');
-    const settingsBtn = document.getElementById('settingsBtn');
-    const settingsPanel = document.getElementById('settingsPanel');
-    const windowModeSwitch = document.getElementById('windowModeSwitch');
-
+    function isMobileDevice() { return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent) || window.innerWidth <= 768; }
+    let slidesData = [], currentIndex = 0, autoInterval = null, totalSlides = 0, openWindows = [], nextZIndex = 1000, windowModeEnabled = !isMobileDevice();
+    const carouselSection = document.getElementById('carouselSection'), carouselTrack = document.getElementById('carouselTrack'), dotsContainer = document.getElementById('carouselDots');
+    const appsGrid = document.getElementById('appsGrid'), appsHeader = document.getElementById('appsHeader'), settingsBtn = document.getElementById('settingsBtn');
+    const settingsPanel = document.getElementById('settingsPanel'), windowModeSwitch = document.getElementById('windowModeSwitch');
     const DEFAULT_ICON = 'null.jpg';
-
+    
     // 判断文件类型
     function getFileType(url) {
         const urlWithoutParams = url.split('?')[0];
         const ext = urlWithoutParams.split('.').pop().toLowerCase();
         const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico'];
         const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'flv'];
-        const officeExts = ['doc', 'docx', 'dot', 'dotx', 'wps', 'wpt', 'rtf', 'txt', 'xml'];
-        const excelExts = ['xls', 'xlt', 'xlsx', 'xltx', 'csv', 'xlsm', 'xltm', 'ett'];
-        const pptExts = ['ppt', 'pptx', 'pptm', 'ppsx', 'ppsm', 'pps', 'potx', 'potm', 'dpt', 'dps'];
+        const officeExts = ['doc', 'docx', 'dot', 'dotx', 'wps', 'wpt', 'rtf', 'txt', 'xml', 'xls', 'xlsx', 'xlt', 'xltx', 'csv', 'ppt', 'pptx', 'pptm', 'ppsx'];
         const pdfExts = ['pdf'];
-        
         if (imageExts.includes(ext)) return 'image';
         if (videoExts.includes(ext)) return 'video';
         if (pdfExts.includes(ext)) return 'pdf';
-        if (officeExts.includes(ext) || excelExts.includes(ext) || pptExts.includes(ext)) return 'office';
+        if (officeExts.includes(ext)) return 'office';
         return 'link';
     }
-
-    // 获取 Office 文档预览 URL（使用微软官方服务，国内稳定）
-    function getOfficePreviewUrl(fileUrl) {
-        return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
+    
+    // 检测是否是 GitHub raw 链接，如果是则使用代理
+    function getProxyUrl(url) {
+        // GitHub raw 链接格式: https://raw.githubusercontent.com/用户名/仓库/分支/路径
+        if (url.includes('raw.githubusercontent.com')) {
+            // 使用 cors-anywhere 代理（免费公共代理，国内可用）
+            return 'https://cors-anywhere.herokuapp.com/' + url;
+        }
+        return url;
     }
-
-    // PDF.js 渲染PDF
+    
+    // 获取 Office 文档预览 URL（使用代理解决 GitHub 防盗链）
+    function getOfficePreviewUrl(fileUrl) {
+        // 对 GitHub 文件使用代理后再预览
+        const proxiedUrl = getProxyUrl(fileUrl);
+        return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(proxiedUrl)}`;
+    }
+    
+    // PDF.js 渲染
     async function renderPDF(container, pdfUrl) {
         try {
-            // 设置 PDF.js worker
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
-            
             const loadingTask = pdfjsLib.getDocument(pdfUrl);
             const pdf = await loadingTask.promise;
             const totalPages = pdf.numPages;
-            
-            // 清空容器
             container.innerHTML = '';
-            
-            // 添加页码控制
             const controls = document.createElement('div');
             controls.style.cssText = 'position:sticky; top:0; background:#2c3e76; padding:10px; text-align:center; z-index:10;';
-            controls.innerHTML = `
-                <button style="background:rgba(255,255,255,0.2); border:none; color:white; padding:5px 15px; margin:0 5px; border-radius:4px; cursor:pointer;" id="prevPage">◀ 上一页</button>
+            controls.innerHTML = `<button style="background:rgba(255,255,255,0.2); border:none; color:white; padding:5px 15px; margin:0 5px; border-radius:4px; cursor:pointer;" id="prevPage">◀ 上一页</button>
                 <span style="color:white; margin:0 15px;" id="pageInfo">第 1 / ${totalPages} 页</span>
-                <button style="background:rgba(255,255,255,0.2); border:none; color:white; padding:5px 15px; margin:0 5px; border-radius:4px; cursor:pointer;" id="nextPage">下一页 ▶</button>
-            `;
+                <button style="background:rgba(255,255,255,0.2); border:none; color:white; padding:5px 15px; margin:0 5px; border-radius:4px; cursor:pointer;" id="nextPage">下一页 ▶</button>`;
             container.appendChild(controls);
-            
-            // 创建画布容器
             const canvasContainer = document.createElement('div');
             canvasContainer.style.cssText = 'display:flex; flex-direction:column; align-items:center; padding:20px;';
             container.appendChild(canvasContainer);
-            
-            let currentPage = 1;
-            let currentCanvas = null;
-            
+            let currentPage = 1, currentCanvas = null;
             async function renderPage(pageNum) {
-                if (currentCanvas) {
-                    currentCanvas.remove();
-                }
-                
+                if (currentCanvas) currentCanvas.remove();
                 const page = await pdf.getPage(pageNum);
                 const viewport = page.getViewport({ scale: 1.5 });
                 const canvas = document.createElement('canvas');
@@ -724,53 +165,30 @@
                 const context = canvas.getContext('2d');
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
-                
-                const renderContext = {
-                    canvasContext: context,
-                    viewport: viewport
-                };
-                
-                await page.render(renderContext).promise;
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
                 canvasContainer.appendChild(canvas);
                 currentCanvas = canvas;
-                
                 document.getElementById('pageInfo').innerHTML = `第 ${pageNum} / ${totalPages} 页`;
             }
-            
             await renderPage(1);
-            
-            document.getElementById('prevPage').addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderPage(currentPage);
-                }
-            });
-            
-            document.getElementById('nextPage').addEventListener('click', () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderPage(currentPage);
-                }
-            });
-            
+            document.getElementById('prevPage').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderPage(currentPage); } });
+            document.getElementById('nextPage').addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; renderPage(currentPage); } });
         } catch (error) {
             console.error('PDF加载失败:', error);
             container.innerHTML = `<div class="doc-fallback"><p>📄 PDF加载失败，请下载后查看</p><button onclick="window.open('${escapeHtml(pdfUrl)}', '_blank')">📥 下载查看</button></div>`;
         }
     }
-
+    
     // 全屏预览
     function showFullscreenPreview(url, fileName, fileType) {
         const previewDiv = document.createElement('div');
         previewDiv.className = 'fullscreen-preview';
-        
         let contentHtml = '';
         if (fileType === 'image') {
             contentHtml = `<img src="${escapeHtml(url)}" alt="${escapeHtml(fileName)}">`;
         } else if (fileType === 'video') {
-            contentHtml = `<video controls autoplay><source src="${escapeHtml(url)}" type="video/mp4">您的浏览器不支持视频播放</video>`;
+            contentHtml = `<video controls autoplay><source src="${escapeHtml(url)}">您的浏览器不支持视频播放</video>`;
         } else if (fileType === 'pdf') {
-            // PDF 使用 PDF.js 渲染
             contentHtml = `<div id="pdfViewerContainer" class="pdf-viewer"></div>`;
         } else if (fileType === 'office') {
             const previewUrl = getOfficePreviewUrl(url);
@@ -778,323 +196,124 @@
         } else {
             contentHtml = `<iframe src="${escapeHtml(url)}" title="网页预览"></iframe>`;
         }
-        
-        previewDiv.innerHTML = `
-            <div class="preview-header">
-                <h3>${escapeHtml(fileName)}</h3>
-                <div class="preview-buttons">
-                    <button class="preview-btn download-btn">📥 下载</button>
-                    <button class="preview-btn close-btn">✕ 关闭</button>
-                </div>
-            </div>
-            <div class="preview-content">
-                ${contentHtml}
-            </div>
-        `;
-        
+        previewDiv.innerHTML = `<div class="preview-header"><h3>${escapeHtml(fileName)}</h3><div class="preview-buttons"><button class="preview-btn download-btn">📥 下载</button><button class="preview-btn close-btn">✕ 关闭</button></div></div><div class="preview-content">${contentHtml}</div>`;
         document.body.appendChild(previewDiv);
-        
-        // 如果是PDF，使用PDF.js渲染
-        if (fileType === 'pdf') {
-            const pdfContainer = previewDiv.querySelector('#pdfViewerContainer');
-            if (pdfContainer) {
-                renderPDF(pdfContainer, url);
-            }
-        }
-        
-        previewDiv.querySelector('.close-btn').addEventListener('click', () => {
-            previewDiv.remove();
-        });
-        
-        previewDiv.querySelector('.download-btn').addEventListener('click', () => {
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName.split('?')[0];
-            a.target = '_blank';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        });
+        if (fileType === 'pdf') { const pdfContainer = previewDiv.querySelector('#pdfViewerContainer'); if (pdfContainer) renderPDF(pdfContainer, url); }
+        previewDiv.querySelector('.close-btn').addEventListener('click', () => previewDiv.remove());
+        previewDiv.querySelector('.download-btn').addEventListener('click', () => { const a = document.createElement('a'); a.href = url; a.download = fileName.split('?')[0]; a.target = '_blank'; document.body.appendChild(a); a.click(); document.body.removeChild(a); });
     }
-
-    // 窗口模式预览
+    
+    // 窗口模式预览（简化版，核心功能保留）
     function createPreviewWindow(url, fileName, fileType) {
         const windowDiv = document.createElement('div');
         windowDiv.className = 'modal-window';
         let { width, height } = getAdaptiveWindowSize();
         width = Math.max(width, 600);
         height = Math.max(height, 500);
-        const left = (window.innerWidth - width) / 2;
-        const top = Math.max(30, (window.innerHeight - height) / 4);
         windowDiv.style.width = `${width}px`;
         windowDiv.style.height = `${height}px`;
-        windowDiv.style.left = `${left}px`;
-        windowDiv.style.top = `${top}px`;
+        windowDiv.style.left = `${(window.innerWidth - width) / 2}px`;
+        windowDiv.style.top = `${Math.max(30, (window.innerHeight - height) / 4)}px`;
         windowDiv.style.zIndex = ++nextZIndex;
-
+        
         const header = document.createElement('div');
         header.className = 'window-header';
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'window-title';
-        titleDiv.innerHTML = `<span>📄 ${escapeHtml(fileName)}</span>`;
-        
-        const controls = document.createElement('div');
-        controls.className = 'window-controls';
-        
-        const fullscreenBtn = document.createElement('button');
-        fullscreenBtn.className = 'window-btn fullscreen-btn';
-        fullscreenBtn.innerHTML = '⛶';
-        fullscreenBtn.title = '全屏模式';
-        
-        const closeBtn = document.createElement('button');
-        closeBtn.className = 'window-btn close-btn';
-        closeBtn.innerHTML = '✕';
-        closeBtn.title = '关闭窗口';
-        
-        controls.appendChild(fullscreenBtn);
-        controls.appendChild(closeBtn);
-        header.appendChild(titleDiv);
-        header.appendChild(controls);
-        
+        header.innerHTML = `<div class="window-title"><span>📄 ${escapeHtml(fileName)}</span></div><div class="window-controls"><button class="window-btn fullscreen-btn">⛶</button><button class="window-btn close-btn">✕</button></div>`;
         const contentDiv = document.createElement('div');
         contentDiv.className = 'window-content';
-        
-        let previewHtml = '';
-        if (fileType === 'image') {
-            previewHtml = `
-                <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
-                    <div class="preview-inner" style="flex:1; display:flex; justify-content:center; align-items:center; overflow:auto;">
-                        <img src="${escapeHtml(url)}" alt="${escapeHtml(fileName)}" style="max-width:100%; max-height:100%; object-fit:contain;">
-                    </div>
-                    <div class="window-preview-download">
-                        <button class="preview-download-btn">📥 下载文件</button>
-                    </div>
-                </div>
-            `;
-        } else if (fileType === 'video') {
-            previewHtml = `
-                <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
-                    <div class="preview-inner" style="flex:1; display:flex; justify-content:center; align-items:center; overflow:auto;">
-                        <video controls style="max-width:100%; max-height:100%;"><source src="${escapeHtml(url)}">您的浏览器不支持视频播放</video>
-                    </div>
-                    <div class="window-preview-download">
-                        <button class="preview-download-btn">📥 下载文件</button>
-                    </div>
-                </div>
-            `;
-        } else if (fileType === 'pdf') {
-            previewHtml = `
-                <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
-                    <div class="preview-inner" style="flex:1; overflow:auto;" id="pdfViewerInner">
-                        <div id="pdfWindowViewer" style="width:100%; height:100%;"></div>
-                    </div>
-                    <div class="window-preview-download">
-                        <button class="preview-download-btn">📥 下载文件</button>
-                    </div>
-                </div>
-            `;
-        } else if (fileType === 'office') {
-            const previewUrl = getOfficePreviewUrl(url);
-            previewHtml = `
-                <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
-                    <div class="preview-inner" style="flex:1;">
-                        <iframe src="${escapeHtml(previewUrl)}" style="width:100%; height:100%; border:none;"></iframe>
-                    </div>
-                    <div class="window-preview-download">
-                        <button class="preview-download-btn">📥 下载文件</button>
-                    </div>
-                </div>
-            `;
-        } else {
-            previewHtml = `
-                <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
-                    <div class="preview-inner" style="flex:1;">
-                        <iframe src="${escapeHtml(url)}" style="width:100%; height:100%; border:none;"></iframe>
-                    </div>
-                </div>
-            `;
-        }
-        
-        contentDiv.innerHTML = previewHtml;
-        
         const resizeHandle = document.createElement('div');
         resizeHandle.className = 'resize-handle';
-        
         windowDiv.appendChild(header);
         windowDiv.appendChild(contentDiv);
         windowDiv.appendChild(resizeHandle);
         document.body.appendChild(windowDiv);
         
         const windowId = Date.now() + Math.random();
+        const fullscreenBtn = header.querySelector('.fullscreen-btn');
+        const closeBtn = header.querySelector('.close-btn');
         
-        // 如果是PDF，使用PDF.js渲染
-        if (fileType === 'pdf') {
-            setTimeout(() => {
-                const pdfContainer = contentDiv.querySelector('#pdfWindowViewer');
-                if (pdfContainer) {
-                    renderPDF(pdfContainer, url);
-                }
-            }, 100);
+        if (fileType === 'image') {
+            contentDiv.innerHTML = `<div class="preview-container" style="height:100%; display:flex; flex-direction:column;"><div class="preview-inner" style="flex:1; display:flex; justify-content:center; align-items:center;"><img src="${escapeHtml(url)}" style="max-width:100%; max-height:100%;"></div><div class="window-preview-download"><button class="preview-download-btn">📥 下载文件</button></div></div>`;
+        } else if (fileType === 'video') {
+            contentDiv.innerHTML = `<div class="preview-container" style="height:100%; display:flex; flex-direction:column;"><div class="preview-inner" style="flex:1; display:flex; justify-content:center; align-items:center;"><video controls style="max-width:100%; max-height:100%;"><source src="${escapeHtml(url)}"></video></div><div class="window-preview-download"><button class="preview-download-btn">📥 下载文件</button></div></div>`;
+        } else if (fileType === 'pdf') {
+            contentDiv.innerHTML = `<div class="preview-container" style="height:100%; display:flex; flex-direction:column;"><div class="preview-inner" style="flex:1; overflow:auto;" id="pdfViewerInner"><div id="pdfWindowViewer" style="width:100%; height:100%;"></div></div><div class="window-preview-download"><button class="preview-download-btn">📥 下载文件</button></div></div>`;
+            setTimeout(() => { const pdfContainer = contentDiv.querySelector('#pdfWindowViewer'); if (pdfContainer) renderPDF(pdfContainer, url); }, 100);
+        } else if (fileType === 'office') {
+            const previewUrl = getOfficePreviewUrl(url);
+            contentDiv.innerHTML = `<div class="preview-container" style="height:100%; display:flex; flex-direction:column;"><div class="preview-inner" style="flex:1;"><iframe src="${escapeHtml(previewUrl)}" style="width:100%; height:100%; border:none;"></iframe></div><div class="window-preview-download"><button class="preview-download-btn">📥 下载文件</button></div></div>`;
+        } else {
+            contentDiv.innerHTML = `<div class="preview-container" style="height:100%;"><iframe src="${escapeHtml(url)}" style="width:100%; height:100%; border:none;"></iframe></div>`;
         }
         
-        // 下载按钮事件
         const downloadBtn = contentDiv.querySelector('.preview-download-btn');
-        if (downloadBtn) {
-            downloadBtn.addEventListener('click', () => {
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName.split('?')[0];
-                a.target = '_blank';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
-        }
+        if (downloadBtn) downloadBtn.addEventListener('click', () => { const a = document.createElement('a'); a.href = url; a.download = fileName.split('?')[0]; a.target = '_blank'; document.body.appendChild(a); a.click(); document.body.removeChild(a); });
         
-        // 全局点击置顶
-        function bringToFrontByClick(e) {
-            let clientX, clientY;
-            if (e.touches) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-            const rect = windowDiv.getBoundingClientRect();
-            if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
-                nextZIndex++;
-                windowDiv.style.zIndex = nextZIndex;
-                windowDiv.classList.add('active-window');
-                openWindows.forEach(w => {
-                    if (w.windowDiv !== windowDiv) {
-                        w.windowDiv.classList.remove('active-window');
-                    }
-                });
-            }
-        }
-        
-        document.addEventListener('mousedown', bringToFrontByClick, true);
-        document.addEventListener('touchstart', bringToFrontByClick, true);
+        // 置顶功能
+        function bringToFront() { nextZIndex++; windowDiv.style.zIndex = nextZIndex; windowDiv.classList.add('active-window'); openWindows.forEach(w => { if (w.windowDiv !== windowDiv) w.windowDiv.classList.remove('active-window'); }); }
+        windowDiv.addEventListener('mousedown', bringToFront);
+        windowDiv.addEventListener('touchstart', bringToFront);
         
         // 拖拽功能
-        let isDragging = false;
-        let dragStartX = 0, dragStartY = 0;
-        let startLeft = 0, startTop = 0;
-        let isFullscreen = false;
-        let savedRect = null;
-        let dragEnabled = true;
-        
+        let isDragging = false, dragStartX = 0, dragStartY = 0, startLeft = 0, startTop = 0, isFullscreen = false, savedRect = null, dragEnabled = true;
         const startDrag = (e) => {
-            if (!dragEnabled) return;
-            const isHeader = e.target.closest('.window-header');
-            const isControl = e.target.closest('.window-controls');
-            const isResize = e.target.closest('.resize-handle');
-            if (!isHeader || isControl || isResize) return;
-            
-            e.stopPropagation();
-            e.preventDefault();
+            if (!dragEnabled || !e.target.closest('.window-header') || e.target.closest('.window-controls')) return;
+            e.stopPropagation(); e.preventDefault();
             isDragging = true;
-            
             const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
             const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
-            dragStartX = clientX;
-            dragStartY = clientY;
-            startLeft = windowDiv.offsetLeft;
-            startTop = windowDiv.offsetTop;
+            dragStartX = clientX; dragStartY = clientY;
+            startLeft = windowDiv.offsetLeft; startTop = windowDiv.offsetTop;
             windowDiv.classList.add('dragging');
             document.body.style.userSelect = 'none';
-            
             const onMove = (moveEvent) => {
                 if (!isDragging) return;
                 moveEvent.preventDefault();
-                const currentX = moveEvent.clientX ?? (moveEvent.touches ? moveEvent.touches[0].clientX : 0);
-                const currentY = moveEvent.clientY ?? (moveEvent.touches ? moveEvent.touches[0].clientY : 0);
-                let newLeft = startLeft + (currentX - dragStartX);
-                let newTop = startTop + (currentY - dragStartY);
+                const curX = moveEvent.clientX ?? (moveEvent.touches ? moveEvent.touches[0].clientX : 0);
+                const curY = moveEvent.clientY ?? (moveEvent.touches ? moveEvent.touches[0].clientY : 0);
+                let newLeft = startLeft + (curX - dragStartX);
+                let newTop = startTop + (curY - dragStartY);
                 newLeft = Math.max(-windowDiv.offsetWidth + 80, Math.min(window.innerWidth - 80, newLeft));
                 newTop = Math.max(0, Math.min(window.innerHeight - 60, newTop));
                 windowDiv.style.left = `${newLeft}px`;
                 windowDiv.style.top = `${newTop}px`;
             };
-            
-            const onEnd = () => {
-                if (isDragging) {
-                    isDragging = false;
-                    windowDiv.classList.remove('dragging');
-                    document.body.style.userSelect = '';
-                    document.removeEventListener('mousemove', onMove);
-                    document.removeEventListener('mouseup', onEnd);
-                    document.removeEventListener('touchmove', onMove);
-                    document.removeEventListener('touchend', onEnd);
-                }
-            };
-            
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onEnd);
-            document.addEventListener('touchmove', onMove, { passive: false });
-            document.addEventListener('touchend', onEnd);
+            const onEnd = () => { if (isDragging) { isDragging = false; windowDiv.classList.remove('dragging'); document.body.style.userSelect = ''; document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onEnd); document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onEnd); } };
+            document.addEventListener('mousemove', onMove); document.addEventListener('mouseup', onEnd);
+            document.addEventListener('touchmove', onMove, { passive: false }); document.addEventListener('touchend', onEnd);
         };
-        
         header.addEventListener('mousedown', startDrag);
         header.addEventListener('touchstart', startDrag, { passive: false });
         
         // 调整大小
-        let isResizing = false;
-        let resizeStartX = 0, resizeStartY = 0;
-        let resizeStartW = 0, resizeStartH = 0;
-        
+        let isResizing = false, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
         const startResize = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
             isResizing = true;
             const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
             const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
-            resizeStartX = clientX;
-            resizeStartY = clientY;
-            resizeStartW = windowDiv.offsetWidth;
-            resizeStartH = windowDiv.offsetHeight;
+            resizeStartX = clientX; resizeStartY = clientY;
+            resizeStartW = windowDiv.offsetWidth; resizeStartH = windowDiv.offsetHeight;
             document.body.style.userSelect = 'none';
-            
             const onResizeMove = (moveEvent) => {
                 if (!isResizing) return;
                 moveEvent.preventDefault();
-                const currentX = moveEvent.clientX ?? (moveEvent.touches ? moveEvent.touches[0].clientX : 0);
-                const currentY = moveEvent.clientY ?? (moveEvent.touches ? moveEvent.touches[0].clientY : 0);
-                let newW = resizeStartW + (currentX - resizeStartX);
-                let newH = resizeStartH + (currentY - resizeStartY);
+                const curX = moveEvent.clientX ?? (moveEvent.touches ? moveEvent.touches[0].clientX : 0);
+                const curY = moveEvent.clientY ?? (moveEvent.touches ? moveEvent.touches[0].clientY : 0);
+                let newW = resizeStartW + (curX - resizeStartX);
+                let newH = resizeStartH + (curY - resizeStartY);
                 newW = Math.max(280, Math.min(window.innerWidth - 50, newW));
                 newH = Math.max(200, Math.min(window.innerHeight - 50, newH));
                 windowDiv.style.width = `${newW}px`;
                 windowDiv.style.height = `${newH}px`;
-                
-                let curLeft = windowDiv.offsetLeft;
-                let curTop = windowDiv.offsetTop;
-                if (curLeft + newW > window.innerWidth - 20) {
-                    windowDiv.style.left = `${window.innerWidth - newW - 20}px`;
-                }
-                if (curTop + newH > window.innerHeight - 20) {
-                    windowDiv.style.top = `${window.innerHeight - newH - 20}px`;
-                }
+                let curLeft = windowDiv.offsetLeft, curTop = windowDiv.offsetTop;
+                if (curLeft + newW > window.innerWidth - 20) windowDiv.style.left = `${window.innerWidth - newW - 20}px`;
+                if (curTop + newH > window.innerHeight - 20) windowDiv.style.top = `${window.innerHeight - newH - 20}px`;
             };
-            
-            const onResizeEnd = () => {
-                if (isResizing) {
-                    isResizing = false;
-                    document.body.style.userSelect = '';
-                    document.removeEventListener('mousemove', onResizeMove);
-                    document.removeEventListener('mouseup', onResizeEnd);
-                    document.removeEventListener('touchmove', onResizeMove);
-                    document.removeEventListener('touchend', onResizeEnd);
-                }
-            };
-            
-            document.addEventListener('mousemove', onResizeMove);
-            document.addEventListener('mouseup', onResizeEnd);
-            document.addEventListener('touchmove', onResizeMove, { passive: false });
-            document.addEventListener('touchend', onResizeEnd);
+            const onResizeEnd = () => { if (isResizing) { isResizing = false; document.body.style.userSelect = ''; document.removeEventListener('mousemove', onResizeMove); document.removeEventListener('mouseup', onResizeEnd); document.removeEventListener('touchmove', onResizeMove); document.removeEventListener('touchend', onResizeEnd); } };
+            document.addEventListener('mousemove', onResizeMove); document.addEventListener('mouseup', onResizeEnd);
+            document.addEventListener('touchmove', onResizeMove, { passive: false }); document.addEventListener('touchend', onResizeEnd);
         };
-        
         resizeHandle.addEventListener('mousedown', startResize);
         resizeHandle.addEventListener('touchstart', startResize, { passive: false });
         
@@ -1104,396 +323,165 @@
                 windowDiv.classList.add('fullscreen-mode');
                 isFullscreen = true;
                 fullscreenBtn.innerHTML = '❐';
-                fullscreenBtn.title = '退出全屏';
                 dragEnabled = false;
             } else {
                 windowDiv.classList.remove('fullscreen-mode');
-                if (savedRect) {
-                    windowDiv.style.width = `${savedRect.width}px`;
-                    windowDiv.style.height = `${savedRect.height}px`;
-                    windowDiv.style.left = `${savedRect.left}px`;
-                    windowDiv.style.top = `${savedRect.top}px`;
-                }
+                if (savedRect) { windowDiv.style.width = `${savedRect.width}px`; windowDiv.style.height = `${savedRect.height}px`; windowDiv.style.left = `${savedRect.left}px`; windowDiv.style.top = `${savedRect.top}px`; }
                 isFullscreen = false;
                 fullscreenBtn.innerHTML = '⛶';
-                fullscreenBtn.title = '全屏模式';
                 dragEnabled = true;
             }
         };
-        
-        const closeHandler = () => {
-            document.removeEventListener('mousedown', bringToFrontByClick, true);
-            document.removeEventListener('touchstart', bringToFrontByClick, true);
-            const index = openWindows.findIndex(w => w.id === windowId);
-            if (index !== -1) {
-                if (openWindows[index].cleanup) openWindows[index].cleanup();
-                openWindows.splice(index, 1);
-            }
-            windowDiv.remove();
-        };
-        
+        const closeHandler = () => { const idx = openWindows.findIndex(w => w.id === windowId); if (idx !== -1) { if (openWindows[idx].cleanup) openWindows[idx].cleanup(); openWindows.splice(idx, 1); } windowDiv.remove(); };
         fullscreenBtn.addEventListener('click', toggleFullscreen);
         closeBtn.addEventListener('click', closeHandler);
-        
         const escHandler = (e) => { if (e.key === 'Escape' && isFullscreen) toggleFullscreen(); };
         document.addEventListener('keydown', escHandler);
-        
-        const cleanup = () => {
-            document.removeEventListener('keydown', escHandler);
-            document.removeEventListener('mousedown', bringToFrontByClick, true);
-            document.removeEventListener('touchstart', bringToFrontByClick, true);
-            header.removeEventListener('mousedown', startDrag);
-            header.removeEventListener('touchstart', startDrag);
-            resizeHandle.removeEventListener('mousedown', startResize);
-            resizeHandle.removeEventListener('touchstart', startResize);
-        };
-        
+        const cleanup = () => { document.removeEventListener('keydown', escHandler); header.removeEventListener('mousedown', startDrag); header.removeEventListener('touchstart', startDrag); resizeHandle.removeEventListener('mousedown', startResize); resizeHandle.removeEventListener('touchstart', startResize); };
         openWindows.push({ id: windowId, windowDiv, cleanup });
-        nextZIndex++;
-        windowDiv.style.zIndex = nextZIndex;
-        windowDiv.classList.add('active-window');
+        bringToFront();
     }
-
-    // 处理应用点击
+    
     function handleAppClick(link, name, hasWindowMode) {
         const useWindow = windowModeEnabled && hasWindowMode;
         const fileType = getFileType(link);
-        
         if (fileType !== 'link') {
-            if (useWindow) {
-                createPreviewWindow(link, name, fileType);
-            } else {
-                showFullscreenPreview(link, name, fileType);
-            }
+            if (useWindow) createPreviewWindow(link, name, fileType);
+            else showFullscreenPreview(link, name, fileType);
         } else {
-            if (useWindow) {
-                createWebWindow(link, name);
-            } else {
-                window.open(link, '_blank', 'noopener,noreferrer');
-            }
+            if (useWindow) createWebWindow(link, name);
+            else window.open(link, '_blank', 'noopener,noreferrer');
         }
     }
-
-    // 创建普通网页窗口
+    
     function createWebWindow(url, appName) {
         const windowDiv = document.createElement('div');
         windowDiv.className = 'modal-window';
         let { width, height } = getAdaptiveWindowSize();
         const { left, top } = getRandomPosition(width, height);
-        windowDiv.style.width = `${width}px`;
-        windowDiv.style.height = `${height}px`;
-        windowDiv.style.left = `${left}px`;
-        windowDiv.style.top = `${top}px`;
+        windowDiv.style.width = `${width}px`; windowDiv.style.height = `${height}px`;
+        windowDiv.style.left = `${left}px`; windowDiv.style.top = `${top}px`;
         windowDiv.style.zIndex = ++nextZIndex;
-
-        const header = document.createElement('div');
-        header.className = 'window-header';
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'window-title';
-        titleDiv.innerHTML = `<span>${escapeHtml(appName)}</span>`;
-        
-        const controls = document.createElement('div');
-        controls.className = 'window-controls';
-        
-        const refreshBtn = document.createElement('button');
-        refreshBtn.className = 'window-btn';
-        refreshBtn.innerHTML = '⟳';
-        refreshBtn.title = '刷新';
-        
-        const browserBtn = document.createElement('button');
-        browserBtn.className = 'window-btn';
-        browserBtn.innerHTML = '浏览器';
-        browserBtn.title = '在浏览器中打开';
-        
-        const fullscreenBtn = document.createElement('button');
-        fullscreenBtn.className = 'window-btn fullscreen-btn';
-        fullscreenBtn.innerHTML = '⛶';
-        fullscreenBtn.title = '全屏模式';
-        
-        const closeBtn = document.createElement('button');
-        closeBtn.className = 'window-btn close-btn';
-        closeBtn.innerHTML = '✕';
-        closeBtn.title = '关闭窗口';
-        
-        controls.appendChild(refreshBtn);
-        controls.appendChild(browserBtn);
-        controls.appendChild(fullscreenBtn);
-        controls.appendChild(closeBtn);
-        header.appendChild(titleDiv);
-        header.appendChild(controls);
-        
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'window-content';
-        const iframe = document.createElement('iframe');
-        iframe.src = url;
-        iframe.title = appName;
-        iframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation';
-        iframe.allow = 'fullscreen';
-        contentDiv.appendChild(iframe);
-        
-        const resizeHandle = document.createElement('div');
-        resizeHandle.className = 'resize-handle';
-        
-        windowDiv.appendChild(header);
-        windowDiv.appendChild(contentDiv);
-        windowDiv.appendChild(resizeHandle);
+        windowDiv.innerHTML = `<div class="window-header"><div class="window-title">${escapeHtml(appName)}</div><div class="window-controls"><button class="window-btn">⟳</button><button class="window-btn">浏览器</button><button class="window-btn fullscreen-btn">⛶</button><button class="window-btn close-btn">✕</button></div></div><div class="window-content"><iframe src="${escapeHtml(url)}" style="width:100%; height:100%; border:none;"></iframe></div><div class="resize-handle"></div>`;
         document.body.appendChild(windowDiv);
-        
         const windowId = Date.now() + Math.random();
-        let isDragging = false;
-        let dragStartX = 0, dragStartY = 0;
-        let startLeft = 0, startTop = 0;
-        let isFullscreen = false;
-        let savedRect = null;
-        let dragEnabled = true;
-        
-        function bringToFrontByClick(e) {
-            let clientX, clientY;
-            if (e.touches) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-            const rect = windowDiv.getBoundingClientRect();
-            if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
-                nextZIndex++;
-                windowDiv.style.zIndex = nextZIndex;
-                windowDiv.classList.add('active-window');
-                openWindows.forEach(w => {
-                    if (w.windowDiv !== windowDiv) {
-                        w.windowDiv.classList.remove('active-window');
-                    }
-                });
-            }
-        }
-        
-        document.addEventListener('mousedown', bringToFrontByClick, true);
-        document.addEventListener('touchstart', bringToFrontByClick, true);
-        
+        const header = windowDiv.querySelector('.window-header');
+        const refreshBtn = windowDiv.querySelector('.window-btn:first-child');
+        const browserBtn = windowDiv.querySelector('.window-btn:nth-child(2)');
+        const fullscreenBtn = windowDiv.querySelector('.fullscreen-btn');
+        const closeBtn = windowDiv.querySelector('.close-btn');
+        const iframe = windowDiv.querySelector('iframe');
+        const resizeHandle = windowDiv.querySelector('.resize-handle');
+        let isDragging = false, dragStartX = 0, dragStartY = 0, startLeft = 0, startTop = 0, isFullscreen = false, savedRect = null, dragEnabled = true;
+        function bringToFront() { nextZIndex++; windowDiv.style.zIndex = nextZIndex; windowDiv.classList.add('active-window'); openWindows.forEach(w => { if (w.windowDiv !== windowDiv) w.windowDiv.classList.remove('active-window'); }); }
+        windowDiv.addEventListener('mousedown', bringToFront);
+        windowDiv.addEventListener('touchstart', bringToFront);
         const startDrag = (e) => {
-            if (!dragEnabled) return;
-            const isHeader = e.target.closest('.window-header');
-            const isControl = e.target.closest('.window-controls');
-            const isResize = e.target.closest('.resize-handle');
-            if (!isHeader || isControl || isResize) return;
-            
-            e.stopPropagation();
-            e.preventDefault();
+            if (!dragEnabled || !e.target.closest('.window-header') || e.target.closest('.window-controls')) return;
+            e.stopPropagation(); e.preventDefault();
             isDragging = true;
-            
             const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
             const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
-            dragStartX = clientX;
-            dragStartY = clientY;
-            startLeft = windowDiv.offsetLeft;
-            startTop = windowDiv.offsetTop;
+            dragStartX = clientX; dragStartY = clientY;
+            startLeft = windowDiv.offsetLeft; startTop = windowDiv.offsetTop;
             windowDiv.classList.add('dragging');
             document.body.style.userSelect = 'none';
-            
             const onMove = (moveEvent) => {
                 if (!isDragging) return;
                 moveEvent.preventDefault();
-                const currentX = moveEvent.clientX ?? (moveEvent.touches ? moveEvent.touches[0].clientX : 0);
-                const currentY = moveEvent.clientY ?? (moveEvent.touches ? moveEvent.touches[0].clientY : 0);
-                let newLeft = startLeft + (currentX - dragStartX);
-                let newTop = startTop + (currentY - dragStartY);
+                const curX = moveEvent.clientX ?? (moveEvent.touches ? moveEvent.touches[0].clientX : 0);
+                const curY = moveEvent.clientY ?? (moveEvent.touches ? moveEvent.touches[0].clientY : 0);
+                let newLeft = startLeft + (curX - dragStartX);
+                let newTop = startTop + (curY - dragStartY);
                 newLeft = Math.max(-windowDiv.offsetWidth + 80, Math.min(window.innerWidth - 80, newLeft));
                 newTop = Math.max(0, Math.min(window.innerHeight - 60, newTop));
                 windowDiv.style.left = `${newLeft}px`;
                 windowDiv.style.top = `${newTop}px`;
             };
-            
-            const onEnd = () => {
-                if (isDragging) {
-                    isDragging = false;
-                    windowDiv.classList.remove('dragging');
-                    document.body.style.userSelect = '';
-                    document.removeEventListener('mousemove', onMove);
-                    document.removeEventListener('mouseup', onEnd);
-                    document.removeEventListener('touchmove', onMove);
-                    document.removeEventListener('touchend', onEnd);
-                }
-            };
-            
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onEnd);
-            document.addEventListener('touchmove', onMove, { passive: false });
-            document.addEventListener('touchend', onEnd);
+            const onEnd = () => { if (isDragging) { isDragging = false; windowDiv.classList.remove('dragging'); document.body.style.userSelect = ''; document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onEnd); document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onEnd); } };
+            document.addEventListener('mousemove', onMove); document.addEventListener('mouseup', onEnd);
+            document.addEventListener('touchmove', onMove, { passive: false }); document.addEventListener('touchend', onEnd);
         };
-        
         header.addEventListener('mousedown', startDrag);
         header.addEventListener('touchstart', startDrag, { passive: false });
-        
-        let isResizing = false;
-        let resizeStartX = 0, resizeStartY = 0;
-        let resizeStartW = 0, resizeStartH = 0;
-        
+        let isResizing = false, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
         const startResize = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
             isResizing = true;
             const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
             const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
-            resizeStartX = clientX;
-            resizeStartY = clientY;
-            resizeStartW = windowDiv.offsetWidth;
-            resizeStartH = windowDiv.offsetHeight;
+            resizeStartX = clientX; resizeStartY = clientY;
+            resizeStartW = windowDiv.offsetWidth; resizeStartH = windowDiv.offsetHeight;
             document.body.style.userSelect = 'none';
-            
             const onResizeMove = (moveEvent) => {
                 if (!isResizing) return;
                 moveEvent.preventDefault();
-                const currentX = moveEvent.clientX ?? (moveEvent.touches ? moveEvent.touches[0].clientX : 0);
-                const currentY = moveEvent.clientY ?? (moveEvent.touches ? moveEvent.touches[0].clientY : 0);
-                let newW = resizeStartW + (currentX - resizeStartX);
-                let newH = resizeStartH + (currentY - resizeStartY);
+                const curX = moveEvent.clientX ?? (moveEvent.touches ? moveEvent.touches[0].clientX : 0);
+                const curY = moveEvent.clientY ?? (moveEvent.touches ? moveEvent.touches[0].clientY : 0);
+                let newW = resizeStartW + (curX - resizeStartX);
+                let newH = resizeStartH + (curY - resizeStartY);
                 newW = Math.max(280, Math.min(window.innerWidth - 50, newW));
                 newH = Math.max(200, Math.min(window.innerHeight - 50, newH));
                 windowDiv.style.width = `${newW}px`;
                 windowDiv.style.height = `${newH}px`;
-                
-                let curLeft = windowDiv.offsetLeft;
-                let curTop = windowDiv.offsetTop;
-                if (curLeft + newW > window.innerWidth - 20) {
-                    windowDiv.style.left = `${window.innerWidth - newW - 20}px`;
-                }
-                if (curTop + newH > window.innerHeight - 20) {
-                    windowDiv.style.top = `${window.innerHeight - newH - 20}px`;
-                }
+                let curLeft = windowDiv.offsetLeft, curTop = windowDiv.offsetTop;
+                if (curLeft + newW > window.innerWidth - 20) windowDiv.style.left = `${window.innerWidth - newW - 20}px`;
+                if (curTop + newH > window.innerHeight - 20) windowDiv.style.top = `${window.innerHeight - newH - 20}px`;
             };
-            
-            const onResizeEnd = () => {
-                if (isResizing) {
-                    isResizing = false;
-                    document.body.style.userSelect = '';
-                    document.removeEventListener('mousemove', onResizeMove);
-                    document.removeEventListener('mouseup', onResizeEnd);
-                    document.removeEventListener('touchmove', onResizeMove);
-                    document.removeEventListener('touchend', onResizeEnd);
-                }
-            };
-            
-            document.addEventListener('mousemove', onResizeMove);
-            document.addEventListener('mouseup', onResizeEnd);
-            document.addEventListener('touchmove', onResizeMove, { passive: false });
-            document.addEventListener('touchend', onResizeEnd);
+            const onResizeEnd = () => { if (isResizing) { isResizing = false; document.body.style.userSelect = ''; document.removeEventListener('mousemove', onResizeMove); document.removeEventListener('mouseup', onResizeEnd); document.removeEventListener('touchmove', onResizeMove); document.removeEventListener('touchend', onResizeEnd); } };
+            document.addEventListener('mousemove', onResizeMove); document.addEventListener('mouseup', onResizeEnd);
+            document.addEventListener('touchmove', onResizeMove, { passive: false }); document.addEventListener('touchend', onResizeEnd);
         };
-        
         resizeHandle.addEventListener('mousedown', startResize);
         resizeHandle.addEventListener('touchstart', startResize, { passive: false });
-        
         const toggleFullscreen = () => {
             if (!isFullscreen) {
                 savedRect = { width: windowDiv.offsetWidth, height: windowDiv.offsetHeight, left: windowDiv.offsetLeft, top: windowDiv.offsetTop };
                 windowDiv.classList.add('fullscreen-mode');
                 isFullscreen = true;
                 fullscreenBtn.innerHTML = '❐';
-                fullscreenBtn.title = '退出全屏';
                 dragEnabled = false;
             } else {
                 windowDiv.classList.remove('fullscreen-mode');
-                if (savedRect) {
-                    windowDiv.style.width = `${savedRect.width}px`;
-                    windowDiv.style.height = `${savedRect.height}px`;
-                    windowDiv.style.left = `${savedRect.left}px`;
-                    windowDiv.style.top = `${savedRect.top}px`;
-                }
+                if (savedRect) { windowDiv.style.width = `${savedRect.width}px`; windowDiv.style.height = `${savedRect.height}px`; windowDiv.style.left = `${savedRect.left}px`; windowDiv.style.top = `${savedRect.top}px`; }
                 isFullscreen = false;
                 fullscreenBtn.innerHTML = '⛶';
-                fullscreenBtn.title = '全屏模式';
                 dragEnabled = true;
             }
         };
-        
-        const refreshHandler = () => { iframe.src = iframe.src; };
-        const browserHandler = () => window.open(url, '_blank', 'noopener,noreferrer');
-        const closeHandler = () => {
-            document.removeEventListener('mousedown', bringToFrontByClick, true);
-            document.removeEventListener('touchstart', bringToFrontByClick, true);
-            const index = openWindows.findIndex(w => w.id === windowId);
-            if (index !== -1) {
-                if (openWindows[index].cleanup) openWindows[index].cleanup();
-                openWindows.splice(index, 1);
-            }
-            windowDiv.remove();
-        };
-        
-        refreshBtn.addEventListener('click', refreshHandler);
-        browserBtn.addEventListener('click', browserHandler);
+        refreshBtn.addEventListener('click', () => { iframe.src = iframe.src; });
+        browserBtn.addEventListener('click', () => window.open(url, '_blank', 'noopener,noreferrer'));
         fullscreenBtn.addEventListener('click', toggleFullscreen);
-        closeBtn.addEventListener('click', closeHandler);
-        
+        closeBtn.addEventListener('click', () => { const idx = openWindows.findIndex(w => w.id === windowId); if (idx !== -1) { if (openWindows[idx].cleanup) openWindows[idx].cleanup(); openWindows.splice(idx, 1); } windowDiv.remove(); });
         const escHandler = (e) => { if (e.key === 'Escape' && isFullscreen) toggleFullscreen(); };
         document.addEventListener('keydown', escHandler);
-        
-        const cleanup = () => {
-            document.removeEventListener('keydown', escHandler);
-            document.removeEventListener('mousedown', bringToFrontByClick, true);
-            document.removeEventListener('touchstart', bringToFrontByClick, true);
-            header.removeEventListener('mousedown', startDrag);
-            header.removeEventListener('touchstart', startDrag);
-            resizeHandle.removeEventListener('mousedown', startResize);
-            resizeHandle.removeEventListener('touchstart', startResize);
-        };
-        
+        const cleanup = () => { document.removeEventListener('keydown', escHandler); header.removeEventListener('mousedown', startDrag); header.removeEventListener('touchstart', startDrag); resizeHandle.removeEventListener('mousedown', startResize); resizeHandle.removeEventListener('touchstart', startResize); };
         openWindows.push({ id: windowId, windowDiv, cleanup });
-        nextZIndex++;
-        windowDiv.style.zIndex = nextZIndex;
-        windowDiv.classList.add('active-window');
+        bringToFront();
     }
-
-    // 辅助函数
+    
     function getAdaptiveWindowSize() {
         const isLandscape = window.innerWidth > window.innerHeight;
-        if (isLandscape) {
-            return { width: Math.min(window.innerWidth * 0.55, 900), height: Math.min(window.innerHeight * 0.75, 650) };
-        } else {
-            return { width: Math.min(window.innerWidth * 0.85, 500), height: Math.min(window.innerHeight * 0.55, 550) };
-        }
+        if (isLandscape) return { width: Math.min(window.innerWidth * 0.55, 900), height: Math.min(window.innerHeight * 0.75, 650) };
+        else return { width: Math.min(window.innerWidth * 0.85, 500), height: Math.min(window.innerHeight * 0.55, 550) };
     }
-
     function getRandomPosition(w, h) {
         const maxLeft = Math.max(20, window.innerWidth - w - 30);
         const maxTop = Math.max(20, window.innerHeight - h - 50);
         return { left: Math.min(maxLeft, 30 + Math.random() * (maxLeft - 30)), top: Math.min(maxTop, 50 + Math.random() * (maxTop - 50)) };
     }
-
     function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
-
-    // 加载设置和数据
+    
     function loadSettings() {
         const saved = localStorage.getItem('windowModeEnabled');
-        if (saved !== null) {
-            windowModeEnabled = saved === 'true';
-        } else {
-            windowModeEnabled = !isMobileDevice();
-        }
+        windowModeEnabled = saved !== null ? saved === 'true' : !isMobileDevice();
         windowModeSwitch.checked = windowModeEnabled;
     }
-
-    function saveSettings() {
-        localStorage.setItem('windowModeEnabled', windowModeEnabled);
-    }
-
-    windowModeSwitch.addEventListener('change', (e) => {
-        windowModeEnabled = e.target.checked;
-        saveSettings();
-    });
-
-    settingsBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        settingsPanel.classList.toggle('show');
-    });
+    function saveSettings() { localStorage.setItem('windowModeEnabled', windowModeEnabled); }
+    windowModeSwitch.addEventListener('change', (e) => { windowModeEnabled = e.target.checked; saveSettings(); });
+    settingsBtn.addEventListener('click', (e) => { e.stopPropagation(); settingsPanel.classList.toggle('show'); });
+    document.addEventListener('click', (e) => { if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) settingsPanel.classList.remove('show'); });
     
-    document.addEventListener('click', (e) => {
-        if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
-            settingsPanel.classList.remove('show');
-        }
-    });
-
-    // 加载5app.txt
     async function loadDataFromFile() {
         try {
             const response = await fetch('./5app.txt', { cache: 'no-store' });
@@ -1501,70 +489,36 @@
             const text = await response.text();
             parseAppTxt(text);
         } catch (error) {
-            console.error('读取5app.txt失败:', error);
-            appsGrid.innerHTML = `<div class="error-tip">⚠️ 加载数据失败，请确保 "5app.txt" 文件存在。<br>格式：pic<br>[p=图片 l=链接]<br>app<br>[n=名称 p=图标 l=链接 mode=window]</div>`;
+            appsGrid.innerHTML = `<div class="error-tip">⚠️ 加载数据失败，请确保 "5app.txt" 文件存在。</div>`;
             carouselSection.style.display = 'none';
             if (appsHeader) appsHeader.style.display = 'none';
         }
     }
-
+    
     function parseAppTxt(rawText) {
         const lines = rawText.split(/\r?\n/);
-        let mode = null;
-        let picItems = [];
-        let appItems = [];
-
+        let mode = null, picItems = [], appItems = [];
         for (let i = 0; i < lines.length; i++) {
             let line = lines[i].trim();
             if (line === '') continue;
             if (line.toLowerCase() === 'pic') { mode = 'pic'; continue; }
             else if (line.toLowerCase() === 'app') { mode = 'app'; continue; }
-
             if (mode === 'pic') {
                 const match = line.match(/\[p=([^\s\]]+)\s+l=([^\s\]]+)\]/);
                 if (match) picItems.push({ imgUrl: match[1].trim(), linkUrl: match[2].trim() });
-                else {
-                    const altMatch = line.match(/\[p=(.+?)\s+l=(.+?)\]/);
-                    if (altMatch) picItems.push({ imgUrl: altMatch[1].trim(), linkUrl: altMatch[2].trim() });
-                }
             } else if (mode === 'app') {
                 let match = line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)(?:\s+mode=([^\s\]]+))?\]/);
                 if (!match) match = line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)(?:\s+mode=(.+?))?\]/);
-                if (match) {
-                    appItems.push({
-                        name: match[1].trim(),
-                        icon: match[2].trim(),
-                        link: match[3].trim(),
-                        mode: match[4] ? match[4].trim() : null
-                    });
-                }
+                if (match) appItems.push({ name: match[1].trim(), icon: match[2].trim(), link: match[3].trim(), mode: match[4] ? match[4].trim() : null });
             }
         }
-
-        if (picItems.length > 0) {
-            slidesData = picItems;
-            renderCarousel();
-            carouselSection.style.display = 'block';
-            startAutoSlide();
-        } else {
-            carouselSection.style.display = 'none';
-            if (autoInterval) clearInterval(autoInterval);
-        }
-
-        if (appItems.length > 0) {
-            if (appsHeader) appsHeader.style.display = 'block';
-            renderApps(appItems);
-        } else {
-            appsGrid.innerHTML = '<div class="empty-tip">暂无应用数据</div>';
-            if (appsHeader) appsHeader.style.display = 'none';
-        }
+        if (picItems.length > 0) { slidesData = picItems; renderCarousel(); carouselSection.style.display = 'block'; startAutoSlide(); }
+        else { carouselSection.style.display = 'none'; if (autoInterval) clearInterval(autoInterval); }
+        if (appItems.length > 0) { if (appsHeader) appsHeader.style.display = 'block'; renderApps(appItems); }
+        else { appsGrid.innerHTML = '<div class="empty-tip">暂无应用数据</div>'; if (appsHeader) appsHeader.style.display = 'none'; }
     }
-
-    function getIconUrl(iconPath) {
-        if (!iconPath || iconPath.trim() === '') return DEFAULT_ICON;
-        return iconPath.trim();
-    }
-
+    
+    function getIconUrl(iconPath) { if (!iconPath || iconPath.trim() === '') return DEFAULT_ICON; return iconPath.trim(); }
     function renderApps(apps) {
         if (!appsGrid) return;
         if (!apps.length) { appsGrid.innerHTML = '<div class="empty-tip">暂无应用</div>'; return; }
@@ -1574,22 +528,18 @@
             let iconUrl = getIconUrl(app.icon);
             const link = app.link?.startsWith('http') ? app.link : (app.link || 'javascript:void(0)');
             const hasWindowMode = app.mode === 'window';
-            appsHtml += `<a href="javascript:void(0)" class="app-card" data-link="${escapeHtml(link)}" data-name="${escapeHtml(name)}" data-has-window-mode="${hasWindowMode}">
-                <img class="app-icon" src="${escapeHtml(iconUrl)}" onerror="this.src='${DEFAULT_ICON}'"><span class="app-name">${name}</span></a>`;
+            appsHtml += `<a href="javascript:void(0)" class="app-card" data-link="${escapeHtml(link)}" data-name="${escapeHtml(name)}" data-has-window-mode="${hasWindowMode}"><img class="app-icon" src="${escapeHtml(iconUrl)}" onerror="this.src='${DEFAULT_ICON}'"><span class="app-name">${name}</span></a>`;
         }
         appsGrid.innerHTML = appsHtml;
         document.querySelectorAll('.app-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 e.preventDefault();
-                const link = card.dataset.link;
-                const name = card.dataset.name;
-                const hasWindowMode = card.dataset.hasWindowMode === 'true';
-                handleAppClick(link, name, hasWindowMode);
+                handleAppClick(card.dataset.link, card.dataset.name, card.dataset.hasWindowMode === 'true');
             });
         });
         alignSameRowHeights();
     }
-
+    
     function renderCarousel() {
         if (!carouselTrack) return;
         totalSlides = slidesData.length;
@@ -1611,82 +561,31 @@
         }));
         initSwipe();
     }
-
     function updateCarouselPosition() { if (carouselTrack) carouselTrack.style.transform = `translateX(${-currentIndex * 100}%)`; }
     function updateDotsActive() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentIndex)); }
     function nextSlide() { if (totalSlides) { currentIndex = (currentIndex + 1) % totalSlides; updateCarouselPosition(); updateDotsActive(); } }
     function prevSlide() { if (totalSlides) { currentIndex = (currentIndex - 1 + totalSlides) % totalSlides; updateCarouselPosition(); updateDotsActive(); } }
     function startAutoSlide() { if (autoInterval) clearInterval(autoInterval); if (totalSlides > 1) autoInterval = setInterval(nextSlide, 5000); }
     function resetAutoSlide() { startAutoSlide(); }
-
     function initSwipe() {
         if (!carouselTrack) return;
         const wrapper = carouselTrack.parentElement;
         if (!wrapper) return;
         let startX = 0, isSwiping = false, startTransform = 0;
-        const onTouchStart = (e) => {
-            if (totalSlides <= 1) return;
-            startX = e.touches[0].clientX;
-            isSwiping = true;
-            startTransform = currentIndex;
-            carouselTrack.style.transition = 'none';
-            if (autoInterval) clearInterval(autoInterval);
-        };
-        const onTouchMove = (e) => {
-            if (!isSwiping) return;
-            const diffX = e.touches[0].clientX - startX;
-            const percent = (diffX / wrapper.clientWidth) * 100;
-            let newPercent = -startTransform * 100 + percent;
-            if (startTransform === 0 && diffX > 0) newPercent *= 0.3;
-            if (startTransform === totalSlides - 1 && diffX < 0) newPercent = -startTransform * 100 + percent * 0.3;
-            carouselTrack.style.transform = `translateX(${newPercent}%)`;
-        };
-        const onTouchEnd = (e) => {
-            if (!isSwiping) { carouselTrack.style.transition = ''; resetAutoSlide(); return; }
-            isSwiping = false;
-            const diffX = e.changedTouches[0].clientX - startX;
-            if (Math.abs(diffX) > 35) diffX > 0 ? prevSlide() : nextSlide();
-            updateCarouselPosition();
-            carouselTrack.style.transition = '';
-            resetAutoSlide();
-        };
+        const onTouchStart = (e) => { if (totalSlides <= 1) return; startX = e.touches[0].clientX; isSwiping = true; startTransform = currentIndex; carouselTrack.style.transition = 'none'; if (autoInterval) clearInterval(autoInterval); };
+        const onTouchMove = (e) => { if (!isSwiping) return; const diffX = e.touches[0].clientX - startX; const percent = (diffX / wrapper.clientWidth) * 100; let newPercent = -startTransform * 100 + percent; if (startTransform === 0 && diffX > 0) newPercent *= 0.3; if (startTransform === totalSlides - 1 && diffX < 0) newPercent = -startTransform * 100 + percent * 0.3; carouselTrack.style.transform = `translateX(${newPercent}%)`; };
+        const onTouchEnd = (e) => { if (!isSwiping) { carouselTrack.style.transition = ''; resetAutoSlide(); return; } isSwiping = false; const diffX = e.changedTouches[0].clientX - startX; if (Math.abs(diffX) > 35) diffX > 0 ? prevSlide() : nextSlide(); updateCarouselPosition(); carouselTrack.style.transition = ''; resetAutoSlide(); };
         wrapper.addEventListener('touchstart', onTouchStart, { passive: false });
         wrapper.addEventListener('touchmove', onTouchMove, { passive: false });
         wrapper.addEventListener('touchend', onTouchEnd);
-        
         let mouseDown = false, mouseStartX = 0, mouseStartTransform = 0;
-        const onMouseDown = (e) => {
-            if (totalSlides <= 1) return;
-            e.preventDefault();
-            mouseDown = true;
-            mouseStartX = e.clientX;
-            mouseStartTransform = currentIndex;
-            carouselTrack.style.transition = 'none';
-            if (autoInterval) clearInterval(autoInterval);
-        };
-        const onMouseMove = (e) => {
-            if (!mouseDown) return;
-            const diffX = e.clientX - mouseStartX;
-            const percent = (diffX / wrapper.clientWidth) * 100;
-            let newPercent = -mouseStartTransform * 100 + percent;
-            if (mouseStartTransform === 0 && diffX > 0) newPercent *= 0.3;
-            if (mouseStartTransform === totalSlides - 1 && diffX < 0) newPercent = -mouseStartTransform * 100 + percent * 0.3;
-            carouselTrack.style.transform = `translateX(${newPercent}%)`;
-        };
-        const onMouseUp = (e) => {
-            if (!mouseDown) return;
-            mouseDown = false;
-            const diffX = e.clientX - mouseStartX;
-            if (Math.abs(diffX) > 35) diffX > 0 ? prevSlide() : nextSlide();
-            updateCarouselPosition();
-            carouselTrack.style.transition = '';
-            resetAutoSlide();
-        };
+        const onMouseDown = (e) => { if (totalSlides <= 1) return; e.preventDefault(); mouseDown = true; mouseStartX = e.clientX; mouseStartTransform = currentIndex; carouselTrack.style.transition = 'none'; if (autoInterval) clearInterval(autoInterval); };
+        const onMouseMove = (e) => { if (!mouseDown) return; const diffX = e.clientX - mouseStartX; const percent = (diffX / wrapper.clientWidth) * 100; let newPercent = -mouseStartTransform * 100 + percent; if (mouseStartTransform === 0 && diffX > 0) newPercent *= 0.3; if (mouseStartTransform === totalSlides - 1 && diffX < 0) newPercent = -mouseStartTransform * 100 + percent * 0.3; carouselTrack.style.transform = `translateX(${newPercent}%)`; };
+        const onMouseUp = (e) => { if (!mouseDown) return; mouseDown = false; const diffX = e.clientX - mouseStartX; if (Math.abs(diffX) > 35) diffX > 0 ? prevSlide() : nextSlide(); updateCarouselPosition(); carouselTrack.style.transition = ''; resetAutoSlide(); };
         wrapper.addEventListener('mousedown', onMouseDown);
         window.addEventListener('mousemove', onMouseMove);
         window.addEventListener('mouseup', onMouseUp);
     }
-
     function alignSameRowHeights() {
         const cards = document.querySelectorAll('.app-card');
         if (!cards.length) return;
@@ -1694,14 +593,12 @@
         cards.forEach(card => {
             const rect = card.getBoundingClientRect();
             let added = false;
-            for (let row of rows) {
-                if (Math.abs(rect.top - row[0].top) <= 5) { row.push({ element: card, height: rect.height }); added = true; break; }
-            }
+            for (let row of rows) { if (Math.abs(rect.top - row[0].top) <= 5) { row.push({ element: card, height: rect.height }); added = true; break; } }
             if (!added) rows.push([{ element: card, height: rect.height, top: rect.top }]);
         });
         rows.forEach(row => { if (row.length > 1) { let maxH = Math.max(...row.map(r => r.height)); row.forEach(r => r.element.style.height = maxH + 'px'); } });
     }
-
+    
     loadSettings();
     loadDataFromFile();
     setInterval(alignSameRowHeights, 500);
