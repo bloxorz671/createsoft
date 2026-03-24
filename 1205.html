@@ -366,10 +366,29 @@
             height: 85vh;
             border: none;
         }
-        .doc-preview {
+        .pdf-preview {
             width: 100%;
             height: 85vh;
+            border: none;
+        }
+        .doc-fallback {
+            text-align: center;
+            padding: 40px;
             background: white;
+            border-radius: 12px;
+        }
+        .doc-fallback p {
+            margin-bottom: 20px;
+            color: #666;
+        }
+        .doc-fallback button {
+            background: #2b4c8a;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
         }
 
         /* 窗口模式下的预览窗口样式 */
@@ -630,20 +649,44 @@
 
     // 判断文件类型
     function getFileType(url) {
-        const ext = url.split('.').pop().toLowerCase();
+        const urlWithoutParams = url.split('?')[0];
+        const ext = urlWithoutParams.split('.').pop().toLowerCase();
         const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico'];
         const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'flv'];
-        const docExts = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'];
+        const officeExts = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'];
+        const pdfExts = ['pdf'];
         
         if (imageExts.includes(ext)) return 'image';
         if (videoExts.includes(ext)) return 'video';
-        if (docExts.includes(ext)) return 'document';
+        if (pdfExts.includes(ext)) return 'pdf';
+        if (officeExts.includes(ext)) return 'office';
         return 'link';
     }
 
-    // 获取文档预览URL（使用Google Docs Viewer）
-    function getDocPreviewUrl(fileUrl) {
-        return `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+    // 获取文档预览URL（使用多种方案）
+    function getDocPreviewUrl(fileUrl, fileType) {
+        const encodedUrl = encodeURIComponent(fileUrl);
+        
+        if (fileType === 'pdf') {
+            // PDF 使用浏览器原生支持或 PDF.js
+            return fileUrl;
+        } else if (fileType === 'office') {
+            // 使用 Microsoft Office Online 预览服务（更稳定）
+            return `https://view.officeapps.live.com/op/embed.aspx?src=${encodedUrl}`;
+        }
+        return fileUrl;
+    }
+
+    // 显示文档预览备用方案（当在线预览失败时）
+    function showFallbackPreview(fileName, fileUrl, downloadUrl) {
+        return `
+            <div class="doc-fallback">
+                <p>📄 无法在线预览此文档</p>
+                <p style="font-size:0.85rem; margin:10px 0;">${escapeHtml(fileName)}</p>
+                <button onclick="window.open('${escapeHtml(downloadUrl)}', '_blank')">📥 下载查看</button>
+                <button onclick="this.closest('.fullscreen-preview, .modal-window')?.remove()" style="margin-left:10px; background:#6c757d;">✕ 关闭</button>
+            </div>
+        `;
     }
 
     // 全屏预览
@@ -656,9 +699,16 @@
             contentHtml = `<img src="${escapeHtml(url)}" alt="${escapeHtml(fileName)}">`;
         } else if (fileType === 'video') {
             contentHtml = `<video controls autoplay><source src="${escapeHtml(url)}" type="video/mp4">您的浏览器不支持视频播放</video>`;
-        } else if (fileType === 'document') {
-            const docUrl = getDocPreviewUrl(url);
-            contentHtml = `<iframe src="${escapeHtml(docUrl)}" title="文档预览"></iframe>`;
+        } else if (fileType === 'pdf') {
+            contentHtml = `<iframe class="pdf-preview" src="${escapeHtml(url)}" title="PDF预览"></iframe>`;
+        } else if (fileType === 'office') {
+            const previewUrl = getDocPreviewUrl(url, fileType);
+            contentHtml = `
+                <iframe src="${escapeHtml(previewUrl)}" title="文档预览" style="width:100%; height:85vh; border:none;"></iframe>
+                <div style="position:absolute; bottom:20px; right:20px; background:rgba(0,0,0,0.7); color:white; padding:5px 10px; border-radius:5px; font-size:12px;">
+                    ⚡ 由 Microsoft Office 提供预览支持
+                </div>
+            `;
         } else {
             contentHtml = `<iframe src="${escapeHtml(url)}" title="网页预览"></iframe>`;
         }
@@ -677,6 +727,27 @@
         `;
         
         document.body.appendChild(previewDiv);
+        
+        // 为 office 文档添加 fallback 检测
+        if (fileType === 'office') {
+            const iframe = previewDiv.querySelector('iframe');
+            if (iframe) {
+                setTimeout(() => {
+                    try {
+                        // 检测 iframe 是否加载失败（通过检查内容）
+                        if (iframe.contentDocument && iframe.contentDocument.body && 
+                            iframe.contentDocument.body.innerText.includes('无法') || 
+                            iframe.contentDocument.body.innerText.includes('error')) {
+                            const fallbackHtml = showFallbackPreview(fileName, url, url);
+                            const contentDiv = previewDiv.querySelector('.preview-content');
+                            contentDiv.innerHTML = fallbackHtml;
+                        }
+                    } catch(e) {
+                        // 跨域无法检测，保持原样
+                    }
+                }, 3000);
+            }
+        }
         
         previewDiv.querySelector('.close-btn').addEventListener('click', () => {
             previewDiv.remove();
@@ -758,12 +829,23 @@
                     </div>
                 </div>
             `;
-        } else if (fileType === 'document') {
-            const docUrl = getDocPreviewUrl(url);
+        } else if (fileType === 'pdf') {
             previewHtml = `
                 <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
                     <div class="preview-inner" style="flex:1;">
-                        <iframe src="${escapeHtml(docUrl)}" style="width:100%; height:100%; border:none;"></iframe>
+                        <iframe src="${escapeHtml(url)}" style="width:100%; height:100%; border:none;"></iframe>
+                    </div>
+                    <div class="window-preview-download">
+                        <button class="preview-download-btn">📥 下载文件</button>
+                    </div>
+                </div>
+            `;
+        } else if (fileType === 'office') {
+            const previewUrl = getDocPreviewUrl(url, fileType);
+            previewHtml = `
+                <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
+                    <div class="preview-inner" style="flex:1;">
+                        <iframe id="officePreviewFrame" src="${escapeHtml(previewUrl)}" style="width:100%; height:100%; border:none;"></iframe>
                     </div>
                     <div class="window-preview-download">
                         <button class="preview-download-btn">📥 下载文件</button>
@@ -791,12 +873,27 @@
         document.body.appendChild(windowDiv);
         
         const windowId = Date.now() + Math.random();
-        let isDragging = false;
-        let dragStartX = 0, dragStartY = 0;
-        let startLeft = 0, startTop = 0;
-        let isFullscreen = false;
-        let savedRect = null;
-        let dragEnabled = true;
+        
+        // 为 office 文档添加 fallback
+        if (fileType === 'office') {
+            const iframe = contentDiv.querySelector('#officePreviewFrame');
+            if (iframe) {
+                setTimeout(() => {
+                    try {
+                        if (iframe.contentDocument && iframe.contentDocument.body && 
+                            (iframe.contentDocument.body.innerText.includes('无法') || 
+                             iframe.contentDocument.body.innerText.includes('error') ||
+                             iframe.contentDocument.body.innerText.includes('拒绝'))) {
+                            const fallbackHtml = showFallbackPreview(fileName, url, url);
+                            const previewInner = contentDiv.querySelector('.preview-inner');
+                            previewInner.innerHTML = fallbackHtml;
+                        }
+                    } catch(e) {
+                        // 跨域无法检测，保持原样
+                    }
+                }, 3000);
+            }
+        }
         
         // 下载按钮事件
         const downloadBtn = contentDiv.querySelector('.preview-download-btn');
@@ -839,6 +936,13 @@
         document.addEventListener('touchstart', bringToFrontByClick, true);
         
         // 拖拽功能
+        let isDragging = false;
+        let dragStartX = 0, dragStartY = 0;
+        let startLeft = 0, startTop = 0;
+        let isFullscreen = false;
+        let savedRect = null;
+        let dragEnabled = true;
+        
         const startDrag = (e) => {
             if (!dragEnabled) return;
             const isHeader = e.target.closest('.window-header');
@@ -1008,12 +1112,11 @@
         windowDiv.classList.add('active-window');
     }
 
-    // 处理应用点击（支持文件预览）
+    // 处理应用点击
     function handleAppClick(link, name, hasWindowMode) {
         const useWindow = windowModeEnabled && hasWindowMode;
         const fileType = getFileType(link);
         
-        // 如果是文件类型（图片/视频/文档），使用预览功能
         if (fileType !== 'link') {
             if (useWindow) {
                 createPreviewWindow(link, name, fileType);
@@ -1021,7 +1124,6 @@
                 showFullscreenPreview(link, name, fileType);
             }
         } else {
-            // 普通网页链接
             if (useWindow) {
                 createWebWindow(link, name);
             } else {
@@ -1030,7 +1132,7 @@
         }
     }
 
-    // 创建普通网页窗口
+    // 创建普通网页窗口（简化版）
     function createWebWindow(url, appName) {
         const windowDiv = document.createElement('div');
         windowDiv.className = 'modal-window';
@@ -1052,12 +1154,12 @@
         controls.className = 'window-controls';
         
         const refreshBtn = document.createElement('button');
-        refreshBtn.className = 'window-btn refresh-btn';
+        refreshBtn.className = 'window-btn';
         refreshBtn.innerHTML = '⟳';
         refreshBtn.title = '刷新';
         
         const browserBtn = document.createElement('button');
-        browserBtn.className = 'window-btn browser-btn';
+        browserBtn.className = 'window-btn';
         browserBtn.innerHTML = '浏览器';
         browserBtn.title = '在浏览器中打开';
         
