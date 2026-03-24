@@ -357,10 +357,11 @@
             padding: 20px;
             background: #f5f5f5;
             min-height: calc(100% - 60px);
+            flex-direction: column;
         }
         .preview-content img, .preview-content video {
             max-width: 100%;
-            max-height: 90vh;
+            max-height: 85vh;
             object-fit: contain;
         }
         .preview-content iframe {
@@ -411,6 +412,21 @@
             background: #1e3a6b;
             transform: scale(1.02);
         }
+        .download-btn-inline {
+            margin-top: 20px;
+            background: #2b4c8a;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .download-btn-inline:hover {
+            background: #1e3a6b;
+            transform: scale(1.02);
+        }
 
         /* 窗口模式下的样式 */
         .window-content {
@@ -421,7 +437,6 @@
             overflow: auto;
         }
         
-        /* 网页窗口 iframe 样式 - 关键修复 */
         .window-content iframe {
             width: 100%;
             height: 100%;
@@ -434,7 +449,6 @@
             bottom: 0;
         }
         
-        /* 预览容器样式 */
         .window-content .preview-container {
             width: 100%;
             height: 100%;
@@ -723,7 +737,7 @@
     }
 
     // PDF.js 渲染PDF
-    async function renderPDF(container, pdfUrl) {
+    async function renderPDF(container, pdfUrl, showDownloadBtn = true, downloadUrl = null) {
         try {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
             
@@ -745,6 +759,22 @@
             const canvasContainer = document.createElement('div');
             canvasContainer.style.cssText = 'display:flex; flex-direction:column; align-items:center; padding:20px;';
             container.appendChild(canvasContainer);
+            
+            if (showDownloadBtn && downloadUrl) {
+                const downloadDiv = document.createElement('div');
+                downloadDiv.style.cssText = 'text-align:center; padding:10px; background:#f0f2f5; border-top:1px solid #ddd;';
+                downloadDiv.innerHTML = `<button class="pdf-download-btn" style="background:#2b4c8a; color:white; border:none; padding:8px 24px; border-radius:6px; cursor:pointer;">下载文件</button>`;
+                container.appendChild(downloadDiv);
+                downloadDiv.querySelector('.pdf-download-btn').addEventListener('click', () => {
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = downloadUrl.split('/').pop().split('?')[0];
+                    a.target = '_blank';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+            }
             
             let currentPage = 1;
             let currentCanvas = null;
@@ -796,11 +826,11 @@
             console.error('PDF加载失败:', error);
             container.innerHTML = `<div class="unsupported-preview"><h2>PDF加载失败</h2><p>该文件无法预览</p><button class="download-now-btn">立即下载</button></div>`;
             const btn = container.querySelector('.download-now-btn');
-            if (btn) {
+            if (btn && downloadUrl) {
                 btn.addEventListener('click', () => {
                     const a = document.createElement('a');
-                    a.href = pdfUrl;
-                    a.download = pdfUrl.split('/').pop().split('?')[0];
+                    a.href = downloadUrl;
+                    a.download = downloadUrl.split('/').pop().split('?')[0];
                     a.target = '_blank';
                     document.body.appendChild(a);
                     a.click();
@@ -810,16 +840,25 @@
         }
     }
 
-    // 全屏预览
+    // 全屏预览 - 所有文件类型都添加下载按钮
     function showFullscreenPreview(url, fileName, fileType) {
         const previewDiv = document.createElement('div');
         previewDiv.className = 'fullscreen-preview';
         
         let contentHtml = '';
         if (fileType === 'image') {
-            contentHtml = `<img src="${escapeHtml(url)}" alt="${escapeHtml(fileName)}">`;
+            contentHtml = `
+                <img src="${escapeHtml(url)}" alt="${escapeHtml(fileName)}" style="max-width:100%; max-height:85vh; object-fit:contain;">
+                <button class="download-btn-inline" id="inlineDownloadBtn">下载文件</button>
+            `;
         } else if (fileType === 'video') {
-            contentHtml = `<video controls autoplay><source src="${escapeHtml(url)}" type="video/mp4">您的浏览器不支持视频播放</video>`;
+            contentHtml = `
+                <video controls autoplay style="max-width:100%; max-height:85vh;">
+                    <source src="${escapeHtml(url)}" type="video/mp4">
+                    您的浏览器不支持视频播放
+                </video>
+                <button class="download-btn-inline" id="inlineDownloadBtn">下载文件</button>
+            `;
         } else if (fileType === 'pdf') {
             contentHtml = `<div id="pdfViewerContainer" class="pdf-viewer"></div>`;
         } else if (fileType === 'office') {
@@ -851,8 +890,22 @@
         if (fileType === 'pdf') {
             const pdfContainer = previewDiv.querySelector('#pdfViewerContainer');
             if (pdfContainer) {
-                renderPDF(pdfContainer, url);
+                renderPDF(pdfContainer, url, true, url);
             }
+        }
+        
+        // 图片和视频的下载按钮
+        const inlineDownloadBtn = previewDiv.querySelector('#inlineDownloadBtn');
+        if (inlineDownloadBtn) {
+            inlineDownloadBtn.addEventListener('click', () => {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName.split('?')[0];
+                a.target = '_blank';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
         }
         
         const downloadBtn = previewDiv.querySelector('.download-now-btn');
@@ -987,7 +1040,7 @@
             setTimeout(() => {
                 const pdfContainer = contentDiv.querySelector('#pdfWindowViewer');
                 if (pdfContainer) {
-                    renderPDF(pdfContainer, url);
+                    renderPDF(pdfContainer, url, false);
                 }
             }, 100);
         }
@@ -1239,7 +1292,7 @@
         }
     }
 
-    // 创建普通网页窗口 - 修复iframe显示问题
+    // 创建普通网页窗口
     function createWebWindow(url, appName) {
         const windowDiv = document.createElement('div');
         windowDiv.className = 'modal-window';
@@ -1289,7 +1342,6 @@
         
         const contentDiv = document.createElement('div');
         contentDiv.className = 'window-content';
-        // 关键修复：设置相对定位，iframe绝对定位填满
         contentDiv.style.position = 'relative';
         const iframe = document.createElement('iframe');
         iframe.src = url;
