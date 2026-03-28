@@ -88,7 +88,7 @@
             <input type="password" id="githubToken" class="token-input" placeholder="输入 GitHub Personal Access Token">
             <button id="submitToken" class="token-submit">验证并进入编辑模式</button>
         </div>
-        <div class="settings-hint">💡 部分应用可能不支持窗口模式</div>
+        <div class="settings-hint">💡 部分应用可能不支持窗口模式<br>编辑模式需要 GitHub Token</div>
     </div>
     <div class="carousel-section" id="carouselSection" style="display: none;">
         <div class="carousel-wrapper"><div class="carousel-track" id="carouselTrack"></div></div>
@@ -102,13 +102,17 @@
 </div>
 
 <script>
-    // 配置文件地址 - 直接使用 luckynum.top
-    const CONFIG_URL = 'https://luckynum.top/5app.txt';
+    // ========== 配置 ==========
+    const CONFIG_URL = 'https://luckynum.top/5app.txt';           // 读取配置
+    const GITHUB_OWNER = 'bloxorz671';
+    const GITHUB_REPO = 'createsoft';      // 注意：根据您的后台代码，仓库名是 createsoft
+    const GITHUB_PATH = '5app.txt';
     
     let slidesData = [], appItems = [], currentIndex = 0, autoInterval = null, totalSlides = 0;
     let windowModeEnabled = !(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent));
     let isEditMode = false, currentToken = null, fileSha = null;
     
+    // DOM 元素
     const carouselSection = document.getElementById('carouselSection'), carouselTrack = document.getElementById('carouselTrack');
     const dotsContainer = document.getElementById('carouselDots'), appsGrid = document.getElementById('appsGrid');
     const appsHeader = document.getElementById('appsHeader'), settingsBtn = document.getElementById('settingsBtn');
@@ -117,78 +121,234 @@
     const githubTokenInput = document.getElementById('githubToken'), submitTokenBtn = document.getElementById('submitToken');
     const addAppTextBtn = document.getElementById('addAppTextBtn');
     
-    // 从 luckynum.top 加载配置文件
+    // ========== 工具函数 ==========
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+    
+    // UTF-8 编码/解码
+    function utf8ToBase64(str) {
+        const bytes = new TextEncoder().encode(str);
+        let binary = '';
+        for(let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        return btoa(binary);
+    }
+    
+    function base64ToUtf8(base64) {
+        const binary = atob(base64.replace(/\n/g, ''));
+        const bytes = new Uint8Array(binary.length);
+        for(let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return new TextDecoder('utf-8').decode(bytes);
+    }
+    
+    // 生成配置文件内容
+    function generateFileContent() {
+        let content = 'pic\n';
+        for(let slide of slidesData) content += `[p=${slide.imgUrl} l=${slide.linkUrl}]\n`;
+        content += 'app\n';
+        for(let app of appItems) content += `[n=${app.name} p=${app.icon} l=${app.link}${app.mode === 'window' ? ' mode=window' : ''}]\n`;
+        return content;
+    }
+    
+    // ========== 读取配置（从 luckynum.top） ==========
     async function loadConfigFile() {
         try {
-            console.log('正在加载配置:', CONFIG_URL);
+            console.log('加载配置:', CONFIG_URL);
             const response = await fetch(CONFIG_URL);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const content = await response.text();
-            console.log('加载成功，内容长度:', content.length);
             parseAppTxt(content);
         } catch (error) {
             console.error('加载失败:', error);
-            appsGrid.innerHTML = `<div class="error-tip">⚠️ 加载数据失败<br>请检查网络后刷新重试<br>配置文件: ${CONFIG_URL}</div>`;
+            appsGrid.innerHTML = `<div class="error-tip">⚠️ 加载数据失败<br>请检查网络后刷新重试</div>`;
             carouselSection.style.display = 'none';
             if (appsHeader) appsHeader.style.display = 'none';
         }
     }
     
-    // 保存到 luckynum.top（需要后端支持，这里先保留原有逻辑）
-    async function saveConfigFile(content) {
-        if (!currentToken) { alert('请先输入Token'); return false; }
-        // 这里需要您提供 luckynum.top 的保存接口
-        alert('保存功能需要后端支持，请联系管理员');
-        return false;
+    // ========== 保存到 GitHub ==========
+    async function saveToGitHub(content) {
+        if (!currentToken) { alert('请先输入GitHub Token'); return false; }
+        try {
+            // 获取当前文件 SHA
+            let sha = fileSha;
+            if (!sha) {
+                const checkRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                if (checkRes.ok) {
+                    const data = await checkRes.json();
+                    sha = data.sha;
+                }
+            }
+            
+            const body = {
+                message: '更新应用配置',
+                content: utf8ToBase64(content),
+                branch: 'main'
+            };
+            if (sha) body.sha = sha;
+            
+            const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${currentToken}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.message || '保存失败');
+            }
+            
+            const data = await response.json();
+            fileSha = data.content.sha;
+            alert('保存成功！');
+            return true;
+        } catch (error) {
+            alert('保存失败: ' + error.message);
+            return false;
+        }
     }
     
-    function loadSettings() { 
-        let saved = localStorage.getItem('windowModeEnabled'); 
-        if(saved !== null) windowModeEnabled = saved === 'true'; 
-        windowModeSwitch.checked = windowModeEnabled; 
-    }
-    function saveSettings() { localStorage.setItem('windowModeEnabled', windowModeEnabled); }
-    windowModeSwitch.addEventListener('change', (e) => { windowModeEnabled = e.target.checked; saveSettings(); });
-    settingsBtn.addEventListener('click', (e) => { e.stopPropagation(); settingsPanel.classList.toggle('show'); });
-    document.addEventListener('click', (e) => { if(!settingsPanel.contains(e.target) && e.target !== settingsBtn) settingsPanel.classList.remove('show'); });
-    adminBtn.addEventListener('click', () => { tokenArea.style.display = tokenArea.style.display === 'none' ? 'block' : 'none'; });
-    
+    // ========== 验证 Token ==========
     async function submitToken() {
         const token = githubTokenInput.value.trim();
-        if(!token) { alert('请输入Token'); return; }
-        submitTokenBtn.disabled = true; submitTokenBtn.textContent = '验证中...';
-        // 这里需要您提供 luckynum.top 的验证接口
-        alert('管理后台需要 luckynum.top 提供后端支持，当前仅展示模式');
-        submitTokenBtn.disabled = false;
-        submitTokenBtn.textContent = '验证并进入编辑模式';
+        if (!token) { alert('请输入Token'); return; }
+        
+        submitTokenBtn.disabled = true;
+        submitTokenBtn.textContent = '验证中...';
+        
+        try {
+            const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error('Token无效或仓库不存在');
+            
+            currentToken = token;
+            isEditMode = true;
+            document.body.classList.add('edit-mode');
+            addAppTextBtn.style.display = 'inline-block';
+            
+            // 重新渲染带删除按钮的界面
+            if (slidesData.length > 0) renderCarousel();
+            renderApps(appItems);
+            
+            alert('验证成功，进入编辑模式！\n- 点击应用/轮播图右上角 ✕ 可删除\n- 点击"+ 添加应用"可添加新应用');
+            settingsPanel.classList.remove('show');
+            tokenArea.style.display = 'none';
+        } catch (error) {
+            alert('验证失败: ' + error.message);
+        } finally {
+            submitTokenBtn.disabled = false;
+            submitTokenBtn.textContent = '验证并进入编辑模式';
+        }
     }
     submitTokenBtn.addEventListener('click', submitToken);
     
+    // ========== 添加应用弹窗 ==========
     function showAddAppModal() {
-        alert('添加应用功能需要 luckynum.top 提供后端支持');
+        const modal = document.createElement('div'); modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>添加新应用</h3>
+                <label>应用名称</label><input type="text" id="appName" placeholder="例如: 在线考试">
+                <label>应用图标链接</label><input type="text" id="appIcon" placeholder="图片URL (可留空)">
+                <label>跳转链接</label><input type="text" id="appLink" placeholder="https://...">
+                <label>窗口模式</label>
+                <select id="appMode"><option value="">普通跳转</option><option value="window">窗口模式</option></select>
+                <div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div>
+            </div>`;
+        document.body.appendChild(modal);
+        
+        modal.querySelector('.confirm-btn').onclick = async () => {
+            const name = modal.querySelector('#appName').value.trim();
+            const icon = modal.querySelector('#appIcon').value.trim() || 'null.jpg';
+            const link = modal.querySelector('#appLink').value.trim();
+            const mode = modal.querySelector('#appMode').value;
+            
+            if (!name || !link) { alert('请填写应用名称和链接'); return; }
+            
+            appItems.push({ name, icon, link, mode: mode || null });
+            if (await saveToGitHub(generateFileContent())) {
+                renderApps(appItems);
+                modal.remove();
+            } else {
+                appItems.pop();
+                modal.remove();
+            }
+        };
+        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
+    }
+    addAppTextBtn.addEventListener('click', showAddAppModal);
+    
+    // ========== 添加轮播图弹窗 ==========
+    function showAddCarouselModal() {
+        const modal = document.createElement('div'); modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>添加轮播图</h3>
+                <label>图片链接</label><input type="text" id="carouselImg" placeholder="图片URL">
+                <label>点击跳转链接</label><input type="text" id="carouselLink" placeholder="https://...">
+                <div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div>
+            </div>`;
+        document.body.appendChild(modal);
+        
+        modal.querySelector('.confirm-btn').onclick = async () => {
+            const imgUrl = modal.querySelector('#carouselImg').value.trim();
+            const linkUrl = modal.querySelector('#carouselLink').value.trim();
+            if (!imgUrl) { alert('请填写图片链接'); return; }
+            
+            slidesData.push({ imgUrl, linkUrl });
+            if (await saveToGitHub(generateFileContent())) {
+                renderCarousel();
+                modal.remove();
+            } else {
+                slidesData.pop();
+                modal.remove();
+            }
+        };
+        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
     }
     
+    // ========== 删除功能 ==========
     async function deleteApp(index) {
-        alert('删除应用功能需要 luckynum.top 提供后端支持');
+        if (confirm('确定要删除这个应用吗？')) {
+            const deleted = appItems[index];
+            appItems.splice(index, 1);
+            if (await saveToGitHub(generateFileContent())) {
+                renderApps(appItems);
+            } else {
+                appItems.splice(index, 0, deleted);
+            }
+        }
     }
     
     async function deleteSlide(index) {
-        alert('删除轮播图功能需要 luckynum.top 提供后端支持');
+        if (confirm('确定要删除这张轮播图吗？')) {
+            const deleted = slidesData[index];
+            slidesData.splice(index, 1);
+            if (await saveToGitHub(generateFileContent())) {
+                if (slidesData.length === 0) carouselSection.style.display = 'none';
+                else renderCarousel();
+            } else {
+                slidesData.splice(index, 0, deleted);
+            }
+        }
     }
     
+    // ========== 渲染应用列表 ==========
     function renderApps(apps) {
-        if(!appsGrid) return;
-        if(!apps.length) { appsGrid.innerHTML = '<div class="empty-tip">暂无应用</div>'; return; }
+        if (!appsGrid) return;
+        if (!apps.length) { appsGrid.innerHTML = '<div class="empty-tip">暂无应用，点击"+ 添加应用"添加</div>'; return; }
+        
         let appsHtml = '';
-        for(let i = 0; i < apps.length; i++) {
+        for (let i = 0; i < apps.length; i++) {
             const app = apps[i];
-            // 处理图片URL：如果是相对路径，加上 luckynum.top 前缀
             let iconUrl = app.icon;
             if (iconUrl && !iconUrl.startsWith('http') && !iconUrl.startsWith('//')) {
                 iconUrl = `https://luckynum.top/${iconUrl}`;
             }
             appsHtml += `
                 <div class="app-card" data-link="${escapeHtml(app.link)}" data-name="${escapeHtml(app.name)}" data-mode="${app.mode || ''}">
+                    ${isEditMode ? `<button class="delete-btn" data-type="app" data-index="${i}">✕</button>` : ''}
                     <img class="app-icon" src="${escapeHtml(iconUrl || 'null.jpg')}" onerror="this.src='https://luckynum.top/null.jpg'">
                     <span class="app-name">${escapeHtml(app.name)}</span>
                 </div>`;
@@ -196,27 +356,34 @@
         appsGrid.innerHTML = appsHtml;
         
         document.querySelectorAll('.app-card').forEach(card => {
-            card.addEventListener('click', (e) => { 
+            card.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-btn')) return;
                 let link = card.dataset.link;
-                // 处理链接：如果是相对路径，加上 luckynum.top 前缀
                 if (link && !link.startsWith('http') && !link.startsWith('//') && !link.startsWith('javascript:')) {
                     link = `https://luckynum.top/${link}`;
                 }
                 window.open(link, '_blank');
             });
         });
+        
+        if (isEditMode) {
+            document.querySelectorAll('.delete-btn[data-type="app"]').forEach(btn => {
+                btn.onclick = (e) => { e.stopPropagation(); deleteApp(parseInt(btn.dataset.index)); };
+            });
+        }
         alignSameRowHeights();
     }
     
+    // ========== 渲染轮播图 ==========
     function renderCarousel() {
-        if(!carouselTrack) return;
+        if (!carouselTrack) return;
         totalSlides = slidesData.length;
-        if(totalSlides === 0) { carouselSection.style.display = 'none'; return; }
+        if (totalSlides === 0) { carouselSection.style.display = 'none'; return; }
         carouselSection.style.display = 'block';
+        
         let slidesHtml = '';
-        for(let i = 0; i < slidesData.length; i++) {
+        for (let i = 0; i < slidesData.length; i++) {
             const slide = slidesData[i];
-            // 处理图片URL
             let imgUrl = slide.imgUrl;
             let linkUrl = slide.linkUrl;
             if (imgUrl && !imgUrl.startsWith('http') && !imgUrl.startsWith('//')) {
@@ -225,17 +392,31 @@
             if (linkUrl && !linkUrl.startsWith('http') && !linkUrl.startsWith('//')) {
                 linkUrl = `https://luckynum.top/${linkUrl}`;
             }
-            slidesHtml += `<div class="carousel-slide"><a href="${escapeHtml(linkUrl)}" target="_blank"><img src="${escapeHtml(imgUrl)}" onerror="this.src='https://luckynum.top/null.jpg'"></a></div>`;
+            slidesHtml += `<div class="carousel-slide">${isEditMode ? `<button class="delete-btn" data-type="slide" data-index="${i}">✕</button>` : ''}<a href="${escapeHtml(linkUrl)}" target="_blank"><img src="${escapeHtml(imgUrl)}" onerror="this.src='https://luckynum.top/null.jpg'"></a></div>`;
         }
         carouselTrack.innerHTML = slidesHtml;
+        
         let dotsHtml = '';
-        for(let i = 0; i < totalSlides; i++) dotsHtml += `<div class="dot ${i === currentIndex ? 'active' : ''}" data-index="${i}"></div>`;
+        for (let i = 0; i < totalSlides; i++) dotsHtml += `<div class="dot ${i === currentIndex ? 'active' : ''}" data-index="${i}"></div>`;
         dotsContainer.innerHTML = dotsHtml;
         updateCarouselPosition();
-        document.querySelectorAll('.dot').forEach(dot => dot.addEventListener('click', (e) => { currentIndex = parseInt(dot.dataset.index); updateCarouselPosition(); updateDotsActive(); resetAutoSlide(); }));
+        
+        document.querySelectorAll('.dot').forEach(dot => dot.addEventListener('click', (e) => {
+            currentIndex = parseInt(dot.dataset.index);
+            updateCarouselPosition();
+            updateDotsActive();
+            resetAutoSlide();
+        }));
+        
+        if (isEditMode) {
+            document.querySelectorAll('.delete-btn[data-type="slide"]').forEach(btn => {
+                btn.onclick = (e) => { e.stopPropagation(); deleteSlide(parseInt(btn.dataset.index)); };
+            });
+        }
         startAutoSlide();
     }
     
+    // ========== 轮播图控制 ==========
     function updateCarouselPosition() { if(carouselTrack) carouselTrack.style.transform = `translateX(${-currentIndex * 100}%)`; }
     function updateDotsActive() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentIndex)); }
     function nextSlide() { if(totalSlides) { currentIndex = (currentIndex + 1) % totalSlides; updateCarouselPosition(); updateDotsActive(); } }
@@ -262,6 +443,7 @@
         rows.forEach(row => { if(row.length > 1) { let maxH = Math.max(...row.map(r => r.height)); row.forEach(r => r.element.style.height = maxH + 'px'); } });
     }
     
+    // ========== 解析配置文件 ==========
     function parseAppTxt(rawText) {
         const lines = rawText.split(/\r?\n/);
         let mode = null; let picItems = []; let appItemsTemp = [];
@@ -292,8 +474,15 @@
         }
     }
     
-    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+    // ========== 设置 ==========
+    function loadSettings() { let saved = localStorage.getItem('windowModeEnabled'); if(saved !== null) windowModeEnabled = saved === 'true'; windowModeSwitch.checked = windowModeEnabled; }
+    function saveSettings() { localStorage.setItem('windowModeEnabled', windowModeEnabled); }
+    windowModeSwitch.addEventListener('change', (e) => { windowModeEnabled = e.target.checked; saveSettings(); });
+    settingsBtn.addEventListener('click', (e) => { e.stopPropagation(); settingsPanel.classList.toggle('show'); });
+    document.addEventListener('click', (e) => { if(!settingsPanel.contains(e.target) && e.target !== settingsBtn) settingsPanel.classList.remove('show'); });
+    adminBtn.addEventListener('click', () => { tokenArea.style.display = tokenArea.style.display === 'none' ? 'block' : 'none'; });
     
+    // ========== 启动 ==========
     loadSettings();
     loadConfigFile();
     window.addEventListener('resize', () => setTimeout(alignSameRowHeights, 100));
