@@ -106,16 +106,12 @@
         .modal-window.dragging { opacity: 0.98; cursor: grabbing; transition: none; }
         .resize-handle { position: absolute; bottom: 0; right: 0; width: 30px; height: 30px; cursor: nw-resize; z-index: 10; background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.15) 50%); border-bottom-right-radius: 12px; }
         
-        /* 全屏预览样式 */
-        .fullscreen-preview { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 2000; display: flex; flex-direction: column; }
-        .preview-header { background: #2c3e76; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .preview-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 16px; border-radius: 6px; cursor: pointer; }
-        .preview-content { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; background: #f5f5f5; flex-direction: column; overflow: auto; }
-        .preview-content img, .preview-content video { max-width: 100%; max-height: 85vh; object-fit: contain; }
-        .download-btn-inline { margin-top: 20px; background: #2b4c8a; color: white; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; }
-        .unsupported-preview { text-align: center; padding: 60px 20px; }
-        .unsupported-preview h2 { font-size: 1.8rem; color: #666; margin-bottom: 20px; }
-        .unsupported-preview button { background: #2b4c8a; color: white; border: none; padding: 12px 32px; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+        /* PDF 视图样式 */
+        .pdf-viewer-container { width: 100%; height: 100%; display: flex; flex-direction: column; background: #525659; }
+        .pdf-controls { background: #2c3e76; padding: 8px; text-align: center; color: white; }
+        .pdf-controls button { background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 12px; margin: 0 5px; border-radius: 4px; cursor: pointer; }
+        .pdf-canvas-container { flex: 1; overflow: auto; display: flex; justify-content: center; padding: 20px; }
+        .pdf-canvas { box-shadow: 0 2px 10px rgba(0,0,0,0.3); margin: 0 auto; }
         
         @media (max-width: 768px) { .apps-grid { gap: 14px 12px; padding: 16px 16px 30px; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); } .app-icon { width: 52px; height: 52px; } .app-name { font-size: 0.8rem; } .main-header h1 { font-size: 1.6rem; } .add-fab { bottom: 70px; right: 16px; gap: 10px; } .add-btn, .add-carousel-btn, .upload-only-btn { width: 48px; height: 48px; font-size: 20px; } .drag-handle { width: 20px; height: 20px; font-size: 10px; } }
     </style>
@@ -139,7 +135,7 @@
             <input type="password" id="githubToken" class="token-input" placeholder="输入 GitHub Personal Access Token">
             <button id="submitToken" class="token-submit">验证并进入编辑模式</button>
         </div>
-        <div class="settings-hint">💡 普通网页直接跳转，文件（图片/视频/PDF/Office）才预览</div>
+        <div class="settings-hint">💡 窗口模式开启后，支持网页/图片/视频/PDF在窗口中打开</div>
     </div>
     <div class="carousel-section" id="carouselSection" style="display: none;">
         <div class="carousel-wrapper"><div class="carousel-track" id="carouselTrack"></div></div>
@@ -187,15 +183,177 @@
     // ========== 文件类型判断 ==========
     function getFileType(url) {
         const ext = url.split('?')[0].split('.').pop().toLowerCase();
-        // 可预览的文件类型
-        const previewExts = ['jpg','jpeg','png','gif','webp','bmp','svg','mp4','webm','ogg','mov','pdf','doc','docx','xls','xlsx','ppt','pptx'];
-        if (previewExts.includes(ext)) {
-            if (['jpg','jpeg','png','gif','webp','bmp','svg'].includes(ext)) return 'image';
-            if (['mp4','webm','ogg','mov'].includes(ext)) return 'video';
-            if (ext === 'pdf') return 'pdf';
-            return 'office';
-        }
+        if (['jpg','jpeg','png','gif','webp','bmp','svg'].includes(ext)) return 'image';
+        if (['mp4','webm','ogg','mov'].includes(ext)) return 'video';
+        if (ext === 'pdf') return 'pdf';
         return 'link';
+    }
+    
+    // ========== PDF 渲染函数（使用 PDF.js） ==========
+    async function renderPDFInContainer(container, pdfUrl) {
+        try {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
+            const loadingTask = pdfjsLib.getDocument(pdfUrl);
+            const pdf = await loadingTask.promise;
+            const totalPages = pdf.numPages;
+            
+            container.innerHTML = '';
+            
+            const controls = document.createElement('div');
+            controls.className = 'pdf-controls';
+            controls.innerHTML = `
+                <button id="pdfPrevBtn">◀ 上一页</button>
+                <span id="pdfPageInfo">第 1 / ${totalPages} 页</span>
+                <button id="pdfNextBtn">下一页 ▶</button>
+                <button id="pdfDownloadBtn" style="margin-left:15px;">📥 下载</button>
+            `;
+            container.appendChild(controls);
+            
+            const canvasContainer = document.createElement('div');
+            canvasContainer.className = 'pdf-canvas-container';
+            container.appendChild(canvasContainer);
+            
+            let currentPage = 1;
+            let currentCanvas = null;
+            
+            async function renderPage(pageNum) {
+                if (currentCanvas) currentCanvas.remove();
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 1.2 });
+                const canvas = document.createElement('canvas');
+                canvas.className = 'pdf-canvas';
+                const context = canvas.getContext('2d');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                const renderContext = { canvasContext: context, viewport: viewport };
+                await page.render(renderContext).promise;
+                canvasContainer.appendChild(canvas);
+                currentCanvas = canvas;
+                document.getElementById('pdfPageInfo').innerHTML = `第 ${pageNum} / ${totalPages} 页`;
+            }
+            
+            await renderPage(1);
+            
+            document.getElementById('pdfPrevBtn').onclick = () => { if (currentPage > 1) { currentPage--; renderPage(currentPage); } };
+            document.getElementById('pdfNextBtn').onclick = () => { if (currentPage < totalPages) { currentPage++; renderPage(currentPage); } };
+            document.getElementById('pdfDownloadBtn').onclick = () => { const a = document.createElement('a'); a.href = pdfUrl; a.download = pdfUrl.split('/').pop().split('?')[0]; a.click(); };
+        } catch (error) {
+            console.error('PDF加载失败:', error);
+            container.innerHTML = `<div class="window-unsupported"><h3>📄 PDF加载失败</h3><p>文件可能无法访问</p><button class="download-btn">立即下载</button></div>`;
+            const btn = container.querySelector('.download-btn');
+            if (btn) btn.onclick = () => { const a = document.createElement('a'); a.href = pdfUrl; a.download = pdfUrl.split('/').pop().split('?')[0]; a.click(); };
+        }
+    }
+    
+    // ========== 普通网页窗口（iframe） ==========
+    function createWebWindow(url, title) {
+        const windowDiv = document.createElement('div');
+        windowDiv.className = 'modal-window';
+        const width = Math.min(800, window.innerWidth - 100);
+        const height = Math.min(600, window.innerHeight - 150);
+        windowDiv.style.width = `${width}px`;
+        windowDiv.style.height = `${height}px`;
+        windowDiv.style.left = `${(window.innerWidth - width) / 2}px`;
+        windowDiv.style.top = `${(window.innerHeight - height) / 3}px`;
+        windowDiv.style.zIndex = ++nextZIndex;
+        
+        const header = document.createElement('div');
+        header.className = 'window-header';
+        header.innerHTML = `<div class="window-title">${escapeHtml(title)}</div><div class="window-controls"><button class="window-btn refresh-btn">⟳</button><button class="window-btn fullscreen-btn">⛶</button><button class="window-btn close-btn">✕</button></div>`;
+        
+        const content = document.createElement('div');
+        content.className = 'window-content';
+        content.style.position = 'relative';
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.style.position = 'absolute';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        content.appendChild(iframe);
+        
+        const resizeHandle = document.createElement('div');
+        resizeHandle.className = 'resize-handle';
+        
+        windowDiv.appendChild(header);
+        windowDiv.appendChild(content);
+        windowDiv.appendChild(resizeHandle);
+        document.body.appendChild(windowDiv);
+        
+        // 刷新按钮
+        header.querySelector('.refresh-btn').onclick = () => { iframe.src = iframe.src; };
+        
+        // 窗口置顶
+        const bringToFront = () => { nextZIndex++; windowDiv.style.zIndex = nextZIndex; };
+        windowDiv.addEventListener('mousedown', bringToFront);
+        windowDiv.addEventListener('touchstart', bringToFront);
+        
+        // 拖拽移动
+        let isDragging = false, dragStartX, dragStartY, startLeft, startTop;
+        header.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.window-controls')) return;
+            isDragging = true;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            startLeft = windowDiv.offsetLeft;
+            startTop = windowDiv.offsetTop;
+            windowDiv.classList.add('dragging');
+            document.body.style.userSelect = 'none';
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            let newLeft = startLeft + (e.clientX - dragStartX);
+            let newTop = startTop + (e.clientY - dragStartY);
+            newLeft = Math.max(-windowDiv.offsetWidth + 80, Math.min(window.innerWidth - 80, newLeft));
+            newTop = Math.max(0, Math.min(window.innerHeight - 60, newTop));
+            windowDiv.style.left = `${newLeft}px`;
+            windowDiv.style.top = `${newTop}px`;
+        });
+        document.addEventListener('mouseup', () => {
+            if (isDragging) { isDragging = false; windowDiv.classList.remove('dragging'); document.body.style.userSelect = ''; }
+        });
+        
+        // 全屏
+        let isFullscreen = false, savedRect;
+        header.querySelector('.fullscreen-btn').onclick = () => {
+            if (!isFullscreen) {
+                savedRect = { width: windowDiv.offsetWidth, height: windowDiv.offsetHeight, left: windowDiv.offsetLeft, top: windowDiv.offsetTop };
+                windowDiv.classList.add('fullscreen-mode');
+                isFullscreen = true;
+                header.querySelector('.fullscreen-btn').innerHTML = '❐';
+            } else {
+                windowDiv.classList.remove('fullscreen-mode');
+                windowDiv.style.width = `${savedRect.width}px`;
+                windowDiv.style.height = `${savedRect.height}px`;
+                windowDiv.style.left = `${savedRect.left}px`;
+                windowDiv.style.top = `${savedRect.top}px`;
+                isFullscreen = false;
+                header.querySelector('.fullscreen-btn').innerHTML = '⛶';
+            }
+        };
+        header.querySelector('.close-btn').onclick = () => windowDiv.remove();
+        
+        // 调整大小
+        let isResizing = false;
+        resizeHandle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            isResizing = true;
+            let startW = windowDiv.offsetWidth, startH = windowDiv.offsetHeight;
+            let startX = e.clientX, startY = e.clientY;
+            const onMove = (moveEvent) => {
+                if (!isResizing) return;
+                let newW = startW + (moveEvent.clientX - startX);
+                let newH = startH + (moveEvent.clientY - startY);
+                windowDiv.style.width = `${Math.max(280, newW)}px`;
+                windowDiv.style.height = `${Math.max(200, newH)}px`;
+            };
+            const onUp = () => { isResizing = false; document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
     }
     
     // ========== 带缩放功能的图片预览窗口 ==========
@@ -231,19 +389,12 @@
         const resetZoom = () => { scale = 1; img.style.transform = 'scale(1)'; img.style.cursor = 'zoom-in'; };
         
         img.onclick = (e) => { e.stopPropagation(); if (scale > 1) zoomOut(); else zoomIn(); };
-        
-        // 滚轮缩放
-        img.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            if (e.deltaY < 0) zoomIn();
-            else zoomOut();
-        });
+        img.addEventListener('wheel', (e) => { e.preventDefault(); if (e.deltaY < 0) zoomIn(); else zoomOut(); });
         
         content.innerHTML = `<div class="preview-container"><div class="preview-inner" id="previewInner"></div><div class="window-preview-download"><button class="download-btn">立即下载</button></div></div>`;
         const previewInner = content.querySelector('#previewInner');
         previewInner.appendChild(img);
         
-        // 添加缩放控制按钮
         const zoomControls = document.createElement('div');
         zoomControls.className = 'zoom-controls';
         zoomControls.innerHTML = `<button id="zoomOutBtn">-</button><button id="resetZoomBtn">⟳</button><button id="zoomInBtn">+</button>`;
@@ -330,13 +481,8 @@
         });
     }
     
-    // ========== 通用预览窗口（视频/PDF/Office） ==========
-    function createPreviewWindow(url, title, fileType) {
-        if (fileType === 'image') {
-            createImagePreviewWindow(url, title);
-            return;
-        }
-        
+    // ========== 视频预览窗口 ==========
+    function createVideoPreviewWindow(url, title) {
         const windowDiv = document.createElement('div');
         windowDiv.className = 'modal-window';
         const width = Math.min(700, window.innerWidth - 80);
@@ -353,17 +499,7 @@
         
         const content = document.createElement('div');
         content.className = 'window-content';
-        
-        let innerHtml = '';
-        if (fileType === 'video') {
-            innerHtml = `<div class="preview-container"><div class="preview-inner"><video controls style="max-width:100%; max-height:100%;"><source src="${escapeHtml(url)}"></video></div><div class="window-preview-download"><button class="download-btn">立即下载</button></div></div>`;
-        } else if (fileType === 'pdf') {
-            innerHtml = `<div class="preview-container"><div class="preview-inner"><iframe src="${escapeHtml(url)}" style="width:100%; height:100%; border:none;"></iframe></div><div class="window-preview-download"><button class="download-btn">立即下载</button></div></div>`;
-        } else {
-            // Office 文档或其他
-            innerHtml = `<div class="window-unsupported"><h3>📄 该文件类型不支持在线预览</h3><p style="margin:15px 0; color:#666;">${escapeHtml(title)}</p><button class="download-btn">立即下载</button></div>`;
-        }
-        content.innerHTML = innerHtml;
+        content.innerHTML = `<div class="preview-container"><div class="preview-inner"><video controls style="max-width:100%; max-height:100%;"><source src="${escapeHtml(url)}"></video></div><div class="window-preview-download"><button class="download-btn">立即下载</button></div></div>`;
         
         const resizeHandle = document.createElement('div');
         resizeHandle.className = 'resize-handle';
@@ -443,7 +579,146 @@
         });
     }
     
-    // ========== 全屏预览 ==========
+    // ========== PDF 预览窗口 ==========
+    function createPDFPreviewWindow(url, title) {
+        const windowDiv = document.createElement('div');
+        windowDiv.className = 'modal-window';
+        const width = Math.min(700, window.innerWidth - 80);
+        const height = Math.min(600, window.innerHeight - 100);
+        windowDiv.style.width = `${width}px`;
+        windowDiv.style.height = `${height}px`;
+        windowDiv.style.left = `${(window.innerWidth - width) / 2}px`;
+        windowDiv.style.top = `${(window.innerHeight - height) / 3}px`;
+        windowDiv.style.zIndex = ++nextZIndex;
+        
+        const header = document.createElement('div');
+        header.className = 'window-header';
+        header.innerHTML = `<div class="window-title">${escapeHtml(title)}</div><div class="window-controls"><button class="window-btn fullscreen-btn">⛶</button><button class="window-btn close-btn">✕</button></div>`;
+        
+        const content = document.createElement('div');
+        content.className = 'window-content';
+        const pdfContainer = document.createElement('div');
+        pdfContainer.className = 'pdf-viewer-container';
+        pdfContainer.style.width = '100%';
+        pdfContainer.style.height = '100%';
+        content.appendChild(pdfContainer);
+        
+        const resizeHandle = document.createElement('div');
+        resizeHandle.className = 'resize-handle';
+        
+        windowDiv.appendChild(header);
+        windowDiv.appendChild(content);
+        windowDiv.appendChild(resizeHandle);
+        document.body.appendChild(windowDiv);
+        
+        // 渲染PDF
+        renderPDFInContainer(pdfContainer, url);
+        
+        const bringToFront = () => { nextZIndex++; windowDiv.style.zIndex = nextZIndex; };
+        windowDiv.addEventListener('mousedown', bringToFront);
+        windowDiv.addEventListener('touchstart', bringToFront);
+        
+        let isDragging = false, dragStartX, dragStartY, startLeft, startTop;
+        header.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.window-controls')) return;
+            isDragging = true;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            startLeft = windowDiv.offsetLeft;
+            startTop = windowDiv.offsetTop;
+            windowDiv.classList.add('dragging');
+            document.body.style.userSelect = 'none';
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            let newLeft = startLeft + (e.clientX - dragStartX);
+            let newTop = startTop + (e.clientY - dragStartY);
+            newLeft = Math.max(-windowDiv.offsetWidth + 80, Math.min(window.innerWidth - 80, newLeft));
+            newTop = Math.max(0, Math.min(window.innerHeight - 60, newTop));
+            windowDiv.style.left = `${newLeft}px`;
+            windowDiv.style.top = `${newTop}px`;
+        });
+        document.addEventListener('mouseup', () => {
+            if (isDragging) { isDragging = false; windowDiv.classList.remove('dragging'); document.body.style.userSelect = ''; }
+        });
+        
+        let isFullscreen = false, savedRect;
+        header.querySelector('.fullscreen-btn').onclick = () => {
+            if (!isFullscreen) {
+                savedRect = { width: windowDiv.offsetWidth, height: windowDiv.offsetHeight, left: windowDiv.offsetLeft, top: windowDiv.offsetTop };
+                windowDiv.classList.add('fullscreen-mode');
+                isFullscreen = true;
+                header.querySelector('.fullscreen-btn').innerHTML = '❐';
+            } else {
+                windowDiv.classList.remove('fullscreen-mode');
+                windowDiv.style.width = `${savedRect.width}px`;
+                windowDiv.style.height = `${savedRect.height}px`;
+                windowDiv.style.left = `${savedRect.left}px`;
+                windowDiv.style.top = `${savedRect.top}px`;
+                isFullscreen = false;
+                header.querySelector('.fullscreen-btn').innerHTML = '⛶';
+            }
+        };
+        header.querySelector('.close-btn').onclick = () => windowDiv.remove();
+        
+        let isResizing = false;
+        resizeHandle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            isResizing = true;
+            let startW = windowDiv.offsetWidth, startH = windowDiv.offsetHeight;
+            let startX = e.clientX, startY = e.clientY;
+            const onMove = (moveEvent) => {
+                if (!isResizing) return;
+                let newW = startW + (moveEvent.clientX - startX);
+                let newH = startH + (moveEvent.clientY - startY);
+                windowDiv.style.width = `${Math.max(280, newW)}px`;
+                windowDiv.style.height = `${Math.max(200, newH)}px`;
+            };
+            const onUp = () => { isResizing = false; document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+    }
+    
+    // ========== 通用预览窗口入口 ==========
+    function createPreviewWindow(url, title, fileType) {
+        if (fileType === 'image') {
+            createImagePreviewWindow(url, title);
+        } else if (fileType === 'video') {
+            createVideoPreviewWindow(url, title);
+        } else if (fileType === 'pdf') {
+            createPDFPreviewWindow(url, title);
+        } else if (fileType === 'link') {
+            createWebWindow(url, title);
+        }
+    }
+    
+    // ========== 处理应用点击 ==========
+    function handleAppClick(link, name, hasWindowMode) {
+        const fileType = getFileType(link);
+        const useWindow = windowModeEnabled && hasWindowMode;
+        
+        if (useWindow) {
+            // 窗口模式：无论什么类型都在窗口中打开
+            if (fileType === 'link') {
+                createWebWindow(link, name);
+            } else {
+                createPreviewWindow(link, name, fileType);
+            }
+        } else {
+            // 普通模式：直接跳转或全屏预览
+            if (fileType !== 'link') {
+                // 文件类型：全屏预览
+                showFullscreenPreview(link, name, fileType);
+            } else {
+                // 普通链接：新标签页打开
+                window.open(link, '_blank');
+            }
+        }
+    }
+    
+    // ========== 全屏预览（非窗口模式） ==========
     function showFullscreenPreview(url, fileName, fileType) {
         const previewDiv = document.createElement('div');
         previewDiv.className = 'fullscreen-preview';
@@ -464,70 +739,9 @@
         previewDiv.querySelector('.close-btn').onclick = () => previewDiv.remove();
     }
     
-    // ========== 处理应用点击 - 普通链接直接跳转，文件才预览 ==========
-    function handleAppClick(link, name, hasWindowMode) {
-        const fileType = getFileType(link);
-        const useWindow = windowModeEnabled && (hasWindowMode || fileType !== 'link');
-        
-        if (fileType === 'link') {
-            // 普通网页链接，直接跳转，不预览
-            window.open(link, '_blank');
-        } else {
-            // 文件类型，使用预览
-            if (useWindow) {
-                createPreviewWindow(link, name, fileType);
-            } else {
-                showFullscreenPreview(link, name, fileType);
-            }
-        }
-    }
-    
-    // ========== 仅上传文件到根目录 ==========
-    async function uploadFileToRoot(file) {
-        if (!currentToken) { alert('请先输入Token'); return null; }
-        try {
-            const reader = new FileReader();
-            const base64 = await new Promise(r => { reader.onload = e => r(e.target.result.split(',')[1]); reader.readAsDataURL(file); });
-            const fileName = file.name;
-            const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fileName}`, {
-                method: 'PUT', headers: { 'Authorization': `Bearer ${currentToken}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: `上传 ${fileName}`, content: base64, branch: 'main' })
-            });
-            if (!res.ok) throw new Error();
-            const data = await res.json();
-            const url = `https://cdn.jsdelivr.net/gh/${GITHUB_OWNER}/${GITHUB_REPO}@main/${fileName}`;
-            alert(`上传成功！\n文件链接: ${url}\n可复制此链接用于应用配置`);
-            return url;
-        } catch(e) { alert('上传失败'); return null; }
-    }
-    
-    function showUploadOnlyModal() {
-        const modal = document.createElement('div'); modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><h3>📤 上传文件到根目录</h3><div class="upload-area" id="uploadArea">📁 点击选择文件<input type="file" id="fileInput" style="display:none"></div><div class="upload-status" id="uploadStatus"></div><div class="modal-buttons"><button class="cancel-btn">关闭</button></div></div>`;
-        document.body.appendChild(modal);
-        const uploadArea = modal.querySelector('#uploadArea'), fileInput = modal.querySelector('#fileInput'), uploadStatus = modal.querySelector('#uploadStatus');
-        uploadArea.onclick = () => fileInput.click();
-        fileInput.onchange = async (e) => {
-            const file = e.target.files[0]; if (!file) return;
-            uploadStatus.textContent = '⏳ 上传中...';
-            uploadStatus.style.color = '#666';
-            const url = await uploadFileToRoot(file);
-            if (url) {
-                uploadStatus.innerHTML = `✅ 上传成功！<br>链接: <code style="font-size:11px; word-break:break-all;">${url}</code><br>已复制到剪贴板`;
-                navigator.clipboard.writeText(url);
-                uploadStatus.style.color = '#27ae60';
-            } else {
-                uploadStatus.textContent = '❌ 上传失败';
-                uploadStatus.style.color = '#e74c3c';
-            }
-        };
-        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
-    }
-    
-    // ========== 工具函数 ==========
+    // ========== 其余功能保持不变 ==========
     function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
     function utf8ToBase64(str) { const bytes = new TextEncoder().encode(str); let binary = ''; for(let b of bytes) binary += String.fromCharCode(b); return btoa(binary); }
-    function base64ToUtf8(base64) { const binary = atob(base64.replace(/\n/g, '')); const bytes = new Uint8Array(binary.length); for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i); return new TextDecoder('utf-8').decode(bytes); }
     function generateFileContent() { let c='pic\n'; for(let s of slidesData) c+=`[p=${s.imgUrl} l=${s.linkUrl}]\n`; c+='app\n'; for(let a of appItems) c+=`[n=${a.name} p=${a.icon} l=${a.link}${a.mode==='window'?' mode=window':''}]\n`; return c; }
     
     async function uploadImageToGitHub(file) {
@@ -543,6 +757,43 @@
             if (!res.ok) throw new Error();
             return `https://cdn.jsdelivr.net/gh/${GITHUB_OWNER}/${GITHUB_REPO}@main/${fileName}`;
         } catch(e) { alert('上传失败'); return null; }
+    }
+    
+    async function uploadFileToRoot(file) {
+        if (!currentToken) { alert('请先输入Token'); return null; }
+        try {
+            const reader = new FileReader();
+            const base64 = await new Promise(r => { reader.onload = e => r(e.target.result.split(',')[1]); reader.readAsDataURL(file); });
+            const fileName = file.name;
+            const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fileName}`, {
+                method: 'PUT', headers: { 'Authorization': `Bearer ${currentToken}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: `上传 ${fileName}`, content: base64, branch: 'main' })
+            });
+            if (!res.ok) throw new Error();
+            const url = `https://cdn.jsdelivr.net/gh/${GITHUB_OWNER}/${GITHUB_REPO}@main/${fileName}`;
+            alert(`上传成功！\n链接: ${url}`);
+            return url;
+        } catch(e) { alert('上传失败'); return null; }
+    }
+    
+    function showUploadOnlyModal() {
+        const modal = document.createElement('div'); modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><h3>📤 上传文件到根目录</h3><div class="upload-area" id="uploadArea">📁 点击选择文件<input type="file" id="fileInput" style="display:none"></div><div class="upload-status" id="uploadStatus"></div><div class="modal-buttons"><button class="cancel-btn">关闭</button></div></div>`;
+        document.body.appendChild(modal);
+        const uploadArea = modal.querySelector('#uploadArea'), fileInput = modal.querySelector('#fileInput'), uploadStatus = modal.querySelector('#uploadStatus');
+        uploadArea.onclick = () => fileInput.click();
+        fileInput.onchange = async (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            uploadStatus.textContent = '⏳ 上传中...';
+            const url = await uploadFileToRoot(file);
+            if (url) {
+                uploadStatus.innerHTML = `✅ 上传成功！<br>链接: <code style="font-size:11px; word-break:break-all;">${url}</code>`;
+                navigator.clipboard.writeText(url);
+            } else {
+                uploadStatus.textContent = '❌ 上传失败';
+            }
+        };
+        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
     }
     
     async function loadConfigFile() {
