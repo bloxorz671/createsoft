@@ -3,6 +3,7 @@ pic
 
 
 app
+[n=3月27日作业 p=327.jpg l=327.jpg]
 [n=本周调课 p=327调课.jpg l=327调课.jpg]
 [n=作业提交平台 p=homeworkapp.jpg l=homeworkapp]
 [n=电子值日码 p=ezr.jpg l=ezr mode=window] 
