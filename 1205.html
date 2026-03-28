@@ -16,21 +16,10 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #f5f7fc; font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; min-height: 100vh; }
         .platform-container { max-width: 550px; margin: 0 auto; background: #ffffff; }
-        .main-header { text-align: center; padding: 20px 16px 12px; background: white; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(0, 0, 0, 0.05); display: flex; justify-content: flex-end; align-items: center; }
-        .main-header h1 { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; flex: 1; text-align: center; margin: 0 16px; }
-        .settings-btn { background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px; border-radius: 8px; color: #1e3c72; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
-        .settings-btn:hover { background: rgba(0, 0, 0, 0.05); transform: rotate(15deg); }
+        .main-header { text-align: center; padding: 20px 16px 12px; background: white; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+        .main-header h1 { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; cursor: pointer; display: inline-block; padding: 0 16px; }
         .greeting-section { padding: 12px 20px 0 20px; background: white; }
         .greeting-text { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; display: block; text-align: left; margin-bottom: 8px; }
-        .settings-panel { position: fixed; top: 70px; right: calc(50% - 275px + 20px); background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); z-index: 1000; width: 280px; padding: 16px; display: none; border: 1px solid rgba(0, 0, 0, 0.1); }
-        @media (max-width: 600px) { .settings-panel { right: 16px; top: 70px; } }
-        .settings-panel.show { display: block; }
-        .settings-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
-        .settings-label { font-size: 0.95rem; color: #333; font-weight: 500; }
-        .admin-btn { background: #2b4c8a; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; margin-left: 8px; }
-        .token-input-area { margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; }
-        .token-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.8rem; margin: 8px 0; }
-        .token-submit { background: #2b4c8a; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; width: 100%; }
         .edit-mode .carousel-slide, .edit-mode .app-card { position: relative; }
         .edit-mode .app-card { cursor: grab; }
         .edit-mode .app-card:active { cursor: grabbing; }
@@ -75,7 +64,7 @@
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; background: white; }
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; }
         
-        /* 全屏文件阅读器样式 - 图片显示完整优先 */
+        /* 全屏文件阅读器样式 */
         .file-viewer-overlay {
             position: fixed;
             top: 0;
@@ -140,7 +129,6 @@
             justify-content: center;
             align-items: center;
         }
-        /* 图片容器 - 使用 contain 确保图片完整显示，有黑边 */
         .image-container {
             width: 100%;
             height: 100%;
@@ -161,7 +149,6 @@
             transform-origin: center center;
             will-change: transform;
         }
-        /* 视频样式 */
         .viewer-content video {
             max-width: 100%;
             max-height: 100%;
@@ -248,8 +235,7 @@
 <body>
 <div class="platform-container">
     <div class="main-header">
-        <h1>初二五班智慧应用平台</h1>
-        <button class="settings-btn" id="settingsBtn">⚙</button>
+        <h1 id="titleClickTarget">初二五班智慧应用平台</h1>
     </div>
     
     <!-- 问候语区域 -->
@@ -257,17 +243,6 @@
         <div class="greeting-text"></div>
     </div>
     
-    <div class="settings-panel" id="settingsPanel">
-        <div class="settings-item">
-            <span class="settings-label">管理后台</span>
-            <button class="admin-btn" id="adminBtn">🔑 验证Token</button>
-        </div>
-        <div id="tokenArea" style="display: none;" class="token-input-area">
-            <input type="password" id="githubToken" class="token-input" placeholder="输入 GitHub Personal Access Token">
-            <button id="submitToken" class="token-submit">验证并进入编辑模式</button>
-        </div>
-        <div class="settings-hint">💡 文件在全屏阅读器中打开，支持缩放；普通链接在新标签页打开</div>
-    </div>
     <div class="carousel-section" id="carouselSection" style="display: none;">
         <div class="carousel-wrapper"><div class="carousel-track" id="carouselTrack"></div></div>
         <div class="carousel-dots" id="carouselDots"></div>
@@ -286,6 +261,68 @@
 </div>
 
 <script>
+    // ========== 标题点击3次触发Token输入 ==========
+    let clickCount = 0;
+    let clickTimer = null;
+    const titleElement = document.getElementById('titleClickTarget');
+    
+    titleElement.addEventListener('click', () => {
+        clickCount++;
+        if (clickTimer) clearTimeout(clickTimer);
+        clickTimer = setTimeout(() => { clickCount = 0; }, 1000);
+        
+        if (clickCount === 3) {
+            clickCount = 0;
+            showTokenInputModal();
+        }
+    });
+    
+    function showTokenInputModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>验证Token</h3>
+                <input type="password" id="tokenInput" placeholder="输入 GitHub Personal Access Token" style="width:100%; padding:10px; margin:8px 0; border:1px solid #ddd; border-radius:8px;">
+                <div class="modal-buttons">
+                    <button class="confirm-btn" id="tokenConfirmBtn">验证</button>
+                    <button class="cancel-btn" id="tokenCancelBtn">取消</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        modal.querySelector('#tokenConfirmBtn').onclick = async () => {
+            const token = modal.querySelector('#tokenInput').value.trim();
+            if (!token) return;
+            modal.querySelector('#tokenConfirmBtn').disabled = true;
+            modal.querySelector('#tokenConfirmBtn').textContent = '验证中...';
+            
+            try {
+                const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Token无效');
+                
+                currentToken = token;
+                isEditMode = true;
+                document.body.classList.add('edit-mode');
+                addAppTextBtn.style.display = 'inline-block';
+                fabGroup.style.display = 'flex';
+                if (slidesData.length) renderCarousel();
+                renderApps(appItems);
+                
+                modal.remove();
+            } catch (e) {
+                alert('Token验证失败');
+                modal.querySelector('#tokenConfirmBtn').disabled = false;
+                modal.querySelector('#tokenConfirmBtn').textContent = '验证';
+            }
+        };
+        
+        modal.querySelector('#tokenCancelBtn').onclick = () => modal.remove();
+    }
+    
     // ========== 读取并显示 zhiriData 问候语 ==========
     function checkAndShowGreeting() {
         try {
@@ -322,10 +359,7 @@
     
     const carouselSection = document.getElementById('carouselSection'), carouselTrack = document.getElementById('carouselTrack');
     const dotsContainer = document.getElementById('carouselDots'), appsGrid = document.getElementById('appsGrid');
-    const appsHeader = document.getElementById('appsHeader'), settingsBtn = document.getElementById('settingsBtn');
-    const settingsPanel = document.getElementById('settingsPanel');
-    const adminBtn = document.getElementById('adminBtn'), tokenArea = document.getElementById('tokenArea');
-    const githubTokenInput = document.getElementById('githubToken'), submitTokenBtn = document.getElementById('submitToken');
+    const appsHeader = document.getElementById('appsHeader');
     const addAppTextBtn = document.getElementById('addAppTextBtn');
     const fabGroup = document.getElementById('fabGroup');
     const addAppFab = document.getElementById('addAppFab');
@@ -363,7 +397,7 @@
         document.body.removeChild(a);
     }
     
-    // ========== 图片缩放和拖拽功能（支持双指手势） ==========
+    // ========== 图片缩放和拖拽功能 ==========
     function createZoomableImage(url, fileName) {
         const container = document.createElement('div');
         container.className = 'image-container';
@@ -418,14 +452,12 @@
             updateTransform();
         };
         
-        // 鼠标滚轮缩放
         img.addEventListener('wheel', (e) => {
             e.preventDefault();
             if (e.deltaY < 0) zoomIn();
             else zoomOut();
         });
         
-        // 鼠标拖拽（缩放后）
         let isDragging = false;
         let dragStartX = 0, dragStartY = 0;
         let startTranslateX = 0, startTranslateY = 0;
@@ -456,34 +488,19 @@
             if (scale > 1) img.style.cursor = 'grab';
         });
         
-        // 触摸事件 - 支持双指缩放和单指拖拽
         let initialTouches = [];
-        
-        const getDistance = (touches) => {
-            const dx = touches[0].clientX - touches[1].clientX;
-            const dy = touches[0].clientY - touches[1].clientY;
-            return Math.hypot(dx, dy);
-        };
-        
-        const getCenter = (touches) => {
-            return {
-                x: (touches[0].clientX + touches[1].clientX) / 2,
-                y: (touches[0].clientY + touches[1].clientY) / 2
-            };
-        };
+        const getDistance = (touches) => Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
+        const getCenter = (touches) => ({ x: (touches[0].clientX + touches[1].clientX) / 2, y: (touches[0].clientY + touches[1].clientY) / 2 });
         
         container.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const touches = Array.from(e.touches);
             initialTouches = touches;
-            
             if (touches.length === 1) {
-                // 单指拖拽
                 isPanning = true;
                 lastTouchX = touches[0].clientX;
                 lastTouchY = touches[0].clientY;
             } else if (touches.length === 2) {
-                // 双指缩放
                 initialDistance = getDistance(touches);
                 initialScale = scale;
                 const center = getCenter(touches);
@@ -495,9 +512,7 @@
         container.addEventListener('touchmove', (e) => {
             e.preventDefault();
             const touches = Array.from(e.touches);
-            
             if (touches.length === 1 && isPanning && scale > 1) {
-                // 单指拖拽移动图片
                 const deltaX = touches[0].clientX - lastTouchX;
                 const deltaY = touches[0].clientY - lastTouchY;
                 translateX += deltaX;
@@ -507,11 +522,9 @@
                 lastTouchX = touches[0].clientX;
                 lastTouchY = touches[0].clientY;
             } else if (touches.length === 2) {
-                // 双指缩放
                 const newDistance = getDistance(touches);
                 const newScale = initialScale * (newDistance / initialDistance);
                 scale = Math.min(Math.max(newScale, 1), 4);
-                
                 if (scale === 1) {
                     translateX = 0;
                     translateY = 0;
@@ -531,10 +544,7 @@
             }
         });
         
-        container.addEventListener('touchend', (e) => {
-            isPanning = false;
-            initialTouches = [];
-        });
+        container.addEventListener('touchend', () => { isPanning = false; initialTouches = []; });
         
         img.onerror = () => {
             container.innerHTML = `<div class="unsupported-view"><h2>🖼️ 图片加载失败</h2><p>该图片无法显示</p><button class="fallback-download">📥 立即下载</button></div>`;
@@ -608,7 +618,6 @@
             content.appendChild(video);
             
         } else if (fileType === 'pdf') {
-            // PDF 处理（保持原有功能）
             const pdfContainerDiv = document.createElement('div');
             pdfContainerDiv.className = 'pdf-viewer-container';
             const controls = document.createElement('div');
@@ -631,7 +640,6 @@
             pdfContainerDiv.appendChild(pdfCanvasContainer);
             content.appendChild(pdfContainerDiv);
             
-            // 简化 PDF 初始化
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
             pdfjsLib.getDocument(url).promise.then(pdf => {
                 let currentPage = 1;
@@ -689,7 +697,6 @@
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
     
-    // ========== 处理应用点击 ==========
     function handleAppClick(link, name) {
         if (isFileUrl(link)) {
             openFileViewer(link, name);
@@ -698,12 +705,10 @@
         }
     }
     
-    // ========== 工具函数 ==========
     function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
     function utf8ToBase64(str) { const bytes = new TextEncoder().encode(str); let binary = ''; for(let b of bytes) binary += String.fromCharCode(b); return btoa(binary); }
     function generateFileContent() { let c='pic\n'; for(let s of slidesData) c+=`[p=${s.imgUrl} l=${s.linkUrl}]\n`; c+='app\n'; for(let a of appItems) c+=`[n=${a.name} p=${a.icon} l=${a.link}]\n`; return c; }
     
-    // ========== GitHub 操作（简化，保持原有功能） ==========
     async function uploadImageToGitHub(file) {
         if (!currentToken) return null;
         try {
@@ -785,27 +790,6 @@
         } catch(e) { alert('保存失败'); return false; }
     }
     
-    async function submitToken() {
-        const token = githubTokenInput.value.trim();
-        if (!token) { alert('请输入Token'); return; }
-        submitTokenBtn.disabled = true; submitTokenBtn.textContent = '验证中...';
-        try {
-            const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, { headers: { 'Authorization': `Bearer ${token}` } });
-            if (!res.ok) throw new Error();
-            currentToken = token; isEditMode = true;
-            document.body.classList.add('edit-mode');
-            addAppTextBtn.style.display = 'inline-block';
-            fabGroup.style.display = 'flex';
-            if (slidesData.length) renderCarousel();
-            renderApps(appItems);
-            alert('编辑模式已启用\n- 拖动应用左上角 ⋮⋮ 可调整顺序\n- 点击 ✕ 删除\n- 📤 仅上传文件到根目录\n- 🖼️ 添加轮播图\n- + 添加应用');
-            settingsPanel.classList.remove('show');
-            tokenArea.style.display = 'none';
-        } catch(e) { alert('Token无效'); }
-        finally { submitTokenBtn.disabled = false; submitTokenBtn.textContent = '验证并进入编辑模式'; }
-    }
-    
-    // ========== 拖动排序 ==========
     function initDragSort() {
         const cards = document.querySelectorAll('.app-card');
         cards.forEach((card, idx) => {
@@ -837,7 +821,6 @@
         });
     }
     
-    // ========== 添加弹窗 ==========
     function showAddAppModal() {
         const modal = document.createElement('div'); modal.className = 'modal-overlay';
         modal.innerHTML = `<div class="modal-content"><h3>添加新应用</h3><label>应用名称</label><input id="appName"><label>应用图标</label><div class="upload-area" id="uploadArea">📁 点击上传图片<input type="file" id="fileInput" style="display:none"></div><input id="iconUrl" placeholder="或直接输入图片链接"><label>跳转链接</label><input id="appLink"><div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div></div>`;
@@ -988,10 +971,6 @@
         else { appsGrid.innerHTML = '<div class="empty-tip">暂无应用数据</div>'; if(appsHeader) appsHeader.style.display = 'flex'; }
     }
     
-    settingsBtn.addEventListener('click', (e) => { e.stopPropagation(); settingsPanel.classList.toggle('show'); });
-    document.addEventListener('click', (e) => { if(!settingsPanel.contains(e.target) && e.target !== settingsBtn) settingsPanel.classList.remove('show'); });
-    adminBtn.addEventListener('click', () => { tokenArea.style.display = tokenArea.style.display === 'none' ? 'block' : 'none'; });
-    submitTokenBtn.addEventListener('click', submitToken);
     addAppFab.addEventListener('click', showAddAppModal);
     addCarouselFab.addEventListener('click', showAddCarouselModal);
     uploadOnlyBtn.addEventListener('click', showUploadOnlyModal);
