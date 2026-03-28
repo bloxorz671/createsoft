@@ -16,12 +16,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #f5f7fc; font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; min-height: 100vh; }
         .platform-container { max-width: 550px; margin: 0 auto; background: #ffffff; }
-        .main-header { text-align: center; padding: 20px 16px 12px; background: white; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center; }
-        .main-header h1 { font-size: 1.9rem; font-weight: 700; color: #1e3c72; flex: 1; text-align: center; }
-        .header-left-area { display: flex; align-items: center; gap: 12px; }
-        .greeting-text { font-size: 0.85rem; color: #2b4c8a; background: #e8f0fe; padding: 6px 12px; border-radius: 20px; white-space: nowrap; }
+        .main-header { text-align: center; padding: 20px 16px 12px; background: white; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(0, 0, 0, 0.05); display: flex; justify-content: flex-end; align-items: center; }
+        .main-header h1 { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; flex: 1; text-align: center; margin: 0 16px; }
         .settings-btn { background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px; border-radius: 8px; color: #1e3c72; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
         .settings-btn:hover { background: rgba(0, 0, 0, 0.05); transform: rotate(15deg); }
+        .greeting-section { padding: 12px 20px 0 20px; background: white; }
+        .greeting-text { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; display: block; text-align: left; margin-bottom: 8px; }
         .settings-panel { position: fixed; top: 70px; right: calc(50% - 275px + 20px); background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); z-index: 1000; width: 280px; padding: 16px; display: none; border: 1px solid rgba(0, 0, 0, 0.1); }
         @media (max-width: 600px) { .settings-panel { right: 16px; top: 70px; } }
         .settings-panel.show { display: block; }
@@ -229,10 +229,10 @@
             .app-icon { width: 52px; height: 52px; }
             .app-name { font-size: 0.8rem; }
             .main-header h1 { font-size: 1.6rem; }
+            .greeting-text { font-size: 1.6rem; }
             .add-fab { bottom: 70px; right: 16px; gap: 10px; }
             .add-btn, .add-carousel-btn, .upload-only-btn { width: 48px; height: 48px; font-size: 20px; }
             .drag-handle { width: 20px; height: 20px; font-size: 10px; }
-            .greeting-text { font-size: 0.7rem; padding: 4px 8px; }
             .viewer-btn, .zoom-btn { padding: 6px 12px; font-size: 0.8rem; }
         }
     </style>
@@ -240,12 +240,15 @@
 <body>
 <div class="platform-container">
     <div class="main-header">
-        <div class="header-left-area">
-            <div id="greetingContainer" style="display: none;"></div>
-        </div>
         <h1>初二五班智慧应用平台</h1>
         <button class="settings-btn" id="settingsBtn">⚙</button>
     </div>
+    
+    <!-- 问候语区域 - 在大标题下方，轮播图上方，向左顶格 -->
+    <div id="greetingContainer" class="greeting-section" style="display: none;">
+        <div class="greeting-text"></div>
+    </div>
+    
     <div class="settings-panel" id="settingsPanel">
         <div class="settings-item">
             <span class="settings-label">管理后台</span>
@@ -286,8 +289,9 @@
                 if (zhiriData && zhiriData.timestamp && (now - zhiriData.timestamp <= 60000)) {
                     const studentName = zhiriData.value || '同学';
                     const greetingContainer = document.getElementById('greetingContainer');
-                    if (greetingContainer) {
-                        greetingContainer.innerHTML = `<span class="greeting-text">${escapeHtml(studentName)}同学你好</span>`;
+                    const greetingText = greetingContainer.querySelector('.greeting-text');
+                    if (greetingContainer && greetingText) {
+                        greetingText.textContent = `${studentName}同学你好`;
                         greetingContainer.style.display = 'block';
                     }
                 }
