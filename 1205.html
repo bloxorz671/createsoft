@@ -18,7 +18,9 @@
         .platform-container { max-width: 550px; margin: 0 auto; background: #ffffff; }
         .main-header { text-align: center; padding: 20px 16px 12px; background: white; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center; }
         .main-header h1 { font-size: 1.9rem; font-weight: 700; color: #1e3c72; flex: 1; text-align: center; }
-        .settings-btn { background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px; border-radius: 8px; color: #1e3c72; width: 40px; height: 40px; }
+        .header-left-area { display: flex; align-items: center; gap: 12px; }
+        .greeting-text { font-size: 0.85rem; color: #2b4c8a; background: #e8f0fe; padding: 6px 12px; border-radius: 20px; white-space: nowrap; }
+        .settings-btn { background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px; border-radius: 8px; color: #1e3c72; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
         .settings-btn:hover { background: rgba(0, 0, 0, 0.05); transform: rotate(15deg); }
         .settings-panel { position: fixed; top: 70px; right: calc(50% - 275px + 20px); background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); z-index: 1000; width: 280px; padding: 16px; display: none; border: 1px solid rgba(0, 0, 0, 0.1); }
         @media (max-width: 600px) { .settings-panel { right: 16px; top: 70px; } }
@@ -73,43 +75,30 @@
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; background: white; }
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; }
         
-        /* 文件阅读器样式 - 全屏弹窗 */
+        /* 全屏文件阅读器样式 */
         .file-viewer-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: #000;
             z-index: 20000;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-        .file-viewer {
-            background: white;
-            border-radius: 20px;
-            width: 95%;
-            max-width: 1200px;
-            height: 90%;
-            max-height: 90vh;
-            display: flex;
             flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
         }
         .viewer-header {
-            background: linear-gradient(135deg, #2c3e76 0%, #1e2a4a 100%);
+            background: #1e2a4a;
             color: white;
-            padding: 15px 20px;
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0;
+            z-index: 10;
         }
         .viewer-title {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 500;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -130,49 +119,47 @@
             font-size: 0.9rem;
             transition: all 0.2s;
         }
-        .viewer-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.02); }
+        .viewer-btn:hover { background: rgba(255,255,255,0.4); }
+        .zoom-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
         .viewer-content {
             flex: 1;
-            background: #f5f5f5;
+            background: #000;
             overflow: auto;
-            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
-        .viewer-content img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
+        .image-zoom-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+            cursor: grab;
+        }
+        .image-zoom-container:active { cursor: grabbing; }
+        .zoomable-image {
+            max-width: none;
+            max-height: none;
+            transition: transform 0.1s ease;
+            transform-origin: center center;
         }
         .viewer-content video {
             max-width: 100%;
             max-height: 100%;
-        }
-        .viewer-content iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            min-height: 500px;
-        }
-        .unsupported-view {
-            text-align: center;
-            padding: 60px;
-        }
-        .unsupported-view h2 {
-            font-size: 1.8rem;
-            color: #666;
-            margin-bottom: 20px;
-        }
-        .unsupported-view button {
-            background: #2b4c8a;
-            color: white;
-            border: none;
-            padding: 12px 32px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            margin-top: 20px;
+            background: #000;
         }
         .pdf-viewer-container {
             width: 100%;
@@ -182,7 +169,7 @@
             background: #525659;
         }
         .pdf-controls {
-            background: #2c3e76;
+            background: #1e2a4a;
             padding: 10px;
             text-align: center;
             color: white;
@@ -203,10 +190,39 @@
             display: flex;
             justify-content: center;
             padding: 20px;
+            background: #525659;
         }
         .pdf-canvas {
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
             margin: 0 auto;
+            cursor: pointer;
+        }
+        .pdf-zoom-controls {
+            display: inline-flex;
+            gap: 5px;
+            margin-left: 20px;
+        }
+        .unsupported-view {
+            text-align: center;
+            padding: 60px;
+            background: white;
+            border-radius: 16px;
+            margin: 20px;
+        }
+        .unsupported-view h2 {
+            font-size: 1.8rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .unsupported-view button {
+            background: #2b4c8a;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px;
         }
         @media (max-width: 768px) {
             .apps-grid { gap: 14px 12px; padding: 16px 16px 30px; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
@@ -216,14 +232,17 @@
             .add-fab { bottom: 70px; right: 16px; gap: 10px; }
             .add-btn, .add-carousel-btn, .upload-only-btn { width: 48px; height: 48px; font-size: 20px; }
             .drag-handle { width: 20px; height: 20px; font-size: 10px; }
-            .file-viewer { width: 95%; height: 90%; }
-            .viewer-content iframe { min-height: 400px; }
+            .greeting-text { font-size: 0.7rem; padding: 4px 8px; }
+            .viewer-btn, .zoom-btn { padding: 6px 12px; font-size: 0.8rem; }
         }
     </style>
 </head>
 <body>
 <div class="platform-container">
     <div class="main-header">
+        <div class="header-left-area">
+            <div id="greetingContainer" style="display: none;"></div>
+        </div>
         <h1>初二五班智慧应用平台</h1>
         <button class="settings-btn" id="settingsBtn">⚙</button>
     </div>
@@ -236,7 +255,7 @@
             <input type="password" id="githubToken" class="token-input" placeholder="输入 GitHub Personal Access Token">
             <button id="submitToken" class="token-submit">验证并进入编辑模式</button>
         </div>
-        <div class="settings-hint">💡 文件在弹窗中预览，普通链接在新标签页打开</div>
+        <div class="settings-hint">💡 文件在全屏阅读器中打开，支持缩放；普通链接在新标签页打开</div>
     </div>
     <div class="carousel-section" id="carouselSection" style="display: none;">
         <div class="carousel-wrapper"><div class="carousel-track" id="carouselTrack"></div></div>
@@ -256,6 +275,32 @@
 </div>
 
 <script>
+    // ========== 读取并显示 zhiriData 问候语 ==========
+    function checkAndShowGreeting() {
+        try {
+            const zhiriDataStr = localStorage.getItem('zhiriData');
+            if (zhiriDataStr) {
+                const zhiriData = JSON.parse(zhiriDataStr);
+                const now = Date.now();
+                // 检查数据是否存在且未过期（60秒内）
+                if (zhiriData && zhiriData.timestamp && (now - zhiriData.timestamp <= 60000)) {
+                    const studentName = zhiriData.value || '同学';
+                    const greetingContainer = document.getElementById('greetingContainer');
+                    if (greetingContainer) {
+                        greetingContainer.innerHTML = `<span class="greeting-text">${escapeHtml(studentName)}同学你好</span>`;
+                        greetingContainer.style.display = 'block';
+                    }
+                }
+                // 无论是否过期，都删除该数据
+                localStorage.removeItem('zhiriData');
+            }
+        } catch (e) {
+            console.error('读取zhiriData失败:', e);
+            // 出错时也尝试删除，避免残留
+            localStorage.removeItem('zhiriData');
+        }
+    }
+    
     // ========== 配置 ==========
     const CONFIG_URL = 'https://luckynum.top/5app.txt';
     const GITHUB_OWNER = 'bloxorz671';
@@ -281,27 +326,14 @@
     
     // ========== 判断是否为文件（有扩展名且不是网页） ==========
     function isFileUrl(url) {
-        // 排除空链接、javascript、mailto等
         if (!url || url.startsWith('javascript:') || url.startsWith('mailto:') || url.startsWith('#')) return false;
-        
-        // 获取路径部分（去掉参数）
         const path = url.split('?')[0].split('#')[0];
-        
-        // 检查是否有文件扩展名
         const lastDot = path.lastIndexOf('.');
         if (lastDot === -1 || lastDot === path.length - 1) return false;
-        
         const ext = path.substring(lastDot + 1).toLowerCase();
-        
-        // 网页类型 - 不是文件，应该在新标签页打开
         const webExts = ['html', 'htm', 'php', 'asp', 'aspx', 'jsp', 'do', 'action', 'cfm', 'cgi', 'pl'];
         if (webExts.includes(ext)) return false;
-        
-        // 文件扩展名
-        const fileExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico', 
-                          'mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'flv',
-                          'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'rtf', 'zip', 'rar', '7z'];
-        return fileExts.includes(ext);
+        return true;
     }
     
     // ========== 获取文件类型 ==========
@@ -326,94 +358,167 @@
     }
     
     // ========== PDF 渲染函数 ==========
-    async function renderPDF(container, url, fileName) {
+    let currentPDF = null;
+    let currentPDFScale = 1.2;
+    let currentPDFPage = 1;
+    let pdfTotalPages = 1;
+    let pdfContainer = null;
+    let pdfCanvasContainer = null;
+    
+    async function renderPDFPage() {
+        if (!currentPDF) return;
+        try {
+            const page = await currentPDF.getPage(currentPDFPage);
+            const viewport = page.getViewport({ scale: currentPDFScale });
+            const canvas = document.createElement('canvas');
+            canvas.className = 'pdf-canvas';
+            const context = canvas.getContext('2d');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            await page.render({ canvasContext: context, viewport }).promise;
+            if (pdfCanvasContainer) {
+                pdfCanvasContainer.innerHTML = '';
+                pdfCanvasContainer.appendChild(canvas);
+            }
+            const pageInfo = document.getElementById('pdfPageInfo');
+            if (pageInfo) pageInfo.innerHTML = `第 ${currentPDFPage} / ${pdfTotalPages} 页`;
+        } catch(e) { console.error('PDF渲染失败', e); }
+    }
+    
+    async function initPDF(pdfUrl, fileName) {
         try {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
-            const loadingTask = pdfjsLib.getDocument(url);
-            const pdf = await loadingTask.promise;
-            const totalPages = pdf.numPages;
-            
-            container.innerHTML = '';
-            
-            const controls = document.createElement('div');
-            controls.className = 'pdf-controls';
-            controls.innerHTML = `
-                <button id="pdfPrevBtn">◀ 上一页</button>
-                <span id="pdfPageInfo">第 1 / ${totalPages} 页</span>
-                <button id="pdfNextBtn">下一页 ▶</button>
-                <button id="pdfDownloadBtn" style="margin-left:15px;">📥 下载</button>
-            `;
-            container.appendChild(controls);
-            
-            const canvasContainer = document.createElement('div');
-            canvasContainer.className = 'pdf-canvas-container';
-            container.appendChild(canvasContainer);
-            
-            let currentPage = 1;
-            let currentCanvas = null;
-            
-            async function renderPage(pageNum) {
-                if (currentCanvas) currentCanvas.remove();
-                const page = await pdf.getPage(pageNum);
-                const viewport = page.getViewport({ scale: 1.2 });
-                const canvas = document.createElement('canvas');
-                canvas.className = 'pdf-canvas';
-                const context = canvas.getContext('2d');
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-                await page.render({ canvasContext: context, viewport }).promise;
-                canvasContainer.appendChild(canvas);
-                currentCanvas = canvas;
-                document.getElementById('pdfPageInfo').innerHTML = `第 ${pageNum} / ${totalPages} 页`;
-            }
-            
-            await renderPage(1);
-            
-            document.getElementById('pdfPrevBtn').onclick = () => { if (currentPage > 1) { currentPage--; renderPage(currentPage); } };
-            document.getElementById('pdfNextBtn').onclick = () => { if (currentPage < totalPages) { currentPage++; renderPage(currentPage); } };
-            document.getElementById('pdfDownloadBtn').onclick = () => downloadFile(url, fileName);
+            const loadingTask = pdfjsLib.getDocument(pdfUrl);
+            currentPDF = await loadingTask.promise;
+            pdfTotalPages = currentPDF.numPages;
+            currentPDFPage = 1;
+            currentPDFScale = 1.2;
+            await renderPDFPage();
         } catch (error) {
-            container.innerHTML = `<div class="unsupported-view"><h2>📄 PDF加载失败</h2><p>文件可能无法访问或格式不支持</p><button onclick="downloadFile('${escapeHtml(url)}', '${escapeHtml(fileName)}')">📥 立即下载</button></div>`;
+            if (pdfContainer) {
+                pdfContainer.innerHTML = `<div class="unsupported-view" style="background:#fff; margin:20px;"><h2>📄 PDF加载失败</h2><p>文件可能无法访问</p><button class="fallback-download">📥 立即下载</button></div>`;
+                const btn = pdfContainer.querySelector('.fallback-download');
+                if (btn) btn.onclick = () => downloadFile(pdfUrl, fileName);
+            }
         }
     }
     
-    // ========== 文件阅读器（全屏弹窗） ==========
+    // ========== 图片缩放功能 ==========
+    function createZoomableImage(url, fileName) {
+        const container = document.createElement('div');
+        container.className = 'image-zoom-container';
+        
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'zoomable-image';
+        img.style.transform = 'scale(1)';
+        container.appendChild(img);
+        
+        let scale = 1;
+        let isDragging = false;
+        let dragStartX = 0, dragStartY = 0;
+        let translateX = 0, translateY = 0;
+        
+        const updateTransform = () => {
+            img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+        };
+        
+        const zoomIn = () => {
+            scale = Math.min(scale + 0.25, 4);
+            updateTransform();
+        };
+        const zoomOut = () => {
+            scale = Math.max(scale - 0.25, 0.5);
+            updateTransform();
+        };
+        const resetZoom = () => {
+            scale = 1;
+            translateX = 0;
+            translateY = 0;
+            updateTransform();
+        };
+        
+        img.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY < 0) zoomIn();
+            else zoomOut();
+        });
+        
+        img.addEventListener('mousedown', (e) => {
+            if (scale > 1) {
+                isDragging = true;
+                dragStartX = e.clientX - translateX;
+                dragStartY = e.clientY - translateY;
+                img.style.cursor = 'grabbing';
+                e.preventDefault();
+            }
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging && scale > 1) {
+                translateX = e.clientX - dragStartX;
+                translateY = e.clientY - dragStartY;
+                updateTransform();
+            }
+        });
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            if (scale > 1) img.style.cursor = 'grab';
+        });
+        
+        img.onerror = () => {
+            container.innerHTML = `<div class="unsupported-view"><h2>🖼️ 图片加载失败</h2><p>该图片无法显示</p><button class="fallback-download">📥 立即下载</button></div>`;
+            const btn = container.querySelector('.fallback-download');
+            if (btn) btn.onclick = () => downloadFile(url, fileName);
+        };
+        
+        return { container, zoomIn, zoomOut, resetZoom };
+    }
+    
+    // ========== 全屏文件阅读器 ==========
     function openFileViewer(url, fileName) {
         const fileType = getFileType(url);
         
-        // 创建遮罩层
         const overlay = document.createElement('div');
         overlay.className = 'file-viewer-overlay';
         
-        const viewer = document.createElement('div');
-        viewer.className = 'file-viewer';
-        
-        // 头部
         const header = document.createElement('div');
         header.className = 'viewer-header';
         header.innerHTML = `
             <div class="viewer-title">${escapeHtml(fileName)}</div>
             <div class="viewer-controls">
+                <div id="zoomControls" style="display: none; gap: 8px;"></div>
                 <button class="viewer-btn download-btn">📥 下载</button>
                 <button class="viewer-btn close-btn">✕ 关闭</button>
             </div>
         `;
         
-        // 内容区域
         const content = document.createElement('div');
         content.className = 'viewer-content';
         
-        // 根据文件类型生成内容
+        overlay.appendChild(header);
+        overlay.appendChild(content);
+        document.body.appendChild(overlay);
+        
+        let zoomInFn = null, zoomOutFn = null, resetZoomFn = null;
+        
         if (fileType === 'image') {
-            const img = document.createElement('img');
-            img.src = url;
-            img.alt = fileName;
-            img.onerror = () => {
-                content.innerHTML = `<div class="unsupported-view"><h2>🖼️ 图片加载失败</h2><p>该图片无法显示</p><button class="fallback-download">📥 立即下载</button></div>`;
-                const btn = content.querySelector('.fallback-download');
-                if (btn) btn.onclick = () => downloadFile(url, fileName);
-            };
-            content.appendChild(img);
+            const { container, zoomIn, zoomOut, resetZoom } = createZoomableImage(url, fileName);
+            content.appendChild(container);
+            zoomInFn = zoomIn;
+            zoomOutFn = zoomOut;
+            resetZoomFn = resetZoom;
+            
+            const zoomControls = header.querySelector('#zoomControls');
+            zoomControls.style.display = 'flex';
+            zoomControls.innerHTML = `
+                <button class="zoom-btn" id="zoomOutBtn">−</button>
+                <button class="zoom-btn" id="resetZoomBtn">⟳</button>
+                <button class="zoom-btn" id="zoomInBtn">+</button>
+            `;
+            zoomControls.querySelector('#zoomInBtn').onclick = () => zoomInFn();
+            zoomControls.querySelector('#zoomOutBtn').onclick = () => zoomOutFn();
+            zoomControls.querySelector('#resetZoomBtn').onclick = () => resetZoomFn();
+            
         } else if (fileType === 'video') {
             const video = document.createElement('video');
             video.controls = true;
@@ -429,15 +534,69 @@
                 if (btn) btn.onclick = () => downloadFile(url, fileName);
             };
             content.appendChild(video);
+            
         } else if (fileType === 'pdf') {
-            const pdfContainer = document.createElement('div');
-            pdfContainer.className = 'pdf-viewer-container';
-            pdfContainer.style.width = '100%';
-            pdfContainer.style.height = '100%';
-            content.appendChild(pdfContainer);
-            renderPDF(pdfContainer, url, fileName);
+            const pdfContainerDiv = document.createElement('div');
+            pdfContainerDiv.className = 'pdf-viewer-container';
+            pdfContainer = pdfContainerDiv;
+            
+            const controls = document.createElement('div');
+            controls.className = 'pdf-controls';
+            controls.innerHTML = `
+                <button id="pdfPrevBtn">◀ 上一页</button>
+                <span id="pdfPageInfo">第 1 / ? 页</span>
+                <button id="pdfNextBtn">下一页 ▶</button>
+                <div class="pdf-zoom-controls">
+                    <button id="pdfZoomOutBtn">−</button>
+                    <span id="pdfZoomLevel">100%</span>
+                    <button id="pdfZoomInBtn">+</button>
+                    <button id="pdfResetZoomBtn">⟳</button>
+                </div>
+                <button id="pdfDownloadBtn" style="margin-left:15px;">📥 下载</button>
+            `;
+            pdfContainerDiv.appendChild(controls);
+            
+            pdfCanvasContainer = document.createElement('div');
+            pdfCanvasContainer.className = 'pdf-canvas-container';
+            pdfContainerDiv.appendChild(pdfCanvasContainer);
+            content.appendChild(pdfContainerDiv);
+            
+            initPDF(url, fileName);
+            
+            setTimeout(() => {
+                const prevBtn = document.getElementById('pdfPrevBtn');
+                const nextBtn = document.getElementById('pdfNextBtn');
+                const zoomInBtn = document.getElementById('pdfZoomInBtn');
+                const zoomOutBtn = document.getElementById('pdfZoomOutBtn');
+                const resetZoomBtn = document.getElementById('pdfResetZoomBtn');
+                const zoomLevel = document.getElementById('pdfZoomLevel');
+                const downloadBtn = document.getElementById('pdfDownloadBtn');
+                
+                if (prevBtn) prevBtn.onclick = async () => {
+                    if (currentPDFPage > 1) { currentPDFPage--; await renderPDFPage(); }
+                };
+                if (nextBtn) nextBtn.onclick = async () => {
+                    if (currentPDFPage < pdfTotalPages) { currentPDFPage++; await renderPDFPage(); }
+                };
+                if (zoomInBtn) zoomInBtn.onclick = async () => {
+                    currentPDFScale = Math.min(currentPDFScale + 0.2, 3);
+                    if (zoomLevel) zoomLevel.innerHTML = Math.round(currentPDFScale * 100) + '%';
+                    await renderPDFPage();
+                };
+                if (zoomOutBtn) zoomOutBtn.onclick = async () => {
+                    currentPDFScale = Math.max(currentPDFScale - 0.2, 0.6);
+                    if (zoomLevel) zoomLevel.innerHTML = Math.round(currentPDFScale * 100) + '%';
+                    await renderPDFPage();
+                };
+                if (resetZoomBtn) resetZoomBtn.onclick = async () => {
+                    currentPDFScale = 1.2;
+                    if (zoomLevel) zoomLevel.innerHTML = Math.round(currentPDFScale * 100) + '%';
+                    await renderPDFPage();
+                };
+                if (downloadBtn) downloadBtn.onclick = () => downloadFile(url, fileName);
+            }, 100);
+            
         } else {
-            // 其他文件类型（不支持预览）
             content.innerHTML = `
                 <div class="unsupported-view">
                     <h2>📄 该文件不支持预览</h2>
@@ -449,31 +608,22 @@
             if (btn) btn.onclick = () => downloadFile(url, fileName);
         }
         
-        viewer.appendChild(header);
-        viewer.appendChild(content);
-        overlay.appendChild(viewer);
-        document.body.appendChild(overlay);
-        
-        // 下载按钮
         const downloadBtn = header.querySelector('.download-btn');
-        if (downloadBtn) {
-            downloadBtn.onclick = () => downloadFile(url, fileName);
-        }
+        if (downloadBtn) downloadBtn.onclick = () => downloadFile(url, fileName);
         
-        // 关闭按钮
         header.querySelector('.close-btn').onclick = () => overlay.remove();
         
-        // 点击遮罩层关闭
+        const escHandler = (e) => { if (e.key === 'Escape') overlay.remove(); };
+        document.addEventListener('keydown', escHandler);
+        overlay._escHandler = escHandler;
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
     
     // ========== 处理应用点击 ==========
     function handleAppClick(link, name) {
         if (isFileUrl(link)) {
-            // 是文件，在弹窗阅读器中打开
             openFileViewer(link, name);
         } else {
-            // 是普通链接，在新标签页打开
             window.open(link, '_blank');
         }
     }
@@ -780,6 +930,8 @@
     uploadOnlyBtn.addEventListener('click', showUploadOnlyModal);
     addAppTextBtn.addEventListener('click', showAddAppModal);
     
+    // 启动：先检查问候语，再加载配置
+    checkAndShowGreeting();
     loadConfigFile();
     window.addEventListener('resize', () => setTimeout(alignSameRowHeights, 100));
 </script>
