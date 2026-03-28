@@ -11,6 +11,7 @@
     <title>初二五班智慧应用平台</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #f5f7fc; font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; min-height: 100vh; }
@@ -72,34 +73,151 @@
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; background: white; }
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; }
         
-        /* 下载按钮浮动样式 */
-        .download-float-btn {
+        /* 文件阅读器样式 - 全屏弹窗 */
+        .file-viewer-overlay {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 20000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        .file-viewer {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 1000px;
+            height: 85%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+        .viewer-header {
+            background: linear-gradient(135deg, #2c3e76 0%, #1e2a4a 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .viewer-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+        .viewer-controls {
+            display: flex;
+            gap: 12px;
+        }
+        .viewer-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .viewer-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.02); }
+        .viewer-content {
+            flex: 1;
+            background: #f5f5f5;
+            overflow: auto;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .viewer-content img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .viewer-content video {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .viewer-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            min-height: 500px;
+        }
+        .unsupported-view {
+            text-align: center;
+            padding: 60px;
+        }
+        .unsupported-view h2 {
+            font-size: 1.8rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .unsupported-view button {
             background: #2b4c8a;
             color: white;
             border: none;
-            border-radius: 50px;
-            padding: 12px 24px;
-            font-size: 1rem;
+            padding: 12px 32px;
+            border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 1000;
-            display: none;
-            gap: 8px;
-            align-items: center;
+            font-size: 1rem;
+            margin-top: 20px;
         }
-        .download-float-btn:hover { background: #1e3a6b; }
-        
-        @media (max-width: 768px) { 
-            .apps-grid { gap: 14px 12px; padding: 16px 16px 30px; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); } 
-            .app-icon { width: 52px; height: 52px; } 
-            .app-name { font-size: 0.8rem; } 
-            .main-header h1 { font-size: 1.6rem; } 
-            .add-fab { bottom: 70px; right: 16px; gap: 10px; } 
-            .add-btn, .add-carousel-btn, .upload-only-btn { width: 48px; height: 48px; font-size: 20px; } 
+        .pdf-viewer-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #525659;
+        }
+        .pdf-controls {
+            background: #2c3e76;
+            padding: 10px;
+            text-align: center;
+            color: white;
+            flex-shrink: 0;
+        }
+        .pdf-controls button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 6px 16px;
+            margin: 0 5px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .pdf-canvas-container {
+            flex: 1;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .pdf-canvas {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            margin: 0 auto;
+        }
+        @media (max-width: 768px) {
+            .apps-grid { gap: 14px 12px; padding: 16px 16px 30px; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+            .app-icon { width: 52px; height: 52px; }
+            .app-name { font-size: 0.8rem; }
+            .main-header h1 { font-size: 1.6rem; }
+            .add-fab { bottom: 70px; right: 16px; gap: 10px; }
+            .add-btn, .add-carousel-btn, .upload-only-btn { width: 48px; height: 48px; font-size: 20px; }
             .drag-handle { width: 20px; height: 20px; font-size: 10px; }
+            .file-viewer { width: 95%; height: 90%; }
+            .viewer-content iframe { min-height: 400px; }
         }
     </style>
 </head>
@@ -118,7 +236,7 @@
             <input type="password" id="githubToken" class="token-input" placeholder="输入 GitHub Personal Access Token">
             <button id="submitToken" class="token-submit">验证并进入编辑模式</button>
         </div>
-        <div class="settings-hint">💡 所有文件在新标签页打开，同时提供下载按钮</div>
+        <div class="settings-hint">💡 点击应用打开文件阅读器，支持图片/视频/PDF预览，提供下载按钮</div>
     </div>
     <div class="carousel-section" id="carouselSection" style="display: none;">
         <div class="carousel-wrapper"><div class="carousel-track" id="carouselTrack"></div></div>
@@ -161,47 +279,178 @@
     const addCarouselFab = document.getElementById('addCarouselFab');
     const uploadOnlyBtn = document.getElementById('uploadOnlyBtn');
     
+    // ========== 文件类型判断 ==========
+    function getFileType(url) {
+        const ext = url.split('?')[0].split('.').pop().toLowerCase();
+        if (['jpg','jpeg','png','gif','webp','bmp','svg','ico'].includes(ext)) return 'image';
+        if (['mp4','webm','ogg','mov','avi','mkv'].includes(ext)) return 'video';
+        if (ext === 'pdf') return 'pdf';
+        if (['doc','docx','xls','xlsx','ppt','pptx','txt'].includes(ext)) return 'office';
+        return 'unsupported';
+    }
+    
+    // ========== PDF 渲染函数 ==========
+    async function renderPDF(container, url, fileName) {
+        try {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
+            const loadingTask = pdfjsLib.getDocument(url);
+            const pdf = await loadingTask.promise;
+            const totalPages = pdf.numPages;
+            
+            container.innerHTML = '';
+            
+            const controls = document.createElement('div');
+            controls.className = 'pdf-controls';
+            controls.innerHTML = `
+                <button id="pdfPrevBtn">◀ 上一页</button>
+                <span id="pdfPageInfo">第 1 / ${totalPages} 页</span>
+                <button id="pdfNextBtn">下一页 ▶</button>
+                <button id="pdfDownloadBtn" style="margin-left:15px;">📥 下载</button>
+            `;
+            container.appendChild(controls);
+            
+            const canvasContainer = document.createElement('div');
+            canvasContainer.className = 'pdf-canvas-container';
+            container.appendChild(canvasContainer);
+            
+            let currentPage = 1;
+            let currentCanvas = null;
+            
+            async function renderPage(pageNum) {
+                if (currentCanvas) currentCanvas.remove();
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 1.2 });
+                const canvas = document.createElement('canvas');
+                canvas.className = 'pdf-canvas';
+                const context = canvas.getContext('2d');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                await page.render({ canvasContext: context, viewport }).promise;
+                canvasContainer.appendChild(canvas);
+                currentCanvas = canvas;
+                document.getElementById('pdfPageInfo').innerHTML = `第 ${pageNum} / ${totalPages} 页`;
+            }
+            
+            await renderPage(1);
+            
+            document.getElementById('pdfPrevBtn').onclick = () => { if (currentPage > 1) { currentPage--; renderPage(currentPage); } };
+            document.getElementById('pdfNextBtn').onclick = () => { if (currentPage < totalPages) { currentPage++; renderPage(currentPage); } };
+            document.getElementById('pdfDownloadBtn').onclick = () => downloadFile(url, fileName);
+        } catch (error) {
+            container.innerHTML = `<div class="unsupported-view"><h2>📄 PDF加载失败</h2><p>文件可能无法访问或格式不支持</p><button onclick="downloadFile('${escapeHtml(url)}', '${escapeHtml(fileName)}')">📥 立即下载</button></div>`;
+        }
+    }
+    
+    // ========== 下载文件 ==========
+    function downloadFile(url, fileName) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName.split('?')[0];
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+    
+    // ========== 文件阅读器 ==========
+    function openFileViewer(url, fileName) {
+        const fileType = getFileType(url);
+        
+        // 创建遮罩层
+        const overlay = document.createElement('div');
+        overlay.className = 'file-viewer-overlay';
+        
+        const viewer = document.createElement('div');
+        viewer.className = 'file-viewer';
+        
+        // 头部
+        const header = document.createElement('div');
+        header.className = 'viewer-header';
+        header.innerHTML = `
+            <div class="viewer-title">${escapeHtml(fileName)}</div>
+            <div class="viewer-controls">
+                <button class="viewer-btn download-btn">📥 下载</button>
+                <button class="viewer-btn close-btn">✕ 关闭</button>
+            </div>
+        `;
+        
+        // 内容区域
+        const content = document.createElement('div');
+        content.className = 'viewer-content';
+        
+        // 根据文件类型生成内容
+        if (fileType === 'image') {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = fileName;
+            img.onerror = () => {
+                content.innerHTML = `<div class="unsupported-view"><h2>🖼️ 图片加载失败</h2><p>该图片无法显示</p><button class="fallback-download">📥 立即下载</button></div>`;
+                const btn = content.querySelector('.fallback-download');
+                if (btn) btn.onclick = () => downloadFile(url, fileName);
+            };
+            content.appendChild(img);
+        } else if (fileType === 'video') {
+            const video = document.createElement('video');
+            video.controls = true;
+            video.autoplay = false;
+            video.style.maxWidth = '100%';
+            video.style.maxHeight = '100%';
+            const source = document.createElement('source');
+            source.src = url;
+            video.appendChild(source);
+            video.onerror = () => {
+                content.innerHTML = `<div class="unsupported-view"><h2>🎬 视频加载失败</h2><p>该视频无法播放</p><button class="fallback-download">📥 立即下载</button></div>`;
+                const btn = content.querySelector('.fallback-download');
+                if (btn) btn.onclick = () => downloadFile(url, fileName);
+            };
+            content.appendChild(video);
+        } else if (fileType === 'pdf') {
+            const pdfContainer = document.createElement('div');
+            pdfContainer.className = 'pdf-viewer-container';
+            pdfContainer.style.width = '100%';
+            pdfContainer.style.height = '100%';
+            content.appendChild(pdfContainer);
+            renderPDF(pdfContainer, url, fileName);
+        } else {
+            // 不支持预览的文件类型
+            content.innerHTML = `
+                <div class="unsupported-view">
+                    <h2>📄 该文件不支持预览</h2>
+                    <p>${escapeHtml(fileName)}</p>
+                    <button class="fallback-download">📥 立即下载</button>
+                </div>
+            `;
+            const btn = content.querySelector('.fallback-download');
+            if (btn) btn.onclick = () => downloadFile(url, fileName);
+        }
+        
+        viewer.appendChild(header);
+        viewer.appendChild(content);
+        overlay.appendChild(viewer);
+        document.body.appendChild(overlay);
+        
+        // 下载按钮
+        const downloadBtn = header.querySelector('.download-btn');
+        if (downloadBtn) {
+            downloadBtn.onclick = () => downloadFile(url, fileName);
+        }
+        
+        // 关闭按钮
+        header.querySelector('.close-btn').onclick = () => overlay.remove();
+        
+        // 点击遮罩层关闭
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    }
+    
+    // ========== 处理应用点击 ==========
+    function handleAppClick(link, name) {
+        openFileViewer(link, name);
+    }
+    
     // ========== 工具函数 ==========
     function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
     function utf8ToBase64(str) { const bytes = new TextEncoder().encode(str); let binary = ''; for(let b of bytes) binary += String.fromCharCode(b); return btoa(binary); }
     function generateFileContent() { let c='pic\n'; for(let s of slidesData) c+=`[p=${s.imgUrl} l=${s.linkUrl}]\n`; c+='app\n'; for(let a of appItems) c+=`[n=${a.name} p=${a.icon} l=${a.link}]\n`; return c; }
-    
-    // ========== 处理应用点击 ==========
-    function handleAppClick(link, name) {
-        // 所有链接都在新标签页打开
-        window.open(link, '_blank');
-        
-        // 同时提供下载按钮
-        const fileName = name || link.split('/').pop();
-        showDownloadButton(link, fileName);
-    }
-    
-    // 显示下载按钮
-    let currentDownloadBtn = null;
-    function showDownloadButton(url, fileName) {
-        if (currentDownloadBtn) currentDownloadBtn.remove();
-        
-        const btn = document.createElement('button');
-        btn.className = 'download-float-btn';
-        btn.innerHTML = `📥 下载 ${fileName}`;
-        btn.onclick = () => {
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName.split('?')[0];
-            a.target = '_blank';
-            a.click();
-        };
-        document.body.appendChild(btn);
-        currentDownloadBtn = btn;
-        
-        // 5秒后自动隐藏
-        setTimeout(() => {
-            if (currentDownloadBtn === btn) {
-                btn.remove();
-                currentDownloadBtn = null;
-            }
-        }, 5000);
-    }
     
     // ========== GitHub 操作 ==========
     async function uploadImageToGitHub(file) {
