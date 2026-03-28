@@ -79,7 +79,7 @@
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; }
         
         /* 窗口模式样式 */
-        .modal-window { position: fixed; background: #fff; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; min-width: 280px; min-height: 200px; z-index: 1001; }
+        .modal-window { position: fixed; background: #fff; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; min-width: 300px; min-height: 250px; z-index: 1001; }
         .modal-window.active-window { z-index: 1002; box-shadow: 0 30px 60px -12px rgba(0,0,0,0.6); }
         .window-header { background: linear-gradient(135deg, #2c3e76 0%, #1e2a4a 100%); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; cursor: move; user-select: none; border-bottom: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
         .window-title { font-size: 1rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
@@ -87,8 +87,17 @@
         .window-btn { background: rgba(255,255,255,0.2); border: none; color: white; min-width: 32px; height: 32px; padding: 0 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
         .window-btn.close-btn:hover { background: #e74c3c; }
         .window-btn.fullscreen-btn:hover { background: #27ae60; }
-        .window-content { flex: 1; background: #f5f5f5; overflow: auto; position: relative; }
-        .window-content iframe { width: 100%; height: 100%; border: none; position: absolute; top: 0; left: 0; }
+        .window-content { flex: 1; background: #f5f5f5; overflow: auto; position: relative; display: flex; flex-direction: column; }
+        .preview-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
+        .preview-inner { flex: 1; display: flex; justify-content: center; align-items: center; overflow: auto; padding: 16px; min-height: 0; }
+        .preview-inner img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .preview-inner video { max-width: 100%; max-height: 100%; }
+        .preview-inner iframe { width: 100%; height: 100%; border: none; }
+        .window-preview-download { padding: 10px; background: #f0f2f5; border-top: 1px solid #ddd; text-align: center; }
+        .window-preview-download button { background: #2b4c8a; color: white; border: none; padding: 8px 24px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+        .window-unsupported { text-align: center; padding: 40px; }
+        .window-unsupported h3 { font-size: 1.3rem; color: #666; margin-bottom: 15px; }
+        .window-unsupported button { background: #2b4c8a; color: white; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
         .modal-window.fullscreen-mode { position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; border-radius: 0 !important; z-index: 1003; }
         .modal-window.dragging { opacity: 0.98; cursor: grabbing; transition: none; }
         .resize-handle { position: absolute; bottom: 0; right: 0; width: 30px; height: 30px; cursor: nw-resize; z-index: 10; background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.15) 50%); border-bottom-right-radius: 12px; }
@@ -101,7 +110,8 @@
         .preview-content img, .preview-content video { max-width: 100%; max-height: 85vh; object-fit: contain; }
         .download-btn-inline { margin-top: 20px; background: #2b4c8a; color: white; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; }
         .unsupported-preview { text-align: center; padding: 60px 20px; }
-        .unsupported-preview button { background: #2b4c8a; color: white; border: none; padding: 12px 32px; border-radius: 8px; cursor: pointer; }
+        .unsupported-preview h2 { font-size: 1.8rem; color: #666; margin-bottom: 20px; }
+        .unsupported-preview button { background: #2b4c8a; color: white; border: none; padding: 12px 32px; border-radius: 8px; cursor: pointer; font-size: 1rem; }
         
         @media (max-width: 768px) { .apps-grid { gap: 14px 12px; padding: 16px 16px 30px; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); } .app-icon { width: 52px; height: 52px; } .app-name { font-size: 0.8rem; } .main-header h1 { font-size: 1.6rem; } .add-fab { bottom: 70px; right: 16px; gap: 10px; } .add-btn, .add-carousel-btn { width: 48px; height: 48px; font-size: 24px; } .drag-handle { width: 20px; height: 20px; font-size: 10px; } }
     </style>
@@ -125,7 +135,7 @@
             <input type="password" id="githubToken" class="token-input" placeholder="输入 GitHub Personal Access Token">
             <button id="submitToken" class="token-submit">验证并进入编辑模式</button>
         </div>
-        <div class="settings-hint">💡 窗口模式支持网页、图片、视频、PDF预览<br>编辑模式需要 GitHub Token</div>
+        <div class="settings-hint">💡 窗口模式支持图片/视频/PDF预览，支持窗口拖动/缩放/全屏</div>
     </div>
     <div class="carousel-section" id="carouselSection" style="display: none;">
         <div class="carousel-wrapper"><div class="carousel-track" id="carouselTrack"></div></div>
@@ -154,6 +164,7 @@
     let windowModeEnabled = !(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent));
     let isEditMode = false, currentToken = null, fileSha = null;
     let draggedIndex = null;
+    let openWindows = [], nextZIndex = 1000;
     
     // DOM 元素
     const carouselSection = document.getElementById('carouselSection'), carouselTrack = document.getElementById('carouselTrack');
@@ -173,18 +184,15 @@
         if (['jpg','jpeg','png','gif','webp','bmp','svg'].includes(ext)) return 'image';
         if (['mp4','webm','ogg','mov'].includes(ext)) return 'video';
         if (ext === 'pdf') return 'pdf';
-        if (['doc','docx','xls','xlsx','ppt','pptx'].includes(ext)) return 'office';
-        return 'link';
+        return 'unsupported';
     }
     
-    // ========== 窗口模式预览 ==========
-    let openWindows = [], nextZIndex = 1000;
-    
-    function createWebWindow(url, title) {
+    // ========== 窗口模式预览（修复图片过大问题） ==========
+    function createPreviewWindow(url, title, fileType) {
         const windowDiv = document.createElement('div');
         windowDiv.className = 'modal-window';
-        const width = Math.min(800, window.innerWidth - 100);
-        const height = Math.min(600, window.innerHeight - 150);
+        const width = Math.min(700, window.innerWidth - 80);
+        const height = Math.min(550, window.innerHeight - 100);
         windowDiv.style.width = `${width}px`;
         windowDiv.style.height = `${height}px`;
         windowDiv.style.left = `${(window.innerWidth - width) / 2}px`;
@@ -197,16 +205,18 @@
         
         const content = document.createElement('div');
         content.className = 'window-content';
-        content.style.position = 'relative';
-        const iframe = document.createElement('iframe');
-        iframe.src = url;
-        iframe.style.position = 'absolute';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        content.appendChild(iframe);
+        
+        let innerHtml = '';
+        if (fileType === 'image') {
+            innerHtml = `<div class="preview-container"><div class="preview-inner"><img src="${escapeHtml(url)}" alt="${escapeHtml(title)}" style="max-width:100%; max-height:100%; object-fit:contain;"></div><div class="window-preview-download"><button class="download-btn">立即下载</button></div></div>`;
+        } else if (fileType === 'video') {
+            innerHtml = `<div class="preview-container"><div class="preview-inner"><video controls style="max-width:100%; max-height:100%;"><source src="${escapeHtml(url)}"></video></div><div class="window-preview-download"><button class="download-btn">立即下载</button></div></div>`;
+        } else if (fileType === 'pdf') {
+            innerHtml = `<div class="preview-container"><div class="preview-inner"><iframe src="${escapeHtml(url)}" style="width:100%; height:100%; border:none;"></iframe></div><div class="window-preview-download"><button class="download-btn">立即下载</button></div></div>`;
+        } else {
+            innerHtml = `<div class="window-unsupported"><h3>📄 该文件不支持预览</h3><p style="margin:15px 0; color:#666;">${escapeHtml(title)}</p><button class="download-btn">立即下载</button></div>`;
+        }
+        content.innerHTML = innerHtml;
         
         const resizeHandle = document.createElement('div');
         resizeHandle.className = 'resize-handle';
@@ -216,13 +226,25 @@
         windowDiv.appendChild(resizeHandle);
         document.body.appendChild(windowDiv);
         
-        let isDragging = false, dragStartX, dragStartY, startLeft, startTop;
-        let isFullscreen = false, savedRect;
+        // 下载按钮事件
+        const downloadBtn = content.querySelector('.download-btn');
+        if (downloadBtn) {
+            downloadBtn.onclick = () => {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = title.split('?')[0];
+                a.target = '_blank';
+                a.click();
+            };
+        }
         
+        // 窗口置顶
         const bringToFront = () => { nextZIndex++; windowDiv.style.zIndex = nextZIndex; };
         windowDiv.addEventListener('mousedown', bringToFront);
         windowDiv.addEventListener('touchstart', bringToFront);
         
+        // 拖拽移动
+        let isDragging = false, dragStartX, dragStartY, startLeft, startTop;
         header.addEventListener('mousedown', (e) => {
             if (e.target.closest('.window-controls')) return;
             isDragging = true;
@@ -247,6 +269,8 @@
             if (isDragging) { isDragging = false; windowDiv.classList.remove('dragging'); document.body.style.userSelect = ''; }
         });
         
+        // 全屏
+        let isFullscreen = false, savedRect;
         header.querySelector('.fullscreen-btn').onclick = () => {
             if (!isFullscreen) {
                 savedRect = { width: windowDiv.offsetWidth, height: windowDiv.offsetHeight, left: windowDiv.offsetLeft, top: windowDiv.offsetTop };
@@ -265,6 +289,7 @@
         };
         header.querySelector('.close-btn').onclick = () => windowDiv.remove();
         
+        // 调整大小
         let isResizing = false;
         resizeHandle.addEventListener('mousedown', (e) => {
             e.preventDefault();
@@ -284,18 +309,19 @@
         });
     }
     
+    // ========== 全屏预览 ==========
     function showFullscreenPreview(url, fileName, fileType) {
         const previewDiv = document.createElement('div');
         previewDiv.className = 'fullscreen-preview';
         let contentHtml = '';
         if (fileType === 'image') {
-            contentHtml = `<img src="${escapeHtml(url)}" alt="${escapeHtml(fileName)}"><button class="download-btn-inline" id="downloadBtn">下载文件</button>`;
+            contentHtml = `<img src="${escapeHtml(url)}" alt="${escapeHtml(fileName)}"><button class="download-btn-inline" id="downloadBtn">立即下载</button>`;
         } else if (fileType === 'video') {
-            contentHtml = `<video controls autoplay><source src="${escapeHtml(url)}"></video><button class="download-btn-inline" id="downloadBtn">下载文件</button>`;
+            contentHtml = `<video controls autoplay><source src="${escapeHtml(url)}"></video><button class="download-btn-inline" id="downloadBtn">立即下载</button>`;
         } else if (fileType === 'pdf') {
-            contentHtml = `<iframe src="${escapeHtml(url)}" style="width:100%; height:85vh; border:none;"></iframe><button class="download-btn-inline" id="downloadBtn">下载文件</button>`;
+            contentHtml = `<iframe src="${escapeHtml(url)}" style="width:100%; height:85vh; border:none;"></iframe><button class="download-btn-inline" id="downloadBtn">立即下载</button>`;
         } else {
-            contentHtml = `<div class="unsupported-preview"><h2>该文件不支持预览</h2><p>${escapeHtml(fileName)}</p><button id="downloadBtn">立即下载</button></div>`;
+            contentHtml = `<div class="unsupported-preview"><h2>📄 该文件不支持预览</h2><p>${escapeHtml(fileName)}</p><button id="downloadBtn">立即下载</button></div>`;
         }
         previewDiv.innerHTML = `<div class="preview-header"><h3>${escapeHtml(fileName)}</h3><button class="preview-btn close-btn">✕ 关闭</button></div><div class="preview-content">${contentHtml}</div>`;
         document.body.appendChild(previewDiv);
@@ -304,13 +330,14 @@
         previewDiv.querySelector('.close-btn').onclick = () => previewDiv.remove();
     }
     
+    // ========== 处理应用点击 ==========
     function handleAppClick(link, name, hasWindowMode) {
         const fileType = getFileType(link);
         const useWindow = windowModeEnabled && (hasWindowMode || fileType !== 'link');
         if (useWindow && fileType !== 'link') {
-            createWebWindow(link, name);
+            createPreviewWindow(link, name, fileType);
         } else if (useWindow) {
-            createWebWindow(link, name);
+            createPreviewWindow(link, name, 'link');
         } else if (fileType !== 'link') {
             showFullscreenPreview(link, name, fileType);
         } else {
@@ -532,8 +559,24 @@
     function startAutoSlide() { if(autoInterval) clearInterval(autoInterval); if(totalSlides>1) autoInterval = setInterval(nextSlide,5000); }
     function resetAutoSlide() { startAutoSlide(); }
     
-    function initSwipe() { /* 简化，保持功能 */ }
-    function alignSameRowHeights() { /* 保持原有 */ }
+    function initSwipe() {
+        if(!carouselTrack) return;
+        const wrapper = carouselTrack.parentElement;
+        if(!wrapper) return;
+        let startX = 0, isSwiping = false, startTransform = 0;
+        const onTouchStart = (e) => { if(totalSlides <= 1) return; startX = e.touches[0].clientX; isSwiping = true; startTransform = currentIndex; carouselTrack.style.transition = 'none'; if(autoInterval) clearInterval(autoInterval); };
+        const onTouchMove = (e) => { if(!isSwiping) return; const diffX = e.touches[0].clientX - startX; const percent = (diffX / wrapper.clientWidth) * 100; let newPercent = -startTransform * 100 + percent; if(startTransform === 0 && diffX > 0) newPercent *= 0.3; if(startTransform === totalSlides - 1 && diffX < 0) newPercent = -startTransform * 100 + percent * 0.3; carouselTrack.style.transform = `translateX(${newPercent}%)`; };
+        const onTouchEnd = (e) => { if(!isSwiping) { carouselTrack.style.transition = ''; resetAutoSlide(); return; } isSwiping = false; const diffX = e.changedTouches[0].clientX - startX; if(Math.abs(diffX) > 35) diffX > 0 ? prevSlide() : nextSlide(); updateCarouselPosition(); carouselTrack.style.transition = ''; resetAutoSlide(); };
+        wrapper.addEventListener('touchstart', onTouchStart, { passive: false }); wrapper.addEventListener('touchmove', onTouchMove, { passive: false }); wrapper.addEventListener('touchend', onTouchEnd);
+    }
+    
+    function alignSameRowHeights() {
+        const cards = document.querySelectorAll('.app-card');
+        if(!cards.length) return;
+        const rows = [];
+        cards.forEach(card => { const rect = card.getBoundingClientRect(); let added = false; for(let row of rows) { if(Math.abs(rect.top - row[0].top) <= 5) { row.push({ element: card, height: rect.height }); added = true; break; } } if(!added) rows.push([{ element: card, height: rect.height, top: rect.top }]); });
+        rows.forEach(row => { if(row.length > 1) { let maxH = Math.max(...row.map(r => r.height)); row.forEach(r => r.element.style.height = maxH + 'px'); } });
+    }
     
     function parseAppTxt(raw) {
         const lines = raw.split(/\r?\n/);
