@@ -25,33 +25,75 @@
             width: 100%;
             max-width: 480px;
             margin: 0 auto;
-            padding: 24px 20px;
+            padding: 40px 24px;
             background-color: white;
             border-radius: 20px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        }
-        
-        h1 { 
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 26px;
-            font-weight: 600;
             text-align: center;
         }
         
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0066cc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         .message {
-            font-size: 17px;
-            color: #333;
-            line-height: 1.6;
-            text-align: left;
-            margin-bottom: 24px;
-            padding: 0 4px;
+            font-size: 16px;
+            color: #666;
+            margin: 20px 0;
         }
         
-        .message p {
-            margin: 12px 0;
+        .error-404 {
+            font-size: 80px;
+            font-weight: 600;
+            color: #dee2e6;
+            margin: 20px 0 10px;
+            line-height: 1;
         }
         
+        .error-message h2 {
+            font-size: 24px;
+            color: #343a40;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        
+        .error-message p {
+            font-size: 16px;
+            color: #868e96;
+        }
+        
+        .back-link {
+            margin-top: 30px;
+        }
+        
+        .back-link a {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #f1f3f5;
+            color: #495057;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        
+        .back-link a:hover {
+            background-color: #e9ecef;
+        }
+        
+        /* 值日生页面样式 */
         .student-param {
             font-weight: 600;
             color: #0066cc;
@@ -103,114 +145,29 @@
             border-radius: 10px;
             border: 1px solid #e9ecef;
             word-break: break-all;
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+            font-family: monospace;
             text-align: center;
-            letter-spacing: 0.3px;
         }
         
         .qr-note {
             font-size: 14px;
             color: #868e96;
             margin-top: 12px;
-            padding: 0 8px;
         }
         
-        .back-link {
-            margin-top: 24px;
-            text-align: center;
+        .message-text {
+            font-size: 17px;
+            color: #333;
+            line-height: 1.6;
+            text-align: left;
+            margin-bottom: 24px;
         }
         
-        .back-link a {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: #f1f3f5;
-            color: #495057;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 500;
-            transition: background-color 0.2s;
-        }
-        
-        .back-link a:hover {
-            background-color: #e9ecef;
-        }
-        
-        a {
-            color: #0066cc;
-            text-decoration: none;
-        }
-        
-        a:hover {
-            text-decoration: underline;
-        }
-        
-        .error-404 {
-            font-size: 80px;
-            font-weight: 600;
-            color: #dee2e6;
-            margin: 20px 0 10px;
-            line-height: 1;
-            text-align: center;
-        }
-        
-        .error-message {
-            text-align: center;
-            margin: 20px 0;
-        }
-        
-        .error-message h2 {
-            font-size: 24px;
-            color: #343a40;
-            margin-bottom: 12px;
-            font-weight: 500;
-        }
-        
-        .error-message p {
-            font-size: 16px;
-            color: #868e96;
-        }
-        
-        /* 移动端优化 */
         @media (max-width: 380px) {
-            .container {
-                padding: 20px 16px;
-            }
-            
-            h1 {
-                font-size: 24px;
-            }
-            
-            .message {
-                font-size: 16px;
-            }
-            
-            .student-param {
-                font-size: 17px;
-                padding: 2px 6px;
-            }
-            
             .qr-code img {
                 width: 160px;
                 height: 160px;
             }
-            
-            .qr-text {
-                font-size: 14px;
-                padding: 10px;
-            }
-            
-            .error-404 {
-                font-size: 64px;
-            }
-        }
-        
-        /* 触摸优化 */
-        .qr-code, .back-link a {
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        .qr-code:active, .back-link a:active {
-            transform: scale(0.98);
         }
     </style>
 </head>
@@ -224,60 +181,81 @@
         var currentUrl = window.location.href;
         var urlObj = new URL(currentUrl);
         var path = urlObj.pathname;
-        var queryString = urlObj.search; // 获取?后面的所有内容，包括问号
+        var queryString = urlObj.search;
         
-        // 获取显示内容的容器
         var contentDiv = document.getElementById('content');
         
-        // 只有访问 /zhiri 路径时才显示值日生信息
+        // 判断访问的是哪个路径
         if (path === '/zhiri') {
-            // 修改页面标题
-            document.title = '电子值日卡';
+            // /zhiri?参数 -> 跳转到1205页面，并存储参数和时间戳到临时存储
             
-            // 提取参数部分（去掉开头的?）
-            var params = queryString.substring(1); // 删除第一个字符（问号）
+            // 提取参数
+            var params = queryString.substring(1);
             
-            // 保存原始编码（用于显示）
+            if (params) {
+                // 创建数据对象，包含参数和时间戳
+                var data = {
+                    value: params,
+                    timestamp: Date.now()  // 当前时间戳（毫秒）
+                };
+                // 保存到 localStorage
+                localStorage.setItem('zhiriData', JSON.stringify(data));
+            }
+            
+            // 显示加载动画
+            contentDiv.innerHTML = `
+                <div class="loading-spinner"></div>
+                <div class="message">正在跳转...</div>
+            `;
+            
+            // 延迟跳转，确保存储完成
+            setTimeout(function() {
+                window.location.replace('/1205');
+            }, 100);
+        }
+        else if (path === '/ezhiri') {
+            // /ezhiri?参数 -> 显示值日生信息和二维码（原zhiri的功能）
+            
+            document.title = '值日生信息';
+            
+            // 提取参数
+            var params = queryString.substring(1);
             var encodedParams = params;
             
-            // 如果没有参数，显示默认提示
             if (!params) {
                 params = '未知同学';
                 encodedParams = 'unknown';
             }
             
-            // 解码URL参数为中文字符（用于显示）
+            // 解码URL参数
             try {
                 params = decodeURIComponent(params);
             } catch (e) {
-                // 如果解码失败，保持原样
-                console.log('解码失败，使用原始参数');
+                console.log('解码失败');
             }
             
-            // 构建完整的二维码URL（使用原始编码参数）
-            var qrCodeUrl = 'https://luckynum.top/zhiri?' + encodedParams;
-            
-            // 使用免费的二维码生成API
+            // 构建二维码URL
+            var qrCodeUrl = 'https://luckynum.top/ezhiri?' + encodedParams;
             var qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(qrCodeUrl);
             
-            // 生成值日生信息页面
+            // 显示值日生信息页面
             contentDiv.innerHTML = `
-                <h1>电子值日卡</h1>
-                <div class="message">
+                <h1 style="font-size: 26px; margin-bottom: 20px; text-align: center;">值日生信息</h1>
+                <div class="message-text">
                     <p><span class="student-param">${params}</span> 同学你好，请使用教室中控设备（或大屏）上的“值日管理系统”软件来扫描统计！先用系统扫描值日卡，再扫描本码！感谢你的配合。</p>
                 </div>
                 <div class="qr-section">
                     <div class="qr-title">你的二维码</div>
                     <div class="qr-code">
-                        <img src="${qrImageUrl}" alt="二维码" title="扫描此码进行值日确认">
+                        <img src="${qrImageUrl}" alt="二维码">
                     </div>
                     <div class="qr-text">${encodedParams}</div>
                     <div class="qr-note">请使用值日管理系统扫描此码</div>
                 </div>
             `;
-        } 
+        }
         else {
-            // 对于其他所有404错误，显示普通404页面
+            // 其他404错误
             document.title = '404';
             
             contentDiv.innerHTML = `
