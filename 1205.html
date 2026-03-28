@@ -75,7 +75,7 @@
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; background: white; }
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; }
         
-        /* 全屏文件阅读器样式 */
+        /* 全屏文件阅读器样式 - 图片显示完整优先 */
         .file-viewer-overlay {
             position: fixed;
             top: 0;
@@ -124,8 +124,8 @@
             background: rgba(255,255,255,0.2);
             border: none;
             color: white;
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1.2rem;
@@ -134,32 +134,39 @@
         .viewer-content {
             flex: 1;
             background: #000;
-            overflow: auto;
+            overflow: hidden;
+            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
         }
-        .image-zoom-container {
+        /* 图片容器 - 使用 contain 确保图片完整显示，有黑边 */
+        .image-container {
             width: 100%;
             height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: auto;
-            cursor: grab;
+            overflow: hidden;
+            position: relative;
+            touch-action: none;
         }
-        .image-zoom-container:active { cursor: grabbing; }
         .zoomable-image {
-            max-width: none;
-            max-height: none;
-            transition: transform 0.1s ease;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            transition: transform 0.05s ease-out;
             transform-origin: center center;
+            will-change: transform;
         }
+        /* 视频样式 */
         .viewer-content video {
             max-width: 100%;
             max-height: 100%;
             background: #000;
+            object-fit: contain;
         }
         .pdf-viewer-container {
             width: 100%;
@@ -234,6 +241,7 @@
             .add-btn, .add-carousel-btn, .upload-only-btn { width: 48px; height: 48px; font-size: 20px; }
             .drag-handle { width: 20px; height: 20px; font-size: 10px; }
             .viewer-btn, .zoom-btn { padding: 6px 12px; font-size: 0.8rem; }
+            .zoom-btn { width: 36px; height: 36px; }
         }
     </style>
 </head>
@@ -244,7 +252,7 @@
         <button class="settings-btn" id="settingsBtn">⚙</button>
     </div>
     
-    <!-- 问候语区域 - 在大标题下方，轮播图上方，向左顶格 -->
+    <!-- 问候语区域 -->
     <div id="greetingContainer" class="greeting-section" style="display: none;">
         <div class="greeting-text"></div>
     </div>
@@ -285,7 +293,6 @@
             if (zhiriDataStr) {
                 const zhiriData = JSON.parse(zhiriDataStr);
                 const now = Date.now();
-                // 检查数据是否存在且未过期（60秒内）
                 if (zhiriData && zhiriData.timestamp && (now - zhiriData.timestamp <= 60000)) {
                     const studentName = zhiriData.value || '同学';
                     const greetingContainer = document.getElementById('greetingContainer');
@@ -295,12 +302,10 @@
                         greetingContainer.style.display = 'block';
                     }
                 }
-                // 无论是否过期，都删除该数据
                 localStorage.removeItem('zhiriData');
             }
         } catch (e) {
             console.error('读取zhiriData失败:', e);
-            // 出错时也尝试删除，避免残留
             localStorage.removeItem('zhiriData');
         }
     }
@@ -315,7 +320,6 @@
     let isEditMode = false, currentToken = null, fileSha = null;
     let draggedIndex = null;
     
-    // DOM 元素
     const carouselSection = document.getElementById('carouselSection'), carouselTrack = document.getElementById('carouselTrack');
     const dotsContainer = document.getElementById('carouselDots'), appsGrid = document.getElementById('appsGrid');
     const appsHeader = document.getElementById('appsHeader'), settingsBtn = document.getElementById('settingsBtn');
@@ -328,7 +332,7 @@
     const addCarouselFab = document.getElementById('addCarouselFab');
     const uploadOnlyBtn = document.getElementById('uploadOnlyBtn');
     
-    // ========== 判断是否为文件（有扩展名且不是网页） ==========
+    // ========== 判断是否为文件 ==========
     function isFileUrl(url) {
         if (!url || url.startsWith('javascript:') || url.startsWith('mailto:') || url.startsWith('#')) return false;
         const path = url.split('?')[0].split('#')[0];
@@ -340,7 +344,6 @@
         return true;
     }
     
-    // ========== 获取文件类型 ==========
     function getFileType(url) {
         const path = url.split('?')[0].split('#')[0];
         const ext = path.split('.').pop().toLowerCase();
@@ -350,7 +353,6 @@
         return 'file';
     }
     
-    // ========== 下载文件 ==========
     function downloadFile(url, fileName) {
         const a = document.createElement('a');
         a.href = url;
@@ -361,80 +363,54 @@
         document.body.removeChild(a);
     }
     
-    // ========== PDF 渲染函数 ==========
-    let currentPDF = null;
-    let currentPDFScale = 1.2;
-    let currentPDFPage = 1;
-    let pdfTotalPages = 1;
-    let pdfContainer = null;
-    let pdfCanvasContainer = null;
-    
-    async function renderPDFPage() {
-        if (!currentPDF) return;
-        try {
-            const page = await currentPDF.getPage(currentPDFPage);
-            const viewport = page.getViewport({ scale: currentPDFScale });
-            const canvas = document.createElement('canvas');
-            canvas.className = 'pdf-canvas';
-            const context = canvas.getContext('2d');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            await page.render({ canvasContext: context, viewport }).promise;
-            if (pdfCanvasContainer) {
-                pdfCanvasContainer.innerHTML = '';
-                pdfCanvasContainer.appendChild(canvas);
-            }
-            const pageInfo = document.getElementById('pdfPageInfo');
-            if (pageInfo) pageInfo.innerHTML = `第 ${currentPDFPage} / ${pdfTotalPages} 页`;
-        } catch(e) { console.error('PDF渲染失败', e); }
-    }
-    
-    async function initPDF(pdfUrl, fileName) {
-        try {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
-            const loadingTask = pdfjsLib.getDocument(pdfUrl);
-            currentPDF = await loadingTask.promise;
-            pdfTotalPages = currentPDF.numPages;
-            currentPDFPage = 1;
-            currentPDFScale = 1.2;
-            await renderPDFPage();
-        } catch (error) {
-            if (pdfContainer) {
-                pdfContainer.innerHTML = `<div class="unsupported-view" style="background:#fff; margin:20px;"><h2>📄 PDF加载失败</h2><p>文件可能无法访问</p><button class="fallback-download">📥 立即下载</button></div>`;
-                const btn = pdfContainer.querySelector('.fallback-download');
-                if (btn) btn.onclick = () => downloadFile(pdfUrl, fileName);
-            }
-        }
-    }
-    
-    // ========== 图片缩放功能 ==========
+    // ========== 图片缩放和拖拽功能（支持双指手势） ==========
     function createZoomableImage(url, fileName) {
         const container = document.createElement('div');
-        container.className = 'image-zoom-container';
+        container.className = 'image-container';
         
         const img = document.createElement('img');
         img.src = url;
         img.className = 'zoomable-image';
-        img.style.transform = 'scale(1)';
+        img.style.transform = 'translate(0px, 0px) scale(1)';
         container.appendChild(img);
         
         let scale = 1;
-        let isDragging = false;
-        let dragStartX = 0, dragStartY = 0;
         let translateX = 0, translateY = 0;
+        let initialDistance = 0;
+        let initialScale = 1;
+        let lastTouchX = 0, lastTouchY = 0;
+        let isPanning = false;
         
         const updateTransform = () => {
             img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
         };
         
+        const clampTranslate = () => {
+            const rect = img.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const maxX = Math.max(0, (rect.width * scale - containerRect.width) / 2);
+            const maxY = Math.max(0, (rect.height * scale - containerRect.height) / 2);
+            translateX = Math.min(maxX, Math.max(-maxX, translateX));
+            translateY = Math.min(maxY, Math.max(-maxY, translateY));
+        };
+        
         const zoomIn = () => {
             scale = Math.min(scale + 0.25, 4);
+            clampTranslate();
             updateTransform();
         };
+        
         const zoomOut = () => {
-            scale = Math.max(scale - 0.25, 0.5);
+            scale = Math.max(scale - 0.25, 1);
+            if (scale === 1) {
+                translateX = 0;
+                translateY = 0;
+            } else {
+                clampTranslate();
+            }
             updateTransform();
         };
+        
         const resetZoom = () => {
             scale = 1;
             translateX = 0;
@@ -442,31 +418,122 @@
             updateTransform();
         };
         
+        // 鼠标滚轮缩放
         img.addEventListener('wheel', (e) => {
             e.preventDefault();
             if (e.deltaY < 0) zoomIn();
             else zoomOut();
         });
         
+        // 鼠标拖拽（缩放后）
+        let isDragging = false;
+        let dragStartX = 0, dragStartY = 0;
+        let startTranslateX = 0, startTranslateY = 0;
+        
         img.addEventListener('mousedown', (e) => {
             if (scale > 1) {
                 isDragging = true;
-                dragStartX = e.clientX - translateX;
-                dragStartY = e.clientY - translateY;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                startTranslateX = translateX;
+                startTranslateY = translateY;
                 img.style.cursor = 'grabbing';
                 e.preventDefault();
             }
         });
+        
         document.addEventListener('mousemove', (e) => {
             if (isDragging && scale > 1) {
-                translateX = e.clientX - dragStartX;
-                translateY = e.clientY - dragStartY;
+                translateX = startTranslateX + (e.clientX - dragStartX);
+                translateY = startTranslateY + (e.clientY - dragStartY);
+                clampTranslate();
                 updateTransform();
             }
         });
+        
         document.addEventListener('mouseup', () => {
             isDragging = false;
             if (scale > 1) img.style.cursor = 'grab';
+        });
+        
+        // 触摸事件 - 支持双指缩放和单指拖拽
+        let initialTouches = [];
+        
+        const getDistance = (touches) => {
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.hypot(dx, dy);
+        };
+        
+        const getCenter = (touches) => {
+            return {
+                x: (touches[0].clientX + touches[1].clientX) / 2,
+                y: (touches[0].clientY + touches[1].clientY) / 2
+            };
+        };
+        
+        container.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touches = Array.from(e.touches);
+            initialTouches = touches;
+            
+            if (touches.length === 1) {
+                // 单指拖拽
+                isPanning = true;
+                lastTouchX = touches[0].clientX;
+                lastTouchY = touches[0].clientY;
+            } else if (touches.length === 2) {
+                // 双指缩放
+                initialDistance = getDistance(touches);
+                initialScale = scale;
+                const center = getCenter(touches);
+                lastTouchX = center.x;
+                lastTouchY = center.y;
+            }
+        });
+        
+        container.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touches = Array.from(e.touches);
+            
+            if (touches.length === 1 && isPanning && scale > 1) {
+                // 单指拖拽移动图片
+                const deltaX = touches[0].clientX - lastTouchX;
+                const deltaY = touches[0].clientY - lastTouchY;
+                translateX += deltaX;
+                translateY += deltaY;
+                clampTranslate();
+                updateTransform();
+                lastTouchX = touches[0].clientX;
+                lastTouchY = touches[0].clientY;
+            } else if (touches.length === 2) {
+                // 双指缩放
+                const newDistance = getDistance(touches);
+                const newScale = initialScale * (newDistance / initialDistance);
+                scale = Math.min(Math.max(newScale, 1), 4);
+                
+                if (scale === 1) {
+                    translateX = 0;
+                    translateY = 0;
+                } else {
+                    const newCenter = getCenter(touches);
+                    const deltaX = newCenter.x - lastTouchX;
+                    const deltaY = newCenter.y - lastTouchY;
+                    translateX += deltaX;
+                    translateY += deltaY;
+                    clampTranslate();
+                    lastTouchX = newCenter.x;
+                    lastTouchY = newCenter.y;
+                }
+                updateTransform();
+                initialDistance = newDistance;
+                initialScale = scale;
+            }
+        });
+        
+        container.addEventListener('touchend', (e) => {
+            isPanning = false;
+            initialTouches = [];
         });
         
         img.onerror = () => {
@@ -529,6 +596,7 @@
             video.autoplay = false;
             video.style.maxWidth = '100%';
             video.style.maxHeight = '100%';
+            video.style.objectFit = 'contain';
             const source = document.createElement('source');
             source.src = url;
             video.appendChild(source);
@@ -540,10 +608,9 @@
             content.appendChild(video);
             
         } else if (fileType === 'pdf') {
+            // PDF 处理（保持原有功能）
             const pdfContainerDiv = document.createElement('div');
             pdfContainerDiv.className = 'pdf-viewer-container';
-            pdfContainer = pdfContainerDiv;
-            
             const controls = document.createElement('div');
             controls.className = 'pdf-controls';
             controls.innerHTML = `
@@ -559,46 +626,45 @@
                 <button id="pdfDownloadBtn" style="margin-left:15px;">📥 下载</button>
             `;
             pdfContainerDiv.appendChild(controls);
-            
-            pdfCanvasContainer = document.createElement('div');
+            const pdfCanvasContainer = document.createElement('div');
             pdfCanvasContainer.className = 'pdf-canvas-container';
             pdfContainerDiv.appendChild(pdfCanvasContainer);
             content.appendChild(pdfContainerDiv);
             
-            initPDF(url, fileName);
-            
-            setTimeout(() => {
-                const prevBtn = document.getElementById('pdfPrevBtn');
-                const nextBtn = document.getElementById('pdfNextBtn');
-                const zoomInBtn = document.getElementById('pdfZoomInBtn');
-                const zoomOutBtn = document.getElementById('pdfZoomOutBtn');
-                const resetZoomBtn = document.getElementById('pdfResetZoomBtn');
-                const zoomLevel = document.getElementById('pdfZoomLevel');
-                const downloadBtn = document.getElementById('pdfDownloadBtn');
+            // 简化 PDF 初始化
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
+            pdfjsLib.getDocument(url).promise.then(pdf => {
+                let currentPage = 1;
+                let currentScale = 1.2;
+                const totalPages = pdf.numPages;
+                const renderPage = () => {
+                    pdf.getPage(currentPage).then(page => {
+                        const viewport = page.getViewport({ scale: currentScale });
+                        const canvas = document.createElement('canvas');
+                        canvas.className = 'pdf-canvas';
+                        const context = canvas.getContext('2d');
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+                        page.render({ canvasContext: context, viewport }).promise.then(() => {
+                            pdfCanvasContainer.innerHTML = '';
+                            pdfCanvasContainer.appendChild(canvas);
+                            document.getElementById('pdfPageInfo').innerHTML = `第 ${currentPage} / ${totalPages} 页`;
+                        });
+                    });
+                };
+                renderPage();
                 
-                if (prevBtn) prevBtn.onclick = async () => {
-                    if (currentPDFPage > 1) { currentPDFPage--; await renderPDFPage(); }
-                };
-                if (nextBtn) nextBtn.onclick = async () => {
-                    if (currentPDFPage < pdfTotalPages) { currentPDFPage++; await renderPDFPage(); }
-                };
-                if (zoomInBtn) zoomInBtn.onclick = async () => {
-                    currentPDFScale = Math.min(currentPDFScale + 0.2, 3);
-                    if (zoomLevel) zoomLevel.innerHTML = Math.round(currentPDFScale * 100) + '%';
-                    await renderPDFPage();
-                };
-                if (zoomOutBtn) zoomOutBtn.onclick = async () => {
-                    currentPDFScale = Math.max(currentPDFScale - 0.2, 0.6);
-                    if (zoomLevel) zoomLevel.innerHTML = Math.round(currentPDFScale * 100) + '%';
-                    await renderPDFPage();
-                };
-                if (resetZoomBtn) resetZoomBtn.onclick = async () => {
-                    currentPDFScale = 1.2;
-                    if (zoomLevel) zoomLevel.innerHTML = Math.round(currentPDFScale * 100) + '%';
-                    await renderPDFPage();
-                };
-                if (downloadBtn) downloadBtn.onclick = () => downloadFile(url, fileName);
-            }, 100);
+                document.getElementById('pdfPrevBtn').onclick = () => { if (currentPage > 1) { currentPage--; renderPage(); } };
+                document.getElementById('pdfNextBtn').onclick = () => { if (currentPage < totalPages) { currentPage++; renderPage(); } };
+                document.getElementById('pdfZoomInBtn').onclick = () => { currentScale = Math.min(currentScale + 0.2, 3); renderPage(); };
+                document.getElementById('pdfZoomOutBtn').onclick = () => { currentScale = Math.max(currentScale - 0.2, 0.6); renderPage(); };
+                document.getElementById('pdfResetZoomBtn').onclick = () => { currentScale = 1.2; renderPage(); };
+                document.getElementById('pdfDownloadBtn').onclick = () => downloadFile(url, fileName);
+            }).catch(() => {
+                pdfContainerDiv.innerHTML = `<div class="unsupported-view"><h2>📄 PDF加载失败</h2><p>文件可能无法访问</p><button class="fallback-download">📥 立即下载</button></div>`;
+                const btn = pdfContainerDiv.querySelector('.fallback-download');
+                if (btn) btn.onclick = () => downloadFile(url, fileName);
+            });
             
         } else {
             content.innerHTML = `
@@ -637,7 +703,7 @@
     function utf8ToBase64(str) { const bytes = new TextEncoder().encode(str); let binary = ''; for(let b of bytes) binary += String.fromCharCode(b); return btoa(binary); }
     function generateFileContent() { let c='pic\n'; for(let s of slidesData) c+=`[p=${s.imgUrl} l=${s.linkUrl}]\n`; c+='app\n'; for(let a of appItems) c+=`[n=${a.name} p=${a.icon} l=${a.link}]\n`; return c; }
     
-    // ========== GitHub 操作 ==========
+    // ========== GitHub 操作（简化，保持原有功能） ==========
     async function uploadImageToGitHub(file) {
         if (!currentToken) return null;
         try {
@@ -820,11 +886,9 @@
         modal.querySelector('.cancel-btn').onclick = () => modal.remove();
     }
     
-    // ========== 删除功能 ==========
     async function deleteApp(idx) { if (confirm('确定删除？')) { const d = appItems[idx]; appItems.splice(idx,1); if (await saveToGitHub(generateFileContent())) renderApps(appItems); else appItems.splice(idx,0,d); } }
     async function deleteSlide(idx) { if (confirm('确定删除？')) { const d = slidesData[idx]; slidesData.splice(idx,1); if (await saveToGitHub(generateFileContent())) { if(slidesData.length) renderCarousel(); else carouselSection.style.display='none'; } else slidesData.splice(idx,0,d); } }
     
-    // ========== 渲染 ==========
     function renderApps(apps) {
         if (!appsGrid) return;
         if (!apps.length) { appsGrid.innerHTML = '<div class="empty-tip">暂无应用，点击右下角 + 添加</div>'; return; }
@@ -924,7 +988,6 @@
         else { appsGrid.innerHTML = '<div class="empty-tip">暂无应用数据</div>'; if(appsHeader) appsHeader.style.display = 'flex'; }
     }
     
-    // ========== 设置 ==========
     settingsBtn.addEventListener('click', (e) => { e.stopPropagation(); settingsPanel.classList.toggle('show'); });
     document.addEventListener('click', (e) => { if(!settingsPanel.contains(e.target) && e.target !== settingsBtn) settingsPanel.classList.remove('show'); });
     adminBtn.addEventListener('click', () => { tokenArea.style.display = tokenArea.style.display === 'none' ? 'block' : 'none'; });
@@ -934,7 +997,6 @@
     uploadOnlyBtn.addEventListener('click', showUploadOnlyModal);
     addAppTextBtn.addEventListener('click', showAddAppModal);
     
-    // 启动：先检查问候语，再加载配置
     checkAndShowGreeting();
     loadConfigFile();
     window.addEventListener('resize', () => setTimeout(alignSameRowHeights, 100));
