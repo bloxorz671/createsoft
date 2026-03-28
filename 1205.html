@@ -261,6 +261,85 @@
 </div>
 
 <script>
+    // ========== 获取URL参数 ==========
+    function getUrlParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+    
+    // ========== 从5name.txt读取姓名映射 ==========
+    let nameMapping = {};
+    
+    async function loadNameMapping() {
+        try {
+            const response = await fetch('https://luckynum.top/5name.txt');
+            if (response.ok) {
+                const text = await response.text();
+                const lines = text.split(/\r?\n/);
+                for (let line of lines) {
+                    line = line.trim();
+                    if (line === '') continue;
+                    // 按空格分割，第一个是参数，后面的是姓名（可能包含空格）
+                    const firstSpace = line.indexOf(' ');
+                    if (firstSpace !== -1) {
+                        const param = line.substring(0, firstSpace).trim();
+                        const name = line.substring(firstSpace + 1).trim();
+                        if (param && name) {
+                            nameMapping[param] = name;
+                        }
+                    }
+                }
+                console.log('姓名映射加载成功，共', Object.keys(nameMapping).length, '条');
+            }
+        } catch (e) {
+            console.log('无法加载5name.txt，使用默认问候语');
+        }
+    }
+    
+    // ========== 显示问候语 ==========
+    function showGreeting(greetingText) {
+        const greetingContainer = document.getElementById('greetingContainer');
+        const greetingTextElem = greetingContainer.querySelector('.greeting-text');
+        if (greetingContainer && greetingTextElem) {
+            greetingTextElem.textContent = greetingText;
+            greetingContainer.style.display = 'block';
+        }
+    }
+    
+    // ========== 处理问候语逻辑 ==========
+    async function initGreeting() {
+        // 优先从5name.txt读取
+        await loadNameMapping();
+        
+        const urlParam = getUrlParam('p');
+        if (urlParam && nameMapping[urlParam]) {
+            // 找到了对应的姓名
+            showGreeting(`${nameMapping[urlParam]}同学你好`);
+            return true;
+        }
+        
+        // 其次从localStorage读取zhiriData
+        try {
+            const zhiriDataStr = localStorage.getItem('zhiriData');
+            if (zhiriDataStr) {
+                const zhiriData = JSON.parse(zhiriDataStr);
+                const now = Date.now();
+                if (zhiriData && zhiriData.timestamp && (now - zhiriData.timestamp <= 60000)) {
+                    const studentName = zhiriData.value || '同学';
+                    showGreeting(`${studentName}同学你好`);
+                    localStorage.removeItem('zhiriData');
+                    return true;
+                }
+                localStorage.removeItem('zhiriData');
+            }
+        } catch (e) {
+            console.error('读取zhiriData失败:', e);
+            localStorage.removeItem('zhiriData');
+        }
+        
+        return false;
+    }
+    
     // ========== 标题点击3次触发Token输入 ==========
     let clickCount = 0;
     let clickTimer = null;
@@ -321,30 +400,6 @@
         };
         
         modal.querySelector('#tokenCancelBtn').onclick = () => modal.remove();
-    }
-    
-    // ========== 读取并显示 zhiriData 问候语 ==========
-    function checkAndShowGreeting() {
-        try {
-            const zhiriDataStr = localStorage.getItem('zhiriData');
-            if (zhiriDataStr) {
-                const zhiriData = JSON.parse(zhiriDataStr);
-                const now = Date.now();
-                if (zhiriData && zhiriData.timestamp && (now - zhiriData.timestamp <= 60000)) {
-                    const studentName = zhiriData.value || '同学';
-                    const greetingContainer = document.getElementById('greetingContainer');
-                    const greetingText = greetingContainer.querySelector('.greeting-text');
-                    if (greetingContainer && greetingText) {
-                        greetingText.textContent = `${studentName}同学你好`;
-                        greetingContainer.style.display = 'block';
-                    }
-                }
-                localStorage.removeItem('zhiriData');
-            }
-        } catch (e) {
-            console.error('读取zhiriData失败:', e);
-            localStorage.removeItem('zhiriData');
-        }
     }
     
     // ========== 配置 ==========
@@ -976,8 +1031,10 @@
     uploadOnlyBtn.addEventListener('click', showUploadOnlyModal);
     addAppTextBtn.addEventListener('click', showAddAppModal);
     
-    checkAndShowGreeting();
-    loadConfigFile();
+    // 启动：先处理问候语，再加载配置
+    initGreeting().then(() => {
+        loadConfigFile();
+    });
     window.addEventListener('resize', () => setTimeout(alignSameRowHeights, 100));
 </script>
 </body>
