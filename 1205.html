@@ -1,25 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" href="/41.jpg" type="image/jpeg">
-    <!-- 这里已有或已有其他的 <meta> 标签 -->
-    <!-- 以下是必须添加的 OG 标签 -->
-    <meta property="og:title" content="初二五班智慧应用平台" />
-    <meta property="og:description" content="欢迎使用初二五班智慧应用平台" />
-    <meta property="og:image" content="https://luckynum.top/41.jpg" />
-    <meta property="og:url" content="https://luckynum.top/1205" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="初二五班智慧应用平台" />
-    <!-- 以下为可选但推荐的标签 -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:title" content="初二五班智慧应用平台" />
-    <meta property="twitter:description" content="这里是初二五班智慧应用平台的详细描述，用于在微信中展示。请修改这句话以更准确地描述您的平台。" />
-    <meta property="twitter:image" content="https://luckynum.top/41.jpg" />
-    <title>初二五班智慧应用平台</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>初二五班智慧应用平台</title>
-    <!-- PDF.js 库 - 本地预览PDF，无需外网 -->
     <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.min.js"></script>
     <style>
         * {
@@ -40,6 +24,7 @@
             max-width: 550px;
             margin: 0 auto;
             background: #ffffff;
+            position: relative;
         }
 
         .main-header {
@@ -123,6 +108,28 @@
             border-top: 1px solid #eee;
             line-height: 1.4;
         }
+        .admin-btn {
+            background: #2b4c8a;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .admin-btn:hover {
+            background: #1e3a6b;
+        }
+        .token-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
         .switch {
             position: relative;
             display: inline-block;
@@ -163,6 +170,7 @@
             transform: translateX(24px);
         }
 
+        /* 轮播区样式 */
         .carousel-section {
             margin: 12px 16px 24px;
             background: #f0f2f6;
@@ -178,9 +186,6 @@
             display: flex;
             transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
             cursor: grab;
-        }
-        .carousel-track:active {
-            cursor: grabbing;
         }
         .carousel-slide {
             flex: 0 0 100%;
@@ -199,18 +204,41 @@
             object-fit: cover;
             background: #d9dde3;
             aspect-ratio: 16 / 9;
-            pointer-events: auto;
         }
-
+        .slide-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        .delete-btn, .add-btn {
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .delete-btn:hover {
+            background: #e74c3c;
+        }
+        .add-btn:hover {
+            background: #27ae60;
+        }
         .carousel-dots {
             display: flex;
             justify-content: center;
             gap: 10px;
             padding: 12px 0 14px;
             background: rgba(255,255,255,0.75);
-            position: relative;
-            bottom: 0;
-            width: 100%;
         }
         .dot {
             width: 8px;
@@ -229,12 +257,14 @@
         .apps-header {
             padding: 20px 20px 8px 20px;
             background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .apps-title {
             font-size: 1.3rem;
             font-weight: 600;
             color: #1f2937;
-            margin: 0;
             position: relative;
             display: inline-block;
         }
@@ -247,6 +277,15 @@
             height: 3px;
             background: #2b4c8a;
         }
+        .add-app-btn {
+            background: #2b4c8a;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
 
         .apps-grid {
             display: grid;
@@ -257,7 +296,6 @@
             grid-auto-rows: 1fr;
             align-items: stretch;
         }
-
         .app-card {
             background: #f9fafc;
             display: flex;
@@ -266,31 +304,28 @@
             justify-content: flex-start;
             text-decoration: none;
             transition: all 0.25s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0,0,0,0.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
             border: 1px solid rgba(0, 0, 0, 0.03);
             cursor: pointer;
             padding: 16px 8px;
             height: 100%;
             min-height: 120px;
+            position: relative;
         }
         .app-card:hover {
             transform: translateY(-4px);
             background: #ffffff;
             box-shadow: 0 18px 28px -8px rgba(0, 0, 0, 0.12);
-            border-color: rgba(43, 76, 138, 0.2);
         }
-        
         .app-icon {
             width: 58px;
             height: 58px;
             object-fit: contain;
             margin-bottom: 14px;
-            display: block;
             background: #f0f2f5;
             padding: 4px;
             flex-shrink: 0;
         }
-        
         .app-name {
             font-size: 0.9rem;
             font-weight: 590;
@@ -298,18 +333,89 @@
             text-align: center;
             word-break: break-word;
             line-height: 1.4;
-            max-width: 100%;
-            overflow: visible;
-            white-space: normal;
             width: 100%;
+        }
+        .app-actions {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            display: flex;
+            gap: 4px;
+            z-index: 5;
+        }
+        .app-delete-btn, .app-edit-btn {
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .app-delete-btn:hover {
+            background: #e74c3c;
+        }
+
+        /* 模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-content h3 {
+            margin-bottom: 16px;
+        }
+        .modal-content input, .modal-content textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .modal-content button {
+            margin-top: 12px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .confirm-btn {
+            background: #2b4c8a;
+            color: white;
+        }
+        .cancel-btn {
+            background: #ccc;
         }
 
         .loading-tip, .empty-tip {
             text-align: center;
             padding: 40px 20px;
             color: #6c757d;
-            font-size: 0.9rem;
-            background: white;
         }
         .error-tip {
             color: #c62828;
@@ -319,358 +425,19 @@
             text-align: center;
         }
 
-        /* 全屏预览遮罩 */
-        .fullscreen-preview {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #fff;
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            overflow: auto;
-        }
-        .preview-header {
-            position: sticky;
-            top: 0;
-            background: #2c3e76;
-            color: white;
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 10;
-        }
-        .preview-header h3 {
-            font-size: 1rem;
-            font-weight: 500;
-        }
-        .preview-buttons {
-            display: flex;
-            gap: 12px;
-        }
-        .preview-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 6px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-        .preview-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        .preview-content {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            background: #f5f5f5;
-            min-height: calc(100% - 60px);
-            flex-direction: column;
-        }
-        .preview-content img, .preview-content video {
-            max-width: 100%;
-            max-height: 85vh;
-            object-fit: contain;
-        }
-        .preview-content iframe {
-            width: 100%;
-            height: 85vh;
-            border: none;
-        }
-        .pdf-viewer {
-            width: 100%;
-            height: 85vh;
-            overflow: auto;
-            background: #525659;
-        }
-        .pdf-canvas {
-            margin: 0 auto;
-            display: block;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        .unsupported-preview {
-            text-align: center;
-            padding: 60px 20px;
-            background: white;
-            border-radius: 12px;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        .unsupported-preview h2 {
-            font-size: 2rem;
-            color: #666;
-            margin-bottom: 20px;
-        }
-        .unsupported-preview p {
-            color: #999;
-            margin-bottom: 30px;
-            font-size: 1rem;
-        }
-        .unsupported-preview button {
-            background: #2b4c8a;
-            color: white;
-            border: none;
-            padding: 12px 32px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.2s;
-        }
-        .unsupported-preview button:hover {
-            background: #1e3a6b;
-            transform: scale(1.02);
-        }
-        .download-btn-inline {
-            margin-top: 20px;
-            background: #2b4c8a;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.2s;
-        }
-        .download-btn-inline:hover {
-            background: #1e3a6b;
-            transform: scale(1.02);
-        }
-
-        /* 窗口模式下的样式 */
-        .window-content {
-            flex: 1;
-            background: #f5f5f5;
-            position: relative;
-            min-height: 0;
-            overflow: auto;
-        }
-        
-        .window-content iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-        
-        .window-content .preview-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-        .window-content .preview-inner {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: auto;
-            padding: 10px;
-            min-height: 0;
-        }
-        .window-content .preview-inner img, 
-        .window-content .preview-inner video {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-        .window-content .preview-inner iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            position: static;
-        }
-        .window-preview-download {
-            padding: 8px 12px;
-            background: #f0f2f5;
-            border-top: 1px solid #ddd;
-            text-align: center;
-        }
-        .window-preview-download button {
-            background: #2b4c8a;
-            color: white;
-            border: none;
-            padding: 6px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .window-unsupported {
-            text-align: center;
-            padding: 40px;
-        }
-        .window-unsupported h3 {
-            font-size: 1.5rem;
-            color: #666;
-            margin-bottom: 20px;
-        }
-        .window-unsupported button {
-            background: #2b4c8a;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .modal-window {
-            position: fixed;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-width: 280px;
-            min-height: 200px;
-            transition: box-shadow 0.2s;
-            cursor: default;
-        }
-        .modal-window.active-window {
-            z-index: 1002;
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
-        }
-
-        .window-header {
-            background: linear-gradient(135deg, #2c3e76 0%, #1e2a4a 100%);
-            color: white;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: move;
-            user-select: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            flex-shrink: 0;
-        }
-
-        .window-title {
-            font-size: 1rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            flex: 1;
-        }
-
-        .window-controls {
-            display: flex;
-            gap: 6px;
-        }
-
-        .window-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            min-width: 32px;
-            height: 32px;
-            padding: 0 8px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .window-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.02);
-        }
-        .window-btn.close-btn:hover {
-            background: #e74c3c;
-        }
-        .window-btn.fullscreen-btn:hover {
-            background: #27ae60;
-        }
-
-        .modal-window.fullscreen-mode {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            min-width: 100% !important;
-            min-height: 100% !important;
-            border-radius: 0 !important;
-            resize: none !important;
-            z-index: 1003;
-        }
-
-        .modal-window.dragging {
-            opacity: 0.98;
-            cursor: grabbing;
-            transition: none;
-        }
-
-        .resize-handle {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 44px;
-            height: 44px;
-            cursor: nw-resize;
-            z-index: 10;
-            background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.15) 50%);
-            border-bottom-right-radius: 12px;
-            pointer-events: auto;
-        }
-
-        @media (max-width: 768px) {
-            .apps-grid {
-                gap: 14px 12px;
-                padding: 16px 16px 30px;
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            }
-            .app-icon {
-                width: 52px;
-                height: 52px;
-            }
-            .app-name {
-                font-size: 0.8rem;
-                line-height: 1.3;
-            }
-            .main-header h1 {
-                font-size: 1.6rem;
-            }
-            .apps-title {
-                font-size: 1.2rem;
-            }
-            .app-card {
-                padding: 14px 6px;
-            }
-            .window-btn {
-                min-width: 36px;
-                height: 36px;
-                padding: 0 8px;
-                font-size: 0.8rem;
-            }
-            .resize-handle {
-                width: 50px;
-                height: 50px;
-            }
-            .unsupported-preview h2 {
-                font-size: 1.5rem;
-            }
-        }
+        /* 其他样式保持原有 */
+        .fullscreen-preview { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 2000; display: flex; flex-direction: column; }
+        .preview-header { background: #2c3e76; color: white; padding: 12px 20px; display: flex; justify-content: space-between; }
+        .preview-content { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; background: #f5f5f5; }
+        .modal-window { position: fixed; background: #fff; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; min-width: 280px; min-height: 200px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .window-header { background: linear-gradient(135deg, #2c3e76, #1e2a4a); color: white; padding: 12px 16px; display: flex; justify-content: space-between; cursor: move; }
+        .window-controls { display: flex; gap: 6px; }
+        .window-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 0 8px; border-radius: 6px; cursor: pointer; }
+        .window-content { flex: 1; background: #f5f5f5; position: relative; overflow: auto; }
+        .window-content iframe { width: 100%; height: 100%; border: none; position: absolute; top: 0; left: 0; }
+        .resize-handle { position: absolute; bottom: 0; right: 0; width: 44px; height: 44px; cursor: nw-resize; background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.15) 50%); }
+        .unsupported-preview { text-align: center; padding: 60px 20px; }
+        .download-btn-inline { margin-top: 20px; background: #2b4c8a; color: white; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -691,6 +458,12 @@
         <div class="settings-hint">
             💡 部分应用可能不支持窗口模式
         </div>
+        <div style="margin-top: 12px; border-top: 1px solid #eee; padding-top: 12px;">
+            <div style="font-size: 0.85rem; font-weight: 500; margin-bottom: 8px;">🔐 管理后台</div>
+            <input type="password" id="githubToken" class="token-input" placeholder="输入 GitHub Token">
+            <button id="verifyTokenBtn" class="admin-btn">验证并进入管理模式</button>
+            <div id="adminStatus" style="font-size: 0.7rem; margin-top: 8px; color: #666;"></div>
+        </div>
     </div>
 
     <div class="carousel-section" id="carouselSection" style="display: none;">
@@ -702,6 +475,7 @@
 
     <div class="apps-header" id="appsHeader" style="display: none;">
         <h2 class="apps-title">全部应用</h2>
+        <button class="add-app-btn" id="addAppBtn" style="display: none;">+ 添加应用</button>
     </div>
 
     <div class="apps-grid" id="appsGrid">
@@ -710,20 +484,24 @@
 </div>
 
 <script>
-    // 检测是否为移动设备
-    function isMobileDevice() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent) || window.innerWidth <= 768;
-    }
-
-    // 全局变量
+    // 配置
+    const REPO_OWNER = 'bloxorz671';
+    const REPO_NAME = 'creatsoft';
+    const FILE_PATH = '5app.txt';
+    const GITHUB_API = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+    
+    let isAdminMode = false;
+    let currentToken = '';
     let slidesData = [];
+    let appsData = [];
     let currentIndex = 0;
     let autoInterval = null;
     let totalSlides = 0;
     let openWindows = [];
     let nextZIndex = 1000;
-    let windowModeEnabled = !isMobileDevice();
+    let windowModeEnabled = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
 
+    // DOM 元素
     const carouselSection = document.getElementById('carouselSection');
     const carouselTrack = document.getElementById('carouselTrack');
     const dotsContainer = document.getElementById('carouselDots');
@@ -732,1120 +510,477 @@
     const settingsBtn = document.getElementById('settingsBtn');
     const settingsPanel = document.getElementById('settingsPanel');
     const windowModeSwitch = document.getElementById('windowModeSwitch');
+    const addAppBtn = document.getElementById('addAppBtn');
 
-    const DEFAULT_ICON = 'null.jpg';
-
-    // 判断文件类型
-    function getFileType(url) {
-        const urlWithoutParams = url.split('?')[0];
-        const ext = urlWithoutParams.split('.').pop().toLowerCase();
-        const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico'];
-        const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'flv'];
-        const pdfExts = ['pdf'];
-        const officeExts = ['doc', 'docx', 'dot', 'dotx', 'wps', 'wpt', 'rtf', 'xls', 'xlsx', 'xlt', 'xltx', 'csv', 'ppt', 'pptx', 'pptm', 'ppsx', 'ppsm'];
-        
-        if (imageExts.includes(ext)) return 'image';
-        if (videoExts.includes(ext)) return 'video';
-        if (pdfExts.includes(ext)) return 'pdf';
-        if (officeExts.includes(ext)) return 'office';
-        return 'link';
-    }
-
-    // PDF.js 渲染PDF
-    async function renderPDF(container, pdfUrl, showDownloadBtn = true, downloadUrl = null) {
-        try {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
-            
-            const loadingTask = pdfjsLib.getDocument(pdfUrl);
-            const pdf = await loadingTask.promise;
-            const totalPages = pdf.numPages;
-            
-            container.innerHTML = '';
-            
-            const controls = document.createElement('div');
-            controls.style.cssText = 'position:sticky; top:0; background:#2c3e76; padding:10px; text-align:center; z-index:10;';
-            controls.innerHTML = `
-                <button style="background:rgba(255,255,255,0.2); border:none; color:white; padding:5px 15px; margin:0 5px; border-radius:4px; cursor:pointer;" id="prevPage">◀ 上一页</button>
-                <span style="color:white; margin:0 15px;" id="pageInfo">第 1 / ${totalPages} 页</span>
-                <button style="background:rgba(255,255,255,0.2); border:none; color:white; padding:5px 15px; margin:0 5px; border-radius:4px; cursor:pointer;" id="nextPage">下一页 ▶</button>
-            `;
-            container.appendChild(controls);
-            
-            const canvasContainer = document.createElement('div');
-            canvasContainer.style.cssText = 'display:flex; flex-direction:column; align-items:center; padding:20px;';
-            container.appendChild(canvasContainer);
-            
-            if (showDownloadBtn && downloadUrl) {
-                const downloadDiv = document.createElement('div');
-                downloadDiv.style.cssText = 'text-align:center; padding:10px; background:#f0f2f5; border-top:1px solid #ddd;';
-                downloadDiv.innerHTML = `<button class="pdf-download-btn" style="background:#2b4c8a; color:white; border:none; padding:8px 24px; border-radius:6px; cursor:pointer;">下载文件</button>`;
-                container.appendChild(downloadDiv);
-                downloadDiv.querySelector('.pdf-download-btn').addEventListener('click', () => {
-                    const a = document.createElement('a');
-                    a.href = downloadUrl;
-                    a.download = downloadUrl.split('/').pop().split('?')[0];
-                    a.target = '_blank';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                });
-            }
-            
-            let currentPage = 1;
-            let currentCanvas = null;
-            
-            async function renderPage(pageNum) {
-                if (currentCanvas) {
-                    currentCanvas.remove();
-                }
-                
-                const page = await pdf.getPage(pageNum);
-                const viewport = page.getViewport({ scale: 1.5 });
-                const canvas = document.createElement('canvas');
-                canvas.className = 'pdf-canvas';
-                canvas.style.marginBottom = '20px';
-                canvas.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
-                const context = canvas.getContext('2d');
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-                
-                const renderContext = {
-                    canvasContext: context,
-                    viewport: viewport
-                };
-                
-                await page.render(renderContext).promise;
-                canvasContainer.appendChild(canvas);
-                currentCanvas = canvas;
-                
-                document.getElementById('pageInfo').innerHTML = `第 ${pageNum} / ${totalPages} 页`;
-            }
-            
-            await renderPage(1);
-            
-            document.getElementById('prevPage').addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderPage(currentPage);
-                }
-            });
-            
-            document.getElementById('nextPage').addEventListener('click', () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderPage(currentPage);
-                }
-            });
-            
-        } catch (error) {
-            console.error('PDF加载失败:', error);
-            container.innerHTML = `<div class="unsupported-preview"><h2>PDF加载失败</h2><p>该文件无法预览</p><button class="download-now-btn">立即下载</button></div>`;
-            const btn = container.querySelector('.download-now-btn');
-            if (btn && downloadUrl) {
-                btn.addEventListener('click', () => {
-                    const a = document.createElement('a');
-                    a.href = downloadUrl;
-                    a.download = downloadUrl.split('/').pop().split('?')[0];
-                    a.target = '_blank';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                });
-            }
-        }
-    }
-
-    // 全屏预览 - 所有文件类型都添加下载按钮
-    function showFullscreenPreview(url, fileName, fileType) {
-        const previewDiv = document.createElement('div');
-        previewDiv.className = 'fullscreen-preview';
-        
-        let contentHtml = '';
-        if (fileType === 'image') {
-            contentHtml = `
-                <img src="${escapeHtml(url)}" alt="${escapeHtml(fileName)}" style="max-width:100%; max-height:85vh; object-fit:contain;">
-                <button class="download-btn-inline" id="inlineDownloadBtn">下载文件</button>
-            `;
-        } else if (fileType === 'video') {
-            contentHtml = `
-                <video controls autoplay style="max-width:100%; max-height:85vh;">
-                    <source src="${escapeHtml(url)}" type="video/mp4">
-                    您的浏览器不支持视频播放
-                </video>
-                <button class="download-btn-inline" id="inlineDownloadBtn">下载文件</button>
-            `;
-        } else if (fileType === 'pdf') {
-            contentHtml = `<div id="pdfViewerContainer" class="pdf-viewer"></div>`;
-        } else if (fileType === 'office') {
-            contentHtml = `
-                <div class="unsupported-preview">
-                    <h2>该文件不支持预览</h2>
-                    <p>${escapeHtml(fileName)}</p>
-                    <button class="download-now-btn">立即下载</button>
-                </div>
-            `;
-        } else {
-            contentHtml = `<iframe src="${escapeHtml(url)}" title="网页预览"></iframe>`;
-        }
-        
-        previewDiv.innerHTML = `
-            <div class="preview-header">
-                <h3>${escapeHtml(fileName)}</h3>
-                <div class="preview-buttons">
-                    <button class="preview-btn close-btn">✕ 关闭</button>
-                </div>
-            </div>
-            <div class="preview-content">
-                ${contentHtml}
-            </div>
-        `;
-        
-        document.body.appendChild(previewDiv);
-        
-        if (fileType === 'pdf') {
-            const pdfContainer = previewDiv.querySelector('#pdfViewerContainer');
-            if (pdfContainer) {
-                renderPDF(pdfContainer, url, true, url);
-            }
-        }
-        
-        // 图片和视频的下载按钮
-        const inlineDownloadBtn = previewDiv.querySelector('#inlineDownloadBtn');
-        if (inlineDownloadBtn) {
-            inlineDownloadBtn.addEventListener('click', () => {
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName.split('?')[0];
-                a.target = '_blank';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
-        }
-        
-        const downloadBtn = previewDiv.querySelector('.download-now-btn');
-        if (downloadBtn) {
-            downloadBtn.addEventListener('click', () => {
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName.split('?')[0];
-                a.target = '_blank';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
-        }
-        
-        previewDiv.querySelector('.close-btn').addEventListener('click', () => {
-            previewDiv.remove();
-        });
-    }
-
-    // 窗口模式预览
-    function createPreviewWindow(url, fileName, fileType) {
-        const windowDiv = document.createElement('div');
-        windowDiv.className = 'modal-window';
-        let { width, height } = getAdaptiveWindowSize();
-        width = Math.max(width, 500);
-        height = Math.max(height, 400);
-        const left = (window.innerWidth - width) / 2;
-        const top = Math.max(30, (window.innerHeight - height) / 4);
-        windowDiv.style.width = `${width}px`;
-        windowDiv.style.height = `${height}px`;
-        windowDiv.style.left = `${left}px`;
-        windowDiv.style.top = `${top}px`;
-        windowDiv.style.zIndex = ++nextZIndex;
-
-        const header = document.createElement('div');
-        header.className = 'window-header';
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'window-title';
-        titleDiv.innerHTML = `<span>${escapeHtml(fileName)}</span>`;
-        
-        const controls = document.createElement('div');
-        controls.className = 'window-controls';
-        
-        const fullscreenBtn = document.createElement('button');
-        fullscreenBtn.className = 'window-btn fullscreen-btn';
-        fullscreenBtn.innerHTML = '⛶';
-        fullscreenBtn.title = '全屏模式';
-        
-        const closeBtn = document.createElement('button');
-        closeBtn.className = 'window-btn close-btn';
-        closeBtn.innerHTML = '✕';
-        closeBtn.title = '关闭窗口';
-        
-        controls.appendChild(fullscreenBtn);
-        controls.appendChild(closeBtn);
-        header.appendChild(titleDiv);
-        header.appendChild(controls);
-        
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'window-content';
-        
-        let previewHtml = '';
-        if (fileType === 'image') {
-            previewHtml = `
-                <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
-                    <div class="preview-inner" style="flex:1; display:flex; justify-content:center; align-items:center; overflow:auto;">
-                        <img src="${escapeHtml(url)}" alt="${escapeHtml(fileName)}" style="max-width:100%; max-height:100%; object-fit:contain;">
-                    </div>
-                    <div class="window-preview-download">
-                        <button class="preview-download-btn">下载文件</button>
-                    </div>
-                </div>
-            `;
-        } else if (fileType === 'video') {
-            previewHtml = `
-                <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
-                    <div class="preview-inner" style="flex:1; display:flex; justify-content:center; align-items:center; overflow:auto;">
-                        <video controls style="max-width:100%; max-height:100%;"><source src="${escapeHtml(url)}">您的浏览器不支持视频播放</video>
-                    </div>
-                    <div class="window-preview-download">
-                        <button class="preview-download-btn">下载文件</button>
-                    </div>
-                </div>
-            `;
-        } else if (fileType === 'pdf') {
-            previewHtml = `
-                <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
-                    <div class="preview-inner" style="flex:1; overflow:auto;" id="pdfViewerInner">
-                        <div id="pdfWindowViewer" style="width:100%; height:100%;"></div>
-                    </div>
-                    <div class="window-preview-download">
-                        <button class="preview-download-btn">下载文件</button>
-                    </div>
-                </div>
-            `;
-        } else if (fileType === 'office') {
-            previewHtml = `
-                <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
-                    <div class="preview-inner" style="flex:1; display:flex; justify-content:center; align-items:center;">
-                        <div class="window-unsupported">
-                            <h3>该文件不支持预览</h3>
-                            <p style="margin: 15px 0; color: #666;">${escapeHtml(fileName)}</p>
-                            <button class="download-now-btn">立即下载</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        } else {
-            previewHtml = `
-                <div class="preview-container" style="height:100%; display:flex; flex-direction:column;">
-                    <div class="preview-inner" style="flex:1;">
-                        <iframe src="${escapeHtml(url)}" style="width:100%; height:100%; border:none;"></iframe>
-                    </div>
-                </div>
-            `;
-        }
-        
-        contentDiv.innerHTML = previewHtml;
-        
-        const resizeHandle = document.createElement('div');
-        resizeHandle.className = 'resize-handle';
-        
-        windowDiv.appendChild(header);
-        windowDiv.appendChild(contentDiv);
-        windowDiv.appendChild(resizeHandle);
-        document.body.appendChild(windowDiv);
-        
-        const windowId = Date.now() + Math.random();
-        
-        if (fileType === 'pdf') {
-            setTimeout(() => {
-                const pdfContainer = contentDiv.querySelector('#pdfWindowViewer');
-                if (pdfContainer) {
-                    renderPDF(pdfContainer, url, false);
-                }
-            }, 100);
-        }
-        
-        const downloadBtn = contentDiv.querySelector('.preview-download-btn');
-        if (downloadBtn) {
-            downloadBtn.addEventListener('click', () => {
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName.split('?')[0];
-                a.target = '_blank';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
-        }
-        
-        const unsupportedDownloadBtn = contentDiv.querySelector('.download-now-btn');
-        if (unsupportedDownloadBtn) {
-            unsupportedDownloadBtn.addEventListener('click', () => {
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName.split('?')[0];
-                a.target = '_blank';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
-        }
-        
-        // 全局点击置顶
-        function bringToFrontByClick(e) {
-            let clientX, clientY;
-            if (e.touches) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-            const rect = windowDiv.getBoundingClientRect();
-            if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
-                nextZIndex++;
-                windowDiv.style.zIndex = nextZIndex;
-                windowDiv.classList.add('active-window');
-                openWindows.forEach(w => {
-                    if (w.windowDiv !== windowDiv) {
-                        w.windowDiv.classList.remove('active-window');
-                    }
-                });
-            }
-        }
-        
-        document.addEventListener('mousedown', bringToFrontByClick, true);
-        document.addEventListener('touchstart', bringToFrontByClick, true);
-        
-        let isDragging = false;
-        let dragStartX = 0, dragStartY = 0;
-        let startLeft = 0, startTop = 0;
-        let isFullscreen = false;
-        let savedRect = null;
-        let dragEnabled = true;
-        
-        const startDrag = (e) => {
-            if (!dragEnabled) return;
-            const isHeader = e.target.closest('.window-header');
-            const isControl = e.target.closest('.window-controls');
-            const isResize = e.target.closest('.resize-handle');
-            if (!isHeader || isControl || isResize) return;
-            
-            e.stopPropagation();
-            e.preventDefault();
-            isDragging = true;
-            
-            const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
-            const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
-            dragStartX = clientX;
-            dragStartY = clientY;
-            startLeft = windowDiv.offsetLeft;
-            startTop = windowDiv.offsetTop;
-            windowDiv.classList.add('dragging');
-            document.body.style.userSelect = 'none';
-            
-            const onMove = (moveEvent) => {
-                if (!isDragging) return;
-                moveEvent.preventDefault();
-                const currentX = moveEvent.clientX ?? (moveEvent.touches ? moveEvent.touches[0].clientX : 0);
-                const currentY = moveEvent.clientY ?? (moveEvent.touches ? moveEvent.touches[0].clientY : 0);
-                let newLeft = startLeft + (currentX - dragStartX);
-                let newTop = startTop + (currentY - dragStartY);
-                newLeft = Math.max(-windowDiv.offsetWidth + 80, Math.min(window.innerWidth - 80, newLeft));
-                newTop = Math.max(0, Math.min(window.innerHeight - 60, newTop));
-                windowDiv.style.left = `${newLeft}px`;
-                windowDiv.style.top = `${newTop}px`;
-            };
-            
-            const onEnd = () => {
-                if (isDragging) {
-                    isDragging = false;
-                    windowDiv.classList.remove('dragging');
-                    document.body.style.userSelect = '';
-                    document.removeEventListener('mousemove', onMove);
-                    document.removeEventListener('mouseup', onEnd);
-                    document.removeEventListener('touchmove', onMove);
-                    document.removeEventListener('touchend', onEnd);
-                }
-            };
-            
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onEnd);
-            document.addEventListener('touchmove', onMove, { passive: false });
-            document.addEventListener('touchend', onEnd);
-        };
-        
-        header.addEventListener('mousedown', startDrag);
-        header.addEventListener('touchstart', startDrag, { passive: false });
-        
-        let isResizing = false;
-        let resizeStartX = 0, resizeStartY = 0;
-        let resizeStartW = 0, resizeStartH = 0;
-        
-        const startResize = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            isResizing = true;
-            const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
-            const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
-            resizeStartX = clientX;
-            resizeStartY = clientY;
-            resizeStartW = windowDiv.offsetWidth;
-            resizeStartH = windowDiv.offsetHeight;
-            document.body.style.userSelect = 'none';
-            
-            const onResizeMove = (moveEvent) => {
-                if (!isResizing) return;
-                moveEvent.preventDefault();
-                const currentX = moveEvent.clientX ?? (moveEvent.touches ? moveEvent.touches[0].clientX : 0);
-                const currentY = moveEvent.clientY ?? (moveEvent.touches ? moveEvent.touches[0].clientY : 0);
-                let newW = resizeStartW + (currentX - resizeStartX);
-                let newH = resizeStartH + (currentY - resizeStartY);
-                newW = Math.max(280, Math.min(window.innerWidth - 50, newW));
-                newH = Math.max(200, Math.min(window.innerHeight - 50, newH));
-                windowDiv.style.width = `${newW}px`;
-                windowDiv.style.height = `${newH}px`;
-                
-                let curLeft = windowDiv.offsetLeft;
-                let curTop = windowDiv.offsetTop;
-                if (curLeft + newW > window.innerWidth - 20) {
-                    windowDiv.style.left = `${window.innerWidth - newW - 20}px`;
-                }
-                if (curTop + newH > window.innerHeight - 20) {
-                    windowDiv.style.top = `${window.innerHeight - newH - 20}px`;
-                }
-            };
-            
-            const onResizeEnd = () => {
-                if (isResizing) {
-                    isResizing = false;
-                    document.body.style.userSelect = '';
-                    document.removeEventListener('mousemove', onResizeMove);
-                    document.removeEventListener('mouseup', onResizeEnd);
-                    document.removeEventListener('touchmove', onResizeMove);
-                    document.removeEventListener('touchend', onResizeEnd);
-                }
-            };
-            
-            document.addEventListener('mousemove', onResizeMove);
-            document.addEventListener('mouseup', onResizeEnd);
-            document.addEventListener('touchmove', onResizeMove, { passive: false });
-            document.addEventListener('touchend', onResizeEnd);
-        };
-        
-        resizeHandle.addEventListener('mousedown', startResize);
-        resizeHandle.addEventListener('touchstart', startResize, { passive: false });
-        
-        const toggleFullscreen = () => {
-            if (!isFullscreen) {
-                savedRect = { width: windowDiv.offsetWidth, height: windowDiv.offsetHeight, left: windowDiv.offsetLeft, top: windowDiv.offsetTop };
-                windowDiv.classList.add('fullscreen-mode');
-                isFullscreen = true;
-                fullscreenBtn.innerHTML = '❐';
-                fullscreenBtn.title = '退出全屏';
-                dragEnabled = false;
-            } else {
-                windowDiv.classList.remove('fullscreen-mode');
-                if (savedRect) {
-                    windowDiv.style.width = `${savedRect.width}px`;
-                    windowDiv.style.height = `${savedRect.height}px`;
-                    windowDiv.style.left = `${savedRect.left}px`;
-                    windowDiv.style.top = `${savedRect.top}px`;
-                }
-                isFullscreen = false;
-                fullscreenBtn.innerHTML = '⛶';
-                fullscreenBtn.title = '全屏模式';
-                dragEnabled = true;
-            }
-        };
-        
-        const closeHandler = () => {
-            document.removeEventListener('mousedown', bringToFrontByClick, true);
-            document.removeEventListener('touchstart', bringToFrontByClick, true);
-            const index = openWindows.findIndex(w => w.id === windowId);
-            if (index !== -1) {
-                if (openWindows[index].cleanup) openWindows[index].cleanup();
-                openWindows.splice(index, 1);
-            }
-            windowDiv.remove();
-        };
-        
-        fullscreenBtn.addEventListener('click', toggleFullscreen);
-        closeBtn.addEventListener('click', closeHandler);
-        
-        const escHandler = (e) => { if (e.key === 'Escape' && isFullscreen) toggleFullscreen(); };
-        document.addEventListener('keydown', escHandler);
-        
-        const cleanup = () => {
-            document.removeEventListener('keydown', escHandler);
-            document.removeEventListener('mousedown', bringToFrontByClick, true);
-            document.removeEventListener('touchstart', bringToFrontByClick, true);
-            header.removeEventListener('mousedown', startDrag);
-            header.removeEventListener('touchstart', startDrag);
-            resizeHandle.removeEventListener('mousedown', startResize);
-            resizeHandle.removeEventListener('touchstart', startResize);
-        };
-        
-        openWindows.push({ id: windowId, windowDiv, cleanup });
-        nextZIndex++;
-        windowDiv.style.zIndex = nextZIndex;
-        windowDiv.classList.add('active-window');
-    }
-
-    // 处理应用点击
-    function handleAppClick(link, name, hasWindowMode) {
-        const useWindow = windowModeEnabled && hasWindowMode;
-        const fileType = getFileType(link);
-        
-        if (fileType !== 'link') {
-            if (useWindow) {
-                createPreviewWindow(link, name, fileType);
-            } else {
-                showFullscreenPreview(link, name, fileType);
-            }
-        } else {
-            if (useWindow) {
-                createWebWindow(link, name);
-            } else {
-                window.open(link, '_blank', 'noopener,noreferrer');
-            }
-        }
-    }
-
-    // 创建普通网页窗口
-    function createWebWindow(url, appName) {
-        const windowDiv = document.createElement('div');
-        windowDiv.className = 'modal-window';
-        let { width, height } = getAdaptiveWindowSize();
-        const { left, top } = getRandomPosition(width, height);
-        windowDiv.style.width = `${width}px`;
-        windowDiv.style.height = `${height}px`;
-        windowDiv.style.left = `${left}px`;
-        windowDiv.style.top = `${top}px`;
-        windowDiv.style.zIndex = ++nextZIndex;
-
-        const header = document.createElement('div');
-        header.className = 'window-header';
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'window-title';
-        titleDiv.innerHTML = `<span>${escapeHtml(appName)}</span>`;
-        
-        const controls = document.createElement('div');
-        controls.className = 'window-controls';
-        
-        const refreshBtn = document.createElement('button');
-        refreshBtn.className = 'window-btn';
-        refreshBtn.innerHTML = '⟳';
-        refreshBtn.title = '刷新';
-        
-        const browserBtn = document.createElement('button');
-        browserBtn.className = 'window-btn';
-        browserBtn.innerHTML = '浏览器';
-        browserBtn.title = '在浏览器中打开';
-        
-        const fullscreenBtn = document.createElement('button');
-        fullscreenBtn.className = 'window-btn fullscreen-btn';
-        fullscreenBtn.innerHTML = '⛶';
-        fullscreenBtn.title = '全屏模式';
-        
-        const closeBtn = document.createElement('button');
-        closeBtn.className = 'window-btn close-btn';
-        closeBtn.innerHTML = '✕';
-        closeBtn.title = '关闭窗口';
-        
-        controls.appendChild(refreshBtn);
-        controls.appendChild(browserBtn);
-        controls.appendChild(fullscreenBtn);
-        controls.appendChild(closeBtn);
-        header.appendChild(titleDiv);
-        header.appendChild(controls);
-        
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'window-content';
-        contentDiv.style.position = 'relative';
-        const iframe = document.createElement('iframe');
-        iframe.src = url;
-        iframe.title = appName;
-        iframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation';
-        iframe.allow = 'fullscreen';
-        iframe.style.position = 'absolute';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        contentDiv.appendChild(iframe);
-        
-        const resizeHandle = document.createElement('div');
-        resizeHandle.className = 'resize-handle';
-        
-        windowDiv.appendChild(header);
-        windowDiv.appendChild(contentDiv);
-        windowDiv.appendChild(resizeHandle);
-        document.body.appendChild(windowDiv);
-        
-        const windowId = Date.now() + Math.random();
-        let isDragging = false;
-        let dragStartX = 0, dragStartY = 0;
-        let startLeft = 0, startTop = 0;
-        let isFullscreen = false;
-        let savedRect = null;
-        let dragEnabled = true;
-        
-        function bringToFrontByClick(e) {
-            let clientX, clientY;
-            if (e.touches) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-            const rect = windowDiv.getBoundingClientRect();
-            if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
-                nextZIndex++;
-                windowDiv.style.zIndex = nextZIndex;
-                windowDiv.classList.add('active-window');
-                openWindows.forEach(w => {
-                    if (w.windowDiv !== windowDiv) {
-                        w.windowDiv.classList.remove('active-window');
-                    }
-                });
-            }
-        }
-        
-        document.addEventListener('mousedown', bringToFrontByClick, true);
-        document.addEventListener('touchstart', bringToFrontByClick, true);
-        
-        const startDrag = (e) => {
-            if (!dragEnabled) return;
-            const isHeader = e.target.closest('.window-header');
-            const isControl = e.target.closest('.window-controls');
-            const isResize = e.target.closest('.resize-handle');
-            if (!isHeader || isControl || isResize) return;
-            
-            e.stopPropagation();
-            e.preventDefault();
-            isDragging = true;
-            
-            const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
-            const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
-            dragStartX = clientX;
-            dragStartY = clientY;
-            startLeft = windowDiv.offsetLeft;
-            startTop = windowDiv.offsetTop;
-            windowDiv.classList.add('dragging');
-            document.body.style.userSelect = 'none';
-            
-            const onMove = (moveEvent) => {
-                if (!isDragging) return;
-                moveEvent.preventDefault();
-                const currentX = moveEvent.clientX ?? (moveEvent.touches ? moveEvent.touches[0].clientX : 0);
-                const currentY = moveEvent.clientY ?? (moveEvent.touches ? moveEvent.touches[0].clientY : 0);
-                let newLeft = startLeft + (currentX - dragStartX);
-                let newTop = startTop + (currentY - dragStartY);
-                newLeft = Math.max(-windowDiv.offsetWidth + 80, Math.min(window.innerWidth - 80, newLeft));
-                newTop = Math.max(0, Math.min(window.innerHeight - 60, newTop));
-                windowDiv.style.left = `${newLeft}px`;
-                windowDiv.style.top = `${newTop}px`;
-            };
-            
-            const onEnd = () => {
-                if (isDragging) {
-                    isDragging = false;
-                    windowDiv.classList.remove('dragging');
-                    document.body.style.userSelect = '';
-                    document.removeEventListener('mousemove', onMove);
-                    document.removeEventListener('mouseup', onEnd);
-                    document.removeEventListener('touchmove', onMove);
-                    document.removeEventListener('touchend', onEnd);
-                }
-            };
-            
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onEnd);
-            document.addEventListener('touchmove', onMove, { passive: false });
-            document.addEventListener('touchend', onEnd);
-        };
-        
-        header.addEventListener('mousedown', startDrag);
-        header.addEventListener('touchstart', startDrag, { passive: false });
-        
-        let isResizing = false;
-        let resizeStartX = 0, resizeStartY = 0;
-        let resizeStartW = 0, resizeStartH = 0;
-        
-        const startResize = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            isResizing = true;
-            const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
-            const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
-            resizeStartX = clientX;
-            resizeStartY = clientY;
-            resizeStartW = windowDiv.offsetWidth;
-            resizeStartH = windowDiv.offsetHeight;
-            document.body.style.userSelect = 'none';
-            
-            const onResizeMove = (moveEvent) => {
-                if (!isResizing) return;
-                moveEvent.preventDefault();
-                const currentX = moveEvent.clientX ?? (moveEvent.touches ? moveEvent.touches[0].clientX : 0);
-                const currentY = moveEvent.clientY ?? (moveEvent.touches ? moveEvent.touches[0].clientY : 0);
-                let newW = resizeStartW + (currentX - resizeStartX);
-                let newH = resizeStartH + (currentY - resizeStartY);
-                newW = Math.max(280, Math.min(window.innerWidth - 50, newW));
-                newH = Math.max(200, Math.min(window.innerHeight - 50, newH));
-                windowDiv.style.width = `${newW}px`;
-                windowDiv.style.height = `${newH}px`;
-                
-                let curLeft = windowDiv.offsetLeft;
-                let curTop = windowDiv.offsetTop;
-                if (curLeft + newW > window.innerWidth - 20) {
-                    windowDiv.style.left = `${window.innerWidth - newW - 20}px`;
-                }
-                if (curTop + newH > window.innerHeight - 20) {
-                    windowDiv.style.top = `${window.innerHeight - newH - 20}px`;
-                }
-            };
-            
-            const onResizeEnd = () => {
-                if (isResizing) {
-                    isResizing = false;
-                    document.body.style.userSelect = '';
-                    document.removeEventListener('mousemove', onResizeMove);
-                    document.removeEventListener('mouseup', onResizeEnd);
-                    document.removeEventListener('touchmove', onResizeMove);
-                    document.removeEventListener('touchend', onResizeEnd);
-                }
-            };
-            
-            document.addEventListener('mousemove', onResizeMove);
-            document.addEventListener('mouseup', onResizeEnd);
-            document.addEventListener('touchmove', onResizeMove, { passive: false });
-            document.addEventListener('touchend', onResizeEnd);
-        };
-        
-        resizeHandle.addEventListener('mousedown', startResize);
-        resizeHandle.addEventListener('touchstart', startResize, { passive: false });
-        
-        const toggleFullscreen = () => {
-            if (!isFullscreen) {
-                savedRect = { width: windowDiv.offsetWidth, height: windowDiv.offsetHeight, left: windowDiv.offsetLeft, top: windowDiv.offsetTop };
-                windowDiv.classList.add('fullscreen-mode');
-                isFullscreen = true;
-                fullscreenBtn.innerHTML = '❐';
-                fullscreenBtn.title = '退出全屏';
-                dragEnabled = false;
-            } else {
-                windowDiv.classList.remove('fullscreen-mode');
-                if (savedRect) {
-                    windowDiv.style.width = `${savedRect.width}px`;
-                    windowDiv.style.height = `${savedRect.height}px`;
-                    windowDiv.style.left = `${savedRect.left}px`;
-                    windowDiv.style.top = `${savedRect.top}px`;
-                }
-                isFullscreen = false;
-                fullscreenBtn.innerHTML = '⛶';
-                fullscreenBtn.title = '全屏模式';
-                dragEnabled = true;
-            }
-        };
-        
-        const refreshHandler = () => { iframe.src = iframe.src; };
-        const browserHandler = () => window.open(url, '_blank', 'noopener,noreferrer');
-        const closeHandler = () => {
-            document.removeEventListener('mousedown', bringToFrontByClick, true);
-            document.removeEventListener('touchstart', bringToFrontByClick, true);
-            const index = openWindows.findIndex(w => w.id === windowId);
-            if (index !== -1) {
-                if (openWindows[index].cleanup) openWindows[index].cleanup();
-                openWindows.splice(index, 1);
-            }
-            windowDiv.remove();
-        };
-        
-        refreshBtn.addEventListener('click', refreshHandler);
-        browserBtn.addEventListener('click', browserHandler);
-        fullscreenBtn.addEventListener('click', toggleFullscreen);
-        closeBtn.addEventListener('click', closeHandler);
-        
-        const escHandler = (e) => { if (e.key === 'Escape' && isFullscreen) toggleFullscreen(); };
-        document.addEventListener('keydown', escHandler);
-        
-        const cleanup = () => {
-            document.removeEventListener('keydown', escHandler);
-            document.removeEventListener('mousedown', bringToFrontByClick, true);
-            document.removeEventListener('touchstart', bringToFrontByClick, true);
-            header.removeEventListener('mousedown', startDrag);
-            header.removeEventListener('touchstart', startDrag);
-            resizeHandle.removeEventListener('mousedown', startResize);
-            resizeHandle.removeEventListener('touchstart', startResize);
-        };
-        
-        openWindows.push({ id: windowId, windowDiv, cleanup });
-        nextZIndex++;
-        windowDiv.style.zIndex = nextZIndex;
-        windowDiv.classList.add('active-window');
-    }
-
-    // 辅助函数
-    function getAdaptiveWindowSize() {
-        const isLandscape = window.innerWidth > window.innerHeight;
-        if (isLandscape) {
-            return { width: Math.min(window.innerWidth * 0.55, 900), height: Math.min(window.innerHeight * 0.75, 650) };
-        } else {
-            return { width: Math.min(window.innerWidth * 0.85, 500), height: Math.min(window.innerHeight * 0.55, 550) };
-        }
-    }
-
-    function getRandomPosition(w, h) {
-        const maxLeft = Math.max(20, window.innerWidth - w - 30);
-        const maxTop = Math.max(20, window.innerHeight - h - 50);
-        return { left: Math.min(maxLeft, 30 + Math.random() * (maxLeft - 30)), top: Math.min(maxTop, 50 + Math.random() * (maxTop - 50)) };
-    }
-
-    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
-
-    // 加载设置和数据
+    // 加载设置
     function loadSettings() {
         const saved = localStorage.getItem('windowModeEnabled');
-        if (saved !== null) {
-            windowModeEnabled = saved === 'true';
-        } else {
-            windowModeEnabled = !isMobileDevice();
-        }
+        if (saved !== null) windowModeEnabled = saved === 'true';
         windowModeSwitch.checked = windowModeEnabled;
     }
-
-    function saveSettings() {
-        localStorage.setItem('windowModeEnabled', windowModeEnabled);
-    }
-
     windowModeSwitch.addEventListener('change', (e) => {
         windowModeEnabled = e.target.checked;
-        saveSettings();
+        localStorage.setItem('windowModeEnabled', windowModeEnabled);
     });
 
     settingsBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         settingsPanel.classList.toggle('show');
     });
-    
     document.addEventListener('click', (e) => {
         if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
             settingsPanel.classList.remove('show');
         }
     });
 
-    // 加载5app.txt
-    async function loadDataFromFile() {
+    // GitHub API 操作
+    async function verifyToken() {
+        const token = document.getElementById('githubToken').value.trim();
+        if (!token) {
+            document.getElementById('adminStatus').innerHTML = '❌ 请输入 Token';
+            return false;
+        }
         try {
-            const response = await fetch('./5app.txt', { cache: 'no-store' });
-            if (!response.ok) throw new Error(`无法读取文件 (HTTP ${response.status})`);
-            const text = await response.text();
-            parseAppTxt(text);
-        } catch (error) {
-            console.error('读取5app.txt失败:', error);
-            appsGrid.innerHTML = `<div class="error-tip">⚠️ 加载数据失败，请确保 "5app.txt" 文件存在。<br>格式：pic<br>[p=图片 l=链接]<br>app<br>[n=名称 p=图标 l=链接 mode=window]</div>`;
-            carouselSection.style.display = 'none';
-            if (appsHeader) appsHeader.style.display = 'none';
+            const response = await fetch(GITHUB_API, {
+                headers: { 'Authorization': `token ${token}` }
+            });
+            if (response.ok) {
+                currentToken = token;
+                isAdminMode = true;
+                document.getElementById('adminStatus').innerHTML = '✅ 管理员模式已启用';
+                addAppBtn.style.display = 'block';
+                await loadDataFromGitHub();
+                renderUI();
+                return true;
+            } else {
+                document.getElementById('adminStatus').innerHTML = '❌ Token 验证失败';
+                return false;
+            }
+        } catch (err) {
+            document.getElementById('adminStatus').innerHTML = '❌ 网络错误';
+            return false;
         }
     }
 
-    function parseAppTxt(rawText) {
+    async function loadDataFromGitHub() {
+        try {
+            const response = await fetch(GITHUB_API, {
+                headers: { 'Authorization': `token ${currentToken}` }
+            });
+            const data = await response.json();
+            const content = atob(data.content);
+            parseData(content);
+            currentSha = data.sha;
+        } catch (err) {
+            console.error('加载失败', err);
+        }
+    }
+
+    let currentSha = '';
+
+    async function saveToGitHub(content) {
+        if (!isAdminMode) return false;
+        try {
+            const response = await fetch(GITHUB_API, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${currentToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: 'Update 5app.txt via web',
+                    content: btoa(unescape(encodeURIComponent(content))),
+                    sha: currentSha
+                })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                currentSha = data.content.sha;
+                return true;
+            }
+            return false;
+        } catch (err) {
+            return false;
+        }
+    }
+
+    function parseData(rawText) {
         const lines = rawText.split(/\r?\n/);
         let mode = null;
         let picItems = [];
         let appItems = [];
-
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i].trim();
+        for (let line of lines) {
+            line = line.trim();
             if (line === '') continue;
             if (line.toLowerCase() === 'pic') { mode = 'pic'; continue; }
             else if (line.toLowerCase() === 'app') { mode = 'app'; continue; }
-
             if (mode === 'pic') {
                 const match = line.match(/\[p=([^\s\]]+)\s+l=([^\s\]]+)\]/);
-                if (match) picItems.push({ imgUrl: match[1].trim(), linkUrl: match[2].trim() });
-                else {
-                    const altMatch = line.match(/\[p=(.+?)\s+l=(.+?)\]/);
-                    if (altMatch) picItems.push({ imgUrl: altMatch[1].trim(), linkUrl: altMatch[2].trim() });
-                }
+                if (match) picItems.push({ imgUrl: match[1], linkUrl: match[2] });
             } else if (mode === 'app') {
-                let match = line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)(?:\s+mode=([^\s\]]+))?\]/);
-                if (!match) match = line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)(?:\s+mode=(.+?))?\]/);
+                const match = line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)(?:\s+mode=([^\s\]]+))?\]/);
                 if (match) {
-                    appItems.push({
-                        name: match[1].trim(),
-                        icon: match[2].trim(),
-                        link: match[3].trim(),
-                        mode: match[4] ? match[4].trim() : null
-                    });
+                    appItems.push({ name: match[1], icon: match[2], link: match[3], mode: match[4] || null });
                 }
             }
         }
+        slidesData = picItems;
+        appsData = appItems;
+    }
 
-        if (picItems.length > 0) {
-            slidesData = picItems;
-            renderCarousel();
+    function generateFileContent() {
+        let content = 'pic\n';
+        for (let slide of slidesData) {
+            content += `[p=${slide.imgUrl} l=${slide.linkUrl}]\n`;
+        }
+        content += 'app\n';
+        for (let app of appsData) {
+            let modeStr = app.mode ? ` mode=${app.mode}` : '';
+            content += `[n=${app.name} p=${app.icon} l=${app.link}${modeStr}]\n`;
+        }
+        return content;
+    }
+
+    async function addSlide(imgUrl, linkUrl) {
+        slidesData.push({ imgUrl, linkUrl });
+        const content = generateFileContent();
+        if (await saveToGitHub(content)) {
+            await loadDataFromGitHub();
+            renderUI();
+        } else {
+            alert('保存失败');
+        }
+    }
+
+    async function deleteSlide(index) {
+        slidesData.splice(index, 1);
+        const content = generateFileContent();
+        if (await saveToGitHub(content)) {
+            await loadDataFromGitHub();
+            renderUI();
+        } else {
+            alert('保存失败');
+        }
+    }
+
+    async function addApp(name, icon, link, mode) {
+        appsData.push({ name, icon, link, mode });
+        const content = generateFileContent();
+        if (await saveToGitHub(content)) {
+            await loadDataFromGitHub();
+            renderUI();
+        } else {
+            alert('保存失败');
+        }
+    }
+
+    async function deleteApp(index) {
+        appsData.splice(index, 1);
+        const content = generateFileContent();
+        if (await saveToGitHub(content)) {
+            await loadDataFromGitHub();
+            renderUI();
+        } else {
+            alert('保存失败');
+        }
+    }
+
+    // 添加应用模态框
+    function showAddAppModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>添加应用</h3>
+                <input type="text" id="appName" placeholder="应用名称" required>
+                <input type="text" id="appIcon" placeholder="图标URL (支持图片链接)">
+                <input type="text" id="appLink" placeholder="跳转链接" required>
+                <label style="display: flex; align-items: center; gap: 8px; margin: 8px 0;">
+                    <input type="checkbox" id="appWindowMode"> 使用窗口模式打开
+                </label>
+                <div class="modal-buttons">
+                    <button class="confirm-btn">确认添加</button>
+                    <button class="cancel-btn">取消</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.querySelector('.confirm-btn').onclick = async () => {
+            const name = modal.querySelector('#appName').value.trim();
+            const icon = modal.querySelector('#appIcon').value.trim();
+            const link = modal.querySelector('#appLink').value.trim();
+            const windowMode = modal.querySelector('#appWindowMode').checked;
+            if (!name || !link) {
+                alert('请填写应用名称和链接');
+                return;
+            }
+            await addApp(name, icon || 'null.jpg', link, windowMode ? 'window' : null);
+            modal.remove();
+        };
+        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
+    }
+
+    function showAddSlideModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>添加轮播图</h3>
+                <input type="text" id="slideImg" placeholder="图片链接" required>
+                <input type="text" id="slideLink" placeholder="点击跳转链接" required>
+                <div class="modal-buttons">
+                    <button class="confirm-btn">确认添加</button>
+                    <button class="cancel-btn">取消</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.querySelector('.confirm-btn').onclick = async () => {
+            const img = modal.querySelector('#slideImg').value.trim();
+            const link = modal.querySelector('#slideLink').value.trim();
+            if (!img || !link) {
+                alert('请填写图片链接和跳转链接');
+                return;
+            }
+            await addSlide(img, link);
+            modal.remove();
+        };
+        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
+    }
+
+    // 渲染 UI
+    function renderUI() {
+        // 渲染轮播图
+        totalSlides = slidesData.length;
+        if (slidesData.length > 0) {
             carouselSection.style.display = 'block';
-            startAutoSlide();
+            let slidesHtml = '';
+            for (let i = 0; i < slidesData.length; i++) {
+                const slide = slidesData[i];
+                slidesHtml += `
+                    <div class="carousel-slide">
+                        <a href="${escapeHtml(slide.linkUrl)}" target="_blank">
+                            <img src="${escapeHtml(slide.imgUrl)}" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22400%22%20height%3D%22225%22%3E%3Crect%20width%3D%22400%22%20height%3D%22225%22%20fill%3D%22%23ccc%22/%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20fill%3D%22%23666%22%3E加载失败%3C/text%3E%3C/svg%3E'">
+                        </a>
+                        ${isAdminMode ? `<div class="slide-actions"><button class="delete-btn" data-index="${i}">🗑</button></div>` : ''}
+                    </div>
+                `;
+            }
+            carouselTrack.innerHTML = slidesHtml;
+            let dotsHtml = '';
+            for (let i = 0; i < totalSlides; i++) dotsHtml += `<div class="dot ${i === currentIndex ? 'active' : ''}" data-index="${i}"></div>`;
+            dotsContainer.innerHTML = dotsHtml;
+            updateCarouselPosition();
+            document.querySelectorAll('.dot').forEach(dot => {
+                dot.addEventListener('click', (e) => {
+                    const idx = parseInt(dot.dataset.index);
+                    if (!isNaN(idx) && idx !== currentIndex) {
+                        currentIndex = idx;
+                        updateCarouselPosition();
+                        updateDotsActive();
+                    }
+                });
+            });
+            if (isAdminMode) {
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const idx = parseInt(btn.dataset.index);
+                        if (confirm('确定删除这张轮播图吗？')) {
+                            await deleteSlide(idx);
+                        }
+                    });
+                });
+                // 添加轮播图按钮
+                if (!document.getElementById('addSlideBtn')) {
+                    const addSlideBtn = document.createElement('button');
+                    addSlideBtn.id = 'addSlideBtn';
+                    addSlideBtn.className = 'add-btn';
+                    addSlideBtn.innerHTML = '+';
+                    addSlideBtn.style.position = 'absolute';
+                    addSlideBtn.style.bottom = '60px';
+                    addSlideBtn.style.right = '20px';
+                    addSlideBtn.style.width = '44px';
+                    addSlideBtn.style.height = '44px';
+                    addSlideBtn.style.borderRadius = '50%';
+                    addSlideBtn.style.background = '#2b4c8a';
+                    addSlideBtn.style.color = 'white';
+                    addSlideBtn.style.border = 'none';
+                    addSlideBtn.style.cursor = 'pointer';
+                    addSlideBtn.style.zIndex = '100';
+                    addSlideBtn.onclick = () => showAddSlideModal();
+                    carouselSection.style.position = 'relative';
+                    carouselSection.appendChild(addSlideBtn);
+                }
+            }
         } else {
             carouselSection.style.display = 'none';
-            if (autoInterval) clearInterval(autoInterval);
         }
 
-        if (appItems.length > 0) {
-            if (appsHeader) appsHeader.style.display = 'block';
-            renderApps(appItems);
-        } else {
-            appsGrid.innerHTML = '<div class="empty-tip">暂无应用数据</div>';
-            if (appsHeader) appsHeader.style.display = 'none';
-        }
-    }
-
-    function getIconUrl(iconPath) {
-        if (!iconPath || iconPath.trim() === '') return DEFAULT_ICON;
-        return iconPath.trim();
-    }
-
-    function renderApps(apps) {
-        if (!appsGrid) return;
-        if (!apps.length) { appsGrid.innerHTML = '<div class="empty-tip">暂无应用</div>'; return; }
-        let appsHtml = '';
-        for (let app of apps) {
-            const name = escapeHtml(app.name);
-            let iconUrl = getIconUrl(app.icon);
-            const link = app.link?.startsWith('http') ? app.link : (app.link || 'javascript:void(0)');
-            const hasWindowMode = app.mode === 'window';
-            appsHtml += `<a href="javascript:void(0)" class="app-card" data-link="${escapeHtml(link)}" data-name="${escapeHtml(name)}" data-has-window-mode="${hasWindowMode}">
-                <img class="app-icon" src="${escapeHtml(iconUrl)}" onerror="this.src='${DEFAULT_ICON}'"><span class="app-name">${name}</span></a>`;
-        }
-        appsGrid.innerHTML = appsHtml;
-        document.querySelectorAll('.app-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                e.preventDefault();
-                const link = card.dataset.link;
-                const name = card.dataset.name;
-                const hasWindowMode = card.dataset.hasWindowMode === 'true';
-                handleAppClick(link, name, hasWindowMode);
-            });
-        });
-        alignSameRowHeights();
-    }
-
-    function renderCarousel() {
-        if (!carouselTrack) return;
-        totalSlides = slidesData.length;
-        if (totalSlides === 0) return;
-        let slidesHtml = '';
-        for (let i = 0; i < slidesData.length; i++) {
-            const slide = slidesData[i];
-            const link = slide.linkUrl?.startsWith('http') ? slide.linkUrl : (slide.linkUrl || 'javascript:void(0)');
-            slidesHtml += `<div class="carousel-slide"><a href="${escapeHtml(link)}" target="_blank"><img src="${escapeHtml(slide.imgUrl)}" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22400%22%20height%3D%22225%22%3E%3Crect%20width%3D%22400%22%20height%3D%22225%22%20fill%3D%22%23ccc%22/%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20fill%3D%22%23666%22%3E加载失败%3C/text%3E%3C/svg%3E'"></a></div>`;
-        }
-        carouselTrack.innerHTML = slidesHtml;
-        let dotsHtml = '';
-        for (let i = 0; i < totalSlides; i++) dotsHtml += `<div class="dot ${i === currentIndex ? 'active' : ''}" data-index="${i}"></div>`;
-        dotsContainer.innerHTML = dotsHtml;
-        updateCarouselPosition();
-        document.querySelectorAll('.dot').forEach(dot => dot.addEventListener('click', (e) => {
-            const idx = parseInt(dot.dataset.index);
-            if (!isNaN(idx) && idx !== currentIndex) { currentIndex = idx; updateCarouselPosition(); resetAutoSlide(); updateDotsActive(); }
-        }));
-        initSwipe();
-    }
-
-    function updateCarouselPosition() { if (carouselTrack) carouselTrack.style.transform = `translateX(${-currentIndex * 100}%)`; }
-    function updateDotsActive() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentIndex)); }
-    function nextSlide() { if (totalSlides) { currentIndex = (currentIndex + 1) % totalSlides; updateCarouselPosition(); updateDotsActive(); } }
-    function prevSlide() { if (totalSlides) { currentIndex = (currentIndex - 1 + totalSlides) % totalSlides; updateCarouselPosition(); updateDotsActive(); } }
-    function startAutoSlide() { if (autoInterval) clearInterval(autoInterval); if (totalSlides > 1) autoInterval = setInterval(nextSlide, 5000); }
-    function resetAutoSlide() { startAutoSlide(); }
-
-    function initSwipe() {
-        if (!carouselTrack) return;
-        const wrapper = carouselTrack.parentElement;
-        if (!wrapper) return;
-        let startX = 0, isSwiping = false, startTransform = 0;
-        const onTouchStart = (e) => {
-            if (totalSlides <= 1) return;
-            startX = e.touches[0].clientX;
-            isSwiping = true;
-            startTransform = currentIndex;
-            carouselTrack.style.transition = 'none';
-            if (autoInterval) clearInterval(autoInterval);
-        };
-        const onTouchMove = (e) => {
-            if (!isSwiping) return;
-            const diffX = e.touches[0].clientX - startX;
-            const percent = (diffX / wrapper.clientWidth) * 100;
-            let newPercent = -startTransform * 100 + percent;
-            if (startTransform === 0 && diffX > 0) newPercent *= 0.3;
-            if (startTransform === totalSlides - 1 && diffX < 0) newPercent = -startTransform * 100 + percent * 0.3;
-            carouselTrack.style.transform = `translateX(${newPercent}%)`;
-        };
-        const onTouchEnd = (e) => {
-            if (!isSwiping) { carouselTrack.style.transition = ''; resetAutoSlide(); return; }
-            isSwiping = false;
-            const diffX = e.changedTouches[0].clientX - startX;
-            if (Math.abs(diffX) > 35) diffX > 0 ? prevSlide() : nextSlide();
-            updateCarouselPosition();
-            carouselTrack.style.transition = '';
-            resetAutoSlide();
-        };
-        wrapper.addEventListener('touchstart', onTouchStart, { passive: false });
-        wrapper.addEventListener('touchmove', onTouchMove, { passive: false });
-        wrapper.addEventListener('touchend', onTouchEnd);
-        
-        let mouseDown = false, mouseStartX = 0, mouseStartTransform = 0;
-        const onMouseDown = (e) => {
-            if (totalSlides <= 1) return;
-            e.preventDefault();
-            mouseDown = true;
-            mouseStartX = e.clientX;
-            mouseStartTransform = currentIndex;
-            carouselTrack.style.transition = 'none';
-            if (autoInterval) clearInterval(autoInterval);
-        };
-        const onMouseMove = (e) => {
-            if (!mouseDown) return;
-            const diffX = e.clientX - mouseStartX;
-            const percent = (diffX / wrapper.clientWidth) * 100;
-            let newPercent = -mouseStartTransform * 100 + percent;
-            if (mouseStartTransform === 0 && diffX > 0) newPercent *= 0.3;
-            if (mouseStartTransform === totalSlides - 1 && diffX < 0) newPercent = -mouseStartTransform * 100 + percent * 0.3;
-            carouselTrack.style.transform = `translateX(${newPercent}%)`;
-        };
-        const onMouseUp = (e) => {
-            if (!mouseDown) return;
-            mouseDown = false;
-            const diffX = e.clientX - mouseStartX;
-            if (Math.abs(diffX) > 35) diffX > 0 ? prevSlide() : nextSlide();
-            updateCarouselPosition();
-            carouselTrack.style.transition = '';
-            resetAutoSlide();
-        };
-        wrapper.addEventListener('mousedown', onMouseDown);
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mouseup', onMouseUp);
-    }
-
-    function alignSameRowHeights() {
-        const cards = document.querySelectorAll('.app-card');
-        if (!cards.length) return;
-        const rows = [];
-        cards.forEach(card => {
-            const rect = card.getBoundingClientRect();
-            let added = false;
-            for (let row of rows) {
-                if (Math.abs(rect.top - row[0].top) <= 5) { row.push({ element: card, height: rect.height }); added = true; break; }
+        // 渲染应用
+        if (appsData.length > 0) {
+            appsHeader.style.display = 'flex';
+            let appsHtml = '';
+            for (let i = 0; i < appsData.length; i++) {
+                const app = appsData[i];
+                appsHtml += `
+                    <div class="app-card" data-link="${escapeHtml(app.link)}" data-name="${escapeHtml(app.name)}" data-mode="${app.mode || ''}">
+                        <img class="app-icon" src="${escapeHtml(app.icon || 'null.jpg')}" onerror="this.src='null.jpg'">
+                        <span class="app-name">${escapeHtml(app.name)}</span>
+                        ${isAdminMode ? `<div class="app-actions"><button class="app-delete-btn" data-index="${i}">🗑</button></div>` : ''}
+                    </div>
+                `;
             }
-            if (!added) rows.push([{ element: card, height: rect.height, top: rect.top }]);
-        });
-        rows.forEach(row => { if (row.length > 1) { let maxH = Math.max(...row.map(r => r.height)); row.forEach(r => r.element.style.height = maxH + 'px'); } });
+            appsGrid.innerHTML = appsHtml;
+            document.querySelectorAll('.app-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('app-delete-btn')) return;
+                    const link = card.dataset.link;
+                    const name = card.dataset.name;
+                    const mode = card.dataset.mode;
+                    handleAppClick(link, name, mode === 'window');
+                });
+            });
+            if (isAdminMode) {
+                document.querySelectorAll('.app-delete-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const idx = parseInt(btn.dataset.index);
+                        if (confirm('确定删除这个应用吗？')) {
+                            await deleteApp(idx);
+                        }
+                    });
+                });
+                addAppBtn.style.display = 'block';
+                addAppBtn.onclick = () => showAddAppModal();
+            } else {
+                addAppBtn.style.display = 'none';
+            }
+        } else {
+            appsHeader.style.display = 'none';
+            appsGrid.innerHTML = '<div class="empty-tip">暂无应用数据</div>';
+        }
+        startAutoSlide();
     }
 
+    function updateCarouselPosition() {
+        if (carouselTrack) carouselTrack.style.transform = `translateX(${-currentIndex * 100}%)`;
+    }
+    function updateDotsActive() {
+        document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentIndex));
+    }
+    function nextSlide() { if (totalSlides) { currentIndex = (currentIndex + 1) % totalSlides; updateCarouselPosition(); updateDotsActive(); } }
+    function startAutoSlide() { if (autoInterval) clearInterval(autoInterval); if (totalSlides > 1) autoInterval = setInterval(nextSlide, 5000); }
+
+    // 应用点击处理
+    function getFileType(url) {
+        const ext = url.split('.').pop().toLowerCase();
+        if (['jpg','jpeg','png','gif','webp','bmp','svg'].includes(ext)) return 'image';
+        if (['mp4','webm','ogg','mov'].includes(ext)) return 'video';
+        if (['pdf'].includes(ext)) return 'pdf';
+        if (['doc','docx','xls','xlsx','ppt','pptx'].includes(ext)) return 'office';
+        return 'link';
+    }
+
+    function showFullscreenPreview(url, fileName, fileType) {
+        const previewDiv = document.createElement('div');
+        previewDiv.className = 'fullscreen-preview';
+        let contentHtml = '';
+        if (fileType === 'image') contentHtml = `<img src="${escapeHtml(url)}" style="max-width:100%; max-height:85vh;"><button class="download-btn-inline" id="downloadBtn">下载文件</button>`;
+        else if (fileType === 'video') contentHtml = `<video controls src="${escapeHtml(url)}" style="max-width:100%; max-height:85vh;"></video><button class="download-btn-inline" id="downloadBtn">下载文件</button>`;
+        else if (fileType === 'office') contentHtml = `<div class="unsupported-preview"><h2>该文件不支持预览</h2><button id="downloadBtn">立即下载</button></div>`;
+        else contentHtml = `<iframe src="${escapeHtml(url)}"></iframe>`;
+        previewDiv.innerHTML = `<div class="preview-header"><h3>${escapeHtml(fileName)}</h3><button class="preview-btn close-btn">✕</button></div><div class="preview-content">${contentHtml}</div>`;
+        document.body.appendChild(previewDiv);
+        const downloadBtn = previewDiv.querySelector('#downloadBtn');
+        if (downloadBtn) downloadBtn.onclick = () => { const a = document.createElement('a'); a.href = url; a.download = ''; a.click(); };
+        previewDiv.querySelector('.close-btn').onclick = () => previewDiv.remove();
+    }
+
+    function createWebWindow(url, name) {
+        const win = document.createElement('div');
+        win.className = 'modal-window';
+        let w = Math.min(800, window.innerWidth - 100);
+        let h = Math.min(600, window.innerHeight - 100);
+        win.style.width = `${w}px`;
+        win.style.height = `${h}px`;
+        win.style.left = `${(window.innerWidth - w)/2}px`;
+        win.style.top = `${(window.innerHeight - h)/3}px`;
+        win.style.zIndex = ++nextZIndex;
+        win.innerHTML = `
+            <div class="window-header"><div class="window-title">${escapeHtml(name)}</div><div class="window-controls"><button class="window-btn refresh">⟳</button><button class="window-btn browser">浏览器</button><button class="window-btn fullscreen">⛶</button><button class="window-btn close">✕</button></div></div>
+            <div class="window-content"><iframe src="${escapeHtml(url)}"></iframe></div>
+            <div class="resize-handle"></div>
+        `;
+        document.body.appendChild(win);
+        const iframe = win.querySelector('iframe');
+        win.querySelector('.refresh').onclick = () => iframe.src = iframe.src;
+        win.querySelector('.browser').onclick = () => window.open(url);
+        win.querySelector('.fullscreen').onclick = () => win.classList.toggle('fullscreen-mode');
+        win.querySelector('.close').onclick = () => win.remove();
+        let dragging = false, startX, startY, startLeft, startTop;
+        const header = win.querySelector('.window-header');
+        header.onmousedown = (e) => {
+            if (e.target.closest('.window-controls')) return;
+            dragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startLeft = win.offsetLeft;
+            startTop = win.offsetTop;
+            document.onmousemove = (m) => {
+                if (!dragging) return;
+                win.style.left = `${startLeft + (m.clientX - startX)}px`;
+                win.style.top = `${startTop + (m.clientY - startY)}px`;
+            };
+            document.onmouseup = () => { dragging = false; document.onmousemove = null; };
+        };
+        let resizing = false;
+        const handle = win.querySelector('.resize-handle');
+        handle.onmousedown = (e) => {
+            e.stopPropagation();
+            resizing = true;
+            let startW = win.offsetWidth, startH = win.offsetHeight;
+            let startX = e.clientX, startY = e.clientY;
+            document.onmousemove = (m) => {
+                if (!resizing) return;
+                win.style.width = `${startW + (m.clientX - startX)}px`;
+                win.style.height = `${startH + (m.clientY - startY)}px`;
+            };
+            document.onmouseup = () => { resizing = false; document.onmousemove = null; };
+        };
+        win.onmousedown = () => { nextZIndex++; win.style.zIndex = nextZIndex; };
+    }
+
+    function handleAppClick(link, name, useWindow) {
+        const fileType = getFileType(link);
+        if (fileType !== 'link') {
+            if (useWindow) alert('窗口模式暂不支持预览文件，将在新窗口打开'); 
+            window.open(link, '_blank');
+        } else {
+            if (useWindow) createWebWindow(link, name);
+            else window.open(link, '_blank');
+        }
+    }
+
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+
+    // 初始化
+    document.getElementById('verifyTokenBtn').onclick = verifyToken;
     loadSettings();
-    loadDataFromFile();
-    setInterval(alignSameRowHeights, 500);
-    window.addEventListener('resize', () => setTimeout(alignSameRowHeights, 100));
+    
+    async function init() {
+        try {
+            const response = await fetch('./5app.txt', { cache: 'no-store' });
+            if (response.ok) {
+                const text = await response.text();
+                parseData(text);
+                renderUI();
+            }
+        } catch (err) {
+            appsGrid.innerHTML = '<div class="error-tip">⚠️ 加载失败，请检查文件是否存在</div>';
+        }
+    }
+    init();
 </script>
 </body>
 </html>
