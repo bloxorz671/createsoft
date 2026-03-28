@@ -3,7 +3,6 @@ pic
 app
 [n=3月27日作业 p=327.jpg l=327.jpg]
 [n=本周调课 p=327调课.jpg l=327调课.jpg]
-[n=生物资料下载/预览 p=https://cdn.jsdelivr.net/gh/bloxorz671/createsoft@main/images/1774696233344_IMG_20260328_191026.jpg l=【学生】2025学年第二学期八年级总复习生物学练习题.pdf]
 [n=（点击下载）生物资料下载 p=docx.jpg l=【学生】2025学年第二学期八年级总复习生物学练习题.docx]
 [n=作业提交平台 p=homeworkapp.jpg l=homeworkapp]
 [n=电子值日码 p=ezr.jpg l=ezr]
