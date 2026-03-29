@@ -272,6 +272,7 @@
     let isEditMode = false, currentToken = null, fileSha = null;
     let draggedIndex = null;
     let nameMapping = {};
+    let currentStudentId = null;  // 存储当前学号，用于传递给子页面
     
     const carouselSection = document.getElementById('carouselSection'), carouselTrack = document.getElementById('carouselTrack');
     const dotsContainer = document.getElementById('carouselDots'), appsGrid = document.getElementById('appsGrid');
@@ -323,6 +324,7 @@
         // 优先从URL参数 ?p=学号 获取
         const urlParam = getUrlParam();
         if (urlParam) {
+            currentStudentId = urlParam;  // 保存学号供后续使用
             await loadNameMapping();
             if (nameMapping[urlParam]) {
                 showGreeting(nameMapping[urlParam]);
@@ -330,15 +332,26 @@
             }
         }
         
-        // 其次从localStorage读取zhiriData（存储的是姓名）
+        // 其次从localStorage读取zhiriData
         try {
             const zhiriDataStr = localStorage.getItem('zhiriData');
             if (zhiriDataStr) {
                 const zhiriData = JSON.parse(zhiriDataStr);
                 if (zhiriData && zhiriData.timestamp && (Date.now() - zhiriData.timestamp <= 60000)) {
-                    const studentName = zhiriData.value;
-                    if (studentName) {
-                        showGreeting(studentName);
+                    // 如果存储的是学号，需要查询姓名
+                    const storedValue = zhiriData.value;
+                    if (storedValue && !isNaN(parseInt(storedValue))) {
+                        // 是学号
+                        currentStudentId = storedValue;
+                        await loadNameMapping();
+                        if (nameMapping[storedValue]) {
+                            showGreeting(nameMapping[storedValue]);
+                        } else {
+                            showGreeting(storedValue);
+                        }
+                    } else {
+                        // 已经是姓名
+                        showGreeting(storedValue);
                     }
                     localStorage.removeItem('zhiriData');
                     return true;
@@ -609,8 +622,14 @@
     }
     
     function handleAppClick(link, name) {
-        if (isFileUrl(link)) openFileViewer(link, name);
-        else window.open(link, '_blank');
+        // 特殊处理：如果是电子值日码应用，传递学号参数
+        if (name === '电子值日码' && currentStudentId) {
+            window.open(`https://luckynum.top/ezr?${currentStudentId}`, '_blank');
+        } else if (isFileUrl(link)) {
+            openFileViewer(link, name);
+        } else {
+            window.open(link, '_blank');
+        }
     }
     
     function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
