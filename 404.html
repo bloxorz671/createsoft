@@ -177,7 +177,7 @@
     </div>
 
     <script>
-        // ========== 从 5name.txt 获取姓名映射 ==========
+        // ========== 从 5name.txt 获取姓名 ==========
         let nameMapping = {};
         
         async function loadNameMapping() {
@@ -198,20 +198,23 @@
                             }
                         }
                     }
-                    console.log('姓名映射加载成功，共', Object.keys(nameMapping).length, '条');
-                } else {
-                    console.log('5name.txt 加载失败，状态码:', response.status);
                 }
             } catch (e) {
-                console.log('无法加载5name.txt:', e.message);
+                console.log('无法加载5name.txt');
             }
         }
         
+        // ========== 检查学号是否在名单中 ==========
+        function isStudentInList(studentId) {
+            return nameMapping.hasOwnProperty(studentId);
+        }
+        
+        // ========== 获取姓名 ==========
         function getStudentName(studentId) {
             if (nameMapping[studentId]) {
                 return nameMapping[studentId];
             }
-            return studentId;
+            return studentId; // 找不到则返回学号
         }
         
         // ========== 主逻辑 ==========
@@ -223,71 +226,117 @@
             
             const contentDiv = document.getElementById('content');
             
-            // 提取参数（去掉问号）
-            let rawParam = queryString.substring(1);
-            let studentId = rawParam;
-            
-            if (studentId) {
-                try {
-                    studentId = decodeURIComponent(studentId);
-                    rawParam = encodeURIComponent(studentId);
-                } catch(e) {}
-            }
-            
-            // ========== 情况1：路径是 /ezr ==========
-            // 当访问 /ezr?参数 时，直接跳转到 /ezr?参数（不存储localStorage）
-            if (path === '/ezr') {
-                if (studentId) {
-                    // 跳转到值日码查询系统，携带参数
-                    window.location.href = `/ezr?${rawParam}`;
-                } else {
-                    // 没有参数，跳转到值日码查询系统首页
-                    window.location.href = '/ezr';
-                }
-                return;
-            }
-            
-            // ========== 情况2：路径是 /zhiri ==========
+            // 判断访问的是哪个路径
             if (path === '/zhiri') {
+                // /zhiri?参数 -> 检查是否在名单中
+                
+                // 提取参数（去掉问号）
+                let studentId = queryString.substring(1);
+                
                 if (studentId) {
+                    // 解码
+                    try {
+                        studentId = decodeURIComponent(studentId);
+                    } catch(e) {}
+                    
+                    // 显示加载动画
                     contentDiv.innerHTML = `
                         <div class="loading-spinner"></div>
-                        <div class="message">正在加载姓名信息...</div>
+                        <div class="message">正在验证...</div>
                     `;
                     
+                    // 加载姓名映射
                     await loadNameMapping();
-                    const studentName = getStudentName(studentId);
                     
-                    // 存储姓名到 localStorage
-                    var data = {
-                        value: studentName,
-                        timestamp: Date.now()
-                    };
-                    localStorage.setItem('zhiriData', JSON.stringify(data));
-                    console.log('已存储姓名到 localStorage:', studentName);
-                    
-                    // 跳转到主页面
-                    setTimeout(function() {
-                        window.location.replace('/1205');
-                    }, 100);
+                    // 检查学号是否在名单中
+                    if (isStudentInList(studentId)) {
+                        // 在名单中：获取姓名，跳转到1205
+                        const studentName = getStudentName(studentId);
+                        
+                        var data = {
+                            value: studentName,
+                            timestamp: Date.now()
+                        };
+                        localStorage.setItem('zhiriData', JSON.stringify(data));
+                        
+                        setTimeout(function() {
+                            window.location.replace('/1205');
+                        }, 100);
+                    } else {
+                        // 不在名单中：跳转到 ezhiri
+                        setTimeout(function() {
+                            window.location.replace('/ezhiri?' + encodeURIComponent(studentId));
+                        }, 100);
+                    }
                 } else {
-                    window.location.replace('/1205');
+                    // 没有参数，跳转到首页
+                    window.location.replace('/');
                 }
-                return;
             }
-            
-            // ========== 情况3：其他路径 - 404 ==========
-            document.title = '404';
-            contentDiv.innerHTML = `
-                <div class="error-404">404</div>
-                <div class="error-message">
-                    <h2>页面未找到</h2>
-                    <p>抱歉，您访问的页面不存在</p>
-                </div>
-                <div class="back-link">
-                    <a href="/">返回首页</a>
-                </div>
-            `;
+            else if (path === '/ezhiri') {
+                // /ezhiri?参数 -> 显示值日生信息和二维码
+                
+                document.title = '值日生信息';
+                
+                let studentId = queryString.substring(1);
+                let encodedParams = studentId;
+                
+                if (!studentId) {
+                    studentId = '未知同学';
+                    encodedParams = 'unknown';
+                }
+                
+                try {
+                    studentId = decodeURIComponent(studentId);
+                } catch (e) {}
+                
+                // 加载姓名映射，尝试获取姓名
+                await loadNameMapping();
+                const studentName = getStudentName(studentId);
+                
+                // 构建二维码URL（使用学号作为参数）
+                var qrCodeUrl = 'https://luckynum.top/ezhiri?' + encodedParams;
+                var qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(qrCodeUrl);
+                
+                contentDiv.innerHTML = `
+                    <h1 style="font-size: 26px; margin-bottom: 20px; text-align: center;">值日生信息</h1>
+                    <div class="message-text">
+                        <p><span class="student-param">${escapeHtml(studentName)}</span> 同学你好，请使用教室中控设备（或大屏）上的“值日管理系统”软件来扫描统计！先用系统扫描值日卡，再扫描本码！感谢你的配合。</p>
+                    </div>
+                    <div class="qr-section">
+                        <div class="qr-title">你的二维码</div>
+                        <div class="qr-code">
+                            <img src="${qrImageUrl}" alt="二维码">
+                        </div>
+                        <div class="qr-text">${encodedParams}</div>
+                        <div class="qr-note">请使用值日管理系统扫描此码</div>
+                    </div>
+                `;
+            }
+            else {
+                // 其他404错误
+                document.title = '404';
+                contentDiv.innerHTML = `
+                    <div class="error-404">404</div>
+                    <div class="error-message">
+                        <h2>页面未找到</h2>
+                        <p>抱歉，您访问的页面不存在</p>
+                    </div>
+                    <div class="back-link">
+                        <a href="/">返回首页</a>
+                    </div>
+                `;
+            }
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
         }
         
         main();
