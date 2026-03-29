@@ -304,6 +304,7 @@
                         if (id && name) nameMapping[id] = name;
                     }
                 }
+                console.log('姓名映射加载成功，共', Object.keys(nameMapping).length, '条');
             }
         } catch (e) { console.log('无法加载5name.txt'); }
     }
@@ -314,28 +315,41 @@
         if (container && textElem && studentName) {
             textElem.textContent = `${studentName}同学你好`;
             container.style.display = 'block';
+            console.log('显示问候语:', `${studentName}同学你好`);
         }
     }
     
     async function initGreeting() {
-        await loadNameMapping();
+        // 优先从URL参数 ?p=学号 获取
         const urlParam = getUrlParam();
-        if (urlParam && nameMapping[urlParam]) {
-            showGreeting(nameMapping[urlParam]);
-            return true;
+        if (urlParam) {
+            await loadNameMapping();
+            if (nameMapping[urlParam]) {
+                showGreeting(nameMapping[urlParam]);
+                return true;
+            }
         }
+        
+        // 其次从localStorage读取zhiriData（存储的是姓名）
         try {
             const zhiriDataStr = localStorage.getItem('zhiriData');
             if (zhiriDataStr) {
                 const zhiriData = JSON.parse(zhiriDataStr);
                 if (zhiriData && zhiriData.timestamp && (Date.now() - zhiriData.timestamp <= 60000)) {
-                    showGreeting(zhiriData.value);
+                    const studentName = zhiriData.value;
+                    if (studentName) {
+                        showGreeting(studentName);
+                    }
                     localStorage.removeItem('zhiriData');
                     return true;
                 }
                 localStorage.removeItem('zhiriData');
             }
-        } catch (e) {}
+        } catch (e) {
+            console.error('读取zhiriData失败:', e);
+            localStorage.removeItem('zhiriData');
+        }
+        
         return false;
     }
     
@@ -873,6 +887,7 @@
     uploadOnlyBtn.addEventListener('click', showUploadOnlyModal);
     addAppTextBtn.addEventListener('click', showAddAppModal);
     
+    // 启动：先处理问候语，再加载配置
     initGreeting().then(() => loadConfigFile());
     window.addEventListener('resize', () => setTimeout(alignSameRowHeights, 100));
 </script>
