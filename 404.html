@@ -93,7 +93,6 @@
             background-color: #e9ecef;
         }
         
-        /* 值日生页面样式 */
         .student-param {
             font-weight: 600;
             color: #0066cc;
@@ -173,102 +172,163 @@
 </head>
 <body>
     <div class="container" id="content">
-        <!-- 内容会通过JavaScript动态生成 -->
+        <div class="loading-spinner"></div>
+        <div class="message">正在加载...</div>
     </div>
 
     <script>
-        // 获取当前页面的完整URL
-        var currentUrl = window.location.href;
-        var urlObj = new URL(currentUrl);
-        var path = urlObj.pathname;
-        var queryString = urlObj.search;
+        // ========== 从 5name.txt 获取姓名 ==========
+        let nameMapping = {};
         
-        var contentDiv = document.getElementById('content');
-        
-        // 判断访问的是哪个路径
-        if (path === '/zhiri') {
-            // /zhiri?参数 -> 跳转到1205页面，并存储参数和时间戳到临时存储
-            
-            // 提取参数
-            var params = queryString.substring(1);
-            
-            if (params) {
-                // 创建数据对象，包含参数和时间戳
-                var data = {
-                    value: params,
-                    timestamp: Date.now()  // 当前时间戳（毫秒）
-                };
-                // 保存到 localStorage
-                localStorage.setItem('zhiriData', JSON.stringify(data));
-            }
-            
-            // 显示加载动画
-            contentDiv.innerHTML = `
-                <div class="loading-spinner"></div>
-                <div class="message">正在跳转...</div>
-            `;
-            
-            // 延迟跳转，确保存储完成
-            setTimeout(function() {
-                window.location.replace('/1205');
-            }, 100);
-        }
-        else if (path === '/ezhiri') {
-            // /ezhiri?参数 -> 显示值日生信息和二维码（原zhiri的功能）
-            
-            document.title = '值日生信息';
-            
-            // 提取参数
-            var params = queryString.substring(1);
-            var encodedParams = params;
-            
-            if (!params) {
-                params = '未知同学';
-                encodedParams = 'unknown';
-            }
-            
-            // 解码URL参数
+        async function loadNameMapping() {
             try {
-                params = decodeURIComponent(params);
+                const response = await fetch('https://luckynum.top/5name.txt');
+                if (response.ok) {
+                    const text = await response.text();
+                    const lines = text.split(/\r?\n/);
+                    for (let line of lines) {
+                        line = line.trim();
+                        if (line === '') continue;
+                        const firstSpace = line.indexOf(' ');
+                        if (firstSpace !== -1) {
+                            const id = line.substring(0, firstSpace).trim();
+                            const name = line.substring(firstSpace + 1).trim();
+                            if (id && name) {
+                                nameMapping[id] = name;
+                            }
+                        }
+                    }
+                }
             } catch (e) {
-                console.log('解码失败');
+                console.log('无法加载5name.txt，使用学号作为姓名');
             }
+        }
+        
+        // ========== 获取姓名 ==========
+        function getStudentName(studentId) {
+            if (nameMapping[studentId]) {
+                return nameMapping[studentId];
+            }
+            return studentId; // 找不到则返回学号
+        }
+        
+        // ========== 主逻辑 ==========
+        async function main() {
+            const currentUrl = window.location.href;
+            const urlObj = new URL(currentUrl);
+            const path = urlObj.pathname;
+            const queryString = urlObj.search;
             
-            // 构建二维码URL
-            var qrCodeUrl = 'https://luckynum.top/ezhiri?' + encodedParams;
-            var qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(qrCodeUrl);
+            const contentDiv = document.getElementById('content');
             
-            // 显示值日生信息页面
-            contentDiv.innerHTML = `
-                <h1 style="font-size: 26px; margin-bottom: 20px; text-align: center;">值日生信息</h1>
-                <div class="message-text">
-                    <p><span class="student-param">${params}</span> 同学你好，请使用教室中控设备（或大屏）上的“值日管理系统”软件来扫描统计！先用系统扫描值日卡，再扫描本码！感谢你的配合。</p>
-                </div>
-                <div class="qr-section">
-                    <div class="qr-title">你的二维码</div>
-                    <div class="qr-code">
-                        <img src="${qrImageUrl}" alt="二维码">
+            // 判断访问的是哪个路径
+            if (path === '/zhiri') {
+                // /zhiri?参数 -> 查询姓名后跳转到1205页面
+                
+                // 提取参数（去掉问号）
+                let studentId = queryString.substring(1);
+                
+                if (studentId) {
+                    // 解码
+                    try {
+                        studentId = decodeURIComponent(studentId);
+                    } catch(e) {}
+                    
+                    // 显示加载动画
+                    contentDiv.innerHTML = `
+                        <div class="loading-spinner"></div>
+                        <div class="message">正在加载姓名信息...</div>
+                    `;
+                    
+                    // 先加载姓名映射
+                    await loadNameMapping();
+                    
+                    // 获取真实姓名
+                    const studentName = getStudentName(studentId);
+                    
+                    // 创建数据对象，存储姓名而不是学号
+                    var data = {
+                        value: studentName,      // 存储姓名！
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem('zhiriData', JSON.stringify(data));
+                    
+                    // 延迟跳转
+                    setTimeout(function() {
+                        window.location.replace('/1205');
+                    }, 100);
+                } else {
+                    // 没有参数，直接跳转
+                    window.location.replace('/1205');
+                }
+            }
+            else if (path === '/ezhiri') {
+                // /ezhiri?参数 -> 显示值日生信息和二维码
+                
+                document.title = '值日生信息';
+                
+                let studentId = queryString.substring(1);
+                let encodedParams = studentId;
+                
+                if (!studentId) {
+                    studentId = '未知同学';
+                    encodedParams = 'unknown';
+                }
+                
+                try {
+                    studentId = decodeURIComponent(studentId);
+                } catch (e) {}
+                
+                // 先加载姓名映射，获取真实姓名
+                await loadNameMapping();
+                const studentName = getStudentName(studentId);
+                
+                // 构建二维码URL（使用学号作为参数，保持唯一性）
+                var qrCodeUrl = 'https://luckynum.top/ezhiri?' + encodedParams;
+                var qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(qrCodeUrl);
+                
+                contentDiv.innerHTML = `
+                    <h1 style="font-size: 26px; margin-bottom: 20px; text-align: center;">值日生信息</h1>
+                    <div class="message-text">
+                        <p><span class="student-param">${escapeHtml(studentName)}</span> 同学你好，请使用教室中控设备（或大屏）上的“值日管理系统”软件来扫描统计！先用系统扫描值日卡，再扫描本码！感谢你的配合。</p>
                     </div>
-                    <div class="qr-text">${encodedParams}</div>
-                    <div class="qr-note">请使用值日管理系统扫描此码</div>
-                </div>
-            `;
+                    <div class="qr-section">
+                        <div class="qr-title">你的二维码</div>
+                        <div class="qr-code">
+                            <img src="${qrImageUrl}" alt="二维码">
+                        </div>
+                        <div class="qr-text">${encodedParams}</div>
+                        <div class="qr-note">请使用值日管理系统扫描此码</div>
+                    </div>
+                `;
+            }
+            else {
+                // 其他404错误
+                document.title = '404';
+                contentDiv.innerHTML = `
+                    <div class="error-404">404</div>
+                    <div class="error-message">
+                        <h2>页面未找到</h2>
+                        <p>抱歉，您访问的页面不存在</p>
+                    </div>
+                    <div class="back-link">
+                        <a href="/">返回首页</a>
+                    </div>
+                `;
+            }
         }
-        else {
-            // 其他404错误
-            document.title = '404';
-            
-            contentDiv.innerHTML = `
-                <div class="error-404">404</div>
-                <div class="error-message">
-                    <h2>页面未找到</h2>
-                    <p>抱歉，您访问的页面不存在</p>
-                </div>
-                <div class="back-link">
-                    <a href="/">返回首页</a>
-                </div>
-            `;
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
         }
+        
+        main();
     </script>
 </body>
 </html>
