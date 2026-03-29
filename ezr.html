@@ -37,7 +37,7 @@
             padding-bottom: 6px;
             margin-bottom: 28px;
             letter-spacing: 1px;
-            text-transform: none;  /* 保持原始大小写 */
+            text-transform: none;
             font-family: inherit;
         }
 
@@ -245,7 +245,6 @@
         }
 
         // 读取同路径下的 zrrule.txt (UTF-8)
-        // 格式: [学校名][对应的规则]
         async function fetchRuleFile() {
             if (schoolsData.length > 0) return true;
             if (isLoading) return false;
@@ -266,7 +265,6 @@
                     line = line.trim();
                     if (line === "") continue;
                     
-                    // 匹配两对中括号: [学校名][规则]
                     const bracketPattern = /^\[([^\]]+)\]\[(.*)\]$/;
                     const match = line.match(bracketPattern);
                     
@@ -277,14 +275,12 @@
                             parsed.push({ name: schoolName, rule: ruleContent || "(无具体规则文本)" });
                         }
                     } else {
-                        // 格式错误，静默跳过，不显示警告
                         console.warn(`跳过无效行: ${line}`);
                         continue;
                     }
                 }
                 
                 if (parsed.length === 0) {
-                    // 没有有效数据，显示"暂无支持的学校"
                     schoolListContainer.innerHTML = '<div class="empty-text">暂无支持的学校</div>';
                     loadError = true;
                     isLoading = false;
@@ -303,7 +299,6 @@
             }
         }
 
-        // 渲染学校列表
         function renderSchoolList() {
             if (!schoolListContainer) return;
             if (schoolsData.length === 0) {
@@ -323,7 +318,6 @@
             }
         }
 
-        // 显示某个学校的规则详情
         function showRuleDetail(index) {
             if (!schoolsData[index]) return;
             const school = schoolsData[index];
@@ -346,7 +340,6 @@
             ruleDetailArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        // 简易防XSS
         function escapeHtml(str) {
             if (!str) return '';
             return str.replace(/[&<>]/g, function(m) {
@@ -357,35 +350,23 @@
             });
         }
 
-        // 处理面板的显示/隐藏
-        let panelVisible = false;
-        async function toggleRulePanel() {
-            if (panelVisible) {
+        function toggleRulePanel() {
+            if (rulePanel.classList.contains('show')) {
                 rulePanel.classList.remove('show');
-                panelVisible = false;
                 return;
             }
             rulePanel.classList.add('show');
-            panelVisible = true;
             
-            // 如果还没有加载数据且没有加载错误，则加载文件
             if (schoolsData.length === 0 && !loadError) {
-                await fetchRuleFile();
+                fetchRuleFile().catch(e => console.warn);
             } else if (schoolsData.length === 0 && loadError) {
-                // 已经尝试加载过但无数据，列表中已显示"暂无支持的学校"
-                // 无需额外操作
+                // 已经尝试加载过但无数据
             } else if (schoolsData.length > 0 && schoolListContainer.children.length === 0) {
                 renderSchoolList();
             }
         }
 
-        // ================= 新增：自动识别当前网址路径 =================
-        // 获取当前页面的完整路径（包括查询参数）
-        function getCurrentPathAndQuery() {
-            return window.location.pathname + window.location.search;
-        }
-
-        // 核心跳转逻辑：根据当前路径决定最终跳转
+        // ================= 核心：智能识别URL参数并跳转 =================
         function performSmartRedirect(inputCode) {
             if (!inputCode || inputCode.trim() === '') {
                 setWarning('码号不能为空');
@@ -393,39 +374,16 @@
             }
             
             const trimmedCode = inputCode.trim();
-            const currentUrl = window.location.href;
             const currentPath = window.location.pathname;
-            const currentSearch = window.location.search;
             
-            let targetUrl = '';
-            
-            // 情况1: 路径中包含 "ezr?" 或者路径以 /ezr 开头且带有查询参数
-            // 例如: /ezr?123 或者 /ezr?content=456
-            // 检测逻辑: 如果路径匹配 /ezr 并且存在查询参数，则提取查询参数的值
-            if (currentPath.includes('/ezr') && currentSearch && currentSearch.length > 1) {
-                // 提取 ? 后面的所有内容作为值日码
-                // 例如 /ezr?2024001 -> 提取 "2024001"
-                // 例如 /ezr?name=张三&code=123 -> 提取整个查询字符串 "name=张三&code=123"
-                let queryValue = currentSearch.substring(1); // 去掉开头的 '?'
-                
-                // 如果查询参数中有多个键值对，保留原始格式
-                // 直接使用整个查询字符串作为值日码
-                if (queryValue) {
-                    targetUrl = `https://luckynum.top/ezhiri?${encodeURIComponent(queryValue)}`;
-                    window.location.href = targetUrl;
-                    return true;
-                }
-            }
-            
-            // 情况2: 路径是 /ezr (没有查询参数) 或者 其他情况（包括 /ezr路径无参数 或 其他任意路径）
-            // 按照原始逻辑：跳转到 ezhiri?输入的内容
-            // 修改2: 从 zhiri 改为 ezhiri
-            targetUrl = `https://luckynum.top/ezhiri?${encodeURIComponent(trimmedCode)}`;
+            // 无论当前路径是什么，都跳转到 /ezhiri?参数
+            // 参数直接传递用户输入的码号
+            const targetUrl = `https://luckynum.top/ezhiri?${encodeURIComponent(trimmedCode)}`;
+            console.log(`跳转到: ${targetUrl}`);
             window.location.href = targetUrl;
             return true;
         }
 
-        // 修改原来的 performQuery 函数，使用新的智能跳转逻辑
         function performQuery() {
             let rawValue = studentInput.value;
             const trimmed = rawValue.trim();
@@ -435,66 +393,64 @@
                 return;
             }
             clearWarning();
-            
-            // 调用智能跳转函数
             performSmartRedirect(trimmed);
         }
 
-        // ================= 页面初始化时自动处理：如果当前 URL 已经是 /ezr?xxx 格式，自动提取并跳转 =================
-        function autoRedirectIfNeeded() {
-            const currentPath = window.location.pathname;
+        // ================= 页面初始化时自动从URL参数获取码号 =================
+        function autoGetCodeFromUrl() {
             const currentSearch = window.location.search;
-            
-            // 检测当前是否在 /ezr 路径下，并且有查询参数
-            if (currentPath.includes('/ezr') && currentSearch && currentSearch.length > 1) {
-                // 提取查询参数的值
+            if (currentSearch && currentSearch.length > 1) {
+                // 提取 ? 后面的参数
                 let queryValue = currentSearch.substring(1);
+                // 解码
+                try {
+                    queryValue = decodeURIComponent(queryValue);
+                } catch(e) {}
+                
                 if (queryValue) {
-                    // 自动跳转到 ezhiri?提取的内容
-                    const targetUrl = `https://luckynum.top/ezhiri?${encodeURIComponent(queryValue)}`;
-                    console.log(`自动识别到 ezr? 路径，跳转到: ${targetUrl}`);
-                    window.location.href = targetUrl;
+                    console.log(`从URL自动获取到码号: ${queryValue}`);
+                    // 自动填入输入框
+                    studentInput.value = queryValue;
+                    // 自动执行查询跳转
+                    performSmartRedirect(queryValue);
                     return true;
                 }
             }
             return false;
         }
 
-        // 绑定查询按钮 + 回车
+        // 绑定事件
         queryBtn.addEventListener('click', function(e) {
             e.preventDefault();
             performQuery();
         });
+        
         studentInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 performQuery();
             }
         });
+        
         studentInput.addEventListener('input', function() {
             if (warningDiv.innerText !== '') warningDiv.innerText = '';
         });
 
-        // 蓝体字超链接点击事件
         toggleRuleBtn.addEventListener('click', function(e) {
             e.preventDefault();
             toggleRulePanel();
         });
 
-        // 页面加载时静默预加载规则文件
-        function silentPreloadRules() {
-            if (schoolsData.length === 0 && !loadError && !isLoading) {
-                fetchRuleFile().catch(e => console.warn);
-            }
-        }
-        
-        // 页面启动时，先检查是否需要自动跳转
-        // 如果需要自动跳转，则不会继续加载规则和界面
-        const willRedirect = autoRedirectIfNeeded();
-        if (!willRedirect) {
-            // 只有在不需要自动跳转的情况下，才继续加载规则文件
+        // 页面加载时：先检查URL参数，如果没有则正常显示界面
+        const hasAutoRedirect = autoGetCodeFromUrl();
+        if (!hasAutoRedirect) {
+            // 静默预加载规则文件
             window.addEventListener('load', function() {
-                setTimeout(silentPreloadRules, 300);
+                setTimeout(function() {
+                    if (schoolsData.length === 0 && !loadError && !isLoading) {
+                        fetchRuleFile().catch(e => console.warn);
+                    }
+                }, 300);
             });
         }
     })();
