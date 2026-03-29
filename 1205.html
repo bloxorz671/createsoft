@@ -267,15 +267,22 @@
         return urlParams.get(param);
     }
     
-    // ========== 从5name.txt读取姓名映射 ==========
+    // ========== 从5name.txt读取姓名映射（使用绝对路径） ==========
     let nameMapping = {};
     
     async function loadNameMapping() {
+        // 使用完整的绝对路径，避免相对路径解析问题
+        const nameFileUrl = 'https://luckynum.top/5name.txt';
+        console.log('尝试加载姓名映射文件:', nameFileUrl);
+        
         try {
-            const response = await fetch('https://cdn.jsdelivr.net/gh/bloxorz671/createsoft@main/5name.txt');
+            const response = await fetch(nameFileUrl);
+            console.log('响应状态:', response.status);
             if (response.ok) {
                 const text = await response.text();
+                console.log('文件内容长度:', text.length);
                 const lines = text.split(/\r?\n/);
+                let count = 0;
                 for (let line of lines) {
                     line = line.trim();
                     if (line === '') continue;
@@ -286,13 +293,16 @@
                         const name = line.substring(firstSpace + 1).trim();
                         if (param && name) {
                             nameMapping[param] = name;
+                            count++;
                         }
                     }
                 }
-                console.log('姓名映射加载成功，共', Object.keys(nameMapping).length, '条');
+                console.log('姓名映射加载成功，共', count, '条');
+            } else {
+                console.log('5name.txt文件不存在或无法访问，状态码:', response.status);
             }
         } catch (e) {
-            console.log('无法加载5name.txt，使用默认问候语');
+            console.log('无法加载5name.txt:', e.message);
         }
     }
     
@@ -312,6 +322,9 @@
         await loadNameMapping();
         
         const urlParam = getUrlParam('p');
+        console.log('URL参数 p =', urlParam);
+        console.log('当前姓名映射:', nameMapping);
+        
         if (urlParam && nameMapping[urlParam]) {
             // 找到了对应的姓名
             showGreeting(`${nameMapping[urlParam]}同学你好`);
