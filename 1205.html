@@ -272,7 +272,7 @@
     let isEditMode = false, currentToken = null, fileSha = null;
     let draggedIndex = null;
     let nameMapping = {};
-    let currentStudentId = null;  // 存储当前学号，用于传递给子页面
+    let currentStudentId = null;  // 存储当前学号，用于传递给电子值日码页面
     
     const carouselSection = document.getElementById('carouselSection'), carouselTrack = document.getElementById('carouselTrack');
     const dotsContainer = document.getElementById('carouselDots'), appsGrid = document.getElementById('appsGrid');
@@ -329,6 +329,9 @@
             if (nameMapping[urlParam]) {
                 showGreeting(nameMapping[urlParam]);
                 return true;
+            } else {
+                showGreeting(urlParam);
+                return true;
             }
         }
         
@@ -338,10 +341,9 @@
             if (zhiriDataStr) {
                 const zhiriData = JSON.parse(zhiriDataStr);
                 if (zhiriData && zhiriData.timestamp && (Date.now() - zhiriData.timestamp <= 60000)) {
-                    // 如果存储的是学号，需要查询姓名
                     const storedValue = zhiriData.value;
-                    if (storedValue && !isNaN(parseInt(storedValue))) {
-                        // 是学号
+                    // 判断是否是学号（纯数字）
+                    if (storedValue && /^\d+$/.test(storedValue)) {
                         currentStudentId = storedValue;
                         await loadNameMapping();
                         if (nameMapping[storedValue]) {
@@ -350,7 +352,6 @@
                             showGreeting(storedValue);
                         }
                     } else {
-                        // 已经是姓名
                         showGreeting(storedValue);
                     }
                     localStorage.removeItem('zhiriData');
@@ -621,15 +622,36 @@
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
     
+    // ========== 核心：处理应用点击（修复电子值日码参数传递） ==========
     function handleAppClick(link, name) {
-        // 特殊处理：如果是电子值日码应用，传递学号参数
-        if (name === '电子值日码' && currentStudentId) {
-            window.open(`https://luckynum.top/ezr?${currentStudentId}`, '_blank');
-        } else if (isFileUrl(link)) {
-            openFileViewer(link, name);
-        } else {
-            window.open(link, '_blank');
+        console.log('点击应用:', name, '链接:', link, '当前学号:', currentStudentId);
+        
+        // 特殊处理：电子值日码 - 传递学号参数
+        // 判断条件：链接是 ezr 或者 名称包含"电子值日码"
+        if (link === 'ezr' || link === 'ezr/' || link === '/ezr' || (name && name.includes('电子值日码'))) {
+            if (currentStudentId) {
+                console.log('跳转到电子值日码，携带学号:', currentStudentId);
+                window.open(`https://luckynum.top/ezr?${currentStudentId}`, '_blank');
+            } else {
+                console.log('跳转到电子值日码，无学号参数');
+                window.open('https://luckynum.top/ezr', '_blank');
+            }
+            return;
         }
+        
+        // 文件预览
+        if (isFileUrl(link)) {
+            openFileViewer(link, name);
+            return;
+        }
+        
+        // 普通链接：处理相对路径
+        let finalLink = link;
+        if (finalLink && !finalLink.startsWith('http') && !finalLink.startsWith('//')) {
+            finalLink = `https://luckynum.top/${finalLink}`;
+        }
+        console.log('打开普通链接:', finalLink);
+        window.open(finalLink, '_blank');
     }
     
     function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
