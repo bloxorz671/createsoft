@@ -1,8 +1,6 @@
 pic
-[p=327调课.jpg l=327调课.jpg]
 app
 [n=作业提交平台 p=homeworkapp.jpg l=homeworkapp]
 [n=电子值日码 p=ezr.jpg l=ezr]
 [n=本周调课 p=327调课.jpg l=327调课.jpg]
 [n=（点击下载）生物资料下载 p=docx.jpg l=【学生】2025学年第二学期八年级总复习生物学练习题.docx]
-[n=3月30作业登记 p=https://cdn.jsdelivr.net/gh/bloxorz671/createsoft@main/330作业登记.jpg l=https://cdn.jsdelivr.net/gh/bloxorz671/createsoft@main/330作业登记.jpg]
