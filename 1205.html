@@ -320,31 +320,33 @@
         }
     }
     
+    // ========== 修改：保存学号到全局变量 ==========
     async function initGreeting() {
-        // 优先从URL参数 ?p=学号 获取
+        // 优先从 URL 参数 ?p=学号 获取
         const urlParam = getUrlParam();
         if (urlParam) {
-            currentStudentId = urlParam;  // 保存学号供后续使用
+            currentStudentId = urlParam;  // 保存学号
             await loadNameMapping();
             if (nameMapping[urlParam]) {
                 showGreeting(nameMapping[urlParam]);
-                return true;
             } else {
                 showGreeting(urlParam);
-                return true;
             }
+            // 清除 URL 参数，避免刷新后重复（但学号已保存在内存中）
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, '', newUrl);
+            return true;
         }
         
-        // 其次从localStorage读取zhiriData
+        // 其次从 localStorage 读取（兼容旧逻辑）
         try {
             const zhiriDataStr = localStorage.getItem('zhiriData');
             if (zhiriDataStr) {
                 const zhiriData = JSON.parse(zhiriDataStr);
                 if (zhiriData && zhiriData.timestamp && (Date.now() - zhiriData.timestamp <= 60000)) {
                     const storedValue = zhiriData.value;
-                    // 判断是否是学号（纯数字）
                     if (storedValue && /^\d+$/.test(storedValue)) {
-                        currentStudentId = storedValue;
+                        currentStudentId = storedValue;  // 保存学号
                         await loadNameMapping();
                         if (nameMapping[storedValue]) {
                             showGreeting(nameMapping[storedValue]);
@@ -631,7 +633,7 @@
         if (link === 'ezr' || link === 'ezr/' || link === '/ezr' || (name && name.includes('电子值日码'))) {
             if (currentStudentId) {
                 console.log('跳转到电子值日码，携带学号:', currentStudentId);
-                window.open(`https://luckynum.top/ezr?${currentStudentId}`, '_blank');
+                window.open(`https://luckynum.top/ezr?p=${currentStudentId}`, '_blank');
             } else {
                 console.log('跳转到电子值日码，无学号参数');
                 window.open('https://luckynum.top/ezr', '_blank');
