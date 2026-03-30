@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>e值日（值日码查询系统）</title>
     <style>
-        /* 极端简陋风格: 无圆角, 无阴影, 无渐变, 无复杂装饰 */
         * {
             margin: 0;
             padding: 0;
@@ -20,7 +19,6 @@
             line-height: 1.4;
         }
 
-        /* 主容器: 简单边框, 无圆角 */
         .system-container {
             max-width: 700px;
             margin: 0 auto;
@@ -29,19 +27,16 @@
             padding: 24px 20px 32px 20px;
         }
 
-        /* 标题: 纯粹文字+下划线，取消大写转换 */
         h1 {
             font-size: 26px;
             font-weight: 700;
             border-bottom: 2px solid #000000;
             padding-bottom: 6px;
             margin-bottom: 28px;
-            letter-spacing: 1px;
             text-transform: none;
             font-family: inherit;
         }
 
-        /* 标签区 */
         .input-label {
             font-size: 18px;
             font-weight: 600;
@@ -49,7 +44,6 @@
             display: block;
         }
 
-        /* 输入框: 直角, 传统风格 */
         #studentCode {
             width: 100%;
             padding: 10px 8px;
@@ -62,7 +56,6 @@
             margin-bottom: 6px;
         }
 
-        /* 下划线蓝体字: 放在输入框下方，查询按钮上方 */
         .rule-link {
             display: inline-block;
             margin-top: 8px;
@@ -78,10 +71,8 @@
         }
         .rule-link:hover {
             color: #ff0000;
-            text-decoration: underline;
         }
 
-        /* 按钮: 黑底白字, 直角 */
         .query-btn {
             background: #000000;
             color: #ffffff;
@@ -93,19 +84,13 @@
             cursor: pointer;
             width: auto;
             min-width: 120px;
-            margin-top: 0;
             margin-bottom: 10px;
             border-radius: 0;
-            transition: none;
         }
         .query-btn:hover {
             background: #222222;
         }
-        .query-btn:active {
-            background: #444444;
-        }
 
-        /* 规则面板 */
         .rule-panel {
             margin-top: 16px;
             border-top: 1px solid #888;
@@ -116,7 +101,6 @@
             display: block;
         }
 
-        /* 学校列表区域 */
         .school-list {
             margin-bottom: 20px;
             border: 1px solid #ccc;
@@ -130,25 +114,18 @@
             border-bottom: 1px dotted #aaa;
             cursor: pointer;
             font-size: 15px;
-            font-family: monospace;
             color: #0000aa;
             text-decoration: underline;
         }
         .school-item:hover {
             background-color: #f0f0f0;
-            color: #000000;
-        }
-        .school-item:last-child {
-            border-bottom: none;
         }
 
-        /* 规则详情区域 */
         .rule-detail {
             background: #f8f8f8;
             border-left: 4px solid #000;
-            padding: 12px 12px;
+            padding: 12px;
             font-size: 14px;
-            font-family: monospace;
             margin-top: 10px;
             word-break: break-word;
             white-space: pre-wrap;
@@ -168,28 +145,14 @@
         }
         .loading-text, .empty-text {
             font-size: 14px;
-            font-family: monospace;
             padding: 6px 0;
             color: #666;
         }
-        .error-text {
-            font-size: 14px;
-            font-family: monospace;
-            padding: 6px 0;
-            color: #990000;
-        }
-
-        /* 警告信息 */
         .warning-msg {
             color: #cc0000;
             font-size: 14px;
             margin: 6px 0 4px 0;
             min-height: 22px;
-            font-family: monospace;
-        }
-
-        hr {
-            display: none;
         }
     </style>
 </head>
@@ -201,21 +164,17 @@
     <input type="text" id="studentCode" placeholder="" autocomplete="off" autofocus>
     <div class="warning-msg" id="warningMsg"></div>
     
-    <!-- 蓝体字超链接：放在输入框下方，查询按钮上方 -->
     <div>
         <span id="toggleRuleBtn" class="rule-link">查询码号规则</span>
     </div>
     
     <button class="query-btn" id="queryBtn">查询</button>
 
-    <!-- 规则展示面板 -->
     <div id="rulePanel" class="rule-panel">
         <div id="schoolListContainer" class="school-list">
             <div class="loading-text">查找学校中...</div>
         </div>
-        <div id="ruleDetailArea" style="display: none;">
-            <!-- 动态显示学校规则详情 -->
-        </div>
+        <div id="ruleDetailArea" style="display: none;"></div>
     </div>
 </div>
 
@@ -231,9 +190,41 @@
         const ruleDetailArea = document.getElementById('ruleDetailArea');
 
         // 全局数据
-        let schoolsData = [];          // [{ name: "学校名", rule: "规则内容" }]
+        let schoolsData = [];
         let isLoading = false;
         let loadError = false;
+
+        // ========== 自动读取 URL 参数中的学号 ==========
+        function autoFillStudentId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let studentId = null;
+            
+            // 支持 ?p=20517
+            if (urlParams.get('p')) studentId = urlParams.get('p');
+            
+            // 支持 ?20517
+            if (!studentId) {
+                for (let [key, value] of urlParams.entries()) {
+                    if (key.match(/^\d+$/)) {
+                        studentId = key;
+                        break;
+                    }
+                }
+            }
+            
+            // 支持路径中的数字（如 /ezr/20517，但通常不会）
+            if (!studentId) {
+                const pathMatch = window.location.pathname.match(/\/(\d+)$/);
+                if (pathMatch) studentId = pathMatch[1];
+            }
+            
+            if (studentId) {
+                studentInput.value = studentId;
+                console.log('自动填入学号:', studentId);
+                // 可选：自动触发查询（如需自动查询，取消下面注释）
+                // setTimeout(() => { performQuery(); }, 100);
+            }
+        }
 
         // 辅助函数
         function clearWarning() {
@@ -244,7 +235,7 @@
             warningDiv.innerText = msg;
         }
 
-        // 读取同路径下的 zrrule.txt (UTF-8)
+        // 读取同路径下的 zrrule.txt
         async function fetchRuleFile() {
             if (schoolsData.length > 0) return true;
             if (isLoading) return false;
@@ -350,40 +341,26 @@
             });
         }
 
-        function toggleRulePanel() {
-            if (rulePanel.classList.contains('show')) {
+        let panelVisible = false;
+        async function toggleRulePanel() {
+            if (panelVisible) {
                 rulePanel.classList.remove('show');
+                panelVisible = false;
                 return;
             }
             rulePanel.classList.add('show');
+            panelVisible = true;
             
             if (schoolsData.length === 0 && !loadError) {
-                fetchRuleFile().catch(e => console.warn);
+                await fetchRuleFile();
             } else if (schoolsData.length === 0 && loadError) {
-                // 已经尝试加载过但无数据
+                // 已经显示"暂无支持的学校"
             } else if (schoolsData.length > 0 && schoolListContainer.children.length === 0) {
                 renderSchoolList();
             }
         }
 
-        // ================= 核心：智能识别URL参数并跳转 =================
-        function performSmartRedirect(inputCode) {
-            if (!inputCode || inputCode.trim() === '') {
-                setWarning('码号不能为空');
-                return false;
-            }
-            
-            const trimmedCode = inputCode.trim();
-            const currentPath = window.location.pathname;
-            
-            // 无论当前路径是什么，都跳转到 /ezhiri?参数
-            // 参数直接传递用户输入的码号
-            const targetUrl = `https://luckynum.top/ezhiri?${encodeURIComponent(trimmedCode)}`;
-            console.log(`跳转到: ${targetUrl}`);
-            window.location.href = targetUrl;
-            return true;
-        }
-
+        // 查询跳转函数：跳转到 ezhiri?学号
         function performQuery() {
             let rawValue = studentInput.value;
             const trimmed = rawValue.trim();
@@ -393,30 +370,10 @@
                 return;
             }
             clearWarning();
-            performSmartRedirect(trimmed);
-        }
-
-        // ================= 页面初始化时自动从URL参数获取码号 =================
-        function autoGetCodeFromUrl() {
-            const currentSearch = window.location.search;
-            if (currentSearch && currentSearch.length > 1) {
-                // 提取 ? 后面的参数
-                let queryValue = currentSearch.substring(1);
-                // 解码
-                try {
-                    queryValue = decodeURIComponent(queryValue);
-                } catch(e) {}
-                
-                if (queryValue) {
-                    console.log(`从URL自动获取到码号: ${queryValue}`);
-                    // 自动填入输入框
-                    studentInput.value = queryValue;
-                    // 自动执行查询跳转
-                    performSmartRedirect(queryValue);
-                    return true;
-                }
-            }
-            return false;
+            const encoded = encodeURIComponent(trimmed);
+            const targetUrl = `https://luckynum.top/ezhiri?${encoded}`;
+            console.log('跳转到:', targetUrl);
+            window.location.href = targetUrl;
         }
 
         // 绑定事件
@@ -424,14 +381,12 @@
             e.preventDefault();
             performQuery();
         });
-        
         studentInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 performQuery();
             }
         });
-        
         studentInput.addEventListener('input', function() {
             if (warningDiv.innerText !== '') warningDiv.innerText = '';
         });
@@ -441,18 +396,18 @@
             toggleRulePanel();
         });
 
-        // 页面加载时：先检查URL参数，如果没有则正常显示界面
-        const hasAutoRedirect = autoGetCodeFromUrl();
-        if (!hasAutoRedirect) {
-            // 静默预加载规则文件
-            window.addEventListener('load', function() {
-                setTimeout(function() {
-                    if (schoolsData.length === 0 && !loadError && !isLoading) {
-                        fetchRuleFile().catch(e => console.warn);
-                    }
-                }, 300);
-            });
+        // 静默预加载规则文件
+        function silentPreloadRules() {
+            if (schoolsData.length === 0 && !loadError && !isLoading) {
+                fetchRuleFile().catch(e => console.warn);
+            }
         }
+        
+        window.addEventListener('load', function() {
+            // 自动填入学号
+            autoFillStudentId();
+            setTimeout(silentPreloadRules, 300);
+        });
     })();
 </script>
 </body>
