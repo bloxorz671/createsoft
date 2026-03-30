@@ -1,9 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>值日码 - 电子值日系统</title>
+    <title>值日卡</title>
     <style>
         * {
             margin: 0;
@@ -32,6 +32,14 @@
             text-align: center;
         }
         
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #1e3c72;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
         .loading-spinner {
             width: 40px;
             height: 40px;
@@ -53,15 +61,16 @@
             margin: 20px 0;
         }
         
-        .student-param {
-            font-weight: 600;
-            color: #0066cc;
-            background-color: #e6f0ff;
-            padding: 3px 8px;
-            border-radius: 6px;
-            display: inline-block;
-            font-size: 18px;
-            margin: 0 2px;
+        .student-info {
+            font-size: 17px;
+            color: #333;
+            line-height: 1.6;
+            text-align: left;
+            margin-bottom: 24px;
+        }
+        
+        .student-name {
+            font-weight: bold;
         }
         
         .qr-section {
@@ -112,14 +121,6 @@
             font-size: 14px;
             color: #868e96;
             margin-top: 12px;
-        }
-        
-        .message-text {
-            font-size: 17px;
-            color: #333;
-            line-height: 1.6;
-            text-align: left;
-            margin-bottom: 24px;
         }
         
         .back-link {
@@ -178,16 +179,12 @@
                             }
                         }
                     }
-                    console.log('姓名映射加载成功，共', Object.keys(nameMapping).length, '条');
-                } else {
-                    console.log('5name.txt 加载失败，状态码:', response.status);
                 }
             } catch (e) {
-                console.log('无法加载5name.txt:', e.message);
+                console.log('无法加载5name.txt');
             }
         }
         
-        // ========== 获取姓名（找不到则返回学号） ==========
         function getStudentName(studentId) {
             if (nameMapping[studentId]) {
                 return nameMapping[studentId];
@@ -195,10 +192,8 @@
             return studentId;
         }
         
-        // ========== 获取URL参数 ==========
         function getUrlParam() {
             const urlParams = new URLSearchParams(window.location.search);
-            // 支持多种格式: ?20517 或 ?p=20517 或 ?id=20517
             for (let [key, value] of urlParams.entries()) {
                 if (key.match(/^\d+$/)) {
                     return key;
@@ -209,7 +204,6 @@
             return null;
         }
         
-        // ========== 从路径获取参数（如 /ezhiri/20517） ==========
         function getPathParam() {
             const path = window.location.pathname;
             const match = path.match(/\/(\d+)$/);
@@ -217,38 +211,32 @@
             return null;
         }
         
-        // ========== 生成二维码（使用 qrserver.com API） ==========
-        function generateQRCode(studentId, studentName) {
-            const qrText = studentId;
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrText)}`;
-            return qrUrl;
+        function generateQRCode(studentId) {
+            const qrText = `https://luckynum.top/zhiri?${studentId}`;
+            return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrText)}`;
         }
         
-        // ========== 主逻辑 ==========
         async function main() {
             const contentDiv = document.getElementById('content');
             
-            // 提取参数（优先级：URL参数 > 路径参数）
             let studentId = getUrlParam();
             if (!studentId) {
                 studentId = getPathParam();
             }
             
-            // 加载姓名映射
             await loadNameMapping();
             
             if (studentId) {
                 const studentName = getStudentName(studentId);
-                const qrImageUrl = generateQRCode(studentId, studentName);
+                const qrImageUrl = generateQRCode(studentId);
                 
                 contentDiv.innerHTML = `
+                    <h1>值日卡</h1>
+                    <div class="student-info">
+                        <span class="student-name">${escapeHtml(studentName)}</span> 同学你好，请使用教室中控设备（或大屏）上的“值日管理系统”软件来扫描统计！先用系统扫描值日卡，再扫描本码！感谢你的配合。
+                    </div>
                     <div class="qr-section">
-                        <div class="qr-title">📋 值日生信息</div>
-                        <div class="message-text">
-                            <strong style="font-size: 20px; display: block; margin-bottom: 10px;">${escapeHtml(studentName)}</strong>
-                            同学你好，请使用教室中控设备（或大屏）上的“值日管理系统”软件来扫描统计！先用系统扫描值日卡，再扫描本码！感谢你的配合。
-                        </div>
-                        <div class="qr-title">📱 你的二维码</div>
+                        <div class="qr-title">你的二维码</div>
                         <div class="qr-code">
                             <img src="${escapeHtml(qrImageUrl)}" alt="二维码" id="qrImage">
                         </div>
@@ -260,18 +248,16 @@
                         </div>
                     </div>
                     <div class="back-link">
-                        <a href="/1205">← 返回班级平台</a>
+                        <a href="/1205">返回班级平台</a>
                     </div>
                 `;
             } else {
-                // 没有学号参数时显示提示
                 contentDiv.innerHTML = `
+                    <h1>值日卡</h1>
                     <div style="text-align: center; padding: 40px 20px;">
-                        <div style="font-size: 48px; margin-bottom: 20px;">📋</div>
-                        <h2 style="color: #495057; margin-bottom: 12px;">未获取到值日码</h2>
-                        <p style="color: #868e96; margin-bottom: 24px;">请通过正确的二维码链接访问</p>
+                        <p style="color: #868e96; margin-bottom: 24px;">未获取到值日码</p>
                         <div class="back-link">
-                            <a href="/1205">← 返回班级平台</a>
+                            <a href="/1205">返回班级平台</a>
                         </div>
                     </div>
                 `;
@@ -288,7 +274,6 @@
             });
         }
         
-        // 页面加载时执行
         main();
     </script>
 </body>
