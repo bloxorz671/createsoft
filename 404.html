@@ -2,325 +2,124 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>页面跳转中...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跳转中...</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Microsoft YaHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background-color: #f5f5f5;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 480px;
-            margin: 0 auto;
-            padding: 40px 24px;
-            background-color: white;
-            border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            text-align: center;
-        }
-        
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            margin: 0 auto 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #0066cc;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .message {
-            font-size: 16px;
-            color: #666;
-            margin: 20px 0;
-        }
-        
-        .error-404 {
-            font-size: 80px;
-            font-weight: 600;
-            color: #dee2e6;
-            margin: 20px 0 10px;
-            line-height: 1;
-        }
-        
-        .error-message h2 {
-            font-size: 24px;
-            color: #343a40;
-            margin-bottom: 12px;
-            font-weight: 500;
-        }
-        
-        .error-message p {
-            font-size: 16px;
-            color: #868e96;
-        }
-        
-        .back-link {
-            margin-top: 30px;
-        }
-        
-        .back-link a {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: #f1f3f5;
-            color: #495057;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: background-color 0.2s;
-        }
-        
-        .back-link a:hover {
-            background-color: #e9ecef;
-        }
-        
-        .student-param {
-            font-weight: 600;
-            color: #0066cc;
-            background-color: #e6f0ff;
-            padding: 3px 8px;
-            border-radius: 6px;
-            display: inline-block;
-            font-size: 18px;
-            margin: 0 2px;
-        }
-        
-        .qr-section {
-            margin: 24px 0 16px;
-            padding: 20px 16px;
-            background-color: #f8f9fa;
-            border-radius: 16px;
-            text-align: center;
-        }
-        
-        .qr-title {
-            font-size: 16px;
-            font-weight: 500;
-            color: #495057;
-            margin-bottom: 16px;
-        }
-        
-        .qr-code {
-            display: inline-block;
-            padding: 12px;
-            background-color: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-        }
-        
-        .qr-code img {
-            display: block;
-            width: 200px;
-            height: 200px;
-            max-width: 100%;
-            border-radius: 8px;
-        }
-        
-        .qr-text {
-            font-size: 15px;
-            color: #495057;
-            margin: 16px 8px 8px;
-            padding: 12px;
-            background-color: white;
-            border-radius: 10px;
-            border: 1px solid #e9ecef;
-            word-break: break-all;
-            font-family: monospace;
-            text-align: center;
-        }
-        
-        .qr-note {
-            font-size: 14px;
-            color: #868e96;
-            margin-top: 12px;
-        }
-        
-        .message-text {
-            font-size: 17px;
-            color: #333;
-            line-height: 1.6;
-            text-align: left;
-            margin-bottom: 24px;
-        }
-        
-        @media (max-width: 380px) {
-            .qr-code img {
-                width: 160px;
-                height: 160px;
-            }
-        }
+        body { font-family: system-ui; text-align: center; padding: 50px; background: #f5f7fc; }
+        .spinner { width: 40px; height: 40px; margin: 20px auto; border: 3px solid #ddd; border-top-color: #2b4c8a; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error-box { max-width: 500px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .error-code { font-size: 80px; color: #ddd; margin-bottom: 20px; }
+        .error-message { color: #666; margin-bottom: 30px; }
+        .back-link { color: #2b4c8a; text-decoration: none; }
     </style>
 </head>
 <body>
-    <div class="container" id="content">
-        <div class="loading-spinner"></div>
-        <div class="message">正在加载...</div>
+    <div id="content">
+        <div class="spinner"></div>
+        <div>加载中...</div>
     </div>
 
     <script>
-        // ========== 从 5name.txt 获取姓名映射 ==========
-        let nameMapping = {};
-        
-        async function loadNameMapping() {
-            try {
-                const response = await fetch('https://luckynum.top/5name.txt');
-                if (response.ok) {
-                    const text = await response.text();
-                    const lines = text.split(/\r?\n/);
-                    for (let line of lines) {
-                        line = line.trim();
-                        if (line === '') continue;
-                        const firstSpace = line.indexOf(' ');
-                        if (firstSpace !== -1) {
-                            const id = line.substring(0, firstSpace).trim();
-                            const name = line.substring(firstSpace + 1).trim();
-                            if (id && name) {
-                                nameMapping[id] = name;
-                            }
+        (function() {
+            const currentPath = window.location.pathname;
+            const currentUrl = window.location.href;
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // ========== 判断是否是值日码查询请求 ==========
+            // 规则1: 路径包含 /zhiri（精确匹配 /zhiri 或 /zhiri/）
+            // 规则2: 路径以数字结尾（如 /20517）
+            // 规则3: 参数中包含学号（?p=数字 或 ?数字）
+            
+            let isZhiriRequest = false;
+            let studentId = null;
+            
+            // 情况1: 路径是 /zhiri 或 /zhiri/
+            if (currentPath === '/zhiri' || currentPath === '/zhiri/') {
+                isZhiriRequest = true;
+                // 从查询参数获取学号
+                if (urlParams.get('p')) studentId = urlParams.get('p');
+                if (!studentId) {
+                    for (let [key, value] of urlParams.entries()) {
+                        if (key.match(/^\d+$/)) {
+                            studentId = key;
+                            break;
                         }
                     }
-                    console.log('姓名映射加载成功，共', Object.keys(nameMapping).length, '条');
-                } else {
-                    console.log('5name.txt 加载失败，状态码:', response.status);
-                }
-            } catch (e) {
-                console.log('无法加载5name.txt:', e.message);
-            }
-        }
-        
-        // ========== 获取姓名（找不到则返回学号） ==========
-        function getStudentName(studentId) {
-            if (nameMapping[studentId]) {
-                return nameMapping[studentId];
-            }
-            return studentId;
-        }
-        
-        // ========== 获取URL参数 ==========
-        function getUrlParam() {
-            const urlParams = new URLSearchParams(window.location.search);
-            // 支持多种格式: ?20517 或 ?p=20517 或 ?id=20517
-            for (let [key, value] of urlParams.entries()) {
-                if (key.match(/^\d+$/)) {
-                    return key;
                 }
             }
-            if (urlParams.get('p')) return urlParams.get('p');
-            if (urlParams.get('id')) return urlParams.get('id');
-            return null;
-        }
-        
-        // ========== 从路径获取参数（如 /zhiri/20517） ==========
-        function getPathParam() {
-            const path = window.location.pathname;
-            const match = path.match(/\/(\d+)$/);
-            if (match) return match[1];
-            return null;
-        }
-        
-        // ========== 主逻辑 ==========
-        async function main() {
-            const currentUrl = window.location.href;
-            const urlObj = new URL(currentUrl);
-            const path = urlObj.pathname;
             
+            // 情况2: 路径是纯数字（如 /20517）且不是已知页面
+            if (!isZhiriRequest && currentPath.match(/^\/\d+$/)) {
+                isZhiriRequest = true;
+                studentId = currentPath.substring(1);
+            }
+            
+            // 情况3: 参数中包含 p=数字 或直接数字参数
+            if (!isZhiriRequest) {
+                if (urlParams.get('p') && urlParams.get('p').match(/^\d+$/)) {
+                    isZhiriRequest = true;
+                    studentId = urlParams.get('p');
+                }
+                if (!studentId) {
+                    for (let [key, value] of urlParams.entries()) {
+                        if (key.match(/^\d+$/)) {
+                            isZhiriRequest = true;
+                            studentId = key;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // ========== 根据判断结果处理 ==========
             const contentDiv = document.getElementById('content');
             
-            // 提取参数（优先级：URL参数 > 路径参数）
-            let studentId = getUrlParam();
-            if (!studentId) {
-                studentId = getPathParam();
-            }
-            
-            // 情况1：路径是 /zhiri 且带有参数
-            if (path === '/zhiri' && studentId) {
+            if (isZhiriRequest && studentId) {
+                // 这是值日码查询请求 → 跳转到 1205 页面
                 contentDiv.innerHTML = `
-                    <div class="loading-spinner"></div>
-                    <div class="message">正在跳转...</div>
+                    <div class="spinner"></div>
+                    <div>正在为学号 <strong>${escapeHtml(studentId)}</strong> 跳转...</div>
                 `;
-                
-                // 加载姓名映射并存储到 localStorage（用于显示问候语）
-                await loadNameMapping();
-                const studentName = getStudentName(studentId);
-                
-                // 存储姓名到 localStorage（供主页面使用）
-                var data = {
-                    value: studentName,
-                    timestamp: Date.now()
-                };
-                localStorage.setItem('zhiriData', JSON.stringify(data));
-                console.log('已存储姓名到 localStorage:', studentName, '学号:', studentId);
-                
-                // 延迟后跳转到主页面，携带参数
-                setTimeout(function() {
+                setTimeout(() => {
                     window.location.replace(`/1205?p=${studentId}`);
                 }, 100);
-                return;
+                
+            } else if (isZhiriRequest && !studentId) {
+                // 访问了 /zhiri 但没有学号 → 跳转到首页
+                contentDiv.innerHTML = `
+                    <div class="spinner"></div>
+                    <div>正在跳转到首页...</div>
+                `;
+                setTimeout(() => {
+                    window.location.replace('/1205');
+                }, 100);
+                
+            } else {
+                // 真正的 404 页面
+                contentDiv.innerHTML = `
+                    <div class="error-box">
+                        <div class="error-code">404</div>
+                        <div class="error-message">
+                            <h2>页面未找到</h2>
+                            <p>抱歉，您访问的页面不存在</p>
+                            <p style="font-size: 14px; margin-top: 20px;">${escapeHtml(currentPath)}</p>
+                        </div>
+                        <a href="/1205" class="back-link">← 返回首页</a>
+                    </div>
+                `;
             }
             
-            // 情况2：路径是 /ezr 或 /ezhiri
-            if (path === '/ezr' || path === '/ezhiri') {
-                // 这里处理电子值日码页面，由 ezr 页面自己处理
-                // 直接跳转到电子值日码页面
-                if (studentId) {
-                    window.location.replace(`/ezr?${studentId}`);
-                } else {
-                    window.location.replace('/ezr');
-                }
-                return;
+            function escapeHtml(str) {
+                if (!str) return '';
+                return str.replace(/[&<>]/g, function(m) {
+                    if (m === '&') return '&amp;';
+                    if (m === '<') return '&lt;';
+                    if (m === '>') return '&gt;';
+                    return m;
+                });
             }
-            
-            // 情况3：路径是 /zhiri 但没有参数
-            if (path === '/zhiri' && !studentId) {
-                // 没有参数，直接跳转到主页面
-                window.location.replace('/1205');
-                return;
-            }
-            
-            // 情况4：其他路径 - 404
-            document.title = '404';
-            contentDiv.innerHTML = `
-                <div class="error-404">404</div>
-                <div class="error-message">
-                    <h2>页面未找到</h2>
-                    <p>抱歉，您访问的页面不存在</p>
-                </div>
-                <div class="back-link">
-                    <a href="/">返回首页</a>
-                </div>
-            `;
-        }
-        
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
-        
-        main();
+        })();
     </script>
 </body>
 </html>
