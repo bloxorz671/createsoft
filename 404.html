@@ -3,15 +3,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>跳转中...</title>
+    <title>页面跳转</title>
     <style>
         body { font-family: system-ui; text-align: center; padding: 50px; background: #f5f7fc; }
         .spinner { width: 40px; height: 40px; margin: 20px auto; border: 3px solid #ddd; border-top-color: #2b4c8a; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .error-box { max-width: 500px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
         .error-code { font-size: 80px; color: #ddd; margin-bottom: 20px; }
-        .error-message { color: #666; margin-bottom: 30px; }
-        .back-link { color: #2b4c8a; text-decoration: none; }
+        .home-link { color: #2b4c8a; text-decoration: none; margin-top: 20px; display: inline-block; }
     </style>
 </head>
 <body>
@@ -23,21 +22,16 @@
     <script>
         (function() {
             const currentPath = window.location.pathname;
-            const currentUrl = window.location.href;
             const urlParams = new URLSearchParams(window.location.search);
             
-            // ========== 判断是否是值日码查询请求 ==========
-            // 规则1: 路径包含 /zhiri（精确匹配 /zhiri 或 /zhiri/）
-            // 规则2: 路径以数字结尾（如 /20517）
-            // 规则3: 参数中包含学号（?p=数字 或 ?数字）
+            // 判断是否是值日码请求（精确匹配 /zhiri 路径）
+            const isZhiriPath = (currentPath === '/zhiri' || currentPath === '/zhiri/');
             
-            let isZhiriRequest = false;
+            // 提取学号
             let studentId = null;
             
-            // 情况1: 路径是 /zhiri 或 /zhiri/
-            if (currentPath === '/zhiri' || currentPath === '/zhiri/') {
-                isZhiriRequest = true;
-                // 从查询参数获取学号
+            if (isZhiriPath) {
+                // 从参数获取: ?20517 或 ?p=20517
                 if (urlParams.get('p')) studentId = urlParams.get('p');
                 if (!studentId) {
                     for (let [key, value] of urlParams.entries()) {
@@ -49,63 +43,37 @@
                 }
             }
             
-            // 情况2: 路径是纯数字（如 /20517）且不是已知页面
-            if (!isZhiriRequest && currentPath.match(/^\/\d+$/)) {
-                isZhiriRequest = true;
-                studentId = currentPath.substring(1);
-            }
-            
-            // 情况3: 参数中包含 p=数字 或直接数字参数
-            if (!isZhiriRequest) {
-                if (urlParams.get('p') && urlParams.get('p').match(/^\d+$/)) {
-                    isZhiriRequest = true;
-                    studentId = urlParams.get('p');
-                }
-                if (!studentId) {
-                    for (let [key, value] of urlParams.entries()) {
-                        if (key.match(/^\d+$/)) {
-                            isZhiriRequest = true;
-                            studentId = key;
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            // ========== 根据判断结果处理 ==========
             const contentDiv = document.getElementById('content');
             
-            if (isZhiriRequest && studentId) {
-                // 这是值日码查询请求 → 跳转到 1205 页面
-                contentDiv.innerHTML = `
-                    <div class="spinner"></div>
-                    <div>正在为学号 <strong>${escapeHtml(studentId)}</strong> 跳转...</div>
-                `;
-                setTimeout(() => {
-                    window.location.replace(`/1205?p=${studentId}`);
-                }, 100);
-                
-            } else if (isZhiriRequest && !studentId) {
-                // 访问了 /zhiri 但没有学号 → 跳转到首页
-                contentDiv.innerHTML = `
-                    <div class="spinner"></div>
-                    <div>正在跳转到首页...</div>
-                `;
-                setTimeout(() => {
-                    window.location.replace('/1205');
-                }, 100);
-                
+            if (isZhiriPath) {
+                // 值日码请求：跳转到班级页面，学号通过 URL 参数传递
+                if (studentId) {
+                    contentDiv.innerHTML = `
+                        <div class="spinner"></div>
+                        <div>正在为学号 <strong>${escapeHtml(studentId)}</strong> 跳转...</div>
+                    `;
+                    setTimeout(() => {
+                        window.location.replace(`/1205?p=${studentId}`);
+                    }, 100);
+                } else {
+                    contentDiv.innerHTML = `
+                        <div class="spinner"></div>
+                        <div>正在跳转到班级页面...</div>
+                    `;
+                    setTimeout(() => {
+                        window.location.replace('/1205');
+                    }, 100);
+                }
             } else {
-                // 真正的 404 页面
+                // 真正的 404：返回主页
                 contentDiv.innerHTML = `
                     <div class="error-box">
                         <div class="error-code">404</div>
                         <div class="error-message">
-                            <h2>页面未找到</h2>
                             <p>抱歉，您访问的页面不存在</p>
-                            <p style="font-size: 14px; margin-top: 20px;">${escapeHtml(currentPath)}</p>
+                            <p style="font-size: 14px; color: #999;">${escapeHtml(currentPath)}</p>
                         </div>
-                        <a href="/" class="back-link">← 返回首页</a>
+                        <a href="/" class="home-link">← 返回首页</a>
                     </div>
                 `;
             }
