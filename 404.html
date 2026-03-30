@@ -177,7 +177,7 @@
     </div>
 
     <script>
-        // ========== 从 5name.txt 获取姓名 ==========
+        // ========== 从 5name.txt 获取姓名映射 ==========
         let nameMapping = {};
         
         async function loadNameMapping() {
@@ -198,23 +198,43 @@
                             }
                         }
                     }
+                    console.log('姓名映射加载成功，共', Object.keys(nameMapping).length, '条');
+                } else {
+                    console.log('5name.txt 加载失败，状态码:', response.status);
                 }
             } catch (e) {
-                console.log('无法加载5name.txt');
+                console.log('无法加载5name.txt:', e.message);
             }
         }
         
-        // ========== 检查学号是否在名单中 ==========
-        function isStudentInList(studentId) {
-            return nameMapping.hasOwnProperty(studentId);
-        }
-        
-        // ========== 获取姓名 ==========
+        // ========== 获取姓名（找不到则返回学号） ==========
         function getStudentName(studentId) {
             if (nameMapping[studentId]) {
                 return nameMapping[studentId];
             }
-            return studentId; // 找不到则返回学号
+            return studentId;
+        }
+        
+        // ========== 获取URL参数 ==========
+        function getUrlParam() {
+            const urlParams = new URLSearchParams(window.location.search);
+            // 支持多种格式: ?20517 或 ?p=20517 或 ?id=20517
+            for (let [key, value] of urlParams.entries()) {
+                if (key.match(/^\d+$/)) {
+                    return key;
+                }
+            }
+            if (urlParams.get('p')) return urlParams.get('p');
+            if (urlParams.get('id')) return urlParams.get('id');
+            return null;
+        }
+        
+        // ========== 从路径获取参数（如 /zhiri/20517） ==========
+        function getPathParam() {
+            const path = window.location.pathname;
+            const match = path.match(/\/(\d+)$/);
+            if (match) return match[1];
+            return null;
         }
         
         // ========== 主逻辑 ==========
@@ -222,111 +242,72 @@
             const currentUrl = window.location.href;
             const urlObj = new URL(currentUrl);
             const path = urlObj.pathname;
-            const queryString = urlObj.search;
             
             const contentDiv = document.getElementById('content');
             
-            // 判断访问的是哪个路径
-            if (path === '/zhiri') {
-                // /zhiri?参数 -> 检查是否在名单中
-                
-                // 提取参数（去掉问号）
-                let studentId = queryString.substring(1);
-                
-                if (studentId) {
-                    // 解码
-                    try {
-                        studentId = decodeURIComponent(studentId);
-                    } catch(e) {}
-                    
-                    // 显示加载动画
-                    contentDiv.innerHTML = `
-                        <div class="loading-spinner"></div>
-                        <div class="message">加载中...</div>
-                    `;
-                    
-                    // 加载姓名映射
-                    await loadNameMapping();
-                    
-                    // 检查学号是否在名单中
-                    if (isStudentInList(studentId)) {
-                        // 在名单中：获取姓名，跳转到1205
-                        const studentName = getStudentName(studentId);
-                        
-                        var data = {
-                            value: studentName,
-                            timestamp: Date.now()
-                        };
-                        localStorage.setItem('zhiriData', JSON.stringify(data));
-                        
-                        setTimeout(function() {
-                            window.location.replace('/1205');
-                        }, 100);
-                    } else {
-                        // 不在名单中：跳转到 ezhiri
-                        setTimeout(function() {
-                            window.location.replace('/ezhiri?' + encodeURIComponent(studentId));
-                        }, 100);
-                    }
-                } else {
-                    // 没有参数，跳转到首页
-                    window.location.replace('/');
-                }
+            // 提取参数（优先级：URL参数 > 路径参数）
+            let studentId = getUrlParam();
+            if (!studentId) {
+                studentId = getPathParam();
             }
-            else if (path === '/ezhiri') {
-                // /ezhiri?参数 -> 显示值日生信息和二维码
+            
+            // 情况1：路径是 /zhiri 且带有参数
+            if (path === '/zhiri' && studentId) {
+                contentDiv.innerHTML = `
+                    <div class="loading-spinner"></div>
+                    <div class="message">正在跳转...</div>
+                `;
                 
-                document.title = '值日卡';
-                
-                let studentId = queryString.substring(1);
-                let encodedParams = studentId;
-                
-                if (!studentId) {
-                    studentId = '未知同学';
-                    encodedParams = 'unknown';
-                }
-                
-                try {
-                    studentId = decodeURIComponent(studentId);
-                } catch (e) {}
-                
-                // 加载姓名映射，尝试获取姓名
+                // 加载姓名映射并存储到 localStorage（用于显示问候语）
                 await loadNameMapping();
                 const studentName = getStudentName(studentId);
                 
-                // 构建二维码URL（使用学号作为参数）
-                var qrCodeUrl = 'https://luckynum.top/ezhiri?' + encodedParams;
-                var qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(qrCodeUrl);
+                // 存储姓名到 localStorage（供主页面使用）
+                var data = {
+                    value: studentName,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('zhiriData', JSON.stringify(data));
+                console.log('已存储姓名到 localStorage:', studentName, '学号:', studentId);
                 
-                contentDiv.innerHTML = `
-                    <h1 style="font-size: 26px; margin-bottom: 20px; text-align: center;">值日卡</h1>
-                    <div class="message-text">
-                        <p><span class="student-param">${escapeHtml(studentName)}</span> 同学你好，请使用教室中控设备（或大屏）上的“值日管理系统”软件来扫描统计！先用系统扫描值日卡，再扫描本码！感谢你的配合。</p>
-                    </div>
-                    <div class="qr-section">
-                        <div class="qr-title">你的二维码</div>
-                        <div class="qr-code">
-                            <img src="${qrImageUrl}" alt="二维码">
-                        </div>
-                        <div class="qr-text">${encodedParams}</div>
-                        <div class="qr-note">请使用值日管理系统扫描此码</div>
-                    </div>
-                `;
+                // 延迟后跳转到主页面，携带参数
+                setTimeout(function() {
+                    window.location.replace(`/1205?p=${studentId}`);
+                }, 100);
+                return;
             }
-            else {
-                // 其他404错误
-                document.title = '404';
-                contentDiv.innerHTML = `
-                    <div class="error-404">404</div>
-                    <div class="error-message">
-                        <h2>页面未找到</h2>
-                        <p>抱歉，您访问的页面不存在</p>
-                    </div>
-                    <div class="back-link">
-                        <a href="/">返回首页</a>
-                    </div>
-                `;
+            
+            // 情况2：路径是 /ezr 或 /ezhiri
+            if (path === '/ezr' || path === '/ezhiri') {
+                // 这里处理电子值日码页面，由 ezr 页面自己处理
+                // 直接跳转到电子值日码页面
+                if (studentId) {
+                    window.location.replace(`/ezr?${studentId}`);
+                } else {
+                    window.location.replace('/ezr');
+                }
+                return;
             }
+            
+            // 情况3：路径是 /zhiri 但没有参数
+            if (path === '/zhiri' && !studentId) {
+                // 没有参数，直接跳转到主页面
+                window.location.replace('/1205');
+                return;
+            }
+            
+            // 情况4：其他路径 - 404
+            document.title = '404';
+            contentDiv.innerHTML = `
+                <div class="error-404">404</div>
+                <div class="error-message">
+                    <h2>页面未找到</h2>
+                    <p>抱歉，您访问的页面不存在</p>
+                </div>
+                <div class="back-link">
+                    <a href="/">返回首页</a>
+                </div>
+            `;
         }
         
         function escapeHtml(str) {
