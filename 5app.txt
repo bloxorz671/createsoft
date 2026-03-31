@@ -1,4 +1,6 @@
 pic
+[p=物理-压强-压力表.jpg l=]
+[p=物理-压强-压力表.jpg l=]
 app
 [n=作业提交平台 p=homeworkapp.jpg l=homeworkapp]
 [n=电子值日码 p=ezr.jpg l=ezr]
