@@ -4,16 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>随机抽号 V3.1</title>
-<!-- 百度统计代码 -->
-<script>
-var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "https://hm.baidu.com/hm.js?efaf77a4ecf8113659f6e5c8ee6857fd";
-  var s = document.getElementsByTagName("script")[0]; 
-  s.parentNode.insertBefore(hm, s);
-})();
-</script>
     <!-- 引入SheetJS库用于读取Excel -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -76,7 +66,7 @@ var _hmt = _hmt || [];
             overflow: hidden;
             width: 100%;
             border-bottom: 1px solid #ffeeba;
-            display: none; /* 默认隐藏 */
+            display: none;
         }
         .notice-board .scroll-content {
             display: inline-block;
@@ -87,7 +77,6 @@ var _hmt = _hmt || [];
             0% { transform: translateX(0); }
             100% { transform: translateX(-100%); }
         }
-        /* 暂停滚动效果 */
         .notice-board:hover .scroll-content {
             animation-play-state: paused;
         }
@@ -101,7 +90,6 @@ var _hmt = _hmt || [];
             display: none;
             position: relative;
         }
-        /* 标题区域 */
         .title-container {
             margin-bottom: 20px;
             position: relative;
@@ -126,7 +114,6 @@ var _hmt = _hmt || [];
             display: inline-block;
             -webkit-tap-highlight-color: transparent;
         }
-        /* 设置按钮 - 圆角方框白底黑字 */
         .settings-btn {
             position: absolute;
             top: 0;
@@ -150,7 +137,6 @@ var _hmt = _hmt || [];
             background-color: #e8e8e8;
         }
         
-        /* 主要内容区域 - 确保垂直排列 */
         .main-content {
             display: flex;
             flex-direction: column;
@@ -158,7 +144,6 @@ var _hmt = _hmt || [];
             width: 100%;
         }
         
-        /* 人数显示区域 */
         .number-section {
             width: 100%;
             margin: 20px 0;
@@ -212,7 +197,6 @@ var _hmt = _hmt || [];
             display: none;
         }
         
-        /* 抽号区域 */
         .draw-section {
             width: 100%;
             margin: 20px 0;
@@ -246,7 +230,6 @@ var _hmt = _hmt || [];
             cursor: not-allowed;
         }
         
-        /* 模式指示器 - 独立一行显示 */
         .mode-indicator {
             margin: 15px 0 10px 0;
             color: #666;
@@ -296,7 +279,6 @@ var _hmt = _hmt || [];
         input:checked + .slider:before {
             transform: translateX(30px);
         }
-        /* 弹窗样式 */
         .modal {
             display: none;
             position: fixed;
@@ -330,7 +312,6 @@ var _hmt = _hmt || [];
         .close:hover {
             color: black;
         }
-        /* 更新弹窗专用样式 */
         .update-modal-content {
             background-color: #ffffff;
             margin: 20% auto;
@@ -391,7 +372,6 @@ var _hmt = _hmt || [];
         .update-later:hover {
             background-color: #e8e8e8;
         }
-        /* 通知弹窗专用样式 */
         .notice-modal-content {
             background-color: #ffffff;
             margin: 20% auto;
@@ -526,7 +506,6 @@ var _hmt = _hmt || [];
             color: #666;
             margin-top: 10px;
         }
-        /* 设置弹窗样式 */
         .settings-modal-content {
             background-color: #ffffff;
             margin: 10% auto;
@@ -550,7 +529,6 @@ var _hmt = _hmt || [];
             font-size: 16px;
             color: #333;
         }
-        /* 下拉框样式 */
         .settings-select {
             padding: 8px 12px;
             border: 1px solid #ddd;
@@ -563,7 +541,6 @@ var _hmt = _hmt || [];
         .settings-select:focus {
             border-color: #4a90e2;
         }
-        /* 修改名单按钮 */
         .edit-list-btn {
             background-color: #4a90e2;
             color: white;
@@ -582,7 +559,6 @@ var _hmt = _hmt || [];
         .edit-list-btn.hidden {
             display: none;
         }
-        /* 名单编辑弹窗 */
         .name-list-modal-content {
             background-color: #ffffff;
             margin: 5% auto;
@@ -645,7 +621,6 @@ var _hmt = _hmt || [];
         .name-list-cancel:hover {
             background-color: #e8e8e8;
         }
-        /* 读取Excel按钮 */
         .excel-upload-btn {
             background-color: #28a745;
             color: white;
@@ -660,11 +635,9 @@ var _hmt = _hmt || [];
         .excel-upload-btn:hover {
             background-color: #218838;
         }
-        /* 隐藏的文件输入框 */
         #excel-file-input {
             display: none;
         }
-        /* 调试弹窗样式 */
         .debug-modal-content {
             background-color: #ffffff;
             margin: 10% auto;
@@ -691,7 +664,6 @@ var _hmt = _hmt || [];
         .debug-close:hover {
             color: black;
         }
-        /* 密码容器样式 */
         .password-container {
             position: relative;
             width: 150px;
@@ -781,37 +753,75 @@ var _hmt = _hmt || [];
             color: #666;
             margin-top: 5px;
         }
-        .add-number-container {
+        .record-viewer {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            text-align: left;
+        }
+        .record-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        .record-number {
+            font-weight: bold;
+            color: #4a90e2;
+        }
+        .record-time {
+            color: #999;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .check-update-btn {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .check-update-btn:hover {
+            background-color: #3a7bc8;
+        }
+        .update-checkbox-container {
+            margin-top: 15px;
+            text-align: left;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 8px;
         }
-        .add-number-input {
-            width: 60px;
-            padding: 5px;
-            font-size: 16px;
-            text-align: center;
-            border: 1px solid #ddd;
-            border-radius: 3px;
+        .update-checkbox-container input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .update-checkbox-container label {
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            margin: 0;
         }
     </style>
 </head>
 <body>
-    <!-- 启动屏幕 -->
     <div class="splash-screen" id="splash">
         <div class="splash-title">随机抽号 V3.1</div>
         <div class="splash-sub">启动中...</div>
         <div class="splash-footer">www.luckynum.top</div>
     </div>
 
-    <!-- 滚动公告条 -->
     <div id="notice-board" class="notice-board">
         <div id="board-content" class="scroll-content"></div>
     </div>
 
-    <!-- 通知弹窗 -->
     <div id="notice-modal" class="modal">
         <div class="notice-modal-content">
             <div id="notice-modal-title" class="notice-title"></div>
@@ -820,12 +830,15 @@ var _hmt = _hmt || [];
         </div>
     </div>
 
-    <!-- 版本更新提示弹窗 -->
     <div id="update-modal" class="modal">
         <div class="update-modal-content">
             <div class="update-title">发现新版本</div>
             <div id="version-display" class="version-info">3.1.0 → 3.1.1</div>
             <p class="update-message">是否前往官网下载最新版本？</p>
+            <div class="update-checkbox-container">
+                <input type="checkbox" id="ignore-update-checkbox">
+                <label for="ignore-update-checkbox">忽略此次更新</label>
+            </div>
             <div class="update-buttons">
                 <button id="update-now-btn" class="update-btn update-now">立即更新</button>
                 <button id="update-later-btn" class="update-btn update-later">下次一定</button>
@@ -833,7 +846,6 @@ var _hmt = _hmt || [];
         </div>
     </div>
 
-    <!-- 首次使用设置弹窗（班级人数） -->
     <div id="setup-modal" class="modal">
         <div class="setup-modal-content">
             <h2>欢迎使用随机抽号系统</h2>
@@ -845,7 +857,6 @@ var _hmt = _hmt || [];
         </div>
     </div>
 
-    <!-- 设置弹窗 -->
     <div id="settings-modal" class="modal">
         <div class="settings-modal-content">
             <span class="close" id="settings-close">&times;</span>
@@ -875,18 +886,17 @@ var _hmt = _hmt || [];
                 </label>
             </div>
 
-            <!-- 修改名单按钮（仅在姓名模式显示） -->
             <button id="edit-name-list-btn" class="edit-list-btn hidden">修改姓名名单</button>
+            <button id="check-update-in-settings" class="check-update-btn">检查更新</button>
+            <button id="view-all-records-btn" class="edit-list-btn" style="margin-top: 15px;">查看所有抽选记录</button>
         </div>
     </div>
 
-    <!-- 姓名名单编辑弹窗 -->
     <div id="name-list-modal" class="modal">
         <div class="name-list-modal-content">
             <span class="close" id="name-list-close">&times;</span>
             <h2 style="text-align: center;">编辑姓名名单</h2>
             <div class="name-list-hint">一行一个姓名，按 Enter 换行，或点击下方按钮读取Excel文件</div>
-            <!-- 隐藏的文件输入框 -->
             <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv">
             <div class="name-list-buttons">
                 <button id="excel-upload-btn" class="name-list-btn excel-upload-btn">读取Excel</button>
@@ -897,12 +907,10 @@ var _hmt = _hmt || [];
         </div>
     </div>
 
-    <!-- 首次姓名输入提示弹窗 -->
     <div id="first-name-modal" class="modal">
         <div class="setup-modal-content">
             <h2>请输入姓名名单</h2>
             <p>一行一个姓名，按 Enter 换行，或点击下方按钮读取Excel文件</p>
-            <!-- 隐藏的文件输入框（用于首次输入） -->
             <input type="file" id="first-excel-file-input" accept=".xlsx, .xls, .csv" style="display: none;">
             <div class="name-list-buttons" style="justify-content: center; margin-bottom: 15px;">
                 <button id="first-excel-upload-btn" class="name-list-btn excel-upload-btn">读取Excel</button>
@@ -914,16 +922,13 @@ var _hmt = _hmt || [];
     </div>
 
     <div class="container">
-        <!-- 标题区域 -->
         <div class="title-container">
             <h1 id="title">随机抽号 V3.1</h1>
             <div class="sub-title" id="url-text">www.luckynum.top</div>
             <button class="settings-btn" id="settings-btn">设置</button>
         </div>
         
-        <!-- 主要内容区域 - 确保垂直排列 -->
         <div class="main-content">
-            <!-- 人数显示区域 -->
             <div class="number-section">
                 <div class="input-group">
                     <label for="class-size" id="class-size-label">班级人数：</label>
@@ -933,17 +938,14 @@ var _hmt = _hmt || [];
                 </div>
             </div>
             
-            <!-- 抽号区域 -->
             <div class="draw-section">
                 <div id="result">?</div>
                 <button id="draw-btn">抽号</button>
-                <!-- 模式指示器独立一行，确保在抽号按钮下方显示 -->
                 <div id="mode-indicator" class="mode-indicator"></div>
             </div>
         </div>
     </div>
 
-    <!-- 开发者调试弹窗 -->
     <div id="debug-modal" class="modal">
         <div class="debug-modal-content">
             <span class="debug-close" id="debug-close-btn">&times;</span>
@@ -963,73 +965,66 @@ var _hmt = _hmt || [];
         </div>
     </div>
 
-    <!-- 历史记录弹窗 -->
-    <div id="history-modal" class="modal">
+    <div id="no-repeat-history-modal" class="modal">
         <div class="modal-content">
-            <span class="close" id="history-close">&times;</span>
-            <h2>已抽取的记录</h2>
-            
-            <div class="add-number-container" id="add-record-container">
-                <input type="text" id="add-record-input" class="add-number-input" placeholder="学号/姓名">
-                <button id="add-record-btn" class="history-btn add-btn">添加</button>
+            <span class="close" id="no-repeat-history-close">&times;</span>
+            <h2>不重复抽选记录（开发者）</h2>
+            <div class="add-number-container" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 15px;">
+                <input type="text" id="no-repeat-add-input" class="add-number-input" placeholder="学号/姓名">
+                <button id="no-repeat-add-btn" class="history-btn add-btn">添加</button>
             </div>
-            
-            <div id="history-list"></div>
-            
-            <button id="clear-history-btn" class="clear-btn">清空历史记录</button>
+            <div id="no-repeat-history-list"></div>
+            <button id="no-repeat-clear-btn" class="clear-btn">清空记录</button>
+        </div>
+    </div>
+
+    <div id="all-records-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="all-records-close">&times;</span>
+            <h2>所有抽选记录</h2>
+            <div id="all-records-list" class="record-viewer"></div>
+            <div class="hint" style="margin-top: 15px;">记录超过5M时会自动清空</div>
         </div>
     </div>
 
     <script>
-        // ==================== 初始化变量 ====================
-        const CURRENT_VERSION = "3.1.0";      // 当前软件版本
-        let classSize = 0;                      // 班级人数（学号模式用）
-        let noRepeatMode = true;                 // 不重复开关状态
-        let scrollMode = true;                   // 滚动抽选开关状态
-        let pickMode = 'number';                 // 抽选模式：'number' 或 'name'
-        let nameList = [];                       // 姓名数组
-        let drawnRecords = [];                    // 历史记录数组，统一存储 { value: '学号或姓名', timestamp: 时间戳 }
+        const CURRENT_VERSION = "3.1.1";
+        let classSize = 0;
+        let noRepeatMode = true;
+        let scrollMode = true;
+        let pickMode = 'number';
+        let nameList = [];
+        let noRepeatRecords = [];
+        let allDrawRecords = [];
         
-        // 开发者模式触发条件
         let titleClickCount = 0;
         let urlClickCount = 0;
         let titleClickTimer = null;
         let urlClickTimer = null;
         let titleReady = false;
         
-        // 锁定相关变量
         let wrongAttempts = 0; 
         let lockUntil = 0; 
         let lockTimer = null; 
         
-        // 密码
         const CORRECT_PASSWORD = "3001";
+        let ignoreUpdateFlag = false;
         
-        // ==================== DOM 元素 ====================
         const splash = document.getElementById('splash');
-        
-        // 公告条
         const noticeBoard = document.getElementById('notice-board');
         const boardContent = document.getElementById('board-content');
-        
-        // 通知弹窗
         const noticeModal = document.getElementById('notice-modal');
         const noticeModalTitle = document.getElementById('notice-modal-title');
         const noticeModalMessage = document.getElementById('notice-modal-message');
         const noticeCloseBtn = document.getElementById('notice-close-btn');
-        
-        // 更新弹窗
         const updateModal = document.getElementById('update-modal');
         const versionDisplay = document.getElementById('version-display');
         const updateNowBtn = document.getElementById('update-now-btn');
         const updateLaterBtn = document.getElementById('update-later-btn');
-        
-        // 首次设置弹窗
+        const ignoreUpdateCheckbox = document.getElementById('ignore-update-checkbox');
         const setupModal = document.getElementById('setup-modal');
         const setupClassSizeInput = document.getElementById('setup-class-size');
         const setupSaveBtn = document.getElementById('setup-save-btn');
-        
-        // 主界面
         const classSizeDisplay = document.getElementById('class-size-display');
         const classSizeInput = document.getElementById('class-size-input');
         const editBtn = document.getElementById('edit-btn');
@@ -1039,8 +1034,6 @@ var _hmt = _hmt || [];
         const title = document.getElementById('title');
         const urlText = document.getElementById('url-text');
         const classSizeLabel = document.getElementById('class-size-label');
-        
-        // 设置弹窗
         const settingsBtn = document.getElementById('settings-btn');
         const settingsModal = document.getElementById('settings-modal');
         const settingsClose = document.getElementById('settings-close');
@@ -1048,8 +1041,8 @@ var _hmt = _hmt || [];
         const settingsNoRepeatSwitch = document.getElementById('settings-no-repeat-switch');
         const settingsScrollSwitch = document.getElementById('settings-scroll-switch');
         const editNameListBtn = document.getElementById('edit-name-list-btn');
-        
-        // 姓名名单编辑弹窗
+        const checkUpdateInSettings = document.getElementById('check-update-in-settings');
+        const viewAllRecordsBtn = document.getElementById('view-all-records-btn');
         const nameListModal = document.getElementById('name-list-modal');
         const nameListClose = document.getElementById('name-list-close');
         const nameListTextarea = document.getElementById('name-list-textarea');
@@ -1057,15 +1050,11 @@ var _hmt = _hmt || [];
         const nameListCancel = document.getElementById('name-list-cancel');
         const excelFileInput = document.getElementById('excel-file-input');
         const excelUploadBtn = document.getElementById('excel-upload-btn');
-        
-        // 首次姓名输入弹窗
         const firstNameModal = document.getElementById('first-name-modal');
         const firstNameTextarea = document.getElementById('first-name-textarea');
         const firstNameSaveBtn = document.getElementById('first-name-save-btn');
         const firstExcelFileInput = document.getElementById('first-excel-file-input');
         const firstExcelUploadBtn = document.getElementById('first-excel-upload-btn');
-        
-        // 调试弹窗
         const debugModal = document.getElementById('debug-modal');
         const debugPasswordInput = document.getElementById('debug-password');
         const passwordMask = document.getElementById('password-mask');
@@ -1074,136 +1063,16 @@ var _hmt = _hmt || [];
         const debugLock = document.getElementById('debug-lock');
         const debugAttempts = document.getElementById('debug-attempts');
         const debugCloseBtn = document.getElementById('debug-close-btn');
+        const noRepeatHistoryModal = document.getElementById('no-repeat-history-modal');
+        const noRepeatHistoryClose = document.getElementById('no-repeat-history-close');
+        const noRepeatHistoryList = document.getElementById('no-repeat-history-list');
+        const noRepeatAddInput = document.getElementById('no-repeat-add-input');
+        const noRepeatAddBtn = document.getElementById('no-repeat-add-btn');
+        const noRepeatClearBtn = document.getElementById('no-repeat-clear-btn');
+        const allRecordsModal = document.getElementById('all-records-modal');
+        const allRecordsClose = document.getElementById('all-records-close');
+        const allRecordsList = document.getElementById('all-records-list');
         
-        // 历史记录弹窗
-        const historyModal = document.getElementById('history-modal');
-        const historyClose = document.getElementById('history-close');
-        const historyList = document.getElementById('history-list');
-        const addRecordInput = document.getElementById('add-record-input');
-        const addRecordBtn = document.getElementById('add-record-btn');
-        const clearHistoryBtn = document.getElementById('clear-history-btn');
-        const addRecordContainer = document.getElementById('add-record-container');
-        
-        // ==================== 通知读取函数 ====================
-        function fetchNotice() {
-            fetch('https://www.luckynum.top/notice.txt', { 
-                method: 'GET',
-                mode: 'cors',
-                cache: 'no-cache'
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.text();
-                })
-                .then(text => {
-                    // 解析文本内容
-                    parseNoticeContent(text);
-                })
-                .catch(error => {
-                    // 静默失败，不影响主程序运行
-                    console.log('读取通知失败:', error.message);
-                });
-        }
-
-        // 解析通知内容
-        function parseNoticeContent(content) {
-            const lines = content.split('\n');
-            let head = '';
-            let message = '';
-            let board = '';
-            
-            lines.forEach(line => {
-                if (line.startsWith('Head=')) {
-                    head = line.substring(5).trim();
-                } else if (line.startsWith('Message=')) {
-                    message = line.substring(8).trim();
-                } else if (line.startsWith('Board=')) {
-                    board = line.substring(6).trim();
-                }
-            });
-            
-            // 处理滚动公告条
-            if (board && board.length > 0) {
-                boardContent.textContent = board;
-                noticeBoard.style.display = 'block';
-            } else {
-                noticeBoard.style.display = 'none';
-            }
-            
-            // 处理通知弹窗（只有Head和Message都有内容时才显示）
-            if (head && head.length > 0 && message && message.length > 0) {
-                noticeModalTitle.textContent = head;
-                noticeModalMessage.textContent = message;
-                noticeModal.style.display = 'block';
-            }
-        }
-
-        // ==================== 版本检查函数 ====================
-        function checkForUpdates() {
-            fetch('https://www.luckynum.top/version.txt', { 
-                method: 'GET',
-                mode: 'cors',
-                cache: 'no-cache'
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.text();
-                })
-                .then(versionText => {
-                    // 清理版本号字符串（去除换行和空格）
-                    const remoteVersion = versionText.trim();
-                    console.log('远程版本:', remoteVersion, '当前版本:', CURRENT_VERSION);
-                    
-                    // 比较版本号
-                    if (compareVersions(remoteVersion, CURRENT_VERSION) > 0) {
-                        // 更新弹窗中的版本显示
-                        versionDisplay.textContent = `${CURRENT_VERSION} → ${remoteVersion}`;
-                        // 有新版本，显示更新弹窗
-                        updateModal.style.display = 'block';
-                    }
-                })
-                .catch(error => {
-                    // 静默失败，不影响主程序运行
-                    console.log('版本检查失败（可能文件不存在或网络问题）:', error.message);
-                });
-        }
-
-        // 版本号比较函数
-        function compareVersions(v1, v2) {
-            const parts1 = v1.split('.').map(Number);
-            const parts2 = v2.split('.').map(Number);
-            
-            for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
-                const num1 = parts1[i] || 0;
-                const num2 = parts2[i] || 0;
-                if (num1 > num2) return 1;
-                if (num1 < num2) return -1;
-            }
-            return 0;
-        }
-
-        // ==================== 工具函数 ====================
-        function updatePasswordMask() {
-            const value = debugPasswordInput.value;
-            const maxLength = 4;
-            let maskHtml = '';
-            for (let i = 0; i < value.length; i++) {
-                maskHtml += '<span class="mask-dot"></span>';
-            }
-            if (value.length === 0) {
-                maskHtml = '<span style="color: #999; letter-spacing: normal; font-size: 16px;">请输入</span>';
-            } else {
-                for (let i = value.length; i < maxLength; i++) {
-                    maskHtml += '<span style="display: inline-block; width: 20px;"></span>';
-                }
-            }
-            passwordMask.innerHTML = maskHtml;
-        }
-
         function formatDateTime(timestamp) {
             const date = new Date(timestamp);
             const year = date.getFullYear();
@@ -1214,745 +1083,358 @@ var _hmt = _hmt || [];
             const seconds = String(date.getSeconds()).padStart(2, '0');
             return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
         }
-
-        // ==================== Excel读取函数 ====================
+        
+        function checkAndCleanAllDrawRecords() {
+            try {
+                let recordsStr = JSON.stringify(allDrawRecords);
+                let sizeInBytes = new Blob([recordsStr]).size;
+                if (sizeInBytes > 5 * 1024 * 1024) {
+                    allDrawRecords = [];
+                    saveToLocalStorage();
+                }
+            } catch (error) {
+                console.error('检查记录大小出错:', error);
+            }
+        }
+        
+        function showAllRecords() {
+            allRecordsList.innerHTML = '';
+            if (allDrawRecords.length === 0) {
+                allRecordsList.innerHTML = '<div style="text-align:center;color:#999;">暂无抽选记录</div>';
+            } else {
+                allDrawRecords.slice().reverse().forEach((item) => {
+                    const div = document.createElement('div');
+                    div.className = 'record-item';
+                    div.innerHTML = `<span class="record-number">${escapeHtml(item.value)}</span><span class="record-time">${formatDateTime(item.timestamp)}</span>`;
+                    allRecordsList.appendChild(div);
+                });
+            }
+            allRecordsModal.style.display = 'block';
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        function showNoRepeatHistory() {
+            noRepeatHistoryList.innerHTML = '';
+            if (noRepeatRecords.length === 0) {
+                noRepeatHistoryList.innerHTML = '<div class="history-item">暂无不重复抽选记录</div>';
+            } else {
+                noRepeatRecords.slice().reverse().forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+                    const infoDiv = document.createElement('div');
+                    infoDiv.className = 'history-info';
+                    const valueSpan = document.createElement('span');
+                    valueSpan.className = 'history-number';
+                    valueSpan.textContent = item.value;
+                    const timeSpan = document.createElement('span');
+                    timeSpan.className = 'history-time';
+                    timeSpan.textContent = formatDateTime(item.timestamp);
+                    infoDiv.appendChild(valueSpan);
+                    infoDiv.appendChild(timeSpan);
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'history-actions';
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'history-btn delete-btn';
+                    deleteBtn.textContent = '删除';
+                    const actualIndex = noRepeatRecords.length - 1 - index;
+                    deleteBtn.onclick = function() {
+                        noRepeatRecords.splice(actualIndex, 1);
+                        saveToLocalStorage();
+                        showNoRepeatHistory();
+                    };
+                    actionsDiv.appendChild(deleteBtn);
+                    div.appendChild(infoDiv);
+                    div.appendChild(actionsDiv);
+                    noRepeatHistoryList.appendChild(div);
+                });
+            }
+            noRepeatHistoryModal.style.display = 'block';
+        }
+        
+        function fetchNotice() {
+            fetch('https://www.luckynum.top/notice.txt', { method: 'GET', mode: 'cors', cache: 'no-cache' })
+                .then(response => response.text())
+                .then(text => {
+                    const lines = text.split('\n');
+                    let head = '', message = '', board = '';
+                    lines.forEach(line => {
+                        if (line.startsWith('Head=')) head = line.substring(5).trim();
+                        else if (line.startsWith('Message=')) message = line.substring(8).trim();
+                        else if (line.startsWith('Board=')) board = line.substring(6).trim();
+                    });
+                    if (board && board.length > 0) {
+                        boardContent.textContent = board;
+                        noticeBoard.style.display = 'block';
+                    } else noticeBoard.style.display = 'none';
+                    if (head && message) {
+                        noticeModalTitle.textContent = head;
+                        noticeModalMessage.textContent = message;
+                        noticeModal.style.display = 'block';
+                    }
+                }).catch(() => {});
+        }
+        
+        function checkForUpdates(showNoUpdateMsg = false) {
+            if (ignoreUpdateFlag) return;
+            fetch('https://www.luckynum.top/version.txt', { method: 'GET', mode: 'cors', cache: 'no-cache' })
+                .then(response => response.text())
+                .then(versionText => {
+                    const remoteVersion = versionText.trim();
+                    if (compareVersions(remoteVersion, CURRENT_VERSION) > 0) {
+                        versionDisplay.textContent = `${CURRENT_VERSION} → ${remoteVersion}`;
+                        updateModal.style.display = 'block';
+                    } else if (showNoUpdateMsg) alert('当前已是最新版本');
+                }).catch(() => { if (showNoUpdateMsg) alert('检查更新失败'); });
+        }
+        
+        function compareVersions(v1, v2) {
+            const parts1 = v1.split('.').map(Number);
+            const parts2 = v2.split('.').map(Number);
+            for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+                const num1 = parts1[i] || 0, num2 = parts2[i] || 0;
+                if (num1 > num2) return 1;
+                if (num1 < num2) return -1;
+            }
+            return 0;
+        }
+        
+        function updatePasswordMask() {
+            const value = debugPasswordInput.value;
+            let maskHtml = '';
+            for (let i = 0; i < value.length; i++) maskHtml += '<span class="mask-dot"></span>';
+            if (value.length === 0) maskHtml = '<span style="color: #999; letter-spacing: normal; font-size: 16px;">请输入</span>';
+            else for (let i = value.length; i < 4; i++) maskHtml += '<span style="display: inline-block; width: 20px;"></span>';
+            passwordMask.innerHTML = maskHtml;
+        }
+        
         function setupExcelReader(fileInput, textarea) {
             fileInput.addEventListener('change', function(event) {
                 const file = event.target.files[0];
                 if (!file) return;
-
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     try {
                         const data = new Uint8Array(e.target.result);
                         const workbook = XLSX.read(data, { type: 'array' });
-                        
-                        // 获取第一个工作表
-                        const firstSheetName = workbook.SheetNames[0];
-                        const worksheet = workbook.Sheets[firstSheetName];
-                        
-                        // 转换为JSON
+                        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                        
-                        // 提取第一列的所有非空值作为姓名
                         const names = [];
-                        jsonData.forEach(row => {
-                            if (row && row.length > 0 && row[0] && row[0].toString().trim() !== '') {
-                                names.push(row[0].toString().trim());
-                            }
-                        });
-                        
-                        if (names.length === 0) {
-                            alert('Excel文件中没有找到有效的姓名数据！');
-                            return;
-                        }
-                        
-                        // 将姓名填入文本框（一行一个）
-                        textarea.value = names.join('\n');
-                        
-                    } catch (error) {
-                        console.error('读取Excel文件时出错:', error);
-                        alert('读取Excel文件失败，请确保文件格式正确。');
-                    }
+                        jsonData.forEach(row => { if (row && row[0] && row[0].toString().trim()) names.push(row[0].toString().trim()); });
+                        if (names.length) textarea.value = names.join('\n');
+                        else alert('Excel文件中没有找到有效的姓名数据！');
+                    } catch (error) { alert('读取Excel文件失败'); }
                 };
                 reader.readAsArrayBuffer(file);
-                
-                // 清除文件选择，以便再次选择同一个文件
                 fileInput.value = '';
             });
         }
-
-        // ==================== 数据持久化 ====================
+        
         function loadFromLocalStorage() {
             try {
-                // 班级人数
                 const sizeData = localStorage.getItem('randomDraw_classSize');
                 if (sizeData) classSize = parseInt(sizeData);
-                
-                // 历史记录（统一存储）
-                const recordsData = localStorage.getItem('randomDraw_drawnRecords');
-                if (recordsData) {
-                    const parsed = JSON.parse(recordsData);
-                    if (Array.isArray(parsed)) drawnRecords = parsed;
-                }
-                
-                // 开关状态
+                const noRepeatData = localStorage.getItem('randomDraw_noRepeatRecords');
+                if (noRepeatData) { const parsed = JSON.parse(noRepeatData); if (Array.isArray(parsed)) noRepeatRecords = parsed; }
+                const allRecordsData = localStorage.getItem('randomDraw_allDrawRecords');
+                if (allRecordsData) { const parsed = JSON.parse(allRecordsData); if (Array.isArray(parsed)) allDrawRecords = parsed; checkAndCleanAllDrawRecords(); }
                 const repeatData = localStorage.getItem('randomDraw_noRepeatMode');
                 if (repeatData !== null) noRepeatMode = repeatData === 'true';
                 settingsNoRepeatSwitch.checked = noRepeatMode;
-                
                 const scrollData = localStorage.getItem('randomDraw_scrollMode');
                 if (scrollData !== null) scrollMode = scrollData === 'true';
                 settingsScrollSwitch.checked = scrollMode;
-                
-                // 抽选模式
                 const modeData = localStorage.getItem('randomDraw_pickMode');
-                if (modeData === 'number' || modeData === 'name') {
-                    pickMode = modeData;
-                }
+                if (modeData === 'number' || modeData === 'name') pickMode = modeData;
                 modeSelect.value = pickMode;
-                
-                // 姓名名单
                 const nameListData = localStorage.getItem('randomDraw_nameList');
-                if (nameListData) {
-                    try {
-                        nameList = JSON.parse(nameListData);
-                    } catch {
-                        nameList = [];
-                    }
-                } else {
-                    nameList = [];
-                }
-                
-            } catch (error) {
-                console.error('加载数据出错:', error);
-                resetToDefaults();
-            }
+                if (nameListData) { try { nameList = JSON.parse(nameListData); } catch { nameList = []; } }
+                else nameList = [];
+                const ignoreUpdate = localStorage.getItem('randomDraw_ignoreUpdate');
+                if (ignoreUpdate === 'true') ignoreUpdateFlag = true;
+            } catch (error) { console.error('加载数据出错:', error); }
         }
-
-        function resetToDefaults() {
-            classSize = 0;
-            drawnRecords = [];
-            noRepeatMode = true;
-            scrollMode = true;
-            pickMode = 'number';
-            nameList = [];
-            settingsNoRepeatSwitch.checked = true;
-            settingsScrollSwitch.checked = true;
-            modeSelect.value = 'number';
-        }
-
+        
         function saveToLocalStorage() {
             try {
                 localStorage.setItem('randomDraw_classSize', classSize);
-                localStorage.setItem('randomDraw_drawnRecords', JSON.stringify(drawnRecords));
+                localStorage.setItem('randomDraw_noRepeatRecords', JSON.stringify(noRepeatRecords));
+                localStorage.setItem('randomDraw_allDrawRecords', JSON.stringify(allDrawRecords));
                 localStorage.setItem('randomDraw_noRepeatMode', noRepeatMode);
                 localStorage.setItem('randomDraw_scrollMode', scrollMode);
                 localStorage.setItem('randomDraw_pickMode', pickMode);
                 localStorage.setItem('randomDraw_nameList', JSON.stringify(nameList));
-            } catch (error) {
-                console.error('保存数据出错:', error);
-                alert('保存数据时出错，请检查浏览器设置。');
-            }
+                localStorage.setItem('randomDraw_ignoreUpdate', ignoreUpdateFlag);
+            } catch (error) { console.error('保存数据出错:', error); }
         }
-
-        // ==================== 界面更新 ====================
+        
         function updateDisplay() {
-            // 根据模式调整界面文字和按钮显示
             if (pickMode === 'number') {
                 classSizeLabel.textContent = '班级人数：';
-                addRecordInput.placeholder = '学号';
-                // 学号模式显示编辑按钮
                 editBtn.classList.remove('hidden');
             } else {
                 classSizeLabel.textContent = '名单人数：';
-                addRecordInput.placeholder = '姓名';
-                // 姓名模式隐藏编辑按钮
                 editBtn.classList.add('hidden');
-                
-                const nameCount = nameList.length;
-                classSizeDisplay.textContent = nameCount > 0 ? nameCount : '?';
+                classSizeDisplay.textContent = nameList.length > 0 ? nameList.length : '?';
             }
-
-            // 学号模式且班级人数>0时更新显示
             if (pickMode === 'number' && classSize > 0) {
                 classSizeDisplay.textContent = classSize;
                 drawBtn.disabled = false;
-            } 
-            // 姓名模式且名单非空时更新显示
-            else if (pickMode === 'name' && nameList.length > 0) {
+            } else if (pickMode === 'name' && nameList.length > 0) {
                 classSizeDisplay.textContent = nameList.length;
                 drawBtn.disabled = false;
-            } 
-            else {
-                if (pickMode === 'number') {
-                    classSizeDisplay.textContent = classSize > 0 ? classSize : '?';
-                } else {
-                    classSizeDisplay.textContent = nameList.length > 0 ? nameList.length : '?';
-                }
+            } else {
+                classSizeDisplay.textContent = (pickMode === 'number' && classSize > 0) ? classSize : '?';
                 drawBtn.disabled = (pickMode === 'number' && classSize <= 0) || (pickMode === 'name' && nameList.length === 0);
             }
-
-            // 不重复模式下检查是否需要重置
-            if (pickMode === 'number' && noRepeatMode && drawnRecords.length >= classSize && classSize > 0) {
-                drawnRecords = [];
-                saveToLocalStorage();
-            }
-            if (pickMode === 'name' && noRepeatMode && drawnRecords.length >= nameList.length && nameList.length > 0) {
-                drawnRecords = [];
-                saveToLocalStorage();
-            }
-
-            // 显示/隐藏修改名单按钮
-            if (pickMode === 'name') {
-                editNameListBtn.classList.remove('hidden');
-            } else {
-                editNameListBtn.classList.add('hidden');
-            }
-
-            // 更新模式指示器文字 - 确保在抽号按钮下方显示
+            if (pickMode === 'number' && noRepeatMode && noRepeatRecords.length >= classSize && classSize > 0) { noRepeatRecords = []; saveToLocalStorage(); }
+            if (pickMode === 'name' && noRepeatMode && noRepeatRecords.length >= nameList.length && nameList.length > 0) { noRepeatRecords = []; saveToLocalStorage(); }
+            if (pickMode === 'name') editNameListBtn.classList.remove('hidden');
+            else editNameListBtn.classList.add('hidden');
             modeIndicator.textContent = noRepeatMode ? '不重复抽选已开启' : '';
         }
-
-        // ==================== 首次使用检查 ====================
+        
         function checkFirstTimeUse() {
-            if (pickMode === 'number' && (!classSize || classSize <= 0)) {
-                setupModal.style.display = 'block';
-                setupClassSizeInput.focus();
-            } else if (pickMode === 'name' && nameList.length === 0) {
-                // 姓名模式且名单为空时，弹出首次输入框
-                firstNameModal.style.display = 'block';
-                firstNameTextarea.focus();
-            }
+            if (pickMode === 'number' && (!classSize || classSize <= 0)) { setupModal.style.display = 'block'; setupClassSizeInput.focus(); }
+            else if (pickMode === 'name' && nameList.length === 0) { firstNameModal.style.display = 'block'; firstNameTextarea.focus(); }
         }
-
-        // ==================== 抽选逻辑 ====================
+        
         async function scrollDraw() {
-            const scrollCount = 10;
-            const scrollInterval = 80;
+            const scrollCount = 10, scrollInterval = 80;
             let max = (pickMode === 'number') ? classSize : nameList.length;
-            
             for (let i = 0; i < scrollCount; i++) {
-                if (pickMode === 'number') {
-                    const tempNumber = Math.floor(Math.random() * max) + 1;
-                    resultDisplay.textContent = tempNumber;
-                } else {
-                    const tempIndex = Math.floor(Math.random() * max);
-                    resultDisplay.textContent = nameList[tempIndex];
-                }
+                if (pickMode === 'number') resultDisplay.textContent = Math.floor(Math.random() * max) + 1;
+                else resultDisplay.textContent = nameList[Math.floor(Math.random() * max)];
                 await new Promise(resolve => setTimeout(resolve, scrollInterval));
             }
-            
-            // 返回最终结果
-            if (pickMode === 'number') {
-                return Math.floor(Math.random() * max) + 1;
-            } else {
-                const finalIndex = Math.floor(Math.random() * max);
-                return { value: nameList[finalIndex], index: finalIndex };
-            }
+            if (pickMode === 'number') return Math.floor(Math.random() * max) + 1;
+            else return { value: nameList[Math.floor(Math.random() * max)], index: -1 };
         }
-
+        
         async function drawNumber() {
-            // 检查是否可抽选
-            if (pickMode === 'number' && classSize <= 0) {
-                alert('请先设置班级人数！');
-                setupModal.style.display = 'block';
-                setupClassSizeInput.focus();
-                return;
-            }
-            if (pickMode === 'name' && nameList.length === 0) {
-                alert('请先输入姓名名单！');
-                firstNameModal.style.display = 'block';
-                firstNameTextarea.focus();
-                return;
-            }
-
+            if (pickMode === 'number' && classSize <= 0) { alert('请先设置班级人数！'); setupModal.style.display = 'block'; return; }
+            if (pickMode === 'name' && nameList.length === 0) { alert('请先输入姓名名单！'); firstNameModal.style.display = 'block'; return; }
             let finalValue;
             let finalIndex = -1;
-            
-            // 滚动抽选
             if (scrollMode) {
                 const result = await scrollDraw();
-                if (pickMode === 'number') {
-                    finalValue = result.toString();
-                } else {
-                    finalValue = result.value;
-                    finalIndex = result.index;
-                }
+                if (pickMode === 'number') finalValue = result.toString();
+                else { finalValue = result.value; finalIndex = -1; }
             } else {
-                if (pickMode === 'number') {
-                    finalValue = (Math.floor(Math.random() * classSize) + 1).toString();
-                } else {
-                    finalIndex = Math.floor(Math.random() * nameList.length);
-                    finalValue = nameList[finalIndex];
-                }
+                if (pickMode === 'number') finalValue = (Math.floor(Math.random() * classSize) + 1).toString();
+                else { finalValue = nameList[Math.floor(Math.random() * nameList.length)]; }
             }
-
-            // 不重复抽选逻辑
+            allDrawRecords.push({ value: finalValue, timestamp: Date.now() });
+            checkAndCleanAllDrawRecords();
+            saveToLocalStorage();
             if (noRepeatMode) {
                 if (pickMode === 'number') {
-                    const drawnValues = drawnRecords.map(r => r.value);
-                    if (drawnValues.length >= classSize) {
-                        drawnRecords = [];
-                    }
+                    const drawnValues = noRepeatRecords.map(r => r.value);
+                    if (drawnValues.length >= classSize) noRepeatRecords = [];
                     const available = [];
-                    for (let i = 1; i <= classSize; i++) {
-                        if (!drawnValues.includes(i.toString())) {
-                            available.push(i.toString());
-                        }
-                    }
-                    if (available.length > 0 && !available.includes(finalValue)) {
-                        finalValue = available[Math.floor(Math.random() * available.length)];
-                    }
-                    drawnRecords.push({
-                        value: finalValue,
-                        timestamp: Date.now()
-                    });
+                    for (let i = 1; i <= classSize; i++) if (!drawnValues.includes(i.toString())) available.push(i.toString());
+                    if (available.length > 0 && !available.includes(finalValue)) finalValue = available[Math.floor(Math.random() * available.length)];
+                    noRepeatRecords.push({ value: finalValue, timestamp: Date.now() });
                 } else {
-                    const drawnIndices = drawnRecords.map(r => {
-                        const idx = nameList.indexOf(r.value);
-                        return idx;
-                    }).filter(idx => idx !== -1);
-                    
-                    if (drawnIndices.length >= nameList.length) {
-                        drawnRecords = [];
-                    }
-                    
+                    const drawnIndices = noRepeatRecords.map(r => nameList.indexOf(r.value)).filter(idx => idx !== -1);
+                    if (drawnIndices.length >= nameList.length) noRepeatRecords = [];
                     const availableIndices = [];
-                    for (let i = 0; i < nameList.length; i++) {
-                        if (!drawnIndices.includes(i)) {
-                            availableIndices.push(i);
-                        }
-                    }
-                    
-                    if (availableIndices.length > 0 && !availableIndices.includes(finalIndex)) {
-                        finalIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-                        finalValue = nameList[finalIndex];
-                    }
-                    
-                    drawnRecords.push({
-                        value: finalValue,
-                        timestamp: Date.now()
-                    });
+                    for (let i = 0; i < nameList.length; i++) if (!drawnIndices.includes(i)) availableIndices.push(i);
+                    if (availableIndices.length > 0) finalValue = nameList[availableIndices[Math.floor(Math.random() * availableIndices.length)]];
+                    noRepeatRecords.push({ value: finalValue, timestamp: Date.now() });
                 }
+                saveToLocalStorage();
             }
-
-            // 显示结果
             resultDisplay.textContent = finalValue;
-            saveToLocalStorage();
         }
-
-        // ==================== 显示历史记录 ====================
-        function showHistory() {
-            historyList.innerHTML = '';
-            if (drawnRecords.length === 0) {
-                historyList.innerHTML = '<div class="history-item">暂无抽取记录</div>';
-            } else {
-                drawnRecords.slice().reverse().forEach((item, index) => {
-                    const div = document.createElement('div');
-                    div.className = 'history-item';
-                    
-                    const infoDiv = document.createElement('div');
-                    infoDiv.className = 'history-info';
-                    
-                    const valueSpan = document.createElement('span');
-                    valueSpan.className = 'history-number';
-                    valueSpan.textContent = item.value;
-                    
-                    const timeSpan = document.createElement('span');
-                    timeSpan.className = 'history-time';
-                    timeSpan.textContent = formatDateTime(item.timestamp);
-                    
-                    infoDiv.appendChild(valueSpan);
-                    infoDiv.appendChild(timeSpan);
-                    
-                    const actionsDiv = document.createElement('div');
-                    actionsDiv.className = 'history-actions';
-                    
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.className = 'history-btn delete-btn';
-                    deleteBtn.textContent = '删除';
-                    deleteBtn.onclick = function() {
-                        const actualIndex = drawnRecords.length - 1 - index;
-                        drawnRecords.splice(actualIndex, 1);
-                        saveToLocalStorage();
-                        showHistory();
-                    };
-                    
-                    actionsDiv.appendChild(deleteBtn);
-                    div.appendChild(infoDiv);
-                    div.appendChild(actionsDiv);
-                    historyList.appendChild(div);
-                });
-            }
-            historyModal.style.display = 'block';
-        }
-
-        // ==================== 锁定相关 ====================
-        function isLocked() {
-            return Date.now() < lockUntil;
-        }
-
+        
+        function isLocked() { return Date.now() < lockUntil; }
         function updateLockMessage() {
-            if (isLocked()) {
-                const remaining = Math.ceil((lockUntil - Date.now()) / 1000);
-                debugLock.textContent = `系统已锁定，请等待${remaining}秒`;
-                debugSubmitBtn.disabled = true;
-                debugPasswordInput.disabled = true;
-            } else {
-                debugLock.textContent = '';
-                debugSubmitBtn.disabled = false;
-                debugPasswordInput.disabled = false;
-            }
+            if (isLocked()) { const remaining = Math.ceil((lockUntil - Date.now()) / 1000); debugLock.textContent = `系统已锁定，请等待${remaining}秒`; debugSubmitBtn.disabled = true; debugPasswordInput.disabled = true; }
+            else { debugLock.textContent = ''; debugSubmitBtn.disabled = false; debugPasswordInput.disabled = false; }
         }
-
-        function startLockTimer() {
-            if (lockTimer) clearInterval(lockTimer);
-            lockTimer = setInterval(() => {
-                if (!isLocked()) {
-                    clearInterval(lockTimer);
-                    updateLockMessage();
-                    updateAttemptsInfo();
-                } else {
-                    updateLockMessage();
-                }
-            }, 1000);
-        }
-
-        function loadLockState() {
-            try {
-                const attempts = localStorage.getItem('randomDraw_wrongAttempts');
-                const lock = localStorage.getItem('randomDraw_lockUntil');
-                if (attempts) wrongAttempts = parseInt(attempts);
-                if (lock) {
-                    lockUntil = parseInt(lock);
-                    if (isLocked()) startLockTimer();
-                }
-            } catch (error) {
-                console.error('加载锁定状态出错:', error);
-            }
-        }
-
-        function saveLockState() {
-            localStorage.setItem('randomDraw_wrongAttempts', wrongAttempts);
-            localStorage.setItem('randomDraw_lockUntil', lockUntil);
-        }
-
-        function updateAttemptsInfo() {
-            debugAttempts.textContent = wrongAttempts > 0 ? `错误尝试: ${wrongAttempts}/5` : '';
-        }
-
-        // 显示调试弹窗
-        function showDebugModal() {
-            if (isLocked()) updateLockMessage();
-            debugModal.style.display = 'block';
-            debugPasswordInput.focus();
-            updatePasswordMask();
-            updateAttemptsInfo();
-            updateLockMessage();
-        }
-
-        // 重置开发者触发
-        function resetDeveloperTrigger() {
-            titleClickCount = 0;
-            urlClickCount = 0;
-            titleReady = false;
-            if (titleClickTimer) clearTimeout(titleClickTimer);
-            if (urlClickTimer) clearTimeout(urlClickTimer);
-            titleClickTimer = urlClickTimer = null;
-        }
-
-        // ==================== 事件监听 ====================
-        function setupEventListeners() {
-            // 通知弹窗关闭按钮
-            noticeCloseBtn.addEventListener('click', () => {
-                noticeModal.style.display = 'none';
-            });
-
-            // 更新弹窗按钮事件
-            updateNowBtn.addEventListener('click', () => {
-                window.open('https://www.luckynum.top', '_blank');
-                updateModal.style.display = 'none';
-            });
-
-            updateLaterBtn.addEventListener('click', () => {
-                updateModal.style.display = 'none';
-            });
-
-            // 首次设置（班级人数）
-            setupSaveBtn.addEventListener('click', () => {
-                const newSize = parseInt(setupClassSizeInput.value);
-                if (isNaN(newSize) || newSize < 1 || newSize > 999) {
-                    alert('请输入有效的班级人数（1-999）！');
-                    setupClassSizeInput.focus();
-                    return;
-                }
-                classSize = newSize;
-                saveToLocalStorage();
-                setupModal.style.display = 'none';
-                updateDisplay();
-            });
-
-            setupClassSizeInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') setupSaveBtn.click();
-            });
-
-            // 首次姓名输入
-            firstNameSaveBtn.addEventListener('click', () => {
-                const raw = firstNameTextarea.value;
-                const lines = raw.split('\n')
-                    .map(line => line.trim())
-                    .filter(line => line !== '');
-                if (lines.length === 0) {
-                    alert('请输入至少一个姓名！');
-                    return;
-                }
-                nameList = lines;
-                saveToLocalStorage();
-                firstNameModal.style.display = 'none';
-                firstNameTextarea.value = '';
-                updateDisplay();
-            });
-
-            // 编辑按钮
-            editBtn.addEventListener('click', toggleEditMode);
-            classSizeInput.addEventListener('blur', saveClassSize);
-            classSizeInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') saveClassSize();
-            });
-
-            // 抽号
-            drawBtn.addEventListener('click', drawNumber);
-
-            // 设置按钮
-            settingsBtn.addEventListener('click', () => {
-                settingsModal.style.display = 'block';
-            });
-            settingsClose.addEventListener('click', () => {
-                settingsModal.style.display = 'none';
-            });
-
-            // 模式切换
-            modeSelect.addEventListener('change', () => {
-                pickMode = modeSelect.value;
-                saveToLocalStorage();
-                updateDisplay();
-                checkFirstTimeUse();
-            });
-
-            // 开关变化
-            settingsNoRepeatSwitch.addEventListener('change', () => {
-                noRepeatMode = settingsNoRepeatSwitch.checked;
-                saveToLocalStorage();
-                updateDisplay();
-            });
-            settingsScrollSwitch.addEventListener('change', () => {
-                scrollMode = settingsScrollSwitch.checked;
-                saveToLocalStorage();
-            });
-
-            // 修改名单按钮
-            editNameListBtn.addEventListener('click', () => {
-                nameListTextarea.value = nameList.join('\n');
-                nameListModal.style.display = 'block';
-            });
-
-            // 设置Excel读取功能
-            setupExcelReader(excelFileInput, nameListTextarea);
-            setupExcelReader(firstExcelFileInput, firstNameTextarea);
-
-            // Excel上传按钮点击事件
-            excelUploadBtn.addEventListener('click', () => {
-                excelFileInput.click();
-            });
-
-            firstExcelUploadBtn.addEventListener('click', () => {
-                firstExcelFileInput.click();
-            });
-
-            // 名单编辑保存
-            nameListSave.addEventListener('click', () => {
-                const raw = nameListTextarea.value;
-                const lines = raw.split('\n')
-                    .map(line => line.trim())
-                    .filter(line => line !== '');
-                nameList = lines;
-                saveToLocalStorage();
-                nameListModal.style.display = 'none';
-                updateDisplay();
-            });
-            nameListCancel.addEventListener('click', () => {
-                nameListModal.style.display = 'none';
-            });
-            nameListClose.addEventListener('click', () => {
-                nameListModal.style.display = 'none';
-            });
-
-            // 开发者模式触发
-            document.addEventListener('click', (e) => {
-                if (e.target !== title && e.target !== urlText) {
-                    resetDeveloperTrigger();
-                }
-            });
-
-            title.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (titleClickTimer) clearTimeout(titleClickTimer);
-                titleClickCount++;
-                titleClickTimer = setTimeout(() => {
-                    titleClickCount = 0;
-                    titleReady = false;
-                }, 5000);
-                if (titleClickCount >= 10) {
-                    titleReady = true;
-                    titleClickCount = 0;
-                }
-            });
-
-            urlText.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (!titleReady) return;
-                if (urlClickTimer) clearTimeout(urlClickTimer);
-                urlClickCount++;
-                urlClickTimer = setTimeout(() => {
-                    urlClickCount = 0;
-                    titleReady = false;
-                }, 5000);
-                if (urlClickCount >= 3) {
-                    showDebugModal();
-                    urlClickCount = 0;
-                    titleReady = false;
-                    if (urlClickTimer) clearTimeout(urlClickTimer);
-                    if (titleClickTimer) clearTimeout(titleClickTimer);
-                }
-            });
-
-            // 调试密码输入
-            debugPasswordInput.addEventListener('input', function() {
-                this.value = this.value.replace(/\D/g, '');
-                if (this.value.length > 4) this.value = this.value.slice(0, 4);
-                updatePasswordMask();
-            });
-            debugPasswordInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') debugSubmitBtn.click();
-            });
-
-            // 调试提交
-            debugSubmitBtn.addEventListener('click', () => {
-                if (isLocked()) {
-                    updateLockMessage();
-                    return;
-                }
-                if (debugPasswordInput.value === CORRECT_PASSWORD) {
-                    wrongAttempts = 0;
-                    saveLockState();
-                    debugModal.style.display = 'none';
-                    debugPasswordInput.value = '';
-                    updatePasswordMask();
-                    debugError.textContent = '';
-                    debugLock.textContent = '';
-                    showHistory();
-                } else {
-                    wrongAttempts++;
-                    if (wrongAttempts >= 5) {
-                        lockUntil = Date.now() + 60 * 1000;
-                        saveLockState();
-                        startLockTimer();
-                    }
-                    saveLockState();
-                    updateAttemptsInfo();
-                    debugError.textContent = '密码错误';
-                    debugPasswordInput.value = '';
-                    updatePasswordMask();
-                    debugPasswordInput.focus();
-                    updateLockMessage();
-                }
-            });
-
-            debugCloseBtn.addEventListener('click', () => {
-                debugModal.style.display = 'none';
-                debugPasswordInput.value = '';
-                updatePasswordMask();
-                debugError.textContent = '';
-                debugLock.textContent = '';
-            });
-
-            // 历史记录
-            historyClose.addEventListener('click', () => {
-                historyModal.style.display = 'none';
-            });
-
-            addRecordBtn.addEventListener('click', () => {
-                const value = addRecordInput.value.trim();
-                if (!value) {
-                    alert('请输入内容！');
-                    return;
-                }
-                if (pickMode === 'number' && (isNaN(parseInt(value)) || parseInt(value) < 1 || parseInt(value) > classSize)) {
-                    alert(`请输入有效的学号（1-${classSize}）！`);
-                    return;
-                }
-                if (noRepeatMode) {
-                    const existing = drawnRecords.find(r => r.value === value);
-                    if (existing) {
-                        alert('该记录已存在！');
-                        return;
-                    }
-                }
-                drawnRecords.push({
-                    value: value,
-                    timestamp: Date.now()
-                });
-                saveToLocalStorage();
-                addRecordInput.value = '';
-                showHistory();
-            });
-
-            addRecordInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') addRecordBtn.click();
-            });
-
-            clearHistoryBtn.addEventListener('click', () => {
-                if (confirm('确定要清空所有历史记录吗？')) {
-                    drawnRecords = [];
-                    saveToLocalStorage();
-                    showHistory();
-                }
-            });
-
-            // 点击外部关闭弹窗
-            window.addEventListener('click', (e) => {
-                if (e.target === historyModal) historyModal.style.display = 'none';
-                if (e.target === setupModal) setupClassSizeInput.focus();
-                if (e.target === debugModal) debugPasswordInput.focus();
-                if (e.target === settingsModal) settingsModal.style.display = 'none';
-                if (e.target === nameListModal) nameListModal.style.display = 'none';
-                if (e.target === firstNameModal) firstNameTextarea.focus();
-                if (e.target === updateModal) updateModal.style.display = 'none';
-                if (e.target === noticeModal) noticeModal.style.display = 'none';
-            });
-
-            window.addEventListener('beforeunload', () => {
-                if (titleClickTimer) clearTimeout(titleClickTimer);
-                if (urlClickTimer) clearTimeout(urlClickTimer);
-                if (lockTimer) clearInterval(lockTimer);
-            });
-        }
-
-        // ==================== 编辑班级人数 ====================
+        function startLockTimer() { if (lockTimer) clearInterval(lockTimer); lockTimer = setInterval(() => { if (!isLocked()) { clearInterval(lockTimer); updateLockMessage(); updateAttemptsInfo(); } else updateLockMessage(); }, 1000); }
+        function loadLockState() { try { const attempts = localStorage.getItem('randomDraw_wrongAttempts'); const lock = localStorage.getItem('randomDraw_lockUntil'); if (attempts) wrongAttempts = parseInt(attempts); if (lock) { lockUntil = parseInt(lock); if (isLocked()) startLockTimer(); } } catch (error) {} }
+        function saveLockState() { localStorage.setItem('randomDraw_wrongAttempts', wrongAttempts); localStorage.setItem('randomDraw_lockUntil', lockUntil); }
+        function updateAttemptsInfo() { debugAttempts.textContent = wrongAttempts > 0 ? `错误尝试: ${wrongAttempts}/5` : ''; }
+        function showDebugModal() { if (isLocked()) updateLockMessage(); debugModal.style.display = 'block'; debugPasswordInput.focus(); updatePasswordMask(); updateAttemptsInfo(); updateLockMessage(); }
+        function resetDeveloperTrigger() { titleClickCount = 0; urlClickCount = 0; titleReady = false; if (titleClickTimer) clearTimeout(titleClickTimer); if (urlClickTimer) clearTimeout(urlClickTimer); }
+        
         function toggleEditMode() {
             if (classSizeInput.style.display === 'none') {
-                classSizeInput.style.display = 'inline-block';
-                classSizeDisplay.style.display = 'none';
-                editBtn.textContent = '保存';
-                classSizeInput.value = classSize;
-                classSizeInput.focus();
-                drawBtn.disabled = true;
-            } else {
-                saveClassSize();
-            }
+                classSizeInput.style.display = 'inline-block'; classSizeDisplay.style.display = 'none'; editBtn.textContent = '保存'; classSizeInput.value = classSize; classSizeInput.focus(); drawBtn.disabled = true;
+            } else saveClassSize();
         }
-
         function saveClassSize() {
             let newSize = parseInt(classSizeInput.value);
-            if (isNaN(newSize) || newSize < 1) {
-                alert('请输入有效的班级人数！');
-                classSizeInput.value = classSize;
-                return;
-            }
+            if (isNaN(newSize) || newSize < 1) { alert('请输入有效的班级人数！'); classSizeInput.value = classSize; return; }
             classSize = newSize;
-            if (pickMode === 'number' && noRepeatMode && drawnRecords.length > 0) {
-                drawnRecords = drawnRecords.filter(item => parseInt(item.value) <= classSize);
-            }
-            classSizeInput.style.display = 'none';
-            classSizeDisplay.style.display = 'inline-block';
-            editBtn.textContent = '编辑';
-            drawBtn.disabled = false;
-            saveToLocalStorage();
-            updateDisplay();
+            if (pickMode === 'number' && noRepeatMode && noRepeatRecords.length > 0) noRepeatRecords = noRepeatRecords.filter(item => parseInt(item.value) <= classSize);
+            classSizeInput.style.display = 'none'; classSizeDisplay.style.display = 'inline-block'; editBtn.textContent = '编辑'; drawBtn.disabled = false; saveToLocalStorage(); updateDisplay();
         }
-
-        // ==================== 初始化 ====================
+        
+        function setupEventListeners() {
+            noticeCloseBtn.addEventListener('click', () => noticeModal.style.display = 'none');
+            updateNowBtn.addEventListener('click', () => { window.open('https://www.luckynum.top', '_blank'); updateModal.style.display = 'none'; });
+            updateLaterBtn.addEventListener('click', () => { if (ignoreUpdateCheckbox.checked) { ignoreUpdateFlag = true; saveToLocalStorage(); } updateModal.style.display = 'none'; });
+            setupSaveBtn.addEventListener('click', () => { const newSize = parseInt(setupClassSizeInput.value); if (isNaN(newSize) || newSize < 1 || newSize > 999) { alert('请输入有效的班级人数（1-999）！'); return; } classSize = newSize; saveToLocalStorage(); setupModal.style.display = 'none'; updateDisplay(); });
+            setupClassSizeInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') setupSaveBtn.click(); });
+            firstNameSaveBtn.addEventListener('click', () => { const raw = firstNameTextarea.value; const lines = raw.split('\n').map(l => l.trim()).filter(l => l); if (lines.length === 0) { alert('请输入至少一个姓名！'); return; } nameList = lines; saveToLocalStorage(); firstNameModal.style.display = 'none'; firstNameTextarea.value = ''; updateDisplay(); });
+            editBtn.addEventListener('click', toggleEditMode);
+            classSizeInput.addEventListener('blur', saveClassSize);
+            classSizeInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') saveClassSize(); });
+            drawBtn.addEventListener('click', drawNumber);
+            settingsBtn.addEventListener('click', () => settingsModal.style.display = 'block');
+            settingsClose.addEventListener('click', () => settingsModal.style.display = 'none');
+            modeSelect.addEventListener('change', () => { pickMode = modeSelect.value; saveToLocalStorage(); updateDisplay(); checkFirstTimeUse(); });
+            settingsNoRepeatSwitch.addEventListener('change', () => { noRepeatMode = settingsNoRepeatSwitch.checked; saveToLocalStorage(); updateDisplay(); });
+            settingsScrollSwitch.addEventListener('change', () => { scrollMode = settingsScrollSwitch.checked; saveToLocalStorage(); });
+            editNameListBtn.addEventListener('click', () => { nameListTextarea.value = nameList.join('\n'); nameListModal.style.display = 'block'; });
+            setupExcelReader(excelFileInput, nameListTextarea);
+            setupExcelReader(firstExcelFileInput, firstNameTextarea);
+            excelUploadBtn.addEventListener('click', () => excelFileInput.click());
+            firstExcelUploadBtn.addEventListener('click', () => firstExcelFileInput.click());
+            nameListSave.addEventListener('click', () => { const raw = nameListTextarea.value; const lines = raw.split('\n').map(l => l.trim()).filter(l => l); nameList = lines; saveToLocalStorage(); nameListModal.style.display = 'none'; updateDisplay(); });
+            nameListCancel.addEventListener('click', () => nameListModal.style.display = 'none');
+            nameListClose.addEventListener('click', () => nameListModal.style.display = 'none');
+            checkUpdateInSettings.addEventListener('click', () => checkForUpdates(true));
+            viewAllRecordsBtn.addEventListener('click', showAllRecords);
+            allRecordsClose.addEventListener('click', () => allRecordsModal.style.display = 'none');
+            noRepeatHistoryClose.addEventListener('click', () => noRepeatHistoryModal.style.display = 'none');
+            noRepeatAddBtn.addEventListener('click', () => {
+                const value = noRepeatAddInput.value.trim();
+                if (!value) { alert('请输入内容！'); return; }
+                noRepeatRecords.push({ value: value, timestamp: Date.now() });
+                saveToLocalStorage();
+                noRepeatAddInput.value = '';
+                showNoRepeatHistory();
+            });
+            noRepeatClearBtn.addEventListener('click', () => {
+                if (confirm('确定要清空所有不重复抽选记录吗？')) {
+                    noRepeatRecords = [];
+                    saveToLocalStorage();
+                    showNoRepeatHistory();
+                }
+            });
+            document.addEventListener('click', (e) => { if (e.target !== title && e.target !== urlText) resetDeveloperTrigger(); });
+            title.addEventListener('click', (e) => { e.stopPropagation(); if (titleClickTimer) clearTimeout(titleClickTimer); titleClickCount++; titleClickTimer = setTimeout(() => { titleClickCount = 0; titleReady = false; }, 5000); if (titleClickCount >= 10) { titleReady = true; titleClickCount = 0; } });
+            urlText.addEventListener('click', (e) => { e.stopPropagation(); if (!titleReady) return; if (urlClickTimer) clearTimeout(urlClickTimer); urlClickCount++; urlClickTimer = setTimeout(() => { urlClickCount = 0; titleReady = false; }, 5000); if (urlClickCount >= 3) { showDebugModal(); urlClickCount = 0; titleReady = false; if (urlClickTimer) clearTimeout(urlClickTimer); if (titleClickTimer) clearTimeout(titleClickTimer); } });
+            debugPasswordInput.addEventListener('input', function() { this.value = this.value.replace(/\D/g, ''); if (this.value.length > 4) this.value = this.value.slice(0, 4); updatePasswordMask(); });
+            debugPasswordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') debugSubmitBtn.click(); });
+            debugSubmitBtn.addEventListener('click', () => { if (isLocked()) { updateLockMessage(); return; } if (debugPasswordInput.value === CORRECT_PASSWORD) { wrongAttempts = 0; saveLockState(); debugModal.style.display = 'none'; debugPasswordInput.value = ''; updatePasswordMask(); debugError.textContent = ''; debugLock.textContent = ''; showNoRepeatHistory(); } else { wrongAttempts++; if (wrongAttempts >= 5) { lockUntil = Date.now() + 60 * 1000; saveLockState(); startLockTimer(); } saveLockState(); updateAttemptsInfo(); debugError.textContent = '密码错误'; debugPasswordInput.value = ''; updatePasswordMask(); debugPasswordInput.focus(); updateLockMessage(); } });
+            debugCloseBtn.addEventListener('click', () => { debugModal.style.display = 'none'; debugPasswordInput.value = ''; updatePasswordMask(); debugError.textContent = ''; debugLock.textContent = ''; });
+            window.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.style.display = 'none'; if (e.target === nameListModal) nameListModal.style.display = 'none'; if (e.target === firstNameModal) firstNameTextarea.focus(); if (e.target === updateModal) updateModal.style.display = 'none'; if (e.target === noticeModal) noticeModal.style.display = 'none'; if (e.target === allRecordsModal) allRecordsModal.style.display = 'none'; if (e.target === noRepeatHistoryModal) noRepeatHistoryModal.style.display = 'none'; });
+            window.addEventListener('beforeunload', () => { if (titleClickTimer) clearTimeout(titleClickTimer); if (urlClickTimer) clearTimeout(urlClickTimer); if (lockTimer) clearInterval(lockTimer); });
+        }
+        
         window.addEventListener('load', () => {
             setTimeout(() => {
                 splash.classList.add('splash-hidden');
@@ -1962,11 +1444,7 @@ var _hmt = _hmt || [];
                 setupEventListeners();
                 updateDisplay();
                 checkFirstTimeUse();
-                
-                // 启动后读取通知
                 fetchNotice();
-                
-                // 启动后检查版本更新
                 checkForUpdates();
             }, 1200);
         });
