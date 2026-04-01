@@ -12,4 +12,4 @@ app
 [n=作业提交平台 p=homeworkapp.jpg l=homeworkapp g=班级应用]
 [n=电子值日码 p=ezr.jpg l=ezr g=班级应用]
 [n=初二下学期容易混淆的物理概念、规律.pdf p=null.jpg l=https://luckynum.top/5app/1775055329602_初二下学期容易混淆的物理概念、规律.pdf g=物理（学科）资料]
-[n=知识结构（初二下）完整.pdf p=null.jpg l=//5app/1775055379994_知识结构（初二下）完整.pdf g=物理（学科）资料]
+[n=知识结构（初二下）完整.pdf p=null.jpg l=https://luckynum.top//5app/1775055379994_知识结构（初二下）完整.pdf g=物理（学科）资料]
