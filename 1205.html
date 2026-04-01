@@ -268,15 +268,14 @@
     function base64ToUtf8(base64) { const binary = atob(base64.replace(/\n/g, '')); const bytes = new Uint8Array(binary.length); for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i); return new TextDecoder('utf-8').decode(bytes); }
     
     // ========== 文件类型判断 ==========
-    function isFileUrl(url) {
-        if (!url || url.startsWith('javascript:') || url.startsWith('mailto:') || url.startsWith('#')) return false;
+    function isPreviewableFile(url) {
+        if (!url) return false;
         const path = url.split('?')[0].split('#')[0];
-        const lastDot = path.lastIndexOf('.');
-        if (lastDot === -1 || lastDot === path.length - 1) return false;
-        const ext = path.substring(lastDot + 1).toLowerCase();
-        const webExts = ['html', 'htm', 'php', 'asp', 'aspx', 'jsp'];
-        if (webExts.includes(ext)) return false;
-        return true;
+        const ext = path.split('.').pop().toLowerCase();
+        // 只支持图片和视频预览
+        const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico'];
+        const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'];
+        return imageExts.includes(ext) || videoExts.includes(ext);
     }
     
     function getFileType(url) {
@@ -284,7 +283,6 @@
         const ext = path.split('.').pop().toLowerCase();
         if (['jpg','jpeg','png','gif','webp','bmp','svg','ico'].includes(ext)) return 'image';
         if (['mp4','webm','ogg','mov','avi','mkv'].includes(ext)) return 'video';
-        if (ext === 'pdf') return 'pdf';
         return 'file';
     }
     
@@ -390,7 +388,7 @@
         return { container, zoomIn, zoomOut, resetZoom };
     }
     
-    // ========== 全屏图片/视频阅读器 ==========
+    // ========== 图片预览窗口 ==========
     function openImageViewer(url, fileName) {
         const overlay = document.createElement('div');
         overlay.className = 'file-viewer-overlay';
@@ -417,6 +415,7 @@
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
     
+    // ========== 视频预览窗口 ==========
     function openVideoViewer(url, fileName) {
         const overlay = document.createElement('div');
         overlay.className = 'file-viewer-overlay';
@@ -444,16 +443,32 @@
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
     
-    // ========== PDF处理：直接使用浏览器原生PDF查看器 ==========
-    function openPDF(url, fileName) {
-        // 直接在新标签页打开PDF，浏览器会使用原生PDF查看器
-        window.open(url, '_blank');
+    // ========== 不支持预览的弹窗 ==========
+    function showUnsupportedDialog(url, fileName) {
+        const overlay = document.createElement('div');
+        overlay.className = 'file-viewer-overlay';
+        const header = document.createElement('div');
+        header.className = 'viewer-header';
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn close-btn">✕ 关闭</button></div>`;
+        const content = document.createElement('div');
+        content.className = 'viewer-content';
+        content.innerHTML = `
+            <div class="unsupported-view">
+                <h2>📄 该文件不支持预览</h2>
+                <p>${escapeHtml(fileName)}</p>
+                <button id="downloadBtn" class="download-btn">📥 立即下载</button>
+            </div>
+        `;
+        overlay.appendChild(header); overlay.appendChild(content);
+        document.body.appendChild(overlay);
+        
+        content.querySelector('#downloadBtn').onclick = () => downloadFile(url, fileName);
+        header.querySelector('.close-btn').onclick = () => overlay.remove();
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
     
     // ========== 处理应用点击 ==========
     function handleAppClick(link, name) {
-        console.log('点击应用:', name, '链接:', link, '当前学号:', currentStudentId);
-        
         // 特殊处理：电子值日码 - 传递学号参数
         if (link === 'ezr' || link === 'ezr/' || link === '/ezr' || (name && name.includes('电子值日码'))) {
             if (currentStudentId) {
@@ -473,28 +488,23 @@
         // 判断文件类型
         const fileType = getFileType(link);
         
-        // PDF文件：直接在新标签页打开，使用浏览器原生PDF查看器
-        if (fileType === 'pdf') {
-            openPDF(fullUrl, name);
-            return;
-        }
-        
-        // 图片文件：使用自定义图片查看器（支持缩放）
+        // 图片：使用自定义图片查看器
         if (fileType === 'image') {
             openImageViewer(fullUrl, name);
             return;
         }
         
-        // 视频文件：使用自定义视频播放器
+        // 视频：使用自定义视频播放器
         if (fileType === 'video') {
             openVideoViewer(fullUrl, name);
             return;
         }
         
-        // 其他文件类型：检查是否需要文件预览
-        if (isFileUrl(link)) {
-            // 对于无法预览的文件，直接下载
-            downloadFile(fullUrl, name);
+        // 其他所有文件（包括PDF、Word、Excel、PPT等）：显示"不支持预览"弹窗 + 下载按钮
+        // 判断是否为文件（有扩展名）
+        const isFile = link && link.includes('.') && !link.includes('?') && !link.endsWith('/');
+        if (isFile) {
+            showUnsupportedDialog(fullUrl, name);
             return;
         }
         
@@ -997,7 +1007,8 @@
     };
     
     window.previewFile = function(url, name) {
-        window.open(url, '_blank');
+        // 文件管理器中的文件预览，直接下载
+        downloadFile(url, name);
     };
     
     // ========== 拖拽排序功能 ==========
@@ -1088,7 +1099,7 @@
     function prevSlide() { if(totalSlides) { currentIndex = (currentIndex-1+totalSlides)%totalSlides; updateCarouselPosition(); updateDotsActive(); } }
     function startAutoSlide() { if(autoInterval) clearInterval(autoInterval); if(totalSlides>1) autoInterval = setInterval(nextSlide,5000); }
     function resetAutoSlide() { startAutoSlide(); }
-    function initSwipe() { /* 触摸滑动实现省略，保持原有功能 */ }
+    function initSwipe() { /* 触摸滑动实现省略 */ }
     
     // ========== 保存和加载 ==========
     async function loadConfigFile() {
