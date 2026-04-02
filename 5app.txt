@@ -1,10 +1,11 @@
 group
 [g=每日内容]
 [g=调课通知]
+[g=班级应用]
 [g=物理（学科）资料]
 [g=生物（学科）资料]
 [g=美术（学科）资料]
-[g=班级应用]
+
 pic
 app
 [n=本周调课（新） p=mmexport1774960998747.jpg l=mmexport1774960998747.jpg g=调课通知]
@@ -14,4 +15,4 @@ app
 [n=2025年中学美术素养模拟命题（最终版）.pptx p=/5app/ppticon.jpg l=https://www.kdocs.cn/l/cpTKNPp1DpPL g=美术（学科）资料]
 [n=4月2日作业登记.jpg p=/4月2日作业登记.jpg l=/4月2日作业登记.jpg g=每日内容]
 [n=扫描件-初二下学期容易混淆的物理概念、规律.pdf p=null.jpg l=https://www.kdocs.cn/l/ctz4sNiVojfi g=物理（学科）资料]
-[n=扫描件-初二下学期容易混淆的物理概念、规律.pdf p=null.jpg l=https://www.kdocs.cn/l/chVDypLgzIzv g=物理（学科）资料]
+[n=扫描件-知识结构（初二下）完整.pdf p=null.jpg l=https://www.kdocs.cn/l/chVDypLgzIzv g=物理（学科）资料]
