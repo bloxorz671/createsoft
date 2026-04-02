@@ -268,23 +268,26 @@
     function base64ToUtf8(base64) { const binary = atob(base64.replace(/\n/g, '')); const bytes = new Uint8Array(binary.length); for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i); return new TextDecoder('utf-8').decode(bytes); }
     
     // ========== 文件类型判断 ==========
-    function isPreviewableFile(url) {
+    function isFileUrl(url) {
         if (!url) return false;
-        const path = url.split('?')[0].split('#')[0];
-        const ext = path.split('.').pop().toLowerCase();
-        // 只支持图片和视频预览
-        const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico'];
-        const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'];
-        return imageExts.includes(ext) || videoExts.includes(ext);
+        // 提取路径部分（去掉参数和锚点）
+        let path = url.split('?')[0].split('#')[0];
+        let lastDot = path.lastIndexOf('.');
+        if (lastDot === -1 || lastDot === path.length - 1) return false;
+        let ext = path.substring(lastDot + 1).toLowerCase();
+        // 常见文件扩展名
+        const fileExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico', 'mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'zip', 'rar', '7z'];
+        return fileExts.includes(ext);
     }
     
     function getFileType(url) {
-    const path = url.split('?')[0].split('#')[0];
-    const ext = path.split('.').pop().toLowerCase();
-    if (['jpg','jpeg','png','gif','webp','bmp','svg','ico'].includes(ext)) return 'image';
-    if (['mp4','webm','ogg','mov','avi','mkv'].includes(ext)) return 'video';
-    return 'file';
-}
+        if (!url) return 'link';
+        let path = url.split('?')[0].split('#')[0];
+        let ext = path.split('.').pop().toLowerCase();
+        if (['jpg','jpeg','png','gif','webp','bmp','svg','ico'].includes(ext)) return 'image';
+        if (['mp4','webm','ogg','mov','avi','mkv'].includes(ext)) return 'video';
+        return 'file';
+    }
     
     function downloadFile(url, fileName) {
         const a = document.createElement('a');
@@ -468,76 +471,40 @@
     }
     
     // ========== 处理应用点击 ==========
-   // ========== 处理应用点击 ==========
-function handleAppClick(link, name) {
-    // 特殊处理：电子值日码 - 传递学号参数
-    if (link === 'ezr' || link === 'ezr/' || link === '/ezr' || (name && name.includes('电子值日码'))) {
-        if (currentStudentId) {
-            window.open(`https://luckynum.top/ezr?${currentStudentId}`, '_blank');
-        } else {
-            window.open('https://luckynum.top/ezr', '_blank');
+    function handleAppClick(link, name) {
+        // 特殊处理：电子值日码 - 传递学号参数
+        if (link === 'ezr' || link === 'ezr/' || link === '/ezr' || (name && name.includes('电子值日码'))) {
+            if (currentStudentId) {
+                window.open(`https://luckynum.top/ezr?${currentStudentId}`, '_blank');
+            } else {
+                window.open('https://luckynum.top/ezr', '_blank');
+            }
+            return;
         }
-        return;
-    }
-    
-    // 获取完整URL（处理相对路径）
-    let fullUrl = link;
-    if (fullUrl && !fullUrl.startsWith('http') && !fullUrl.startsWith('//')) {
-        fullUrl = `https://luckynum.top/${fullUrl}`;
-    }
-    
-    // ========== 关键修改：判断是否为文件（只有以常见文件扩展名结尾的才当文件处理）==========
-    const fileExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico', 'mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'zip', 'rar'];
-    
-    // 提取URL路径部分（去掉参数和锚点）
-    let path = fullUrl.split('?')[0].split('#')[0];
-    let ext = path.split('.').pop().toLowerCase();
-    
-    // 判断是否是文件：必须有扩展名且扩展名在列表中
-    const isFile = fileExtensions.includes(ext);
-    
-    // 判断文件类型
-    const fileType = getFileType(link);
-    
-    // 图片：使用自定义图片查看器
-    if (isFile && fileType === 'image') {
-        openImageViewer(fullUrl, name);
-        return;
-    }
-    
-    // 视频：使用自定义视频播放器
-    if (isFile && fileType === 'video') {
-        openVideoViewer(fullUrl, name);
-        return;
-    }
-    
-    // 其他文件（包括PDF、Word、Excel、PPT等）：显示"不支持预览"弹窗 + 下载按钮
-    if (isFile) {
-        showUnsupportedDialog(fullUrl, name);
-        return;
-    }
-    
-    // 普通网页链接（包括金山文档等外链）：直接打开
-    window.open(fullUrl, '_blank');
-}
-        // 判断文件类型
+        
+        // 获取完整URL（处理相对路径）
+        let fullUrl = link;
+        if (fullUrl && !fullUrl.startsWith('http') && !fullUrl.startsWith('//')) {
+            fullUrl = `https://luckynum.top/${fullUrl}`;
+        }
+        
+        // 判断是否为文件
+        const isFile = isFileUrl(link);
         const fileType = getFileType(link);
         
         // 图片：使用自定义图片查看器
-        if (fileType === 'image') {
+        if (isFile && fileType === 'image') {
             openImageViewer(fullUrl, name);
             return;
         }
         
         // 视频：使用自定义视频播放器
-        if (fileType === 'video') {
+        if (isFile && fileType === 'video') {
             openVideoViewer(fullUrl, name);
             return;
         }
         
-        // 其他所有文件（包括PDF、Word、Excel、PPT等）：显示"不支持预览"弹窗 + 下载按钮
-        // 判断是否为文件（有扩展名）
-        const isFile = link && link.includes('.') && !link.includes('?') && !link.endsWith('/');
+        // 其他文件：显示"不支持预览"弹窗 + 下载按钮
         if (isFile) {
             showUnsupportedDialog(fullUrl, name);
             return;
@@ -1042,8 +1009,7 @@ function handleAppClick(link, name) {
     };
     
     window.previewFile = function(url, name) {
-        // 文件管理器中的文件预览，直接下载
-        downloadFile(url, name);
+        window.open(url, '_blank');
     };
     
     // ========== 拖拽排序功能 ==========
