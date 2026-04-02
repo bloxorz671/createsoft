@@ -1,7 +1,7 @@
 group
 [g=每日内容]
 [g=调课通知]
-[g=物理（学科）资料]
+[g=物理（学科）资料【系统原因PDF文件服务异常，暂不提供文件，修复后重新提供】]
 [g=生物（学科）资料]
 [g=美术（学科）资料]
 [g=班级应用]
@@ -10,7 +10,7 @@ app
 [n=本周调课（新） p=mmexport1774960998747.jpg l=mmexport1774960998747.jpg g=调课通知]
 [n=作业提交平台 p=homeworkapp.jpg l=homeworkapp g=班级应用]
 [n=电子值日码 p=ezr.jpg l=ezr g=班级应用]
-[n=【学生】2025学年第二学期八年级总复习生物学练习题 p=/5app/docxicon.jpg l=https://www.kdocs.cn/l/cld2xA02PFve g=生物（学科）资料]
+[n=【学生】2025学年第二学期八年级总复习生物学练习题.docx p=/5app/docxicon.jpg l=https://www.kdocs.cn/l/cld2xA02PFve g=生物（学科）资料]
 [n=2025年中学美术素养模拟命题（最终版）.pptx p=/5app/ppticon.jpg l=https://www.kdocs.cn/l/cpTKNPp1DpPL g=美术（学科）资料]
 [n=4月2日作业登记.jpg p=/4月2日作业登记.jpg l=/4月2日作业登记.jpg g=每日内容]
-[n=扫描件-初二下学期容易混淆的物理概念、规律.pdf p=null.jpg l=https://www.kdocs.cn/l/ctz4sNiVojfi g=物理（学科）资料]
+[n=扫描件-知识结构（初二下）完整.pdf p=null.jpg l=https://www.kdocs.cn/l/chVDypLgzIzv g=物理（学科）资料【系统原因PDF文件服务异常，暂不提供文件，修复后重新提供】]
