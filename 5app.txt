@@ -12,3 +12,4 @@ app
 [n=电子值日码 p=ezr.jpg l=ezr g=班级应用]
 [n=【学生】2025学年第二学期八年级总复习生物学练习题 p=/5app/docxicon.jpg l=https://www.kdocs.cn/l/cld2xA02PFve g=生物（学科）资料]
 [n=2025年中学美术素养模拟命题（最终版）.pptx p=/5app/ppticon.jpg l=https://www.kdocs.cn/l/cpTKNPp1DpPL g=美术（学科）资料]
+[n=4月2日作业登记.jpg p=4月2日作业登记.jpg l=4月2日作业登记.jpg g=每日内容]
