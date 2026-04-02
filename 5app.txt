@@ -3,12 +3,11 @@ group
 [g=调课通知]
 [g=物理（学科）资料【系统原因PDF文件服务异常，暂不提供文件，修复后重新提供】]
 [g=生物（学科）资料]
-[g=美术（学科）资料]
 [g=班级应用]
+[g=美术（学科）资料]
 pic
 app
 [n=本周调课（新） p=mmexport1774960998747.jpg l=mmexport1774960998747.jpg g=调课通知]
 [n=（点击下载）生物资料下载 p=docx.jpg l=【学生】2025学年第二学期八年级总复习生物学练习题.docx g=生物（学科）资料]
 [n=作业提交平台 p=homeworkapp.jpg l=homeworkapp g=班级应用]
 [n=电子值日码 p=ezr.jpg l=ezr g=班级应用]
-[n=2025年中学美术素养模拟命题（最终版） p=null.jpg l=https://www.kdocs.cn/l/cpTKNPp1DpPL g=美术（学科）资料]
