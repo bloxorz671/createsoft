@@ -279,12 +279,12 @@
     }
     
     function getFileType(url) {
-        const path = url.split('?')[0].split('#')[0];
-        const ext = path.split('.').pop().toLowerCase();
-        if (['jpg','jpeg','png','gif','webp','bmp','svg','ico'].includes(ext)) return 'image';
-        if (['mp4','webm','ogg','mov','avi','mkv'].includes(ext)) return 'video';
-        return 'file';
-    }
+    const path = url.split('?')[0].split('#')[0];
+    const ext = path.split('.').pop().toLowerCase();
+    if (['jpg','jpeg','png','gif','webp','bmp','svg','ico'].includes(ext)) return 'image';
+    if (['mp4','webm','ogg','mov','avi','mkv'].includes(ext)) return 'video';
+    return 'file';
+}
     
     function downloadFile(url, fileName) {
         const a = document.createElement('a');
@@ -468,23 +468,58 @@
     }
     
     // ========== 处理应用点击 ==========
-    function handleAppClick(link, name) {
-        // 特殊处理：电子值日码 - 传递学号参数
-        if (link === 'ezr' || link === 'ezr/' || link === '/ezr' || (name && name.includes('电子值日码'))) {
-            if (currentStudentId) {
-                window.open(`https://luckynum.top/ezr?${currentStudentId}`, '_blank');
-            } else {
-                window.open('https://luckynum.top/ezr', '_blank');
-            }
-            return;
+   // ========== 处理应用点击 ==========
+function handleAppClick(link, name) {
+    // 特殊处理：电子值日码 - 传递学号参数
+    if (link === 'ezr' || link === 'ezr/' || link === '/ezr' || (name && name.includes('电子值日码'))) {
+        if (currentStudentId) {
+            window.open(`https://luckynum.top/ezr?${currentStudentId}`, '_blank');
+        } else {
+            window.open('https://luckynum.top/ezr', '_blank');
         }
-        
-        // 获取完整URL（处理相对路径）
-        let fullUrl = link;
-        if (fullUrl && !fullUrl.startsWith('http') && !fullUrl.startsWith('//')) {
-            fullUrl = `https://luckynum.top/${fullUrl}`;
-        }
-        
+        return;
+    }
+    
+    // 获取完整URL（处理相对路径）
+    let fullUrl = link;
+    if (fullUrl && !fullUrl.startsWith('http') && !fullUrl.startsWith('//')) {
+        fullUrl = `https://luckynum.top/${fullUrl}`;
+    }
+    
+    // ========== 关键修改：判断是否为文件（只有以常见文件扩展名结尾的才当文件处理）==========
+    const fileExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico', 'mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'zip', 'rar'];
+    
+    // 提取URL路径部分（去掉参数和锚点）
+    let path = fullUrl.split('?')[0].split('#')[0];
+    let ext = path.split('.').pop().toLowerCase();
+    
+    // 判断是否是文件：必须有扩展名且扩展名在列表中
+    const isFile = fileExtensions.includes(ext);
+    
+    // 判断文件类型
+    const fileType = getFileType(link);
+    
+    // 图片：使用自定义图片查看器
+    if (isFile && fileType === 'image') {
+        openImageViewer(fullUrl, name);
+        return;
+    }
+    
+    // 视频：使用自定义视频播放器
+    if (isFile && fileType === 'video') {
+        openVideoViewer(fullUrl, name);
+        return;
+    }
+    
+    // 其他文件（包括PDF、Word、Excel、PPT等）：显示"不支持预览"弹窗 + 下载按钮
+    if (isFile) {
+        showUnsupportedDialog(fullUrl, name);
+        return;
+    }
+    
+    // 普通网页链接（包括金山文档等外链）：直接打开
+    window.open(fullUrl, '_blank');
+}
         // 判断文件类型
         const fileType = getFileType(link);
         
