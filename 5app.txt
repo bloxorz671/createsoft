@@ -6,7 +6,6 @@ group
 [g=美术（学科）资料]
 pic
 app
-[n=本周调课（新） p=mmexport1774960998747.jpg l=mmexport1774960998747.jpg g=调课通知]
 [n=电子作业提交平台 p=homeworkapp.jpg l=homeworkapp g=班级应用]
 [n=电子值日码 p=ezr.jpg l=ezr g=班级应用]
 [n=【学生】2025学年第二学期八年级总复习生物学练习题.pdf p=null.jpg l=https://www.kdocs.cn/l/cld2xA02PFve g=生物（学科）资料]
