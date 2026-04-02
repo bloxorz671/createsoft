@@ -34,7 +34,7 @@
         .upload-only-btn { background: #f39c12; color: white; border: none; border-radius: 50%; width: 56px; height: 56px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         .add-btn:hover, .add-carousel-btn:hover, .upload-only-btn:hover, .file-manager-btn:hover { transform: scale(1.05); }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; }
-        .modal-content { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; }
+        .modal-content { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto; }
         .modal-content h3 { margin-bottom: 16px; }
         .modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; }
         .modal-buttons { display: flex; gap: 10px; margin-top: 16px; }
@@ -72,8 +72,14 @@
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; }
         
         /* 文件管理器样式 */
-        .file-manager { height: 70vh; overflow-y: auto; }
-        .file-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .file-manager-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .file-manager { height: 55vh; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; padding: 8px; }
+        .file-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; }
         .file-item:hover { background: #f5f5f5; }
         .file-item.folder { color: #2b4c8a; font-weight: 500; }
         .file-item.folder:before { content: "📁 "; }
@@ -82,7 +88,7 @@
         .file-action-btn { background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
         .file-action-btn:hover { background: #e0e0e0; }
         .file-action-btn.delete { color: #e74c3c; }
-        .current-path { padding: 10px; background: #f5f5f5; border-radius: 8px; margin-bottom: 10px; font-family: monospace; font-size: 12px; word-break: break-all; }
+        .current-path { padding: 8px; background: #f5f5f5; border-radius: 8px; margin-bottom: 10px; font-family: monospace; font-size: 12px; word-break: break-all; }
         
         /* 文件上传弹窗 */
         .link-buttons { display: flex; gap: 10px; margin-top: 10px; }
@@ -233,7 +239,7 @@
 
 <div class="add-fab" id="fabGroup" style="display: none;">
     <button class="file-manager-btn" id="fileManagerBtn" title="文件管理器">📁</button>
-    <button class="upload-only-btn" id="uploadOnlyBtn" title="上传文件到5app文件夹">📤</button>
+    <button class="upload-only-btn" id="uploadOnlyBtn" title="上传文件到根目录">📤</button>
     <button class="add-carousel-btn" id="addCarouselFab" title="添加轮播图">🖼️</button>
     <button class="add-btn" id="addAppFab" title="添加应用">+</button>
     <button class="add-btn" id="addGroupFab" title="添加分组" style="background:#9b59b6;">📂</button>
@@ -270,12 +276,10 @@
     // ========== 文件类型判断 ==========
     function isFileUrl(url) {
         if (!url) return false;
-        // 提取路径部分（去掉参数和锚点）
         let path = url.split('?')[0].split('#')[0];
         let lastDot = path.lastIndexOf('.');
         if (lastDot === -1 || lastDot === path.length - 1) return false;
         let ext = path.substring(lastDot + 1).toLowerCase();
-        // 常见文件扩展名
         const fileExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico', 'mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'zip', 'rar', '7z'];
         return fileExts.includes(ext);
     }
@@ -803,7 +807,7 @@
             const file = e.target.files[0];
             if(!file) return;
             uploadArea.innerHTML = '⏳ 上传中...';
-            const url = await uploadTo5appFolder(file);
+            const url = await uploadToRoot(file);
             if(url) { iconUrl.value = url; uploadArea.innerHTML = '✅ 上传成功'; setTimeout(() => uploadArea.innerHTML = '📁 点击上传图片<input type="file" style="display:none">', 2000); }
             else uploadArea.innerHTML = '❌ 失败';
         };
@@ -830,7 +834,7 @@
             const file = e.target.files[0];
             if(!file) return;
             uploadArea.innerHTML = '⏳ 上传中...';
-            const url = await uploadTo5appFolder(file);
+            const url = await uploadToRoot(file);
             if(url) { imgUrl.value = url; uploadArea.innerHTML = '✅ 上传成功'; setTimeout(() => uploadArea.innerHTML = '📁 点击上传图片<input type="file" style="display:none">', 2000); }
             else uploadArea.innerHTML = '❌ 失败';
         };
@@ -856,26 +860,27 @@
     }
     
     // ========== 文件管理器 ==========
-    async function uploadTo5appFolder(file) {
+    // 上传到根目录
+    async function uploadToRoot(file) {
         if(!currentToken) { alert('请先输入Token'); return null; }
         try {
             const reader = new FileReader();
             const base64 = await new Promise(r => { reader.onload = e => r(e.target.result.split(',')[1]); reader.readAsDataURL(file); });
-            const fileName = `5app/${Date.now()}_${file.name}`;
+            const fileName = file.name;
             const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fileName}`, {
                 method: 'PUT', headers: { 'Authorization': `Bearer ${currentToken}` },
-                body: JSON.stringify({ message: `上传 ${file.name}`, content: base64, branch: 'main' })
+                body: JSON.stringify({ message: `上传 ${fileName}`, content: base64, branch: 'main' })
             });
             if(!res.ok) throw new Error();
-            return `/5app/${file.name}`;
+            return fileName;
         } catch(e) { alert('上传失败'); return null; }
     }
     
-    function uploadFileTo5app() {
+    function uploadFileToRoot() {
         const modal = document.createElement('div'); modal.className = 'modal-overlay';
         modal.innerHTML = `
             <div class="modal-content">
-                <h3>📤 上传文件到5app文件夹</h3>
+                <h3>📤 上传文件到根目录</h3>
                 <div class="upload-area" id="uploadArea">📁 点击选择文件<input type="file" id="fileInput" style="display:none"></div>
                 <div class="upload-status" id="uploadStatus"></div>
                 <div id="linkContainer" style="margin-top:15px; display:none;"></div>
@@ -890,11 +895,10 @@
             const file = e.target.files[0];
             if(!file) return;
             uploadStatus.textContent = '⏳ 上传中...';
-            const url = await uploadTo5appFolder(file);
-            if(url) {
-                const fileName = file.name;
-                const innerLink = `/5app/${fileName}`;
-                const outerLink = `https://luckynum.top/5app/${fileName}`;
+            const fileName = await uploadToRoot(file);
+            if(fileName) {
+                const innerLink = `/${fileName}`;
+                const outerLink = `https://luckynum.top/${fileName}`;
                 linkContainer.style.display = 'block';
                 linkContainer.innerHTML = `
                     <p style="margin-bottom:8px; font-weight:500;">✅ 上传成功！</p>
@@ -914,102 +918,83 @@
         alert('已复制: ' + text);
     };
     
+    // 文件管理器 - 浏览所有文件（排除html）
     function openFileManager() {
         const modal = document.createElement('div'); modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content" style="max-width:500px;"><h3>📁 文件管理器</h3><div class="current-path" id="currentPath">/5app/</div><div id="fileList" class="file-manager"></div><div class="modal-buttons"><button class="cancel-btn">关闭</button></div></div>`;
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width:500px;">
+                <div class="file-manager-header">
+                    <h3>📁 文件管理器</h3>
+                    <button class="cancel-btn" id="closeFileManagerBtn" style="width:auto; padding:5px 15px;">关闭</button>
+                </div>
+                <div class="current-path" id="currentPath">/</div>
+                <div id="fileList" class="file-manager"></div>
+            </div>`;
         document.body.appendChild(modal);
-        loadFileList('/5app/', modal);
-        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
+        loadRootFileList(modal);
+        modal.querySelector('#closeFileManagerBtn').onclick = () => modal.remove();
+        modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
     }
     
-    async function loadFileList(path, modal) {
+    async function loadRootFileList(modal) {
         const fileListDiv = modal.querySelector('#fileList');
         const currentPathSpan = modal.querySelector('#currentPath');
-        currentPathSpan.textContent = path;
+        currentPathSpan.textContent = '/';
         
         try {
-            const apiPath = path === '/5app/' ? '5app' : path.substring(1);
-            const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${apiPath}`, {
+            const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/`, {
                 headers: { 'Authorization': `Bearer ${currentToken}` }
             });
-            if(!res.ok && res.status === 404) {
-                fileListDiv.innerHTML = '<div class="empty-tip">文件夹不存在，点击下方按钮创建</div><button class="confirm-btn" style="margin-top:10px;" onclick="createFolder(\'' + path + '\', this.closest(\'.modal-overlay\'))">创建文件夹</button>';
-                return;
-            }
             if(!res.ok) throw new Error();
             const items = await res.json();
             let html = '';
             for(let item of items) {
                 const name = item.name;
                 const isFolder = item.type === 'dir';
+                // 排除 html 文件
+                if(!isFolder && name.toLowerCase().endsWith('.html')) continue;
                 html += `
                     <div class="file-item ${isFolder ? 'folder' : 'file'}">
-                        <span onclick="${isFolder ? `loadFileList('${path}${name}/', this.closest('.modal-overlay'))` : `previewFile('${item.download_url}', '${name}')`}">${escapeHtml(name)}</span>
+                        <span>${escapeHtml(name)}</span>
                         <div class="file-actions">
-                            ${!isFolder ? `<button class="file-action-btn" onclick="copyFileLink('${path}${name}')">🔗</button>` : ''}
-                            <button class="file-action-btn" onclick="renameFile('${path}${name}', '${isFolder}')">✎</button>
-                            <button class="file-action-btn delete" onclick="deleteFileItem('${path}${name}', '${isFolder}')">🗑</button>
+                            <button class="file-action-btn" onclick="copyFileLink('${name}')">🔗</button>
+                            <button class="file-action-btn delete" onclick="deleteRootFile('${name}')">🗑</button>
                         </div>
                     </div>
                 `;
             }
-            html += `<div class="file-item folder" onclick="createFolder('${path}', this.closest('.modal-overlay'))"><span>➕ 新建文件夹</span></div>`;
             fileListDiv.innerHTML = html;
         } catch(e) {
             fileListDiv.innerHTML = '<div class="error-tip">加载失败</div>';
         }
     }
     
-    window.createFolder = async function(path, modal) {
-        const folderName = prompt('请输入文件夹名称');
-        if(!folderName) return;
-        try {
-            const filePath = `${path}${folderName}/.gitkeep`;
-            const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath.substring(1)}`, {
-                method: 'PUT', headers: { 'Authorization': `Bearer ${currentToken}` },
-                body: JSON.stringify({ message: `创建文件夹 ${folderName}`, content: btoa(''), branch: 'main' })
-            });
-            if(res.ok) loadFileList(path, modal);
-            else alert('创建失败');
-        } catch(e) { alert('创建失败'); }
-    };
-    
-    window.renameFile = async function(filePath, isFolder) {
-        const newName = prompt('请输入新名称');
-        if(!newName) return;
-        alert('重命名功能需要先下载再上传，请使用文件管理器手动操作');
-    };
-    
-    window.deleteFileItem = async function(filePath, isFolder) {
-        if(!confirm(`确定删除 ${filePath} 吗？`)) return;
-        try {
-            const apiPath = filePath.substring(1);
-            const checkRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${apiPath}`, {
-                headers: { 'Authorization': `Bearer ${currentToken}` }
-            });
-            const data = await checkRes.json();
-            const sha = data.sha;
-            const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${apiPath}`, {
-                method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` },
-                body: JSON.stringify({ message: `删除 ${filePath}`, sha, branch: 'main' })
-            });
-            if(res.ok) {
-                const modal = document.querySelector('.modal-overlay');
-                if(modal) loadFileList(filePath.substring(0, filePath.lastIndexOf('/') + 1), modal);
-            } else alert('删除失败');
-        } catch(e) { alert('删除失败'); }
-    };
-    
-    window.copyFileLink = function(filePath) {
-        const innerLink = '/' + filePath;
-        const outerLink = `https://luckynum.top/${filePath}`;
+    window.copyFileLink = function(fileName) {
+        const innerLink = `/${fileName}`;
+        const outerLink = `https://luckynum.top/${fileName}`;
         const msg = `内链: ${innerLink}\n外链: ${outerLink}`;
         navigator.clipboard.writeText(msg);
         alert('已复制链接');
     };
     
-    window.previewFile = function(url, name) {
-        window.open(url, '_blank');
+    window.deleteRootFile = async function(fileName) {
+        if(!confirm(`确定删除 ${fileName} 吗？`)) return;
+        try {
+            const checkRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fileName}`, {
+                headers: { 'Authorization': `Bearer ${currentToken}` }
+            });
+            const data = await checkRes.json();
+            const sha = data.sha;
+            const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fileName}`, {
+                method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` },
+                body: JSON.stringify({ message: `删除 ${fileName}`, sha, branch: 'main' })
+            });
+            if(res.ok) {
+                alert('删除成功');
+                const modal = document.querySelector('.modal-overlay');
+                if(modal) loadRootFileList(modal);
+            } else alert('删除失败');
+        } catch(e) { alert('删除失败'); }
     };
     
     // ========== 拖拽排序功能 ==========
@@ -1137,7 +1122,7 @@
     // ========== 事件绑定 ==========
     addAppFab.addEventListener('click', addApp);
     addCarouselFab.addEventListener('click', addCarousel);
-    uploadOnlyBtn.addEventListener('click', uploadFileTo5app);
+    uploadOnlyBtn.addEventListener('click', uploadFileToRoot);
     fileManagerBtn.addEventListener('click', openFileManager);
     addGroupFab.addEventListener('click', addGroup);
     
