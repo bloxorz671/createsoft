@@ -12,3 +12,4 @@ app
 [n=2025年中学美术素养模拟命题（最终版）.pptx p=ppt.ico l=https://www.kdocs.cn/l/cpTKNPp1DpPL g=美术（学科）资料]
 [n=附件3：2026年广州市初中学业水平考试生物学实验操作考试范围.pdf p=pdf.ico l=https://www.kdocs.cn/l/cafIxRqs4p44 g=生物（学科）资料]
 [n=观察小鱼尾鳍血管实验操作视频.mp4 p=null.ico l=/媒体1.mp4 g=生物（学科）资料]
+[n=4月3日作业登记.jpg p=/4月3日作业登记.jpg l=/4月3日作业登记.jpg g=每日内容]
