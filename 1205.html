@@ -1,16 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" href="/41.jpg" type="image/jpeg">
-    <meta property="og:title" content="初二五班智慧应用平台" />
-    <meta property="og:description" content="欢迎使用初二五班智慧应用平台" />
-    <meta property="og:image" content="https://luckynum.top/41.jpg" />
-    <meta property="og:url" content="https://luckynum.top/1205" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="初二五班智慧应用平台" />
-    <title>初二五班智慧应用平台</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>初二五班智慧应用平台</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #f5f7fc; font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; min-height: 100vh; }
@@ -18,7 +11,24 @@
         .main-header { text-align: center; padding: 20px 16px 12px; background: white; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
         .main-header h1 { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; cursor: pointer; display: inline-block; padding: 0 16px; }
         .greeting-section { padding: 12px 20px 0 20px; background: white; }
-        .greeting-text { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; display: block; text-align: left; margin-bottom: 8px; }
+        .greeting-wrapper { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .greeting-text { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; }
+        .integral-badge { 
+            background: #f39c12; 
+            color: #ffd700; 
+            font-size: 1.2rem; 
+            font-weight: 600; 
+            padding: 4px 12px; 
+            border-radius: 30px; 
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(243,156,18,0.3);
+        }
+        .integral-badge::before {
+            content: "⭐";
+            font-size: 1rem;
+        }
         .edit-mode .carousel-slide, .edit-mode .app-card { position: relative; }
         .edit-mode .app-card { cursor: grab; }
         .edit-mode .app-card:active { cursor: grabbing; }
@@ -72,12 +82,7 @@
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; }
         
         /* 文件管理器样式 */
-        .file-manager-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
+        .file-manager-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .file-manager { height: 55vh; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; padding: 8px; }
         .file-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; }
         .file-item:hover { background: #f5f5f5; }
@@ -214,6 +219,7 @@
             .app-name { font-size: 0.75rem; }
             .main-header h1 { font-size: 1.6rem; }
             .greeting-text { font-size: 1.6rem; }
+            .integral-badge { font-size: 1rem; padding: 2px 10px; }
             .add-fab { bottom: 70px; right: 16px; gap: 10px; }
             .add-btn, .add-carousel-btn, .upload-only-btn, .file-manager-btn { width: 48px; height: 48px; font-size: 20px; }
         }
@@ -226,7 +232,10 @@
     </div>
     
     <div id="greetingContainer" class="greeting-section" style="display: none;">
-        <div class="greeting-text"></div>
+        <div class="greeting-wrapper">
+            <div class="greeting-text"></div>
+            <div class="integral-badge" id="integralBadge" style="display: none;"></div>
+        </div>
     </div>
     
     <div class="carousel-section" id="carouselSection" style="display: none;">
@@ -252,12 +261,16 @@
     const GITHUB_REPO = 'createsoft';
     const GITHUB_PATH = '5app.txt';
     const NAME_FILE_URL = 'https://luckynum.top/5name.txt';
+    const INTEGRAL_FILE_URL = 'https://raw.githubusercontent.com/bloxorz671/5class-system/main/student-integral.txt';
     
-    let slidesData = [], appItems = [], groupOrder = [], currentIndex = 0, autoInterval = null, totalSlides = 0;
+    let slidesData = [], appItems = [], groupOrder = ['其他应用'], currentIndex = 0, autoInterval = null, totalSlides = 0;
     let isEditMode = false, currentToken = null, fileSha = null;
     let draggedGroupIndex = null, draggedAppData = null;
     let currentStudentId = null;
     let nameMapping = {};
+    let integralMapping = {};
+    let isAddingApp = false;
+    let isAddingCarousel = false;
     
     const carouselSection = document.getElementById('carouselSection'), carouselTrack = document.getElementById('carouselTrack');
     const dotsContainer = document.getElementById('carouselDots'), groupsContainer = document.getElementById('groupsContainer');
@@ -267,6 +280,56 @@
     const uploadOnlyBtn = document.getElementById('uploadOnlyBtn');
     const fileManagerBtn = document.getElementById('fileManagerBtn');
     const addGroupFab = document.getElementById('addGroupFab');
+    const integralBadge = document.getElementById('integralBadge');
+    
+    // ========== 加载积分数据 ==========
+    async function loadIntegralData() {
+        try {
+            const response = await fetch(INTEGRAL_FILE_URL);
+            if (response.ok) {
+                const text = await response.text();
+                const lines = text.split(/\r?\n/);
+                for (let line of lines) {
+                    line = line.trim();
+                    if (line === '') continue;
+                    // 格式: 205xx xx(积分)
+                    const parts = line.split(/\s+/);
+                    if (parts.length >= 2) {
+                        const studentId = parts[0].trim();
+                        const integral = parts[1].trim();
+                        if (studentId && integral) {
+                            integralMapping[studentId] = integral;
+                        }
+                    }
+                }
+                console.log('积分数据加载成功，共', Object.keys(integralMapping).length, '条');
+            } else {
+                console.log('积分文件加载失败，状态码:', response.status);
+            }
+        } catch (e) {
+            console.log('无法加载积分文件:', e.message);
+        }
+    }
+    
+    // ========== 显示问候语和积分 ==========
+    function showGreetingWithIntegral(studentName, studentId) {
+        const container = document.getElementById('greetingContainer');
+        const textElem = container?.querySelector('.greeting-text');
+        const integralElem = document.getElementById('integralBadge');
+        
+        if (container && textElem && studentName) {
+            textElem.textContent = studentName;
+            container.style.display = 'block';
+            
+            // 显示积分
+            if (studentId && integralMapping[studentId]) {
+                integralElem.textContent = integralMapping[studentId];
+                integralElem.style.display = 'inline-flex';
+            } else {
+                integralElem.style.display = 'none';
+            }
+        }
+    }
     
     // ========== 工具函数 ==========
     function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
@@ -612,7 +675,7 @@
                                 <button class="delete-btn" onclick="deleteApp('${escapeHtml(app.name)}', '${escapeHtml(app.link)}')">✕</button>
                                 <div class="drag-handle">⋮⋮</div>
                             ` : ''}
-                            <img class="app-icon" src="${escapeHtml(icon||'null.jpg')}" onerror="this.src='https://luckynum.top/null.jpg'">
+                            <img class="app-icon" src="${escapeHtml(icon||'')}" onerror="this.onerror=null; this.src=''; this.outerHTML='<div style=\"font-size:32px; text-align:center; margin-bottom:14px;\">📦</div>'">
                             <span class="app-name">${escapeHtml(app.name)}</span>
                         </div>
                     `;
@@ -635,7 +698,7 @@
         if(isEditMode) initDragSort();
     }
     
-    // ========== 问候语功能 ==========
+    // ========== 问候语功能（含积分） ==========
     function getUrlParam() { return new URLSearchParams(window.location.search).get('p'); }
     
     async function loadNameMapping() {
@@ -653,21 +716,16 @@
         } catch(e) {}
     }
     
-    function showGreeting(name) {
-        const container = document.getElementById('greetingContainer');
-        const text = container?.querySelector('.greeting-text');
-        if(container && text && name) {
-            text.textContent = `${name}同学你好`;
-            container.style.display = 'block';
-        }
-    }
-    
     async function initGreeting() {
+        // 先加载积分数据
+        await loadIntegralData();
+        
         const urlParam = getUrlParam();
         if(urlParam) {
             currentStudentId = urlParam;
             await loadNameMapping();
-            showGreeting(nameMapping[urlParam] || urlParam);
+            const studentName = nameMapping[urlParam] || urlParam;
+            showGreetingWithIntegral(studentName, urlParam);
             return;
         }
         try {
@@ -675,7 +733,8 @@
             if(data) {
                 const parsed = JSON.parse(data);
                 if(parsed && parsed.timestamp && Date.now() - parsed.timestamp <= 60000) {
-                    showGreeting(parsed.value);
+                    // localStorage 中存储的可能已经是姓名
+                    showGreetingWithIntegral(parsed.value, null);
                     localStorage.removeItem('zhiriData');
                 }
             }
@@ -699,8 +758,11 @@
             const token = modal.querySelector('#tokenInput').value.trim();
             if(!token) return;
             modal.querySelector('#confirmBtn').disabled = true;
+            modal.querySelector('#confirmBtn').textContent = '验证中...';
             try {
-                const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 if(!res.ok) throw new Error();
                 currentToken = token;
                 isEditMode = true;
@@ -709,7 +771,7 @@
                 renderGroups();
                 modal.remove();
                 alert('编辑模式已启用');
-            } catch(e) { alert('Token无效'); modal.querySelector('#confirmBtn').disabled = false; }
+            } catch(e) { alert('Token无效'); modal.querySelector('#confirmBtn').disabled = false; modal.querySelector('#confirmBtn').textContent = '验证'; }
         };
         modal.querySelector('#cancelBtn').onclick = () => modal.remove();
     }
@@ -789,63 +851,172 @@
         }
     };
     
+    // ========== 添加应用 ==========
     function addApp() {
-        const modal = document.createElement('div'); modal.className = 'modal-overlay';
+        if (isAddingApp) {
+            alert('请稍候，正在处理上一个添加请求...');
+            return;
+        }
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
         modal.innerHTML = `
             <div class="modal-content">
-                <h3>添加应用</h3>
+                <h3>添加新应用</h3>
                 <label>应用名称</label><input id="appName" placeholder="应用名称">
                 <label>图标链接</label><div class="upload-area" id="uploadArea">📁 点击上传图片<input type="file" id="fileInput" style="display:none"></div><input id="iconUrl" placeholder="或直接输入图片链接">
                 <label>跳转链接</label><input id="appLink" placeholder="https://...">
                 <label>所属分组</label><select id="appGroup">${groupOrder.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('')}</select>
-                <div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div>
-            </div>`;
+                <div class="modal-buttons">
+                    <button class="confirm-btn" id="confirmAddBtn">添加</button>
+                    <button class="cancel-btn" id="cancelAddBtn">取消</button>
+                </div>
+            </div>
+        `;
         document.body.appendChild(modal);
-        const uploadArea = modal.querySelector('#uploadArea'), fileInput = modal.querySelector('#fileInput'), iconUrl = modal.querySelector('#iconUrl');
+        
+        const uploadArea = modal.querySelector('#uploadArea');
+        const fileInput = modal.querySelector('#fileInput');
+        const iconUrl = modal.querySelector('#iconUrl');
+        const confirmBtn = modal.querySelector('#confirmAddBtn');
+        const cancelBtn = modal.querySelector('#cancelAddBtn');
+        
         uploadArea.onclick = () => fileInput.click();
         fileInput.onchange = async (e) => {
             const file = e.target.files[0];
-            if(!file) return;
+            if (!file) return;
             uploadArea.innerHTML = '⏳ 上传中...';
             const url = await uploadToRoot(file);
-            if(url) { iconUrl.value = url; uploadArea.innerHTML = '✅ 上传成功'; setTimeout(() => uploadArea.innerHTML = '📁 点击上传图片<input type="file" style="display:none">', 2000); }
-            else uploadArea.innerHTML = '❌ 失败';
+            if (url) {
+                iconUrl.value = url;
+                uploadArea.innerHTML = '✅ 上传成功';
+                setTimeout(() => uploadArea.innerHTML = '📁 点击上传图片<input type="file" style="display:none">', 2000);
+            } else {
+                uploadArea.innerHTML = '❌ 失败';
+            }
         };
-        modal.querySelector('.confirm-btn').onclick = async () => {
+        
+        const handleAdd = async () => {
+            if (isAddingApp) {
+                alert('请稍候...');
+                return;
+            }
+            
             const name = modal.querySelector('#appName').value.trim();
             const icon = iconUrl.value.trim() || 'null.jpg';
             const link = modal.querySelector('#appLink').value.trim();
             const group = modal.querySelector('#appGroup').value;
-            if(!name || !link) { alert('请填写完整'); return; }
-            appItems.push({ name, icon, link, group });
-            if(await saveToGitHub(generateFileContent())) { renderGroups(); modal.remove(); }
-            else { appItems.pop(); modal.remove(); }
+            
+            if (!name || !link) {
+                alert('请填写完整');
+                return;
+            }
+            
+            const newApp = { name, icon, link, group };
+            appItems.push(newApp);
+            renderGroups();
+            
+            isAddingApp = true;
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = '保存中...';
+            
+            const success = await saveToGitHub(generateFileContent());
+            
+            if (success) {
+                modal.remove();
+            } else {
+                appItems.pop();
+                renderGroups();
+                alert('保存失败，请重试');
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '添加';
+                isAddingApp = false;
+                return;
+            }
+            
+            confirmBtn.disabled = false;
+            isAddingApp = false;
         };
-        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
+        
+        confirmBtn.onclick = handleAdd;
+        cancelBtn.onclick = () => modal.remove();
     }
     
+    // ========== 添加轮播图 ==========
     function addCarousel() {
-        const modal = document.createElement('div'); modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><h3>添加轮播图</h3><div class="upload-area" id="uploadArea">📁 点击上传图片<input type="file" id="fileInput" style="display:none"></div><input id="imgUrl" placeholder="或直接输入图片链接"><label>跳转链接</label><input id="linkUrl"><div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div></div>`;
+        if (isAddingCarousel) {
+            alert('请稍候，正在处理上一个添加请求...');
+            return;
+        }
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><h3>添加轮播图</h3><div class="upload-area" id="uploadArea">📁 点击上传图片<input type="file" id="fileInput" style="display:none"></div><input id="imgUrl" placeholder="或直接输入图片链接"><label>跳转链接</label><input id="linkUrl"><div class="modal-buttons"><button class="confirm-btn" id="confirmCarouselBtn">添加</button><button class="cancel-btn" id="cancelCarouselBtn">取消</button></div></div>`;
         document.body.appendChild(modal);
-        const uploadArea = modal.querySelector('#uploadArea'), fileInput = modal.querySelector('#fileInput'), imgUrl = modal.querySelector('#imgUrl');
+        
+        const uploadArea = modal.querySelector('#uploadArea');
+        const fileInput = modal.querySelector('#fileInput');
+        const imgUrl = modal.querySelector('#imgUrl');
+        const confirmBtn = modal.querySelector('#confirmCarouselBtn');
+        const cancelBtn = modal.querySelector('#cancelCarouselBtn');
+        
         uploadArea.onclick = () => fileInput.click();
         fileInput.onchange = async (e) => {
             const file = e.target.files[0];
-            if(!file) return;
+            if (!file) return;
             uploadArea.innerHTML = '⏳ 上传中...';
             const url = await uploadToRoot(file);
-            if(url) { imgUrl.value = url; uploadArea.innerHTML = '✅ 上传成功'; setTimeout(() => uploadArea.innerHTML = '📁 点击上传图片<input type="file" style="display:none">', 2000); }
-            else uploadArea.innerHTML = '❌ 失败';
+            if (url) {
+                imgUrl.value = url;
+                uploadArea.innerHTML = '✅ 上传成功';
+                setTimeout(() => uploadArea.innerHTML = '📁 点击上传图片<input type="file" style="display:none">', 2000);
+            } else {
+                uploadArea.innerHTML = '❌ 失败';
+            }
         };
-        modal.querySelector('.confirm-btn').onclick = async () => {
-            const img = imgUrl.value.trim(), link = modal.querySelector('#linkUrl').value.trim();
-            if(!img) { alert('请填写图片'); return; }
-            slidesData.push({ imgUrl: img, linkUrl: link });
-            if(await saveToGitHub(generateFileContent())) { renderCarousel(); modal.remove(); }
-            else { slidesData.pop(); modal.remove(); }
+        
+        const handleAdd = async () => {
+            if (isAddingCarousel) {
+                alert('请稍候...');
+                return;
+            }
+            
+            const img = imgUrl.value.trim();
+            const link = modal.querySelector('#linkUrl').value.trim();
+            
+            if (!img) {
+                alert('请填写图片链接或上传图片');
+                return;
+            }
+            
+            const newSlide = { imgUrl: img, linkUrl: link };
+            slidesData.push(newSlide);
+            renderCarousel();
+            
+            isAddingCarousel = true;
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = '保存中...';
+            
+            const success = await saveToGitHub(generateFileContent());
+            
+            if (success) {
+                modal.remove();
+            } else {
+                slidesData.pop();
+                renderCarousel();
+                alert('保存失败，请重试');
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '添加';
+                isAddingCarousel = false;
+                return;
+            }
+            
+            confirmBtn.disabled = false;
+            isAddingCarousel = false;
         };
-        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
+        
+        confirmBtn.onclick = handleAdd;
+        cancelBtn.onclick = () => modal.remove();
     }
     
     async function deleteSlide(idx) {
@@ -860,7 +1031,6 @@
     }
     
     // ========== 文件管理器 ==========
-    // 上传到根目录
     async function uploadToRoot(file) {
         if(!currentToken) { alert('请先输入Token'); return null; }
         try {
@@ -918,7 +1088,6 @@
         alert('已复制: ' + text);
     };
     
-    // 文件管理器 - 浏览所有文件（排除html）
     function openFileManager() {
         const modal = document.createElement('div'); modal.className = 'modal-overlay';
         modal.innerHTML = `
@@ -951,7 +1120,6 @@
             for(let item of items) {
                 const name = item.name;
                 const isFolder = item.type === 'dir';
-                // 排除 html 文件
                 if(!isFolder && name.toLowerCase().endsWith('.html')) continue;
                 html += `
                     <div class="file-item ${isFolder ? 'folder' : 'file'}">
@@ -1099,24 +1267,27 @@
     }
     
     async function saveToGitHub(content) {
-        if(!currentToken) { alert('请先输入Token'); return false; }
+        if (!currentToken) return false;
         try {
             let sha = fileSha;
-            if(!sha) {
+            if (!sha) {
                 const check = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
                     headers: { 'Authorization': `Bearer ${currentToken}` }
                 });
-                if(check.ok) sha = (await check.json()).sha;
+                if (check.ok) sha = (await check.json()).sha;
             }
             const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
-                method: 'PUT', headers: { 'Authorization': `Bearer ${currentToken}` },
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${currentToken}` },
                 body: JSON.stringify({ message: '更新配置', content: utf8ToBase64(content), branch: 'main', sha })
             });
-            if(!res.ok) throw new Error();
+            if (!res.ok) throw new Error();
             fileSha = (await res.json()).content.sha;
-            alert('保存成功');
             return true;
-        } catch(e) { alert('保存失败'); return false; }
+        } catch(e) {
+            alert('保存失败: ' + e.message);
+            return false;
+        }
     }
     
     // ========== 事件绑定 ==========
