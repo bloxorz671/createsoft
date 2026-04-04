@@ -126,14 +126,14 @@
 <body>
     <div class="container" id="content">
         <div class="loading-spinner"></div>
-        <div class="message">正在验证学号...</div>
+        <div class="message">正在登录...</div>
     </div>
 
     <script>
         // ========== 获取URL参数 ==========
         function getStudentId() {
             const urlParams = new URLSearchParams(window.location.search);
-            // 支持多种格式: ?20517 或 ?p=20517 或 ?id=20517
+            
             for (let [key, value] of urlParams.entries()) {
                 if (key.match(/^\d+$/)) {
                     return key;
@@ -144,7 +144,7 @@
             return null;
         }
         
-        // ========== 从路径获取参数（如 /zhiri/20517） ==========
+        // ========== 从路径获取参数（如） ==========
         function getPathParam() {
             const path = window.location.pathname;
             const match = path.match(/\/(\d+)$/);
@@ -213,7 +213,7 @@
             const contentDiv = document.getElementById('content');
             contentDiv.innerHTML = `
                 <div class="loading-spinner"></div>
-                <div class="message">验证成功！正在跳转...</div>
+                <div class="message">登录成功</div>
             `;
             
             // 延迟后跳转到主页面
@@ -255,7 +255,7 @@
             const contentDiv = document.getElementById('content');
             contentDiv.innerHTML = `
                 <div class="loading-spinner"></div>
-                <div class="message">正在验证学号 ${escapeHtml(studentId)}...</div>
+                <div class="message">正在登录 ${escapeHtml(studentId)}...</div>
             `;
             
             // 加载姓名映射
