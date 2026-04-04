@@ -1,1 +1,353 @@
- 
+ <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>积分排行榜 - 初二五班</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #f0f2f5;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 550px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            color: #1e3c72;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #eef2f8;
+        }
+        
+        .student-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        /* 学生卡片 */
+        .student-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            border: 1px solid #eef2f8;
+        }
+        
+        .student-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        /* 名次徽章 */
+        .rank-badge {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        /* 金银铜牌背景 */
+        .rank-1 .rank-badge { background: linear-gradient(135deg, #ffd700, #ffb347); color: #8B6914; box-shadow: 0 2px 8px rgba(255,215,0,0.3); }
+        .rank-2 .rank-badge { background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #4a4a4a; box-shadow: 0 2px 8px rgba(192,192,192,0.3); }
+        .rank-3 .rank-badge { background: linear-gradient(135deg, #cd7f32, #b87333); color: #fff; box-shadow: 0 2px 8px rgba(205,127,50,0.3); }
+        .rank-other .rank-badge { background: #f0f2f5; color: #999; }
+        
+        /* 学生信息区 */
+        .student-info {
+            flex: 1;
+        }
+        
+        .student-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 6px;
+        }
+        
+        .student-id {
+            font-size: 0.7rem;
+            color: #999;
+        }
+        
+        /* 右侧评级和分数 */
+        .student-right {
+            text-align: right;
+            flex-shrink: 0;
+        }
+        
+        .rating-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            white-space: nowrap;
+        }
+        
+        /* 评级颜色 */
+        .rating-0 { background: #e74c3c; color: white; }      /* 夯爆了 */
+        .rating-1 { background: #f39c12; color: white; }      /* 顶级 */
+        .rating-2 { background: #f1c40f; color: #8B6914; }    /* 人上人 */
+        .rating-3 { background: #fdebd0; color: #c0392b; }    /* Npc */
+        .rating-4 { background: #95a5a6; color: white; }      /* 拉完了 */
+        
+        .score {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2b4c8a;
+        }
+        
+        .score-unit {
+            font-size: 0.8rem;
+            font-weight: normal;
+            color: #999;
+        }
+        
+        /* 加载状态 */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 60px 20px;
+            color: #c62828;
+            background: #fff5f5;
+            border-radius: 16px;
+        }
+        
+        /* 空状态 */
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        @media (max-width: 480px) {
+            body { padding: 12px; }
+            .student-card { padding: 12px; gap: 12px; }
+            .rank-badge { width: 40px; height: 40px; font-size: 1.2rem; border-radius: 10px; }
+            .student-name { font-size: 0.95rem; }
+            .score { font-size: 1.2rem; }
+            .rating-badge { font-size: 0.7rem; padding: 3px 8px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>⭐ 积分排行榜</h1>
+    <div class="subtitle">初二五班 · 智慧校园</div>
+    <div id="studentList" class="student-list">
+        <div class="loading">加载排行榜数据中...</div>
+    </div>
+</div>
+
+<script>
+    // ========== 配置 ==========
+    const NAME_FILE_URL = 'https://luckynum.top/5name.txt';
+    const INTEGRAL_FILE_URL = 'https://raw.githubusercontent.com/bloxorz671/5class-system/main/student-integral.txt';
+    
+    // 评级配置
+    const RATING_CONFIG = [
+        { min: 80, max: Infinity, name: '夯爆了', level: 0, colorClass: 'rating-0' },
+        { min: 60, max: 79, name: '顶级', level: 1, colorClass: 'rating-1' },
+        { min: 40, max: 59, name: '人上人', level: 2, colorClass: 'rating-2' },
+        { min: 20, max: 39, name: 'Npc', level: 3, colorClass: 'rating-3' },
+        { min: 0, max: 19, name: '拉完了', level: 4, colorClass: 'rating-4' }
+    ];
+    
+    function getRatingByIntegral(integral) {
+        const score = parseInt(integral);
+        if (isNaN(score)) return RATING_CONFIG[4];
+        for (let config of RATING_CONFIG) {
+            if (score >= config.min && score <= config.max) {
+                return config;
+            }
+        }
+        return RATING_CONFIG[4];
+    }
+    
+    // ========== 读取姓名映射 ==========
+    async function fetchNameMapping() {
+        try {
+            const response = await fetch(NAME_FILE_URL);
+            if (response.ok) {
+                const text = await response.text();
+                const mapping = {};
+                const lines = text.split(/\r?\n/);
+                for (let line of lines) {
+                    line = line.trim();
+                    if (line === '') continue;
+                    const space = line.indexOf(' ');
+                    if (space !== -1) {
+                        const id = line.substring(0, space).trim();
+                        const name = line.substring(space + 1).trim();
+                        if (id && name) mapping[id] = name;
+                    }
+                }
+                return mapping;
+            }
+            return {};
+        } catch (e) {
+            console.log('无法加载姓名映射:', e);
+            return {};
+        }
+    }
+    
+    // ========== 读取积分文件 ==========
+    async function fetchIntegralData() {
+        try {
+            const response = await fetch(INTEGRAL_FILE_URL);
+            if (response.ok) {
+                const text = await response.text();
+                const integralMap = {};
+                const lines = text.split(/\r?\n/);
+                for (let line of lines) {
+                    line = line.trim();
+                    if (line === '') continue;
+                    const parts = line.split(/\s+/);
+                    if (parts.length >= 2) {
+                        const id = parts[0].trim();
+                        const integral = parseInt(parts[1].trim());
+                        if (!isNaN(integral)) {
+                            integralMap[id] = integral;
+                        }
+                    }
+                }
+                return integralMap;
+            }
+            return {};
+        } catch (e) {
+            console.log('无法加载积分文件:', e);
+            return {};
+        }
+    }
+    
+    // ========== 构建学生列表 ==========
+    async function loadStudentData() {
+        const container = document.getElementById('studentList');
+        container.innerHTML = '<div class="loading">加载排行榜数据中...</div>';
+        
+        try {
+            // 并行加载姓名和积分
+            const [nameMapping, integralMap] = await Promise.all([
+                fetchNameMapping(),
+                fetchIntegralData()
+            ]);
+            
+            // 构建学生数组
+            const students = [];
+            for (const [id, name] of Object.entries(nameMapping)) {
+                const integral = integralMap[id] || 0;
+                const rating = getRatingByIntegral(integral);
+                students.push({
+                    id: id,
+                    name: name,
+                    integral: integral,
+                    rating: rating
+                });
+            }
+            
+            // 按积分降序排序
+            students.sort((a, b) => b.integral - a.integral);
+            
+            if (students.length === 0) {
+                container.innerHTML = '<div class="empty">暂无学生数据</div>';
+                return;
+            }
+            
+            // 渲染列表
+            renderStudentList(students, container);
+            
+        } catch (e) {
+            console.error(e);
+            container.innerHTML = `<div class="error">加载失败: ${e.message}<br><button onclick="location.reload()" style="margin-top:15px; padding:8px 20px; background:#2b4c8a; color:white; border:none; border-radius:8px; cursor:pointer;">重新加载</button></div>`;
+        }
+    }
+    
+    function renderStudentList(students, container) {
+        let html = '';
+        
+        for (let i = 0; i < students.length; i++) {
+            const student = students[i];
+            const rank = i + 1;
+            
+            // 确定名次样式
+            let rankClass = 'rank-other';
+            if (rank === 1) rankClass = 'rank-1';
+            else if (rank === 2) rankClass = 'rank-2';
+            else if (rank === 3) rankClass = 'rank-3';
+            
+            // 名次显示文字
+            let rankText = rank;
+            if (rank === 1) rankText = '🥇';
+            else if (rank === 2) rankText = '🥈';
+            else if (rank === 3) rankText = '🥉';
+            
+            html += `
+                <div class="student-card ${rankClass}">
+                    <div class="rank-badge">${rankText}</div>
+                    <div class="student-info">
+                        <div class="student-name">${escapeHtml(student.name)}</div>
+                        <div class="student-id">学号: ${escapeHtml(student.id)}</div>
+                    </div>
+                    <div class="student-right">
+                        <div class="rating-badge ${student.rating.colorClass}">${student.rating.name}</div>
+                        <div class="score">${student.integral}<span class="score-unit"> 分</span></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        container.innerHTML = html;
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // 启动
+    loadStudentData();
+</script>
+</body>
+</html>
