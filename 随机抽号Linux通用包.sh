@@ -33,6 +33,58 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #!/bin/bash
 
 # 随机抽号 图形化安装程序
@@ -79,7 +131,7 @@ fetch_version() {
     
     if ! check_network; then
         whiptail --title "网络错误" \
-            --msgbox "无法连接到 luckynum.top\n\n将使用默认版本 3.1.0\n\n请检查网络后重试。" \
+            --msgbox "无法连接到 luckynum.top\n\n安装无法继续\n\n请检查网络后重试。" \
             12 50
         echo "3.1.0"
         return 0
@@ -92,9 +144,9 @@ fetch_version() {
         return 0
     else
         whiptail --title "版本获取失败" \
-            --msgbox "无法获取有效的版本号\n\n将使用默认版本 3.1.0" \
+            --msgbox "无法获取有效的版本号\n\n将使用默认版本 1.0.0" \
             10 50
-        echo "3.1.0"
+        echo "1.0.0"
         return 0
     fi
 }
