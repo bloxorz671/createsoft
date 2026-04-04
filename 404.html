@@ -31,7 +31,7 @@
             let studentId = null;
             
             if (isZhiriPath) {
-                // 从参数获取: ?20517 或 ?p=20517
+                
                 if (urlParams.get('p')) studentId = urlParams.get('p');
                 if (!studentId) {
                     for (let [key, value] of urlParams.entries()) {
@@ -50,7 +50,7 @@
                 if (studentId) {
                     contentDiv.innerHTML = `
                         <div class="spinner"></div>
-                        <div>正在为学号 <strong>${escapeHtml(studentId)}</strong> 跳转...</div>
+                        <div><strong>${escapeHtml(studentId)}</strong>登录中...</div>
                     `;
                     setTimeout(() => {
                         window.location.replace(`/1205?p=${studentId}`);
