@@ -259,10 +259,6 @@
     let currentStudentId = null;
     let nameMapping = {};
     
-    // 防止并发添加的锁
-    let isAddingApp = false;
-    let isAddingCarousel = false;
-    
     const carouselSection = document.getElementById('carouselSection'), carouselTrack = document.getElementById('carouselTrack');
     const dotsContainer = document.getElementById('carouselDots'), groupsContainer = document.getElementById('groupsContainer');
     const fabGroup = document.getElementById('fabGroup');
@@ -609,8 +605,6 @@
                     const app = apps[j];
                     let icon = app.icon;
                     if(icon && !icon.startsWith('http')) icon = `https://luckynum.top/${icon}`;
-                    // ico文件特殊处理：如果加载失败显示emoji
-                    const isIco = icon && icon.toLowerCase().endsWith('.ico');
                     html += `
                         <div class="app-card" data-app-name="${escapeHtml(app.name)}" data-app-link="${escapeHtml(app.link)}" data-app-icon="${escapeHtml(app.icon)}" data-app-group="${escapeHtml(groupName)}">
                             ${isEditMode ? `
@@ -618,7 +612,7 @@
                                 <button class="delete-btn" onclick="deleteApp('${escapeHtml(app.name)}', '${escapeHtml(app.link)}')">✕</button>
                                 <div class="drag-handle">⋮⋮</div>
                             ` : ''}
-                            <img class="app-icon" src="${escapeHtml(icon||'')}" onerror="this.onerror=null; this.src=''; this.outerHTML='<div style=\"font-size:32px; text-align:center; margin-bottom:14px;\">📦</div>'">
+                            <img class="app-icon" src="${escapeHtml(icon||'null.jpg')}" onerror="this.src='https://luckynum.top/null.jpg'">
                             <span class="app-name">${escapeHtml(app.name)}</span>
                         </div>
                     `;
@@ -795,179 +789,63 @@
         }
     };
     
-    // ========== 添加应用（修复覆盖问题） ==========
     function addApp() {
-        if (isAddingApp) {
-            alert('请稍候，正在处理上一个添加请求...');
-            return;
-        }
-        
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
+        const modal = document.createElement('div'); modal.className = 'modal-overlay';
         modal.innerHTML = `
             <div class="modal-content">
-                <h3>添加新应用</h3>
+                <h3>添加应用</h3>
                 <label>应用名称</label><input id="appName" placeholder="应用名称">
                 <label>图标链接</label><div class="upload-area" id="uploadArea">📁 点击上传图片<input type="file" id="fileInput" style="display:none"></div><input id="iconUrl" placeholder="或直接输入图片链接">
                 <label>跳转链接</label><input id="appLink" placeholder="https://...">
                 <label>所属分组</label><select id="appGroup">${groupOrder.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('')}</select>
-                <div class="modal-buttons">
-                    <button class="confirm-btn" id="confirmAddBtn">添加</button>
-                    <button class="cancel-btn" id="cancelAddBtn">取消</button>
-                </div>
-            </div>
-        `;
+                <div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div>
+            </div>`;
         document.body.appendChild(modal);
-        
-        const uploadArea = modal.querySelector('#uploadArea');
-        const fileInput = modal.querySelector('#fileInput');
-        const iconUrl = modal.querySelector('#iconUrl');
-        const confirmBtn = modal.querySelector('#confirmAddBtn');
-        const cancelBtn = modal.querySelector('#cancelAddBtn');
-        
+        const uploadArea = modal.querySelector('#uploadArea'), fileInput = modal.querySelector('#fileInput'), iconUrl = modal.querySelector('#iconUrl');
         uploadArea.onclick = () => fileInput.click();
         fileInput.onchange = async (e) => {
             const file = e.target.files[0];
-            if (!file) return;
+            if(!file) return;
             uploadArea.innerHTML = '⏳ 上传中...';
             const url = await uploadToRoot(file);
-            if (url) {
-                iconUrl.value = url;
-                uploadArea.innerHTML = '✅ 上传成功';
-                setTimeout(() => uploadArea.innerHTML = '📁 点击上传图片<input type="file" style="display:none">', 2000);
-            } else {
-                uploadArea.innerHTML = '❌ 失败';
-            }
+            if(url) { iconUrl.value = url; uploadArea.innerHTML = '✅ 上传成功'; setTimeout(() => uploadArea.innerHTML = '📁 点击上传图片<input type="file" style="display:none">', 2000); }
+            else uploadArea.innerHTML = '❌ 失败';
         };
-        
-        const handleAdd = async () => {
-            if (isAddingApp) {
-                alert('请稍候...');
-                return;
-            }
-            
+        modal.querySelector('.confirm-btn').onclick = async () => {
             const name = modal.querySelector('#appName').value.trim();
             const icon = iconUrl.value.trim() || 'null.jpg';
             const link = modal.querySelector('#appLink').value.trim();
             const group = modal.querySelector('#appGroup').value;
-            
-            if (!name || !link) {
-                alert('请填写完整');
-                return;
-            }
-            
-            // 创建新应用对象
-            const newApp = { name, icon, link, group };
-            
-            // 乐观更新：先更新内存数组和界面
-            appItems.push(newApp);
-            renderGroups(); // 立即显示新应用
-            
-            // 禁用按钮，防止重复点击
-            isAddingApp = true;
-            confirmBtn.disabled = true;
-            confirmBtn.textContent = '保存中...';
-            
-            // 保存到 GitHub
-            const success = await saveToGitHub(generateFileContent());
-            
-            if (success) {
-                modal.remove();
-            } else {
-                // 保存失败，回滚
-                appItems.pop();
-                renderGroups();
-                alert('保存失败，请重试');
-                confirmBtn.disabled = false;
-                confirmBtn.textContent = '添加';
-                isAddingApp = false;
-                return;
-            }
-            
-            confirmBtn.disabled = false;
-            isAddingApp = false;
+            if(!name || !link) { alert('请填写完整'); return; }
+            appItems.push({ name, icon, link, group });
+            if(await saveToGitHub(generateFileContent())) { renderGroups(); modal.remove(); }
+            else { appItems.pop(); modal.remove(); }
         };
-        
-        confirmBtn.onclick = handleAdd;
-        cancelBtn.onclick = () => modal.remove();
+        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
     }
     
-    // ========== 添加轮播图（修复覆盖问题） ==========
     function addCarousel() {
-        if (isAddingCarousel) {
-            alert('请稍候，正在处理上一个添加请求...');
-            return;
-        }
-        
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><h3>添加轮播图</h3><div class="upload-area" id="uploadArea">📁 点击上传图片<input type="file" id="fileInput" style="display:none"></div><input id="imgUrl" placeholder="或直接输入图片链接"><label>跳转链接</label><input id="linkUrl"><div class="modal-buttons"><button class="confirm-btn" id="confirmCarouselBtn">添加</button><button class="cancel-btn" id="cancelCarouselBtn">取消</button></div></div>`;
+        const modal = document.createElement('div'); modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><h3>添加轮播图</h3><div class="upload-area" id="uploadArea">📁 点击上传图片<input type="file" id="fileInput" style="display:none"></div><input id="imgUrl" placeholder="或直接输入图片链接"><label>跳转链接</label><input id="linkUrl"><div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div></div>`;
         document.body.appendChild(modal);
-        
-        const uploadArea = modal.querySelector('#uploadArea');
-        const fileInput = modal.querySelector('#fileInput');
-        const imgUrl = modal.querySelector('#imgUrl');
-        const confirmBtn = modal.querySelector('#confirmCarouselBtn');
-        const cancelBtn = modal.querySelector('#cancelCarouselBtn');
-        
+        const uploadArea = modal.querySelector('#uploadArea'), fileInput = modal.querySelector('#fileInput'), imgUrl = modal.querySelector('#imgUrl');
         uploadArea.onclick = () => fileInput.click();
         fileInput.onchange = async (e) => {
             const file = e.target.files[0];
-            if (!file) return;
+            if(!file) return;
             uploadArea.innerHTML = '⏳ 上传中...';
             const url = await uploadToRoot(file);
-            if (url) {
-                imgUrl.value = url;
-                uploadArea.innerHTML = '✅ 上传成功';
-                setTimeout(() => uploadArea.innerHTML = '📁 点击上传图片<input type="file" style="display:none">', 2000);
-            } else {
-                uploadArea.innerHTML = '❌ 失败';
-            }
+            if(url) { imgUrl.value = url; uploadArea.innerHTML = '✅ 上传成功'; setTimeout(() => uploadArea.innerHTML = '📁 点击上传图片<input type="file" style="display:none">', 2000); }
+            else uploadArea.innerHTML = '❌ 失败';
         };
-        
-        const handleAdd = async () => {
-            if (isAddingCarousel) {
-                alert('请稍候...');
-                return;
-            }
-            
-            const img = imgUrl.value.trim();
-            const link = modal.querySelector('#linkUrl').value.trim();
-            
-            if (!img) {
-                alert('请填写图片链接或上传图片');
-                return;
-            }
-            
-            // 乐观更新
-            const newSlide = { imgUrl: img, linkUrl: link };
-            slidesData.push(newSlide);
-            renderCarousel();
-            
-            isAddingCarousel = true;
-            confirmBtn.disabled = true;
-            confirmBtn.textContent = '保存中...';
-            
-            const success = await saveToGitHub(generateFileContent());
-            
-            if (success) {
-                modal.remove();
-            } else {
-                slidesData.pop();
-                renderCarousel();
-                alert('保存失败，请重试');
-                confirmBtn.disabled = false;
-                confirmBtn.textContent = '添加';
-                isAddingCarousel = false;
-                return;
-            }
-            
-            confirmBtn.disabled = false;
-            isAddingCarousel = false;
+        modal.querySelector('.confirm-btn').onclick = async () => {
+            const img = imgUrl.value.trim(), link = modal.querySelector('#linkUrl').value.trim();
+            if(!img) { alert('请填写图片'); return; }
+            slidesData.push({ imgUrl: img, linkUrl: link });
+            if(await saveToGitHub(generateFileContent())) { renderCarousel(); modal.remove(); }
+            else { slidesData.pop(); modal.remove(); }
         };
-        
-        confirmBtn.onclick = handleAdd;
-        cancelBtn.onclick = () => modal.remove();
+        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
     }
     
     async function deleteSlide(idx) {
@@ -1221,29 +1099,24 @@
     }
     
     async function saveToGitHub(content) {
-        if (!currentToken) {
-            return false;
-        }
+        if(!currentToken) { alert('请先输入Token'); return false; }
         try {
             let sha = fileSha;
-            if (!sha) {
+            if(!sha) {
                 const check = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
                     headers: { 'Authorization': `Bearer ${currentToken}` }
                 });
-                if (check.ok) sha = (await check.json()).sha;
+                if(check.ok) sha = (await check.json()).sha;
             }
             const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
-                method: 'PUT',
-                headers: { 'Authorization': `Bearer ${currentToken}` },
+                method: 'PUT', headers: { 'Authorization': `Bearer ${currentToken}` },
                 body: JSON.stringify({ message: '更新配置', content: utf8ToBase64(content), branch: 'main', sha })
             });
-            if (!res.ok) throw new Error();
+            if(!res.ok) throw new Error();
             fileSha = (await res.json()).content.sha;
+            alert('保存成功');
             return true;
-        } catch(e) {
-            alert('保存失败: ' + e.message);
-            return false;
-        }
+        } catch(e) { alert('保存失败'); return false; }
     }
     
     // ========== 事件绑定 ==========
