@@ -2,11 +2,12 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>班级登录系统</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: system-ui, sans-serif;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -17,22 +18,27 @@
         .card {
             background: white;
             border-radius: 24px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 450px;
         }
-        h1 { font-size: 28px; margin-bottom: 8px; }
-        .sub { color: #666; margin-bottom: 30px; font-size: 14px; }
-        input, select {
+        h1 { font-size: 28px; margin-bottom: 8px; color: #333; text-align: center; }
+        .sub { color: #666; margin-bottom: 25px; font-size: 14px; text-align: center; }
+        select, input {
             width: 100%;
             padding: 14px 16px;
             margin: 8px 0 16px;
             border: 1px solid #ddd;
             border-radius: 12px;
             font-size: 16px;
+            font-family: inherit;
         }
-        input:focus, select:focus { outline: none; border-color: #667eea; }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
         button {
             width: 100%;
             padding: 14px;
@@ -43,26 +49,39 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
+            margin-top: 8px;
+            transition: 0.2s;
         }
         button:hover { background: #5a67d8; }
         .message {
             padding: 12px;
             border-radius: 12px;
             margin: 16px 0;
-            display: none;
             font-size: 14px;
+            word-break: break-word;
         }
-        .error { background: #fee; color: #c33; }
-        .success { background: #efe; color: #3a3; }
-        .info { background: #e3f2fd; color: #1976d2; }
+        .error { background: #fee; color: #c33; border: 1px solid #fcc; }
+        .success { background: #efe; color: #3a3; border: 1px solid #cfc; }
+        .info { background: #e3f2fd; color: #1976d2; border: 1px solid #bbdef5; }
+        .debug { 
+            background: #f5f5f5; 
+            color: #333; 
+            border: 1px solid #ddd; 
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow: auto;
+        }
+        .loading { opacity: 0.7; pointer-events: none; }
     </style>
 </head>
 <body>
 <div class="card">
     <h1>🏫 班级登录</h1>
-    <div class="sub" id="modeText">请输入学号和密码</div>
+    <div class="sub" id="modeText">请选择你的姓名并输入密码</div>
 
     <div id="message" class="message"></div>
+    <div id="debugBox" class="message debug" style="display:none;"></div>
 
     <select id="studentSelect">
         <option value="">-- 选择你的姓名 --</option>
@@ -71,65 +90,45 @@
     <input type="password" id="password" placeholder="密码">
     <input type="password" id="confirmPassword" placeholder="确认密码" style="display:none">
     
-    <button id="submitBtn" onclick="handleLogin()">登录</button>
+    <button id="submitBtn" onclick="handleSubmit()">登录</button>
+    
+    <div style="text-align:center; margin-top:20px; font-size:12px; color:#999;">
+        <a href="#" onclick="toggleDebug()" style="color:#999;">显示/隐藏调试信息</a>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script>
+    // ========== 你的 Supabase 配置 ==========
     const SUPABASE_URL = 'https://cafnrcvjvqzcrcfnxqygo.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_X8K1SrDtFGvDe05GR4tn0w_q6Mzm8uK';
+    // =====================================
+
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+    
     let studentsList = [];
-    let currentStudentNo = null;
+    let currentStudent = null;
+    let debugLogs = [];
 
-    async function loadStudents() {
-        const { data, error } = await supabase
-            .from('students')
-            .select('student_no, name, has_password')
-            .order('student_no');
-        
-        if (error) {
-            showMessage('加载学生列表失败：' + error.message, 'error');
-            return;
+    function addDebugLog(msg) {
+        const timestamp = new Date().toLocaleTimeString();
+        debugLogs.unshift(`[${timestamp}] ${msg}`);
+        if (debugLogs.length > 20) debugLogs.pop();
+        const debugBox = document.getElementById('debugBox');
+        if (debugBox) {
+            debugBox.innerHTML = debugLogs.join('<br>');
         }
-        
-        studentsList = data;
-        const select = document.getElementById('studentSelect');
-        select.innerHTML = '<option value="">-- 选择你的姓名 --</option>';
-        
-        data.forEach(student => {
-            const option = document.createElement('option');
-            option.value = student.student_no;
-            option.textContent = `${student.student_no} - ${student.name}`;
-            select.appendChild(option);
-        });
-        
-        select.onchange = function() {
-            currentStudentNo = this.value;
-            const student = studentsList.find(s => s.student_no === currentStudentNo);
-            const passwordInput = document.getElementById('password');
-            const confirmInput = document.getElementById('confirmPassword');
-            const submitBtn = document.getElementById('submitBtn');
-            
-            if (student && !student.has_password) {
-                // 首次登录，需要设置密码
-                document.getElementById('modeText').textContent = '首次登录，请设置你的密码';
-                confirmInput.style.display = 'block';
-                submitBtn.textContent = '设置密码并登录';
-                passwordInput.placeholder = '设置密码';
-                confirmInput.placeholder = '确认密码';
-            } else {
-                // 已有密码，正常登录
-                document.getElementById('modeText').textContent = '请输入密码登录';
-                confirmInput.style.display = 'none';
-                submitBtn.textContent = '登录';
-                passwordInput.placeholder = '密码';
-            }
-            passwordInput.value = '';
-            confirmInput.value = '';
-        };
+        console.log(msg);
+    }
+
+    function toggleDebug() {
+        const box = document.getElementById('debugBox');
+        if (box.style.display === 'none') {
+            box.style.display = 'block';
+        } else {
+            box.style.display = 'none';
+        }
     }
 
     function showMessage(msg, type) {
@@ -137,83 +136,191 @@
         msgDiv.textContent = msg;
         msgDiv.className = `message ${type}`;
         msgDiv.style.display = 'block';
+        addDebugLog(`消息(${type}): ${msg}`);
         setTimeout(() => {
-            msgDiv.style.display = 'none';
-        }, 4000);
+            if (msgDiv.style.display !== 'none') {
+                msgDiv.style.display = 'none';
+            }
+        }, 5000);
     }
 
-    async function handleLogin() {
-        if (!currentStudentNo) {
-            showMessage('请选择你的姓名', 'error');
+    async function loadStudents() {
+        addDebugLog('开始加载学生名单...');
+        showMessage('正在加载学生名单...', 'info');
+        
+        try {
+            addDebugLog(`请求URL: ${SUPABASE_URL}`);
+            addDebugLog(`使用Key: ${SUPABASE_KEY.substring(0, 20)}...`);
+            
+            const { data, error } = await supabase
+                .from('students')
+                .select('student_no, name, has_password')
+                .order('student_no');
+            
+            if (error) {
+                addDebugLog(`❌ 查询失败: ${JSON.stringify(error)}`);
+                showMessage('加载失败：' + error.message, 'error');
+                return;
+            }
+            
+            addDebugLog(`✅ 查询成功，返回数据条数: ${data ? data.length : 0}`);
+            
+            if (!data || data.length === 0) {
+                addDebugLog('⚠️ 没有学生数据！请检查 students 表是否有数据');
+                showMessage('没有学生数据，请先在 Supabase 中导入学生名单', 'error');
+                return;
+            }
+            
+            studentsList = data;
+            const select = document.getElementById('studentSelect');
+            select.innerHTML = '<option value="">-- 选择你的姓名 --</option>';
+            
+            data.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.student_no;
+                option.textContent = `${student.student_no} - ${student.name}`;
+                select.appendChild(option);
+            });
+            
+            addDebugLog(`✅ 已加载 ${data.length} 名学生到下拉框`);
+            showMessage(`已加载 ${data.length} 名学生`, 'success');
+            
+            select.onchange = function() {
+                const studentNo = this.value;
+                currentStudent = studentsList.find(s => s.student_no === studentNo);
+                const passwordInput = document.getElementById('password');
+                const confirmInput = document.getElementById('confirmPassword');
+                const submitBtn = document.getElementById('submitBtn');
+                const modeText = document.getElementById('modeText');
+                
+                if (currentStudent && !currentStudent.has_password) {
+                    modeText.textContent = '🎉 首次登录，请设置你的密码';
+                    confirmInput.style.display = 'block';
+                    submitBtn.textContent = '设置密码并登录';
+                    passwordInput.placeholder = '设置密码 (至少4位)';
+                    confirmInput.placeholder = '再次输入密码';
+                    addDebugLog(`选择学生: ${currentStudent.name}，首次登录`);
+                } else if (currentStudent && currentStudent.has_password) {
+                    modeText.textContent = '🔐 请输入密码登录';
+                    confirmInput.style.display = 'none';
+                    submitBtn.textContent = '登录';
+                    passwordInput.placeholder = '密码';
+                    addDebugLog(`选择学生: ${currentStudent.name}，已有密码`);
+                }
+                passwordInput.value = '';
+                if (confirmInput) confirmInput.value = '';
+            };
+            
+        } catch (err) {
+            addDebugLog(`❌ 异常错误: ${err.message}`);
+            showMessage('加载出错：' + err.message, 'error');
+        }
+    }
+
+    async function handleSubmit() {
+        if (!currentStudent) {
+            showMessage('请先选择你的姓名', 'error');
             return;
         }
         
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
-        const student = studentsList.find(s => s.student_no === currentStudentNo);
         
         if (!password) {
             showMessage('请输入密码', 'error');
             return;
         }
         
-        // 首次设置密码的情况
-        if (!student.has_password) {
+        const btn = document.getElementById('submitBtn');
+        btn.classList.add('loading');
+        
+        if (!currentStudent.has_password) {
+            addDebugLog(`首次设置密码: ${currentStudent.name}`);
             if (password !== confirmPassword) {
                 showMessage('两次输入的密码不一致', 'error');
+                btn.classList.remove('loading');
                 return;
             }
             if (password.length < 4) {
-                showMessage('密码至少4位', 'error');
+                showMessage('密码至少需要4位', 'error');
+                btn.classList.remove('loading');
                 return;
             }
             
-            // 保存密码
             const passwordHash = CryptoJS.SHA256(password).toString();
-            const { error } = await supabase
-                .from('student_passwords')
-                .insert([{ student_no: currentStudentNo, password_hash: passwordHash }]);
+            addDebugLog(`密码已加密，长度: ${passwordHash.length}`);
             
-            if (error) {
-                showMessage('设置密码失败：' + error.message, 'error');
+            const { error: insertError } = await supabase
+                .from('student_passwords')
+                .insert([{ 
+                    student_no: currentStudent.student_no, 
+                    password_hash: passwordHash 
+                }]);
+            
+            if (insertError) {
+                addDebugLog(`❌ 插入密码失败: ${JSON.stringify(insertError)}`);
+                showMessage('设置密码失败：' + insertError.message, 'error');
+                btn.classList.remove('loading');
                 return;
             }
             
-            // 更新 has_password 标志
-            await supabase
+            addDebugLog(`✅ 密码保存成功`);
+            
+            const { error: updateError } = await supabase
                 .from('students')
                 .update({ has_password: true })
-                .eq('student_no', currentStudentNo);
+                .eq('student_no', currentStudent.student_no);
             
-            showMessage('密码设置成功！请重新登录', 'success');
-            setTimeout(() => location.reload(), 1500);
+            if (updateError) {
+                addDebugLog(`⚠️ 更新标志失败: ${updateError.message}`);
+            } else {
+                addDebugLog(`✅ 更新 has_password 标志成功`);
+            }
+            
+            showMessage('✅ 密码设置成功！请重新登录', 'success');
+            btn.classList.remove('loading');
+            
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
             return;
         }
         
-        // 正常登录验证
+        addDebugLog(`登录验证: ${currentStudent.name}`);
         const passwordHash = CryptoJS.SHA256(password).toString();
+        
         const { data, error } = await supabase
             .from('student_passwords')
             .select('student_no')
-            .eq('student_no', currentStudentNo)
+            .eq('student_no', currentStudent.student_no)
             .eq('password_hash', passwordHash);
         
-        if (error || !data || data.length === 0) {
-            showMessage('密码错误', 'error');
+        btn.classList.remove('loading');
+        
+        if (error) {
+            addDebugLog(`❌ 查询错误: ${JSON.stringify(error)}`);
+            showMessage('登录失败：' + error.message, 'error');
             return;
         }
         
-        showMessage('登录成功！', 'success');
-        // 保存登录状态
-        localStorage.setItem('loggedInStudent', currentStudentNo);
-        const studentInfo = studentsList.find(s => s.student_no === currentStudentNo);
-        localStorage.setItem('studentName', studentInfo.name);
-        // 跳转到班级主页
+        if (!data || data.length === 0) {
+            addDebugLog(`❌ 密码不匹配`);
+            showMessage('❌ 密码错误，请重试', 'error');
+            return;
+        }
+        
+        addDebugLog(`✅ 登录成功！`);
+        showMessage('✅ 登录成功！欢迎 ' + currentStudent.name, 'success');
+        
+        localStorage.setItem('loggedInStudent', currentStudent.student_no);
+        localStorage.setItem('studentName', currentStudent.name);
+        
         setTimeout(() => {
-            window.location.href = '/dashboard.html';
+            alert('登录成功！');
         }, 1000);
     }
 
+    // 页面加载
     loadStudents();
 </script>
 </body>
