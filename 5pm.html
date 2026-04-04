@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -27,13 +27,6 @@
             text-align: center;
             font-size: 1.8rem;
             color: #1e3c72;
-            margin-bottom: 8px;
-        }
-        
-        .subtitle {
-            text-align: center;
-            color: #666;
-            font-size: 0.85rem;
             margin-bottom: 20px;
             padding-bottom: 12px;
             border-bottom: 2px solid #eef2f8;
@@ -92,7 +85,7 @@
             font-size: 1.1rem;
             font-weight: 600;
             color: #1f2937;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
         
         .student-id {
@@ -169,8 +162,7 @@
 </head>
 <body>
 <div class="container">
-    <h1>⭐ 积分排行榜</h1>
-    <div class="subtitle">初二五班 · 智慧校园</div>
+    <h1>积分排行榜</h1>
     <div id="studentList" class="student-list">
         <div class="loading">加载排行榜数据中...</div>
     </div>
@@ -257,6 +249,22 @@
         }
     }
     
+    // ========== 计算并列名次 ==========
+    function assignRanks(students) {
+        if (students.length === 0) return;
+        
+        let currentRank = 1;
+        let currentScore = students[0].integral;
+        
+        for (let i = 0; i < students.length; i++) {
+            if (students[i].integral < currentScore) {
+                currentRank = i + 1;
+                currentScore = students[i].integral;
+            }
+            students[i].rank = currentRank;
+        }
+    }
+    
     // ========== 构建学生列表 ==========
     async function loadStudentData() {
         const container = document.getElementById('studentList');
@@ -285,6 +293,9 @@
             // 按积分降序排序
             students.sort((a, b) => b.integral - a.integral);
             
+            // 分配并列名次
+            assignRanks(students);
+            
             if (students.length === 0) {
                 container.innerHTML = '<div class="empty">暂无学生数据</div>';
                 return;
@@ -304,19 +315,22 @@
         
         for (let i = 0; i < students.length; i++) {
             const student = students[i];
-            const rank = i + 1;
+            const rank = student.rank;
             
-            // 确定名次样式
+            // 确定名次样式（只有名次为1、2、3时才使用特殊样式）
             let rankClass = 'rank-other';
-            if (rank === 1) rankClass = 'rank-1';
-            else if (rank === 2) rankClass = 'rank-2';
-            else if (rank === 3) rankClass = 'rank-3';
-            
-            // 名次显示文字
             let rankText = rank;
-            if (rank === 1) rankText = '🥇';
-            else if (rank === 2) rankText = '🥈';
-            else if (rank === 3) rankText = '🥉';
+            
+            if (rank === 1) {
+                rankClass = 'rank-1';
+                rankText = '🥇';
+            } else if (rank === 2) {
+                rankClass = 'rank-2';
+                rankText = '🥈';
+            } else if (rank === 3) {
+                rankClass = 'rank-3';
+                rankText = '🥉';
+            }
             
             html += `
                 <div class="student-card ${rankClass}">
