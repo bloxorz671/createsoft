@@ -11,38 +11,36 @@
         .main-header { text-align: center; padding: 20px 16px 12px; background: white; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
         .main-header h1 { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; cursor: pointer; display: inline-block; padding: 0 16px; }
         .greeting-section { padding: 12px 20px 0 20px; background: white; }
-        .greeting-wrapper { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .greeting-wrapper { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; cursor: pointer; }
         .greeting-text { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; }
         
-        /* 评级积分框样式 - 文字标签版 */
-        .integral-badge {
+        /* 评级独立框样式 */
+        .rating-box {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            padding: 4px 14px;
             font-size: 1rem;
             font-weight: 600;
-            padding: 4px 14px;
-            border-radius: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             color: white;
+            border: 2px solid;
+            border-radius: 8px;
+            white-space: nowrap;
+            background: transparent;
         }
-        /* 夯爆了 - 红色 (80分以上) */
-        .integral-badge.level-0 { background: #e74c3c; color: white; }
-        /* 顶级 - 橙色 (60-79分) */
-        .integral-badge.level-1 { background: #f39c12; color: white; }
-        /* 人上人 - 黄色 (40-59分) */
-        .integral-badge.level-2 { background: #f1c40f; color: #8B6914; }
-        /* Npc - 浅黄色/肉色 (20-39分) */
-        .integral-badge.level-3 { background: #fdebd0; color: #c0392b; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        /* 拉完了 - 灰色 (0-19分) */
-        .integral-badge.level-4 { background: #95a5a6; color: white; }
+        /* 各评级边框颜色和背景（半透明背景让白色文字更清晰） */
+        .rating-box.level-0 { border-color: #e74c3c; background: rgba(231, 76, 60, 0.15); }
+        .rating-box.level-1 { border-color: #f39c12; background: rgba(243, 156, 18, 0.15); }
+        .rating-box.level-2 { border-color: #f1c40f; background: rgba(241, 196, 15, 0.15); }
+        .rating-box.level-3 { border-color: #e6b0aa; background: rgba(230, 176, 170, 0.15); }
+        .rating-box.level-4 { border-color: #95a5a6; background: rgba(149, 165, 166, 0.15); }
         
-        .integral-badge img {
-            width: 24px;
-            height: 24px;
-            object-fit: contain;
-            border-radius: 4px;
+        /* 积分数字样式 */
+        .integral-score {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2b4c8a;
+            margin-left: 4px;
         }
         
         .edit-mode .carousel-slide, .edit-mode .app-card { position: relative; }
@@ -235,7 +233,8 @@
             .app-name { font-size: 0.75rem; }
             .main-header h1 { font-size: 1.6rem; }
             .greeting-text { font-size: 1.6rem; }
-            .integral-badge { font-size: 0.85rem; padding: 3px 12px; }
+            .rating-box { font-size: 0.85rem; padding: 3px 10px; }
+            .integral-score { font-size: 1rem; }
             .add-fab { bottom: 70px; right: 16px; gap: 10px; }
             .add-btn, .add-carousel-btn, .upload-only-btn, .file-manager-btn { width: 48px; height: 48px; font-size: 20px; }
         }
@@ -248,9 +247,10 @@
     </div>
     
     <div id="greetingContainer" class="greeting-section" style="display: none;">
-        <div class="greeting-wrapper">
+        <div class="greeting-wrapper" id="greetingWrapper">
             <div class="greeting-text"></div>
-            <div class="integral-badge" id="integralBadge" style="display: none;"></div>
+            <div id="ratingBox" class="rating-box" style="display: none;"></div>
+            <span id="integralScore" class="integral-score" style="display: none;"></span>
         </div>
     </div>
     
@@ -288,7 +288,7 @@
     let isAddingApp = false;
     let isAddingCarousel = false;
     
-    // 评级配置 - 文字版
+    // 评级配置
     const RATING_CONFIG = [
         { min: 80, max: Infinity, name: '夯爆了', level: 0, colorClass: 'level-0' },
         { min: 60, max: 79, name: '顶级', level: 1, colorClass: 'level-1' },
@@ -316,7 +316,20 @@
     const uploadOnlyBtn = document.getElementById('uploadOnlyBtn');
     const fileManagerBtn = document.getElementById('fileManagerBtn');
     const addGroupFab = document.getElementById('addGroupFab');
-    const integralBadge = document.getElementById('integralBadge');
+    const ratingBox = document.getElementById('ratingBox');
+    const integralScoreSpan = document.getElementById('integralScore');
+    const greetingWrapper = document.getElementById('greetingWrapper');
+    
+    // ========== 点击积分区域跳转到 /5pm ==========
+    function setupGreetingClick() {
+        if (greetingWrapper) {
+            greetingWrapper.style.cursor = 'pointer';
+            greetingWrapper.addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.location.href = '/5pm';
+            });
+        }
+    }
     
     // ========== 加载积分数据 ==========
     async function loadIntegralData() {
@@ -344,11 +357,10 @@
         }
     }
     
-    // ========== 显示问候语和评级文字框 ==========
+    // ========== 显示问候语、评级框和积分 ==========
     function showGreetingWithIntegral(studentName, studentId) {
         const container = document.getElementById('greetingContainer');
         const textElem = container?.querySelector('.greeting-text');
-        const badgeElem = document.getElementById('integralBadge');
         
         if (container && textElem && studentName) {
             textElem.textContent = studentName;
@@ -357,16 +369,16 @@
             if (studentId && integralMapping[studentId]) {
                 const integral = integralMapping[studentId];
                 const rating = getRatingByIntegral(integral);
-                // 清空并重新构建徽章内容
-                badgeElem.innerHTML = '';
-                badgeElem.className = `integral-badge ${rating.colorClass}`;
-                // 添加评级文字
-                const span = document.createElement('span');
-                span.textContent = `${rating.name} ${integral}`;
-                badgeElem.appendChild(span);
-                badgeElem.style.display = 'inline-flex';
+                // 设置评级框
+                ratingBox.textContent = rating.name;
+                ratingBox.className = `rating-box ${rating.colorClass}`;
+                ratingBox.style.display = 'inline-flex';
+                // 设置积分数字
+                integralScoreSpan.textContent = integral;
+                integralScoreSpan.style.display = 'inline';
             } else {
-                badgeElem.style.display = 'none';
+                ratingBox.style.display = 'none';
+                integralScoreSpan.style.display = 'none';
             }
         }
     }
@@ -755,6 +767,7 @@
             await loadNameMapping();
             const studentName = nameMapping[urlParam] || urlParam;
             showGreetingWithIntegral(studentName, urlParam);
+            setupGreetingClick();
             return;
         }
         try {
@@ -767,6 +780,7 @@
                 }
             }
         } catch(e) {}
+        setupGreetingClick();
     }
     
     // ========== 标题点击3次触发Token输入 ==========
