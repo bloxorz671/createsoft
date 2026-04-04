@@ -13,22 +13,39 @@
         .greeting-section { padding: 12px 20px 0 20px; background: white; }
         .greeting-wrapper { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         .greeting-text { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; }
-        .integral-badge { 
-            background: #f39c12; 
-            color: #ffd700; 
-            font-size: 1.2rem; 
-            font-weight: 600; 
-            padding: 4px 12px; 
-            border-radius: 30px; 
+        
+        /* 评级积分框样式 - 五种颜色 */
+        .integral-badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            box-shadow: 0 2px 8px rgba(243,156,18,0.3);
+            justify-content: center;
+            gap: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            background: #9e9e9e;
+            color: white;
         }
-        .integral-badge::before {
-            content: "⭐";
-            font-size: 1rem;
+        /* 夯 - 红色 (80分以上) */
+        .integral-badge.level-0 { background: #e74c3c; color: #fff; box-shadow: 0 2px 8px rgba(231,76,60,0.4); }
+        /* 顶级 - 橙色 (60-79分) */
+        .integral-badge.level-1 { background: #f39c12; color: #fff; box-shadow: 0 2px 8px rgba(243,156,18,0.4); }
+        /* 人上人 - 黄色 (40-59分) */
+        .integral-badge.level-2 { background: #f1c40f; color: #8B6914; box-shadow: 0 2px 8px rgba(241,196,15,0.4); }
+        /* npc - 绿色 (20-39分) */
+        .integral-badge.level-3 { background: #2ecc71; color: #fff; box-shadow: 0 2px 8px rgba(46,204,113,0.4); }
+        /* 拉完了 - 灰色 (0-19分) */
+        .integral-badge.level-4 { background: #95a5a6; color: #fff; box-shadow: 0 2px 8px rgba(149,165,166,0.4); }
+        
+        .integral-badge img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            border-radius: 4px;
         }
+        
         .edit-mode .carousel-slide, .edit-mode .app-card { position: relative; }
         .edit-mode .app-card { cursor: grab; }
         .edit-mode .app-card:active { cursor: grabbing; }
@@ -219,7 +236,8 @@
             .app-name { font-size: 0.75rem; }
             .main-header h1 { font-size: 1.6rem; }
             .greeting-text { font-size: 1.6rem; }
-            .integral-badge { font-size: 1rem; padding: 2px 10px; }
+            .integral-badge { font-size: 0.9rem; padding: 3px 10px; }
+            .integral-badge img { width: 20px; height: 20px; }
             .add-fab { bottom: 70px; right: 16px; gap: 10px; }
             .add-btn, .add-carousel-btn, .upload-only-btn, .file-manager-btn { width: 48px; height: 48px; font-size: 20px; }
         }
@@ -272,6 +290,26 @@
     let isAddingApp = false;
     let isAddingCarousel = false;
     
+    // 评级配置
+    const RATING_CONFIG = [
+        { min: 80, max: Infinity, name: '夯', level: 0, colorClass: 'level-0', icon: '夯.jpg' },
+        { min: 60, max: 79, name: '顶级', level: 1, colorClass: 'level-1', icon: '顶级.jpg' },
+        { min: 40, max: 59, name: '人上人', level: 2, colorClass: 'level-2', icon: '人上人.jpg' },
+        { min: 20, max: 39, name: 'npc', level: 3, colorClass: 'level-3', icon: 'npc.jpg' },
+        { min: 0, max: 19, name: '拉完了', level: 4, colorClass: 'level-4', icon: '拉完了.jpg' }
+    ];
+    
+    function getRatingByIntegral(integral) {
+        const score = parseInt(integral);
+        if (isNaN(score)) return RATING_CONFIG[4]; // 默认返回拉完了
+        for (let config of RATING_CONFIG) {
+            if (score >= config.min && score <= config.max) {
+                return config;
+            }
+        }
+        return RATING_CONFIG[4];
+    }
+    
     const carouselSection = document.getElementById('carouselSection'), carouselTrack = document.getElementById('carouselTrack');
     const dotsContainer = document.getElementById('carouselDots'), groupsContainer = document.getElementById('groupsContainer');
     const fabGroup = document.getElementById('fabGroup');
@@ -308,21 +346,35 @@
         }
     }
     
-    // ========== 显示问候语和积分 ==========
+    // ========== 显示问候语和评级积分框 ==========
     function showGreetingWithIntegral(studentName, studentId) {
         const container = document.getElementById('greetingContainer');
         const textElem = container?.querySelector('.greeting-text');
-        const integralElem = document.getElementById('integralBadge');
+        const badgeElem = document.getElementById('integralBadge');
         
         if (container && textElem && studentName) {
             textElem.textContent = studentName;
             container.style.display = 'block';
             
             if (studentId && integralMapping[studentId]) {
-                integralElem.textContent = integralMapping[studentId];
-                integralElem.style.display = 'inline-flex';
+                const integral = integralMapping[studentId];
+                const rating = getRatingByIntegral(integral);
+                // 清空并重新构建徽章内容
+                badgeElem.innerHTML = '';
+                badgeElem.className = `integral-badge ${rating.colorClass}`;
+                // 添加评级图片
+                const img = document.createElement('img');
+                img.src = `https://luckynum.top/${rating.icon}`;
+                img.alt = rating.name;
+                img.onerror = () => { img.style.display = 'none'; };
+                badgeElem.appendChild(img);
+                // 添加积分数字
+                const span = document.createElement('span');
+                span.textContent = integral;
+                badgeElem.appendChild(span);
+                badgeElem.style.display = 'inline-flex';
             } else {
-                integralElem.style.display = 'none';
+                badgeElem.style.display = 'none';
             }
         }
     }
@@ -654,7 +706,6 @@
                     const app = apps[j];
                     let icon = app.icon;
                     if(icon && !icon.startsWith('http')) icon = `https://luckynum.top/${icon}`;
-                    // 修复：图标加载失败时使用 base64 占位图，不破坏 DOM 结构
                     const fallbackIcon = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23999\' stroke-width=\'1.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Crect x=\'2\' y=\'3\' width=\'20\' height=\'14\' rx=\'2\' ry=\'2\'%3E%3C/rect%3E%3Cline x1=\'8\' y1=\'21\' x2=\'16\' y2=\'21\'%3E%3C/line%3E%3Cline x1=\'12\' y1=\'17\' x2=\'12\' y2=\'21\'%3E%3C/line%3E%3C/svg%3E';
                     html += `
                         <div class="app-card" data-app-name="${escapeHtml(app.name)}" data-app-link="${escapeHtml(app.link)}" data-app-icon="${escapeHtml(app.icon)}" data-app-group="${escapeHtml(groupName)}">
