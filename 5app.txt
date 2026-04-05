@@ -5,7 +5,6 @@ group
 [g=美术（学科）资料]
 pic
 [p=/install.jpg l=https://www.kdocs.cn/l/cly4WbPEpjLd]
-[p=/IMG_20260402_214250.jpg l=/IMG_20260402_214250.jpg]
 app
 [n=电子作业提交平台 p=homeworkapp.jpg l=homeworkapp g=班级应用]
 [n=电子值日码 p=ezr.jpg l=ezr g=班级应用]
