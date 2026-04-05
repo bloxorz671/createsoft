@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>实时摄像头预览 - 一键切换设备</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免按键时意外选中文字，提升体验 */
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a0f1e 0%, #0c1222 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Roboto', system-ui, 'Helvetica Neue', sans-serif;
+            padding: 20px;
+        }
+
+        /* 主容器卡片风格 */
+        .camera-card {
+            background: rgba(20, 28, 40, 0.75);
+            backdrop-filter: blur(8px);
+            border-radius: 2.5rem;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            padding: 1.2rem;
+            transition: all 0.2s ease;
+        }
+
+        .video-container {
+            position: relative;
+            border-radius: 1.8rem;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+            transform: scaleX(1); /* 默认不翻转，保持真实方向，大部分摄像头预览正常 */
+            background: #111;
+        }
+
+        /* 底部信息栏 */
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-top: 1.2rem;
+            margin-bottom: 0.5rem;
+            padding: 0 0.5rem;
+            color: #eef4ff;
+            font-weight: 500;
+        }
+
+        .device-name {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            padding: 0.35rem 1rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+            font-family: monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 60%;
+        }
+
+        .status-badge {
+            background: #2dd4bf20;
+            backdrop-filter: blur(4px);
+            padding: 0.35rem 1rem;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-left: 2px solid #2dd4bf;
+            color: #c1f2e9;
+        }
+
+        /* 提示区域 */
+        .hint {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #9aa4bf;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 60px;
+            padding: 0.5rem 1rem;
+            display: inline-block;
+            width: auto;
+            backdrop-filter: blur(2px);
+        }
+
+        .key-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #1e293b;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-family: monospace;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+
+        kbd {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: #facc15;
+            box-shadow: inset 0 1px 0 0 #334155, 0 1px 2px rgba(0,0,0,0.3);
+            font-family: monospace;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 1rem;
+        }
+
+        /* 错误提示覆盖层 */
+        .error-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ffb3b3;
+            font-weight: 500;
+            text-align: center;
+            padding: 1rem;
+            border-radius: inherit;
+            z-index: 10;
+        }
+
+        .error-overlay button {
+            margin-top: 18px;
+            background: #3b82f6;
+            border: none;
+            padding: 8px 22px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .error-overlay button:hover {
+            background: #2563eb;
+            transform: scale(0.97);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* 响应式 */
+        @media (max-width: 640px) {
+            .camera-card {
+                padding: 0.8rem;
+            }
+            .device-name {
+                max-width: 50%;
+                font-size: 0.7rem;
+            }
+            .hint {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="camera-card">
+    <div class="video-container" id="videoContainer">
+        <video id="video" autoplay playsinline muted></video>
+        <!-- 错误提示层 (默认隐藏) -->
+        <div id="errorOverlay" class="error-overlay hidden">
+            <span>⚠️ 无法访问摄像头</span>
+            <span style="font-size: 0.8rem; margin-top: 8px;" id="errorMsg">请检查权限或连接摄像头</span>
+            <button id="retryBtn">重试</button>
+        </div>
+    </div>
+
+    <div class="info-bar">
+        <div class="device-name" id="deviceNameLabel">📷 检测设备中...</div>
+        <div class="status-badge" id="statusBadge">● 实时</div>
+    </div>
+
+    <div class="footer">
+        <div class="hint">
+            💡 按下键盘 <kbd>Space</kbd> 或 <kbd>C</kbd> 键快速切换摄像头
+        </div>
+    </div>
+    <div style="display: flex; justify-content: center; margin-top: 6px;">
+        <div class="key-hint">
+            🔄 单键切换 · 无需列表
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- DOM 元素 ----------
+        const videoElement = document.getElementById('video');
+        const deviceNameSpan = document.getElementById('deviceNameLabel');
+        const errorOverlay = document.getElementById('errorOverlay');
+        const errorMsgSpan = document.getElementById('errorMsg');
+        const retryBtn = document.getElementById('retryBtn');
+        const statusBadge = document.getElementById('statusBadge');
+
+        // ---------- 状态变量 ----------
+        let allVideoDevices = [];        // 存储所有视频输入设备 { deviceId, label }
+        let currentDeviceIndex = -1;     // 当前使用的设备索引
+        let currentStream = null;         // 当前活跃的MediaStream
+        let isStreaming = false;           // 是否正在正常预览
+        let initAttempted = false;         // 防止重复初始化
+
+        // ---------- 辅助函数 ----------
+        // 隐藏错误覆盖层，显示视频区
+        function hideErrorOverlay() {
+            errorOverlay.classList.add('hidden');
+        }
+
+        // 显示错误覆盖层，并显示具体消息
+        function showErrorOverlay(message) {
+            errorMsgSpan.innerText = message || '未知错误，请检查摄像头权限';
+            errorOverlay.classList.remove('hidden');
+            statusBadge.innerText = '⛔ 错误';
+            statusBadge.style.borderLeftColor = '#f87171';
+            statusBadge.style.color = '#fecaca';
+        }
+
+        // 更新状态栏为正常预览
+        function updateStatusOnline(deviceLabel) {
+            statusBadge.innerText = '● 实时预览';
+            statusBadge.style.borderLeftColor = '#2dd4bf';
+            statusBadge.style.color = '#c1f2e9';
+            if (deviceLabel && deviceLabel.trim() !== '') {
+                deviceNameSpan.innerHTML = `📹 ${deviceLabel.length > 40 ? deviceLabel.slice(0, 38) + '...' : deviceLabel}`;
+            } else {
+                deviceNameSpan.innerHTML = `📷 摄像头 (ID: ${currentDeviceIndex + 1}/${allVideoDevices.length})`;
+            }
+        }
+
+        // 停止当前所有轨道，释放资源
+        async function stopCurrentStream() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => {
+                    if (track.readyState === 'live') {
+                        track.stop();
+                    }
+                });
+                currentStream = null;
+            }
+            // 如果video标签正在播放旧流，清除srcObject
+            if (videoElement.srcObject) {
+                videoElement.srcObject = null;
+            }
+            isStreaming = false;
+        }
+
+        // 核心：通过设备ID启动摄像头
+        async function startCameraWithDeviceId(deviceId) {
+            try {
+                // 停止之前的流
+                await stopCurrentStream();
+
+                const constraints = {
+                    video: { deviceId: { exact: deviceId } },
+                    audio: false   // 仅视频，实时预览不需要音频
+                };
+
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                currentStream = stream;
+                videoElement.srcObject = stream;
+                await videoElement.play().catch(e => console.warn("play 自动播放被拦截?", e));
+                isStreaming = true;
+                hideErrorOverlay();
+
+                // 获取友好设备名称
+                const device = allVideoDevices.find(d => d.deviceId === deviceId);
+                let displayLabel = device?.label || `摄像头 (ID: ${deviceId.slice(0, 8)}...)`;
+                if (!displayLabel || displayLabel === '') {
+                    displayLabel = `Camera ${currentDeviceIndex + 1}`;
+                }
+                updateStatusOnline(displayLabel);
+                return true;
+            } catch (err) {
+                console.error("启动摄像头失败: ", err);
+                let errorMessage = "";
+                if (err.name === 'NotAllowedError') errorMessage = '摄像头权限被拒绝，请允许访问摄像头。';
+                else if (err.name === 'NotFoundError') errorMessage = '未找到指定的摄像头设备。';
+                else if (err.name === 'OverconstrainedError') errorMessage = '无法满足设备约束，设备可能被占用。';
+                else errorMessage = `无法打开摄像头: ${err.message || err.name}`;
+                showErrorOverlay(errorMessage);
+                isStreaming = false;
+                return false;
+            }
+        }
+
+        // 根据索引切换设备
+        async function switchToDeviceByIndex(index) {
+            if (!allVideoDevices.length) {
+                console.warn("没有可用的视频设备列表");
+                showErrorOverlay("没有检测到任何摄像头设备");
+                return false;
+            }
+            // 循环处理: 确保索引在有效范围 [0, length-1]
+            let safeIndex = index;
+            if (safeIndex < 0) safeIndex = allVideoDevices.length - 1;
+            if (safeIndex >= allVideoDevices.length) safeIndex = 0;
+            
+            const targetDevice = allVideoDevices[safeIndex];
+            if (!targetDevice || !targetDevice.deviceId) {
+                console.error("设备ID无效", targetDevice);
+                showErrorOverlay("设备信息无效，请刷新页面重试");
+                return false;
+            }
+            
+            currentDeviceIndex = safeIndex;
+            const success = await startCameraWithDeviceId(targetDevice.deviceId);
+            if (!success) {
+                // 如果切换失败，不清除设备列表，可以尝试下一个？但为了简洁，只提示失败但保留原索引尝试恢复
+                // 可尝试恢复之前流？但之前已经stop，最好的办法是重新尝试枚举一次并自动修复？
+                // 简易处理：若切换失败且列表仍有设备，展示错误，用户按重试或者再次按键尝试下一个
+                return false;
+            }
+            return true;
+        }
+
+        // 切换到下一个摄像头（循环）
+        async function switchToNextCamera() {
+            if (!allVideoDevices.length) {
+                // 如果没有设备，重新枚举尝试
+                await enumerateAndRefreshDevices();
+                if (!allVideoDevices.length) {
+                    showErrorOverlay("未发现任何摄像头，请连接设备后重试");
+                    return;
+                }
+            }
+            
+            // 如果当前没有索引 (比如从未成功启动或者初始化后未设置)，从0开始
+            let nextIndex = 0;
+            if (currentDeviceIndex !== -1 && allVideoDevices.length > 0) {
+                nextIndex = (currentDeviceIndex + 1) % allVideoDevices.length;
+            } else {
+                // 如果当前索引失效，就尝试从上次有效的索引或者0开始
+                if (currentDeviceIndex === -1 && allVideoDevices.length) nextIndex = 0;
+                else if (currentDeviceIndex >= allVideoDevices.length) nextIndex = 0;
+            }
+            
+            await switchToDeviceByIndex(nextIndex);
+        }
+
+        // 枚举所有视频输入设备，并更新 allVideoDevices 数组，同时尽量保留原索引或纠正索引
+        async function enumerateAndRefreshDevices() {
+            try {
+                // 注意: 需要获取权限后 label 才不为空，但是 deviceId 是可用的。为了获取准确设备列表，先请求一次权限？
+                // 但是我们已经通过初始化请求过权限了，所以再次枚举可以获得完整带label的设备列表。
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoInputs = devices.filter(device => device.kind === 'videoinput');
+                
+                if (videoInputs.length === 0) {
+                    allVideoDevices = [];
+                    currentDeviceIndex = -1;
+                    showErrorOverlay("未检测到任何摄像头设备，请插入摄像头并刷新页面。");
+                    deviceNameSpan.innerHTML = "❌ 无摄像头";
+                    return false;
+                }
+                
+                // 更新全局设备列表
+                allVideoDevices = videoInputs.map(dev => ({
+                    deviceId: dev.deviceId,
+                    label: dev.label || `Camera ${dev.deviceId.slice(0, 5)}...`
+                }));
+                
+                // 修复索引: 如果当前索引有效且 deviceId 还在列表中，保持不变；否则重置到0
+                if (currentDeviceIndex !== -1 && allVideoDevices[currentDeviceIndex]) {
+                    // 保持当前索引指向的设备不变
+                    // 但有可能设备热插拔，ID变化？简单起见保留索引，如果后续切换失败会再次枚举
+                } else {
+                    // 如果当前没有有效索引或者索引越界, 默认0
+                    if (allVideoDevices.length > 0) {
+                        currentDeviceIndex = 0;
+                    } else {
+                        currentDeviceIndex = -1;
+                    }
+                }
+                return true;
+            } catch (err) {
+                console.error("枚举设备失败", err);
+                return false;
+            }
+        }
+
+        // 初始化整个摄像头系统: 请求权限 + 获取设备列表 + 启动第一个摄像头
+        async function initCameraSystem() {
+            if (initAttempted) return;
+            initAttempted = true;
+            
+            // 首先请求基本的摄像头权限（获取设备列表需要权限，且为了预览）
+            try {
+                // 临时请求一个只视频的流，来获取权限并拿到label
+                const tempStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                // 拿到权限后立即停止该临时流，仅用于激活权限枚举，不用于预览。
+                tempStream.getTracks().forEach(track => track.stop());
+                
+                // 现在可以枚举完整设备（带label）
+                await enumerateAndRefreshDevices();
+                
+                if (allVideoDevices.length === 0) {
+                    showErrorOverlay("未检测到任何摄像头，请确保摄像头可用。");
+                    deviceNameSpan.innerHTML = "🚫 无摄像头设备";
+                    return;
+                }
+                
+                // 启动第一个摄像头
+                const firstDevice = allVideoDevices[0];
+                currentDeviceIndex = 0;
+                const success = await startCameraWithDeviceId(firstDevice.deviceId);
+                if (!success) {
+                    // 启动第一个摄像头失败，展示错误，但保留设备列表，后续可按切换尝试其他
+                    console.warn("启动默认摄像头失败");
+                }
+            } catch (err) {
+                console.error("初始化获取摄像头权限失败", err);
+                let msg = "";
+                if (err.name === 'NotAllowedError') msg = "未授予摄像头权限，请点击地址栏允许访问摄像头。";
+                else if (err.name === 'NotFoundError') msg = "未检测到任何摄像头设备。";
+                else msg = `摄像头初始化失败: ${err.message}`;
+                showErrorOverlay(msg);
+                deviceNameSpan.innerHTML = "⚠️ 权限错误";
+            }
+        }
+
+        // 监听设备变化（热插拔）: 当摄像头插拔时动态更新列表，并智能保持/切换
+        async function handleDeviceChange() {
+            console.log("检测到设备列表变化，重新枚举...");
+            // 记住当前正在使用的设备ID (如果存在)
+            let oldDeviceId = null;
+            if (currentStream && currentDeviceIndex !== -1 && allVideoDevices[currentDeviceIndex]) {
+                oldDeviceId = allVideoDevices[currentDeviceIndex].deviceId;
+            }
+            
+            // 重新枚举设备
+            await enumerateAndRefreshDevices();
+            
+            if (allVideoDevices.length === 0) {
+                // 没有摄像头了，停止当前流并显示错误
+                await stopCurrentStream();
+                showErrorOverlay("所有摄像头已断开，请重新连接设备。");
+                deviceNameSpan.innerHTML = "📭 无摄像头";
+                currentDeviceIndex = -1;
+                return;
+            }
+            
+            // 尝试恢复原先的设备 (根据deviceId查找)
+            let foundIndex = -1;
+            if (oldDeviceId) {
+                foundIndex = allVideoDevices.findIndex(dev => dev.deviceId === oldDeviceId);
+            }
+            
+            if (foundIndex !== -1) {
+                // 之前用的设备仍然存在，切换到它
+                await switchToDeviceByIndex(foundIndex);
+            } else {
+                // 之前设备不存在了，或者没有旧设备，默认启动第一个可用设备
+                if (allVideoDevices.length > 0) {
+                    await switchToDeviceByIndex(0);
+                } else {
+                    await stopCurrentStream();
+                    showErrorOverlay("摄像头设备变更后无法获取有效设备");
+                }
+            }
+        }
+
+        // 监听 'devicechange' 事件 (需要已经获取权限，浏览器支持)
+        function registerDeviceChangeListener() {
+            if (navigator.mediaDevices && 'ondevicechange' in navigator.mediaDevices) {
+                navigator.mediaDevices.addEventListener('devicechange', () => {
+                    // 延迟一点点，避免频繁更新
+                    setTimeout(handleDeviceChange, 200);
+                });
+                console.log("已注册设备热插拔监听");
+            } else {
+                console.warn("当前浏览器不支持 devicechange 事件，热插拔将不会自动刷新");
+            }
+        }
+
+        // ---------- 全局按键监听（单键切换）----------
+        function onKeyPressHandler(event) {
+            // 目标按键: 空格键 (Space) 或 C键 / c 键 (不区分大小写)
+            const key = event.key;
+            const isSpace = key === ' ' || key === 'Space' || key === 'Spacebar';
+            const isCKey = key === 'c' || key === 'C';
+            
+            if (isSpace || isCKey) {
+                event.preventDefault();  // 避免按下空格时页面滚动或者触发表单提交
+                // 执行切换摄像头
+                switchToNextCamera().catch(e => {
+                    console.error("切换过程异常", e);
+                    showErrorOverlay("切换失败，请重试或检查摄像头状态");
+                });
+            }
+        }
+
+        // 重试按钮逻辑
+        function bindRetryButton() {
+            retryBtn.addEventListener('click', async () => {
+                // 重试: 重新初始化整个系统
+                initAttempted = false;   // 重置标记，允许重新初始化
+                await stopCurrentStream();
+                hideErrorOverlay();
+                // 重新请求权限及启动
+                await initCameraSystem();
+                // 如果仍然失败，错误覆盖层会再次显示
+            });
+        }
+
+        // 页面关闭前释放资源的可选操作 (非必须)
+        window.addEventListener('beforeunload', () => {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+        });
+
+        // 额外: 如果因为页面可见性变化，不需要额外处理，维持流即可。
+        // 启动所有逻辑
+        function start() {
+            bindRetryButton();
+            registerDeviceChangeListener();
+            initCameraSystem();
+            window.addEventListener('keydown', onKeyPressHandler);
+        }
+
+        // 执行
+        start();
+    })();
+</script>
+</body>
+</html>
