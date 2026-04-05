@@ -18,6 +18,13 @@
         .logout-btn { background: #e74c3c; color: white; border: none; border-radius: 20px; padding: 6px 16px; font-size: 0.8rem; font-weight: 500; cursor: pointer; margin-left: 12px; }
         .logout-btn:hover { background: #c0392b; }
         
+        /* 未登录提示样式 */
+        .unlogged-section { padding: 12px 20px 0 20px; background: white; }
+        .unlogged-wrapper { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+        .unlogged-text { font-size: 1rem; font-weight: 500; color: #e67e22; background: #fff3e0; padding: 10px 16px; border-radius: 12px; flex: 1; text-align: center; }
+        .scan-btn { background: #2b4c8a; color: white; border: none; border-radius: 12px; padding: 10px 20px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .scan-btn:hover { background: #1e3c72; transform: scale(1.02); }
+        
         .rating-box { display: inline-flex; align-items: center; justify-content: center; padding: 4px 14px; font-size: 1rem; font-weight: 600; color: white; border: 2px solid; border-radius: 8px; white-space: nowrap; }
         .rating-box.level-0 { background: #e74c3c; border-color: #c0392b; }
         .rating-box.level-1 { background: #f39c12; border-color: #e67e22; }
@@ -54,6 +61,15 @@
         .student-id-modal input { text-align: center; font-size: 1.2rem; letter-spacing: 2px; }
         .student-id-modal .example { color: #999; font-size: 0.75rem; margin-top: 8px; }
         .student-id-modal .warning-text { color: #e74c3c; font-size: 0.8rem; margin-top: 12px; display: none; }
+        
+        /* 二维码弹窗样式 */
+        .qrcode-modal .modal-content { text-align: center; }
+        .qrcode-modal h3 { color: #1e3c72; margin-bottom: 8px; }
+        .qrcode-modal .qrcode-subtitle { color: #666; font-size: 0.85rem; margin-bottom: 20px; }
+        .qrcode-container { background: white; padding: 20px; border-radius: 12px; display: flex; justify-content: center; margin: 10px 0; }
+        .qrcode-placeholder { width: 200px; height: 200px; background: #f0f2f5; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; }
+        .qrcode-placeholder span { font-size: 48px; margin-bottom: 10px; }
+        .auth-hint { font-size: 0.8rem; color: #2b4c8a; margin-top: 15px; padding: 8px; background: #e8f0fe; border-radius: 8px; }
         
         .carousel-section { margin: 12px 16px 24px; background: #f0f2f6; overflow: hidden; }
         .carousel-wrapper { width: 100%; overflow: hidden; }
@@ -99,6 +115,7 @@
             .app-icon { width: 52px; height: 52px; }
             .app-name { font-size: 0.75rem; }
             .greeting-text { font-size: 1.6rem; }
+            .unlogged-text { font-size: 0.85rem; }
             .add-fab { bottom: 70px; right: 16px; }
             .add-btn, .file-manager-btn, .add-carousel-btn, .upload-only-btn { width: 48px; height: 48px; font-size: 20px; }
         }
@@ -109,11 +126,20 @@
     <div class="warning-banner" id="warningBanner" style="display: none;">⏳ 正在加载平台数据...</div>
     <div class="main-header"><h1 id="titleClickTarget">初二五班智慧应用平台</h1></div>
     
+    <!-- 已登录状态显示 -->
     <div id="greetingContainer" class="greeting-section" style="display: none;">
         <div class="greeting-wrapper" id="greetingWrapper">
             <div class="greeting-text"></div>
             <div id="ratingContainer" style="display: inline-flex; align-items: center; gap: 4px;"></div>
             <button id="logoutBtn" class="logout-btn" style="display: none;">退出登录</button>
+        </div>
+    </div>
+    
+    <!-- 未登录状态显示（仅普通浏览器） -->
+    <div id="unloggedContainer" class="unlogged-section" style="display: none;">
+        <div class="unlogged-wrapper">
+            <div class="unlogged-text">⚠️ 当前处于未登录状态，请先扫描个人系统认证码登录</div>
+            <button id="scanAuthBtn" class="scan-btn">📱 扫描认证码</button>
         </div>
     </div>
     
@@ -161,6 +187,9 @@
     const ratingContainer = document.getElementById('ratingContainer');
     const greetingWrapper = document.getElementById('greetingWrapper');
     const logoutBtn = document.getElementById('logoutBtn');
+    const greetingContainer = document.getElementById('greetingContainer');
+    const unloggedContainer = document.getElementById('unloggedContainer');
+    const scanAuthBtn = document.getElementById('scanAuthBtn');
     
     // ========== 评级配置 ==========
     const RATING_CONFIG = [
@@ -205,65 +234,31 @@
         currentStudentId = null;
     }
     
-    // ========== 自定义学号输入弹窗（解决提示文字被截断问题） ==========
-    function showStudentIdPrompt() {
-        return new Promise((resolve) => {
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay student-id-modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h3>🔐 初二五班专用系统</h3>
-                    <div class="subtitle">请验证身份以继续使用</div>
-                    <input type="number" id="studentIdInput" placeholder="请输入5位数学号" maxlength="5" autocomplete="off">
-                    
-                    <div class="warning-text" id="warningText">❌ 学号必须是5位数字，请重新输入</div>
-                    <div class="modal-buttons">
-                        <button class="confirm-btn" id="confirmBtn">确定</button>
-                        <button class="cancel-btn" id="cancelBtn">取消</button>
+    // ========== 显示认证二维码弹窗 ==========
+    function showAuthQRCode() {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay qrcode-modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>📱 个人系统认证码</h3>
+                <div class="qrcode-subtitle">请使用初二五班专用App扫描</div>
+                <div class="qrcode-container">
+                    <div class="qrcode-placeholder">
+                        <span>📲</span>
+                        <p style="font-size:12px; margin-top:8px;">认证码: G8C5-${Math.random().toString(36).substring(2, 10).toUpperCase()}</p>
                     </div>
                 </div>
-            `;
-            document.body.appendChild(modal);
-            
-            const input = modal.querySelector('#studentIdInput');
-            const confirmBtn = modal.querySelector('#confirmBtn');
-            const cancelBtn = modal.querySelector('#cancelBtn');
-            const warningText = modal.querySelector('#warningText');
-            
-            // 自动聚焦
-            input.focus();
-            
-            const handleConfirm = () => {
-                const value = input.value.trim();
-                if (/^\d{5}$/.test(value)) {
-                    modal.remove();
-                    resolve(value);
-                } else {
-                    warningText.style.display = 'block';
-                    input.style.borderColor = '#e74c3c';
-                    input.value = '';
-                    input.focus();
-                }
-            };
-            
-            const handleCancel = () => {
-                modal.remove();
-                resolve(null);
-            };
-            
-            confirmBtn.onclick = handleConfirm;
-            cancelBtn.onclick = handleCancel;
-            
-            // 回车确认
-            input.onkeypress = (e) => {
-                if (e.key === 'Enter') handleConfirm();
-            };
-            
-            // 点击背景关闭
-            modal.onclick = (e) => {
-                if (e.target === modal) handleCancel();
-            };
-        });
+                <div class="auth-hint">
+                    💡 提示：请打开初二五班专用App，点击"扫描认证码"进行登录
+                </div>
+                <div class="modal-buttons" style="margin-top: 20px;">
+                    <button class="confirm-btn" id="closeQrBtn">关闭</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.querySelector('#closeQrBtn').onclick = () => modal.remove();
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     }
     
     // ========== 加载数据 ==========
@@ -304,16 +299,37 @@
     }
     
     async function showGreeting() {
-        const container = document.getElementById('greetingContainer');
-        const textElem = container?.querySelector('.greeting-text');
         currentStudentId = getStudentId();
-        if (!currentStudentId) { container.style.display = 'none'; return; }
+        
+        // 未登录状态处理
+        if (!currentStudentId) {
+            greetingContainer.style.display = 'none';
+            if (!isTargetDevice) {
+                // 普通浏览器：显示未登录提示
+                unloggedContainer.style.display = 'block';
+                if (scanAuthBtn) {
+                    scanAuthBtn.onclick = showAuthQRCode;
+                }
+            } else {
+                // App设备：显示未登录提示（但没有扫描按钮）
+                unloggedContainer.style.display = 'block';
+                const wrapper = unloggedContainer.querySelector('.unlogged-wrapper');
+                if (wrapper) {
+                    wrapper.innerHTML = '<div class="unlogged-text">⚠️ 当前处于未登录状态，请重新打开App</div>';
+                }
+            }
+            return;
+        }
+        
+        // 已登录：隐藏未登录容器，显示问候语
+        unloggedContainer.style.display = 'none';
+        const textElem = greetingContainer?.querySelector('.greeting-text');
         
         if (Object.keys(nameMapping).length === 0) await loadNameMapping();
         const studentName = nameMapping[currentStudentId] || currentStudentId;
-        if (container && textElem) {
+        if (greetingContainer && textElem) {
             textElem.textContent = studentName;
-            container.style.display = 'block';
+            greetingContainer.style.display = 'block';
             if (Object.keys(integralMapping).length === 0) await loadIntegralData();
             if (integralMapping[currentStudentId]) {
                 const integral = integralMapping[currentStudentId];
@@ -334,7 +350,10 @@
         if (logoutBtn && isTargetDevice) {
             logoutBtn.style.display = 'inline-block';
             logoutBtn.onclick = () => { clearStudentId(); window.location.href = window.location.pathname; };
+        } else if (logoutBtn) {
+            logoutBtn.style.display = 'none';
         }
+        
         if (greetingWrapper) {
             greetingWrapper.style.cursor = 'pointer';
             greetingWrapper.onclick = (e) => {
@@ -344,9 +363,62 @@
         }
     }
     
-    // ========== User-Agent 检测和学号输入（使用自定义弹窗） ==========
+    // ========== 自定义学号输入弹窗（仅 ClassApp 设备） ==========
+    function showStudentIdPrompt() {
+        return new Promise((resolve) => {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay student-id-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>🔐 初二五班专用系统</h3>
+                    <div class="subtitle">请验证身份以继续使用</div>
+                    <input type="number" id="studentIdInput" placeholder="请输入5位数学号" maxlength="5" autocomplete="off">
+                    <div class="example">📌 示例：10001、10002</div>
+                    <div class="warning-text" id="warningText">❌ 学号必须是5位数字，请重新输入</div>
+                    <div class="modal-buttons">
+                        <button class="confirm-btn" id="confirmBtn">确定</button>
+                        <button class="cancel-btn" id="cancelBtn">取消</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            const input = modal.querySelector('#studentIdInput');
+            const confirmBtn = modal.querySelector('#confirmBtn');
+            const cancelBtn = modal.querySelector('#cancelBtn');
+            const warningText = modal.querySelector('#warningText');
+            
+            input.focus();
+            
+            const handleConfirm = () => {
+                const value = input.value.trim();
+                if (/^\d{5}$/.test(value)) {
+                    modal.remove();
+                    resolve(value);
+                } else {
+                    warningText.style.display = 'block';
+                    input.style.borderColor = '#e74c3c';
+                    input.value = '';
+                    input.focus();
+                }
+            };
+            
+            const handleCancel = () => {
+                modal.remove();
+                resolve(null);
+            };
+            
+            confirmBtn.onclick = handleConfirm;
+            cancelBtn.onclick = handleCancel;
+            input.onkeypress = (e) => { if (e.key === 'Enter') handleConfirm(); };
+            modal.onclick = (e) => { if (e.target === modal) handleCancel(); };
+        });
+    }
+    
+    // ========== ClassApp 设备的学号验证 ==========
     async function checkUserAgentAndPrompt() {
         if (!isTargetDevice) return;
+        
         let existingId = getStudentId();
         if (existingId) { currentStudentId = existingId; await showGreeting(); return; }
         
@@ -355,7 +427,6 @@
             saveStudentId(studentId);
             window.location.href = `?p=${studentId}`;
         } else {
-            // 用户点了取消
             warningBanner.style.display = 'block';
             warningBanner.innerHTML = '⚠️ 请输入学号以使用完整功能 | <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">点击重试</span>';
             warningBanner.style.background = '#f8d7da';
@@ -719,9 +790,17 @@
     document.getElementById('addGroupFab')?.addEventListener('click', addGroup);
     
     async function init() {
-        await checkUserAgentAndPrompt();
+        // 先加载配置数据
         await Promise.all([loadConfigFile(), loadNameMapping(), loadIntegralData()]);
-        await showGreeting();
+        // 然后处理登录状态显示
+        if (isTargetDevice) {
+            // ClassApp 设备：弹窗输入学号
+            await checkUserAgentAndPrompt();
+            await showGreeting();
+        } else {
+            // 普通浏览器：直接显示状态（已登录/未登录）
+            await showGreeting();
+        }
     }
     init();
 </script>
