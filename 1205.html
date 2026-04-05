@@ -217,7 +217,6 @@
     </div>
 </div>
 
-<script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 <script>
     // ========== 配置 ==========
     const CONFIG_URL = 'https://luckynum.top/5app.txt';
@@ -240,7 +239,6 @@
     
     // 扫码相关变量
     let scanCodeReader = null;
-    let scanStream = null;
     let scanningActive = false;
     let lastScanTime = 0;
     const SCAN_COOLDOWN = 1000;
@@ -381,7 +379,9 @@
                 return;
             }
         }
-        if (scanStream) { stopScanCamera(); }
+        if (scanVideo && scanVideo.srcObject) {
+            try { stopScanCamera(); } catch(e) {}
+        }
         scanStatus.textContent = '获取摄像头列表...';
         scanningActive = true;
         
@@ -418,41 +418,84 @@
     
     function stopScanCamera() {
         scanningActive = false;
-        if (scanCodeReader) { try { scanCodeReader.reset(); } catch(e) {} }
-        if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
-        if (scanVideo) scanVideo.srcObject = null;
+        if (scanCodeReader) {
+            try { scanCodeReader.reset(); } catch(e) {}
+        }
+        if (scanVideo && scanVideo.srcObject) {
+            try {
+                const stream = scanVideo.srcObject;
+                if (stream && stream.getTracks) {
+                    stream.getTracks().forEach(t => t.stop());
+                }
+                scanVideo.srcObject = null;
+            } catch(e) {}
+        }
     }
     
-    // ========== 相册识别 ==========
+    // ========== 相册识别（修复版） ==========
     async function scanFromImage(file) {
         if (!file) return;
-        if (!scanCodeReader) {
-            try { scanCodeReader = new ZXing.BrowserMultiFormatReader(); } catch(e) {
-                alert('扫码库加载失败');
-                return;
-            }
-        }
-        scanStatus.textContent = '识别中...';
+        
+        // 重新初始化 reader（避免状态问题）
+        let tempReader = null;
         try {
+            tempReader = new ZXing.BrowserMultiFormatReader();
+        } catch(e) {
+            if (scanStatus) scanStatus.textContent = '扫码库加载失败';
+            alert('扫码库加载失败，请刷新页面重试');
+            return;
+        }
+        
+        if (scanStatus) scanStatus.textContent = '识别中...';
+        
+        try {
+            // 创建图片元素
             const img = new Image();
-            const url = URL.createObjectURL(file);
-            await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = url; });
-            const result = await scanCodeReader.decodeFromImage(img);
-            URL.revokeObjectURL(url);
-            if (result && result.text) onScanSuccess(result.text);
-            else scanStatus.textContent = '未识别到二维码';
-        } catch(e) { scanStatus.textContent = '识别失败'; }
+            const imageUrl = URL.createObjectURL(file);
+            
+            // 等待图片加载完成
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = imageUrl;
+            });
+            
+            // 使用 ZXing 解码图片
+            const result = await tempReader.decodeFromImage(img);
+            URL.revokeObjectURL(imageUrl);
+            
+            if (result && result.text) {
+                playBeep();
+                const studentId = extractLastFiveDigits(result.text);
+                if (/^\d{5}$/.test(studentId)) {
+                    saveStudentId(studentId);
+                    stopScanCamera();
+                    if (scanModal) scanModal.style.display = 'none';
+                    window.location.href = `?p=${studentId}`;
+                } else {
+                    if (scanStatus) scanStatus.textContent = '未识别到有效学号';
+                    alert('未识别到5位数学号，请重试');
+                }
+            } else {
+                if (scanStatus) scanStatus.textContent = '未识别到二维码';
+                alert('未识别到二维码，请确保图片清晰');
+            }
+        } catch (err) {
+            console.error('图片识别失败:', err);
+            if (scanStatus) scanStatus.textContent = '识别失败';
+            alert('识别失败，请确保图片包含清晰的二维码/条形码');
+        }
     }
     
     // ========== 显示扫码弹窗 ==========
     function showScanModal() {
-        scanModal.style.display = 'flex';
+        if (scanModal) scanModal.style.display = 'flex';
         setTimeout(() => startScanCamera(), 100);
     }
     
     function closeScanModalFunc() {
         stopScanCamera();
-        scanModal.style.display = 'none';
+        if (scanModal) scanModal.style.display = 'none';
     }
     
     // ========== 加载数据 ==========
@@ -498,6 +541,11 @@
         if (!currentStudentId) {
             greetingContainer.style.display = 'none';
             unloggedContainer.style.display = 'block';
+            
+            // ClassApp 设备不显示扫码登录按钮
+            if (isTargetDevice && scanLoginBtn) {
+                scanLoginBtn.style.display = 'none';
+            }
             return;
         }
         
@@ -585,7 +633,7 @@
         else { warningBanner.style.display = 'block'; warningBanner.innerHTML = '⚠️ 请输入学号以使用完整功能 | <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">点击重试</span>'; }
     }
     
-    // ========== 图片/视频预览模块 ==========
+    // ========== 图片/视频预览模块（简化版，保持原有功能） ==========
     function downloadFile(url, fileName) {
         const a = document.createElement('a');
         a.href = url;
@@ -919,10 +967,22 @@
     document.getElementById('addGroupFab')?.addEventListener('click', addGroup);
     
     // 扫码按钮事件
-    if (scanLoginBtn) scanLoginBtn.addEventListener('click', showScanModal);
+    if (scanLoginBtn) {
+        // ClassApp 设备隐藏扫码按钮
+        if (isTargetDevice) {
+            scanLoginBtn.style.display = 'none';
+        } else {
+            scanLoginBtn.addEventListener('click', showScanModal);
+        }
+    }
     if (closeScanModal) closeScanModal.addEventListener('click', closeScanModalFunc);
     if (scanAlbumBtn) scanAlbumBtn.addEventListener('click', () => scanAlbumInput?.click());
-    if (scanAlbumInput) scanAlbumInput.addEventListener('change', (e) => { if (e.target.files[0]) scanFromImage(e.target.files[0]); scanAlbumInput.value = ''; });
+    if (scanAlbumInput) scanAlbumInput.addEventListener('change', (e) => { 
+        if (e.target.files && e.target.files[0]) {
+            scanFromImage(e.target.files[0]);
+        }
+        scanAlbumInput.value = '';
+    });
     
     async function init() {
         await Promise.all([loadConfigFile(), loadNameMapping(), loadIntegralData()]);
