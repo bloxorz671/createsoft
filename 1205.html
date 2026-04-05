@@ -1,7 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" href="/41.jpg" type="image/jpeg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>初二五班智慧应用平台</title>
+    
+    <!-- 浏览器标签页图标 -->
+    <link rel="icon" href="41.jpg" type="image/jpeg">
+    <link rel="shortcut icon" href="41.jpg" type="image/jpeg">
+    <link rel="apple-touch-icon" href="41.jpg">
+    
+    <!-- Open Graph 标签（微信分享卡片） -->
     <meta property="og:title" content="初二五班智慧应用平台" />
     <meta property="og:description" content="欢迎使用初二五班智慧应用平台" />
     <meta property="og:image" content="https://luckynum.top/41.jpg" />
@@ -13,9 +22,6 @@
     <meta name="twitter:title" content="初二五班智慧应用平台">
     <meta name="twitter:description" content="欢迎使用初二五班智慧应用平台">
     <meta name="twitter:image" content="https://luckynum.top/41.jpg">
-    <title>初二五班智慧应用平台</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="description" content="欢迎使用初二五班智慧应用平台">
     
     <style>
@@ -35,6 +41,8 @@
         .unlogged-section { padding: 12px 20px 0 20px; background: white; }
         .unlogged-wrapper { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; }
         .unlogged-text { font-size: 1rem; font-weight: 500; color: #e67e22; background: #fff3e0; padding: 10px 16px; border-radius: 12px; text-align: center; }
+        .scan-login-btn { background: #2b4c8a; color: white; border: none; border-radius: 12px; padding: 10px 20px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .scan-login-btn:hover { background: #1e3c72; transform: scale(1.02); }
         
         .rating-box { display: inline-flex; align-items: center; justify-content: center; padding: 4px 14px; font-size: 1rem; font-weight: 600; color: white; border: 2px solid; border-radius: 8px; white-space: nowrap; }
         .rating-box.level-0 { background: #e74c3c; border-color: #c0392b; }
@@ -70,6 +78,27 @@
         .student-id-modal .subtitle { color: #666; font-size: 0.85rem; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
         .student-id-modal input { text-align: center; font-size: 1.2rem; letter-spacing: 2px; }
         .student-id-modal .warning-text { color: #e74c3c; font-size: 0.8rem; margin-top: 12px; display: none; }
+        
+        /* 扫码界面样式 */
+        .scan-modal .modal-content { padding: 0; overflow: hidden; max-width: 100%; width: 100%; height: 100%; max-height: 100%; border-radius: 0; background: #000; display: flex; flex-direction: column; }
+        .scan-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; background: #1a1a2e; color: white; flex-shrink: 0; }
+        .scan-header h3 { margin: 0; font-size: 1.2rem; }
+        .scan-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0 8px; }
+        .scan-video-container { flex: 1; position: relative; background: #000; overflow: hidden; }
+        #scanVideo { width: 100%; height: 100%; object-fit: cover; }
+        .scan-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 280px; border: 2px solid rgba(255,255,255,0.8); border-radius: 24px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.6); z-index: 10; }
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, transparent 0%, rgba(0,255,0,0.3) 20%, #00ff00 45%, #00ff00 55%, rgba(0,255,0,0.3) 80%, transparent 100%); box-shadow: 0 0 8px #00ff00; animation: scanMove 2.5s ease-in-out infinite; pointer-events: none; }
+        @keyframes scanMove { 0% { top: 0; opacity: 1; } 45% { opacity: 1; } 55% { opacity: 0.8; } 100% { top: 100%; opacity: 0.3; } }
+        .corner { position: absolute; width: 30px; height: 30px; border-color: #00ff00; border-style: solid; border-width: 0; }
+        .corner-tl { top: -2px; left: -2px; border-top-width: 4px; border-left-width: 4px; border-radius: 8px 0 0 0; }
+        .corner-tr { top: -2px; right: -2px; border-top-width: 4px; border-right-width: 4px; border-radius: 0 8px 0 0; }
+        .corner-bl { bottom: -2px; left: -2px; border-bottom-width: 4px; border-left-width: 4px; border-radius: 0 0 0 8px; }
+        .corner-br { bottom: -2px; right: -2px; border-bottom-width: 4px; border-right-width: 4px; border-radius: 0 0 8px 0; }
+        .scan-tip { position: absolute; bottom: 20%; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.8); font-size: 14px; z-index: 20; background: rgba(0,0,0,0.5); padding: 8px 16px; width: fit-content; margin: 0 auto; border-radius: 20px; backdrop-filter: blur(4px); pointer-events: none; }
+        .album-btn { position: absolute; bottom: 40px; right: 20px; width: 56px; height: 56px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.3); cursor: pointer; z-index: 30; }
+        .album-btn svg { width: 28px; height: 28px; fill: white; }
+        .album-btn input { display: none; }
+        .scan-status { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; z-index: 30; backdrop-filter: blur(4px); }
         
         .carousel-section { margin: 12px 16px 24px; background: #f0f2f6; overflow: hidden; }
         .carousel-wrapper { width: 100%; overflow: hidden; }
@@ -119,12 +148,15 @@
             .add-btn, .file-manager-btn, .add-carousel-btn, .upload-only-btn { width: 48px; height: 48px; font-size: 20px; }
         }
     </style>
+    <!-- ZXing 扫码库 -->
+    <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 </head>
 <body>
 <div class="platform-container">
     <div class="warning-banner" id="warningBanner" style="display: none;">⏳ 正在加载平台数据...</div>
     <div class="main-header"><h1 id="titleClickTarget">初二五班智慧应用平台</h1></div>
     
+    <!-- 已登录状态显示 -->
     <div id="greetingContainer" class="greeting-section" style="display: none;">
         <div class="greeting-wrapper" id="greetingWrapper">
             <div class="greeting-text"></div>
@@ -133,9 +165,11 @@
         </div>
     </div>
     
+    <!-- 未登录状态显示 -->
     <div id="unloggedContainer" class="unlogged-section" style="display: none;">
         <div class="unlogged-wrapper">
             <div class="unlogged-text">⚠️ 当前处于未登录状态</div>
+            <button id="scanLoginBtn" class="scan-login-btn">📷 扫码登录</button>
         </div>
     </div>
     
@@ -155,6 +189,35 @@
     <button class="add-btn" id="addGroupFab" title="添加分组" style="background:#9b59b6;">📂</button>
 </div>
 
+<!-- 扫码弹窗 -->
+<div id="scanModal" class="modal-overlay scan-modal" style="display: none; z-index: 10000;">
+    <div class="modal-content" style="padding: 0; max-width: 100%; width: 100%; height: 100%; border-radius: 0; background: #000;">
+        <div class="scan-header">
+            <h3>📷 扫码登录</h3>
+            <button id="closeScanModal" class="scan-close">✕</button>
+        </div>
+        <div class="scan-video-container">
+            <video id="scanVideo" autoplay playsinline muted></video>
+            <div class="scan-area">
+                <div class="scan-line"></div>
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+            </div>
+            <div class="scan-tip">将二维码/条形码放入框内</div>
+            <div class="album-btn" id="scanAlbumBtn">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="white">
+                    <path d="M18 3v2h2v14H4V5h2V3H2v18h20V3h-4zM9 9h2v2H9V9zm-2 4h2v2H7v-2zm4-4h2v2h-2V9zm-2 4h2v2H9v-2zm4-4h2v2h-2V9zm-2 4h2v2h-2v-2zm4-4h2v2h-2V9zM7 5h10V3H7v2z"/>
+                </svg>
+                <input type="file" id="scanAlbumInput" accept="image/*">
+            </div>
+            <div id="scanStatus" class="scan-status">启动摄像头中...</div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 <script>
     // ========== 配置 ==========
     const CONFIG_URL = 'https://luckynum.top/5app.txt';
@@ -175,6 +238,14 @@
     let nameMapping = {}, integralMapping = {};
     let isAddingApp = false, isAddingCarousel = false;
     
+    // 扫码相关变量
+    let scanCodeReader = null;
+    let scanStream = null;
+    let scanningActive = false;
+    let lastScanTime = 0;
+    const SCAN_COOLDOWN = 1000;
+    let defaultCameraId = null;
+    
     const carouselSection = document.getElementById('carouselSection');
     const carouselTrack = document.getElementById('carouselTrack');
     const dotsContainer = document.getElementById('carouselDots');
@@ -186,7 +257,15 @@
     const logoutBtn = document.getElementById('logoutBtn');
     const greetingContainer = document.getElementById('greetingContainer');
     const unloggedContainer = document.getElementById('unloggedContainer');
+    const scanLoginBtn = document.getElementById('scanLoginBtn');
+    const scanModal = document.getElementById('scanModal');
+    const scanVideo = document.getElementById('scanVideo');
+    const scanStatus = document.getElementById('scanStatus');
+    const closeScanModal = document.getElementById('closeScanModal');
+    const scanAlbumBtn = document.getElementById('scanAlbumBtn');
+    const scanAlbumInput = document.getElementById('scanAlbumInput');
     
+    // ========== 评级配置 ==========
     const RATING_CONFIG = [
         { min: 80, max: Infinity, name: '夯爆了', colorClass: 'level-0' },
         { min: 60, max: 79, name: '顶级', colorClass: 'level-1' },
@@ -204,6 +283,7 @@
         return RATING_CONFIG[4];
     }
     
+    // ========== 存储机制 ==========
     function saveStudentId(id) {
         if (!id) return;
         try { localStorage.setItem('studentId', id); } catch(e) {}
@@ -228,6 +308,154 @@
         currentStudentId = null;
     }
     
+    // ========== 保存默认摄像头 ==========
+    function saveDefaultCamera(deviceId) {
+        if (deviceId) {
+            try { localStorage.setItem('scan_defaultCameraId', deviceId); } catch(e) {}
+            defaultCameraId = deviceId;
+        }
+    }
+    
+    function loadDefaultCamera() {
+        try { defaultCameraId = localStorage.getItem('scan_defaultCameraId'); } catch(e) {}
+        return defaultCameraId;
+    }
+    
+    // ========== 播放提示音 ==========
+    let audioContext = null;
+    function playBeep() {
+        try {
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioContext.state === 'suspended') audioContext.resume().then(() => playBeepSound());
+            else playBeepSound();
+        } catch(e) {}
+    }
+    function playBeepSound() {
+        try {
+            const now = audioContext.currentTime;
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            osc.frequency.value = 600;
+            osc.type = 'square';
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+            osc.start(now);
+            osc.stop(now + 0.12);
+        } catch(e) {}
+    }
+    
+    // ========== 提取最后5位数字 ==========
+    function extractLastFiveDigits(fullCode) {
+        const numbers = fullCode.match(/\d/g);
+        if (numbers && numbers.length >= 5) return numbers.slice(-5).join('');
+        const lastFive = fullCode.slice(-5);
+        if (/^\d{5}$/.test(lastFive)) return lastFive;
+        return fullCode;
+    }
+    
+    // ========== 扫码成功处理 ==========
+    function onScanSuccess(fullCode) {
+        const now = Date.now();
+        if (now - lastScanTime < SCAN_COOLDOWN) return;
+        lastScanTime = now;
+        playBeep();
+        const studentId = extractLastFiveDigits(fullCode);
+        if (/^\d{5}$/.test(studentId)) {
+            saveStudentId(studentId);
+            stopScanCamera();
+            scanModal.style.display = 'none';
+            window.location.href = `?p=${studentId}`;
+        } else {
+            scanStatus.textContent = '识别失败，请重试';
+            setTimeout(() => { if (scanStatus) scanStatus.textContent = '扫描中...'; }, 2000);
+        }
+    }
+    
+    // ========== 启动扫码摄像头 ==========
+    async function startScanCamera() {
+        if (!scanCodeReader) {
+            try { scanCodeReader = new ZXing.BrowserMultiFormatReader(); } catch(e) {
+                scanStatus.textContent = '扫码库加载失败';
+                return;
+            }
+        }
+        if (scanStream) { stopScanCamera(); }
+        scanStatus.textContent = '获取摄像头列表...';
+        scanningActive = true;
+        
+        try {
+            let devices = [];
+            try { devices = await scanCodeReader.listVideoInputDevices(); } catch(e) {
+                const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                tempStream.getTracks().forEach(t => t.stop());
+                devices = await scanCodeReader.listVideoInputDevices();
+            }
+            if (devices.length === 0) throw new Error('未找到摄像头');
+            
+            let selectedId = loadDefaultCamera();
+            if (!selectedId || !devices.find(d => d.deviceId === selectedId)) {
+                const backCam = devices.find(d => {
+                    const label = (d.label || '').toLowerCase();
+                    return label.includes('back') || label.includes('rear') || label.includes('后置') || label.includes('environment');
+                });
+                selectedId = backCam ? backCam.deviceId : devices[0].deviceId;
+                saveDefaultCamera(selectedId);
+            }
+            const selected = devices.find(d => d.deviceId === selectedId);
+            scanStatus.textContent = `使用: ${selected?.label?.slice(0, 30) || '摄像头'}`;
+            
+            await scanCodeReader.decodeFromVideoDevice(selectedId, 'scanVideo', (result, err) => {
+                if (result && scanningActive) onScanSuccess(result.getText());
+                if (err && !(err instanceof ZXing.NotFoundException)) console.warn(err);
+            });
+        } catch(err) {
+            scanStatus.textContent = '摄像头启动失败';
+            console.error(err);
+        }
+    }
+    
+    function stopScanCamera() {
+        scanningActive = false;
+        if (scanCodeReader) { try { scanCodeReader.reset(); } catch(e) {} }
+        if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
+        if (scanVideo) scanVideo.srcObject = null;
+    }
+    
+    // ========== 相册识别 ==========
+    async function scanFromImage(file) {
+        if (!file) return;
+        if (!scanCodeReader) {
+            try { scanCodeReader = new ZXing.BrowserMultiFormatReader(); } catch(e) {
+                alert('扫码库加载失败');
+                return;
+            }
+        }
+        scanStatus.textContent = '识别中...';
+        try {
+            const img = new Image();
+            const url = URL.createObjectURL(file);
+            await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = url; });
+            const result = await scanCodeReader.decodeFromImage(img);
+            URL.revokeObjectURL(url);
+            if (result && result.text) onScanSuccess(result.text);
+            else scanStatus.textContent = '未识别到二维码';
+        } catch(e) { scanStatus.textContent = '识别失败'; }
+    }
+    
+    // ========== 显示扫码弹窗 ==========
+    function showScanModal() {
+        scanModal.style.display = 'flex';
+        setTimeout(() => startScanCamera(), 100);
+    }
+    
+    function closeScanModalFunc() {
+        stopScanCamera();
+        scanModal.style.display = 'none';
+    }
+    
+    // ========== 加载数据 ==========
     async function loadNameMapping() {
         try {
             const res = await fetch(NAME_FILE_URL + '?t=' + Date.now());
@@ -300,12 +528,7 @@
         
         if (logoutBtn) {
             logoutBtn.style.display = 'inline-block';
-            logoutBtn.onclick = () => { 
-                clearStudentId(); 
-                const url = new URL(window.location.href);
-                url.searchParams.delete('p');
-                window.location.href = url.pathname;
-            };
+            logoutBtn.onclick = () => { clearStudentId(); window.location.href = window.location.pathname; };
         }
         
         if (greetingWrapper) {
@@ -317,6 +540,7 @@
         }
     }
     
+    // ========== 学号输入弹窗（仅 ClassApp 设备） ==========
     function showStudentIdPrompt() {
         return new Promise((resolve) => {
             const modal = document.createElement('div');
@@ -334,32 +558,17 @@
                 </div>
             `;
             document.body.appendChild(modal);
-            
             const input = modal.querySelector('#studentIdInput');
             const confirmBtn = modal.querySelector('#confirmBtn');
             const cancelBtn = modal.querySelector('#cancelBtn');
             const warningText = modal.querySelector('#warningText');
-            
             input.focus();
-            
             const handleConfirm = () => {
                 const value = input.value.trim();
-                if (/^\d{5}$/.test(value)) {
-                    modal.remove();
-                    resolve(value);
-                } else {
-                    warningText.style.display = 'block';
-                    input.style.borderColor = '#e74c3c';
-                    input.value = '';
-                    input.focus();
-                }
+                if (/^\d{5}$/.test(value)) { modal.remove(); resolve(value); }
+                else { warningText.style.display = 'block'; input.style.borderColor = '#e74c3c'; input.value = ''; input.focus(); }
             };
-            
-            const handleCancel = () => {
-                modal.remove();
-                resolve(null);
-            };
-            
+            const handleCancel = () => { modal.remove(); resolve(null); };
             confirmBtn.onclick = handleConfirm;
             cancelBtn.onclick = handleCancel;
             input.onkeypress = (e) => { if (e.key === 'Enter') handleConfirm(); };
@@ -370,23 +579,13 @@
     async function checkUserAgentAndPrompt() {
         if (!isTargetDevice) return;
         let existingId = getStudentId();
-        if (existingId) { 
-            currentStudentId = existingId; 
-            await showGreeting(); 
-            return; 
-        }
+        if (existingId) { currentStudentId = existingId; await showGreeting(); return; }
         const studentId = await showStudentIdPrompt();
-        if (studentId) {
-            saveStudentId(studentId);
-            window.location.href = `?p=${studentId}`;
-        } else {
-            warningBanner.style.display = 'block';
-            warningBanner.innerHTML = '⚠️ 请输入学号以使用完整功能 | <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">点击重试</span>';
-            warningBanner.style.background = '#f8d7da';
-            warningBanner.style.color = '#721c24';
-        }
+        if (studentId) { saveStudentId(studentId); window.location.href = `?p=${studentId}`; }
+        else { warningBanner.style.display = 'block'; warningBanner.innerHTML = '⚠️ 请输入学号以使用完整功能 | <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">点击重试</span>'; }
     }
     
+    // ========== 图片/视频预览模块 ==========
     function downloadFile(url, fileName) {
         const a = document.createElement('a');
         a.href = url;
@@ -403,10 +602,8 @@
         img.className = 'zoomable-image';
         img.style.transform = 'translate(0px, 0px) scale(1)';
         container.appendChild(img);
-        
         let scale = 1, translateX = 0, translateY = 0;
         let initialDistance = 0, initialScale = 1, lastTouchX = 0, lastTouchY = 0, isPanning = false;
-        
         const updateTransform = () => { img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; };
         const clampTranslate = () => {
             const rect = img.getBoundingClientRect();
@@ -419,42 +616,22 @@
         const zoomIn = () => { scale = Math.min(scale + 0.25, 4); clampTranslate(); updateTransform(); };
         const zoomOut = () => { scale = Math.max(scale - 0.25, 1); if (scale === 1) { translateX = 0; translateY = 0; } else clampTranslate(); updateTransform(); };
         const resetZoom = () => { scale = 1; translateX = 0; translateY = 0; updateTransform(); };
-        
         img.addEventListener('wheel', (e) => { e.preventDefault(); e.deltaY < 0 ? zoomIn() : zoomOut(); });
-        
         let isDragging = false, dragStartX = 0, dragStartY = 0, startTranslateX = 0, startTranslateY = 0;
         img.addEventListener('mousedown', (e) => {
-            if (scale > 1) {
-                isDragging = true;
-                dragStartX = e.clientX; dragStartY = e.clientY;
-                startTranslateX = translateX; startTranslateY = translateY;
-                img.style.cursor = 'grabbing';
-                e.preventDefault();
-            }
+            if (scale > 1) { isDragging = true; dragStartX = e.clientX; dragStartY = e.clientY; startTranslateX = translateX; startTranslateY = translateY; img.style.cursor = 'grabbing'; e.preventDefault(); }
         });
         document.addEventListener('mousemove', (e) => {
-            if (isDragging && scale > 1) {
-                translateX = startTranslateX + (e.clientX - dragStartX);
-                translateY = startTranslateY + (e.clientY - dragStartY);
-                clampTranslate(); updateTransform();
-            }
+            if (isDragging && scale > 1) { translateX = startTranslateX + (e.clientX - dragStartX); translateY = startTranslateY + (e.clientY - dragStartY); clampTranslate(); updateTransform(); }
         });
         document.addEventListener('mouseup', () => { isDragging = false; if (scale > 1) img.style.cursor = 'grab'; });
-        
         const getDistance = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
         const getCenter = (t) => ({ x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 });
         container.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const touches = Array.from(e.touches);
-            if (touches.length === 1) {
-                isPanning = true;
-                lastTouchX = touches[0].clientX; lastTouchY = touches[0].clientY;
-            } else if (touches.length === 2) {
-                initialDistance = getDistance(touches);
-                initialScale = scale;
-                const center = getCenter(touches);
-                lastTouchX = center.x; lastTouchY = center.y;
-            }
+            if (touches.length === 1) { isPanning = true; lastTouchX = touches[0].clientX; lastTouchY = touches[0].clientY; }
+            else if (touches.length === 2) { initialDistance = getDistance(touches); initialScale = scale; const center = getCenter(touches); lastTouchX = center.x; lastTouchY = center.y; }
         });
         container.addEventListener('touchmove', (e) => {
             e.preventDefault();
@@ -480,7 +657,6 @@
             }
         });
         container.addEventListener('touchend', () => { isPanning = false; });
-        
         img.onerror = () => {
             container.innerHTML = `<div class="unsupported-view"><h2>🖼️ 图片加载失败</h2><button class="fallback-download">📥 立即下载</button></div>`;
             container.querySelector('.fallback-download').onclick = () => downloadFile(url, fileName);
@@ -498,17 +674,14 @@
         content.className = 'viewer-content';
         overlay.appendChild(header); overlay.appendChild(content);
         document.body.appendChild(overlay);
-        
         const { container, zoomIn, zoomOut, resetZoom } = createZoomableImage(url, fileName);
         content.appendChild(container);
-        
         const zoomControls = header.querySelector('#zoomControls');
         zoomControls.style.display = 'flex';
         zoomControls.innerHTML = `<button class="zoom-btn" id="zoomOutBtn">−</button><button class="zoom-btn" id="resetZoomBtn">⟳</button><button class="zoom-btn" id="zoomInBtn">+</button>`;
         zoomControls.querySelector('#zoomInBtn').onclick = zoomIn;
         zoomControls.querySelector('#zoomOutBtn').onclick = zoomOut;
         zoomControls.querySelector('#resetZoomBtn').onclick = resetZoom;
-        
         header.querySelector('.download-btn').onclick = () => downloadFile(url, fileName);
         header.querySelector('.close-btn').onclick = () => overlay.remove();
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
@@ -578,12 +751,8 @@
             window.open(`https://luckynum.top/ezr${id ? '?' + id : ''}`, '_blank');
             return;
         }
-        
         let fullUrl = link;
-        if (fullUrl && !fullUrl.startsWith('http') && !fullUrl.startsWith('//')) {
-            fullUrl = `https://luckynum.top/${fullUrl}`;
-        }
-        
+        if (fullUrl && !fullUrl.startsWith('http') && !fullUrl.startsWith('//')) fullUrl = `https://luckynum.top/${fullUrl}`;
         if (isFileUrl(link)) {
             const fileType = getFileType(link);
             if (fileType === 'image') { openImageViewer(fullUrl, name); return; }
@@ -697,6 +866,7 @@
     
     function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
     
+    // 编辑模式
     let clickCount = 0, clickTimer = null;
     document.getElementById('titleClickTarget')?.addEventListener('click', () => {
         clickCount++;
@@ -724,190 +894,23 @@
         modal.querySelector('#cancelBtn').onclick = () => modal.remove();
     }
     
-    window.deleteSlide = function(idx) { 
-        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
-        if (confirm('确定删除这张轮播图吗？')) { 
-            slidesData.splice(idx, 1); 
-            renderCarousel(); 
-            saveToGitHub(generateFileContent());
-        } 
-    };
+    window.deleteSlide = function(idx) { if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; } if (confirm('确定删除这张轮播图吗？')) { slidesData.splice(idx, 1); renderCarousel(); saveToGitHub(generateFileContent()); } };
+    window.editGroup = function(groupName) { if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; } const newName = prompt('请输入新的分组名称', groupName); if (newName && newName !== groupName) { const index = groupOrder.indexOf(groupName); if (index !== -1) { groupOrder[index] = newName; appItems.forEach(app => { if (app.group === groupName) app.group = newName; }); saveToGitHub(generateFileContent()).then(() => renderGroups()); } } };
+    window.deleteGroup = function(groupName) { if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; } if (groupName === '其他应用') { alert('不能删除"其他应用"分组'); return; } if (confirm(`确定删除分组"${groupName}"？`)) { const index = groupOrder.indexOf(groupName); if (index !== -1) { groupOrder.splice(index, 1); appItems.forEach(app => { if (app.group === groupName) app.group = '其他应用'; }); saveToGitHub(generateFileContent()).then(() => renderGroups()); } } };
+    window.editApp = function(name, link, icon, group) { if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; } const modal = document.createElement('div'); modal.className = 'modal-overlay'; modal.innerHTML = `<div class="modal-content"><h3>编辑应用</h3><label>应用名称</label><input id="appName" value="${escapeHtml(name)}"><label>图标链接</label><input id="appIcon" value="${escapeHtml(icon)}"><label>跳转链接</label><input id="appLink" value="${escapeHtml(link)}"><label>所属分组</label><select id="appGroup">${groupOrder.map(g => `<option value="${escapeHtml(g)}" ${g === group ? 'selected' : ''}>${escapeHtml(g)}</option>`).join('')}</select><div class="modal-buttons"><button class="confirm-btn">保存</button><button class="cancel-btn">取消</button></div></div>`; document.body.appendChild(modal); modal.querySelector('.confirm-btn').onclick = async () => { const newName = modal.querySelector('#appName').value.trim(); const newIcon = modal.querySelector('#appIcon').value.trim() || 'null.jpg'; const newLink = modal.querySelector('#appLink').value.trim(); const newGroup = modal.querySelector('#appGroup').value; if (!newName || !newLink) { alert('请填写完整'); return; } const app = appItems.find(a => a.name === name && a.link === link); if (app) { app.name = newName; app.icon = newIcon; app.link = newLink; app.group = newGroup; if (await saveToGitHub(generateFileContent())) renderGroups(); modal.remove(); } }; modal.querySelector('.cancel-btn').onclick = () => modal.remove(); };
+    window.deleteApp = async function(name, link) { if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; } if (confirm('确定删除这个应用吗？')) { const index = appItems.findIndex(a => a.name === name && a.link === link); if (index !== -1) appItems.splice(index, 1); if (await saveToGitHub(generateFileContent())) renderGroups(); } };
     
-    window.editGroup = function(groupName) { 
-        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
-        const newName = prompt('请输入新的分组名称', groupName);
-        if (newName && newName !== groupName) {
-            const index = groupOrder.indexOf(groupName);
-            if (index !== -1) {
-                groupOrder[index] = newName;
-                appItems.forEach(app => { if (app.group === groupName) app.group = newName; });
-                saveToGitHub(generateFileContent()).then(() => renderGroups());
-            }
-        }
-    };
+    function addApp() { if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; } if (isAddingApp) { alert('请稍候...'); return; } const modal = document.createElement('div'); modal.className = 'modal-overlay'; modal.innerHTML = `<div class="modal-content"><h3>添加新应用</h3><label>应用名称</label><input id="appName" placeholder="应用名称"><label>图标链接</label><input id="iconUrl" placeholder="图标链接"><label>跳转链接</label><input id="appLink" placeholder="https://..."><label>所属分组</label><select id="appGroup">${groupOrder.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('')}</select><div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div></div>`; document.body.appendChild(modal); const confirmBtn = modal.querySelector('.confirm-btn'); const cancelBtn = modal.querySelector('.cancel-btn'); confirmBtn.onclick = async () => { const name = modal.querySelector('#appName').value.trim(); const icon = modal.querySelector('#iconUrl').value.trim() || 'null.jpg'; const link = modal.querySelector('#appLink').value.trim(); const group = modal.querySelector('#appGroup').value; if (!name || !link) { alert('请填写完整'); return; } isAddingApp = true; confirmBtn.disabled = true; confirmBtn.textContent = '保存中...'; appItems.push({ name, icon, link, group }); renderGroups(); const success = await saveToGitHub(generateFileContent()); if (success) { modal.remove(); } else { appItems.pop(); renderGroups(); alert('保存失败'); } confirmBtn.disabled = false; isAddingApp = false; }; cancelBtn.onclick = () => modal.remove(); };
     
-    window.deleteGroup = function(groupName) { 
-        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
-        if (groupName === '其他应用') { alert('不能删除"其他应用"分组'); return; }
-        if (confirm(`确定删除分组"${groupName}"？`)) {
-            const index = groupOrder.indexOf(groupName);
-            if (index !== -1) {
-                groupOrder.splice(index, 1);
-                appItems.forEach(app => { if (app.group === groupName) app.group = '其他应用'; });
-                saveToGitHub(generateFileContent()).then(() => renderGroups());
-            }
-        }
-    };
-    
-    window.editApp = function(name, link, icon, group) { 
-        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
-        const modal = document.createElement('div'); modal.className = 'modal-overlay';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <h3>编辑应用</h3>
-                <label>应用名称</label><input id="appName" value="${escapeHtml(name)}">
-                <label>图标链接</label><input id="appIcon" value="${escapeHtml(icon)}">
-                <label>跳转链接</label><input id="appLink" value="${escapeHtml(link)}">
-                <label>所属分组</label>
-                <select id="appGroup">${groupOrder.map(g => `<option value="${escapeHtml(g)}" ${g === group ? 'selected' : ''}>${escapeHtml(g)}</option>`).join('')}</select>
-                <div class="modal-buttons"><button class="confirm-btn">保存</button><button class="cancel-btn">取消</button></div>
-            </div>`;
-        document.body.appendChild(modal);
-        modal.querySelector('.confirm-btn').onclick = async () => {
-            const newName = modal.querySelector('#appName').value.trim();
-            const newIcon = modal.querySelector('#appIcon').value.trim() || 'null.jpg';
-            const newLink = modal.querySelector('#appLink').value.trim();
-            const newGroup = modal.querySelector('#appGroup').value;
-            if (!newName || !newLink) { alert('请填写完整'); return; }
-            const app = appItems.find(a => a.name === name && a.link === link);
-            if (app) {
-                app.name = newName;
-                app.icon = newIcon;
-                app.link = newLink;
-                app.group = newGroup;
-                if (await saveToGitHub(generateFileContent())) renderGroups();
-                modal.remove();
-            }
-        };
-        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
-    };
-    
-    window.deleteApp = async function(name, link) { 
-        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
-        if (confirm('确定删除这个应用吗？')) {
-            const index = appItems.findIndex(a => a.name === name && a.link === link);
-            if (index !== -1) appItems.splice(index, 1);
-            if (await saveToGitHub(generateFileContent())) renderGroups();
-        }
-    };
-    
-    function addApp() { 
-        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
-        if (isAddingApp) { alert('请稍候...'); return; }
-        const modal = document.createElement('div'); modal.className = 'modal-overlay';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <h3>添加新应用</h3>
-                <label>应用名称</label><input id="appName" placeholder="应用名称">
-                <label>图标链接</label><input id="iconUrl" placeholder="图标链接">
-                <label>跳转链接</label><input id="appLink" placeholder="https://...">
-                <label>所属分组</label><select id="appGroup">${groupOrder.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('')}</select>
-                <div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div>
-            </div>`;
-        document.body.appendChild(modal);
-        const confirmBtn = modal.querySelector('.confirm-btn');
-        const cancelBtn = modal.querySelector('.cancel-btn');
-        confirmBtn.onclick = async () => {
-            const name = modal.querySelector('#appName').value.trim();
-            const icon = modal.querySelector('#iconUrl').value.trim() || 'null.jpg';
-            const link = modal.querySelector('#appLink').value.trim();
-            const group = modal.querySelector('#appGroup').value;
-            if (!name || !link) { alert('请填写完整'); return; }
-            isAddingApp = true;
-            confirmBtn.disabled = true;
-            confirmBtn.textContent = '保存中...';
-            appItems.push({ name, icon, link, group });
-            renderGroups();
-            const success = await saveToGitHub(generateFileContent());
-            if (success) { modal.remove(); } 
-            else { appItems.pop(); renderGroups(); alert('保存失败'); }
-            confirmBtn.disabled = false;
-            isAddingApp = false;
-        };
-        cancelBtn.onclick = () => modal.remove();
-    };
-    
-    function addCarousel() { 
-        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
-        if (isAddingCarousel) { alert('请稍候...'); return; }
-        const modal = document.createElement('div'); modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><h3>添加轮播图</h3><input id="imgUrl" placeholder="图片链接"><label>跳转链接</label><input id="linkUrl"><div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div></div>`;
-        document.body.appendChild(modal);
-        const confirmBtn = modal.querySelector('.confirm-btn');
-        const cancelBtn = modal.querySelector('.cancel-btn');
-        confirmBtn.onclick = async () => {
-            const img = modal.querySelector('#imgUrl').value.trim();
-            const link = modal.querySelector('#linkUrl').value.trim();
-            if (!img) { alert('请填写图片链接'); return; }
-            isAddingCarousel = true;
-            confirmBtn.disabled = true;
-            confirmBtn.textContent = '保存中...';
-            slidesData.push({ imgUrl: img, linkUrl: link });
-            renderCarousel();
-            const success = await saveToGitHub(generateFileContent());
-            if (success) { modal.remove(); } 
-            else { slidesData.pop(); renderCarousel(); alert('保存失败'); }
-            confirmBtn.disabled = false;
-            isAddingCarousel = false;
-        };
-        cancelBtn.onclick = () => modal.remove();
-    };
+    function addCarousel() { if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; } if (isAddingCarousel) { alert('请稍候...'); return; } const modal = document.createElement('div'); modal.className = 'modal-overlay'; modal.innerHTML = `<div class="modal-content"><h3>添加轮播图</h3><input id="imgUrl" placeholder="图片链接"><label>跳转链接</label><input id="linkUrl"><div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div></div>`; document.body.appendChild(modal); const confirmBtn = modal.querySelector('.confirm-btn'); const cancelBtn = modal.querySelector('.cancel-btn'); confirmBtn.onclick = async () => { const img = modal.querySelector('#imgUrl').value.trim(); const link = modal.querySelector('#linkUrl').value.trim(); if (!img) { alert('请填写图片链接'); return; } isAddingCarousel = true; confirmBtn.disabled = true; confirmBtn.textContent = '保存中...'; slidesData.push({ imgUrl: img, linkUrl: link }); renderCarousel(); const success = await saveToGitHub(generateFileContent()); if (success) { modal.remove(); } else { slidesData.pop(); renderCarousel(); alert('保存失败'); } confirmBtn.disabled = false; isAddingCarousel = false; }; cancelBtn.onclick = () => modal.remove(); };
     
     function uploadFileToRoot() { alert('文件管理器需先启用编辑模式'); }
     function openFileManager() { alert('文件管理器需先启用编辑模式'); }
-    function addGroup() { 
-        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
-        const newName = prompt('请输入分组名称');
-        if (newName && !groupOrder.includes(newName)) {
-            groupOrder.push(newName);
-            saveToGitHub(generateFileContent()).then(() => renderGroups());
-        } else if (newName) alert('分组名称已存在');
-    }
+    function addGroup() { if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; } const newName = prompt('请输入分组名称'); if (newName && !groupOrder.includes(newName)) { groupOrder.push(newName); saveToGitHub(generateFileContent()).then(() => renderGroups()); } else if (newName) alert('分组名称已存在'); }
     
-    function generateFileContent() {
-        let content = 'group\n';
-        for(let g of groupOrder) content += `[g=${g}]\n`;
-        content += 'pic\n';
-        for(let s of slidesData) content += `[p=${s.imgUrl} l=${s.linkUrl}]\n`;
-        content += 'app\n';
-        for(let a of appItems) content += `[n=${a.name} p=${a.icon} l=${a.link}${a.group ? ` g=${a.group}` : ''}]\n`;
-        return content;
-    }
+    function generateFileContent() { let content = 'group\n'; for(let g of groupOrder) content += `[g=${g}]\n`; content += 'pic\n'; for(let s of slidesData) content += `[p=${s.imgUrl} l=${s.linkUrl}]\n`; content += 'app\n'; for(let a of appItems) content += `[n=${a.name} p=${a.icon} l=${a.link}${a.group ? ` g=${a.group}` : ''}]\n`; return content; }
     
-    async function saveToGitHub(content) {
-        if (!currentToken) { alert('请先输入Token（点击标题3次）'); return false; }
-        try {
-            let sha = fileSha;
-            if (!sha) {
-                const check = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
-                if (check.ok) sha = (await check.json()).sha;
-            }
-            const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
-                method: 'PUT',
-                headers: { 'Authorization': `Bearer ${currentToken}` },
-                body: JSON.stringify({ message: '更新配置', content: btoa(unescape(encodeURIComponent(content))), branch: 'main', sha })
-            });
-            if (!res.ok) throw new Error();
-            fileSha = (await res.json()).content.sha;
-            alert('保存成功！');
-            return true;
-        } catch(e) {
-            alert('保存失败: ' + e.message);
-            return false;
-        }
-    }
+    async function saveToGitHub(content) { if (!currentToken) { alert('请先输入Token（点击标题3次）'); return false; } try { let sha = fileSha; if (!sha) { const check = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, { headers: { 'Authorization': `Bearer ${currentToken}` } }); if (check.ok) sha = (await check.json()).sha; } const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${currentToken}` }, body: JSON.stringify({ message: '更新配置', content: btoa(unescape(encodeURIComponent(content))), branch: 'main', sha }) }); if (!res.ok) throw new Error(); fileSha = (await res.json()).content.sha; alert('保存成功！'); return true; } catch(e) { alert('保存失败: ' + e.message); return false; } }
     
     document.getElementById('addAppFab')?.addEventListener('click', addApp);
     document.getElementById('addCarouselFab')?.addEventListener('click', addCarousel);
@@ -915,14 +918,16 @@
     document.getElementById('fileManagerBtn')?.addEventListener('click', openFileManager);
     document.getElementById('addGroupFab')?.addEventListener('click', addGroup);
     
+    // 扫码按钮事件
+    if (scanLoginBtn) scanLoginBtn.addEventListener('click', showScanModal);
+    if (closeScanModal) closeScanModal.addEventListener('click', closeScanModalFunc);
+    if (scanAlbumBtn) scanAlbumBtn.addEventListener('click', () => scanAlbumInput?.click());
+    if (scanAlbumInput) scanAlbumInput.addEventListener('change', (e) => { if (e.target.files[0]) scanFromImage(e.target.files[0]); scanAlbumInput.value = ''; });
+    
     async function init() {
         await Promise.all([loadConfigFile(), loadNameMapping(), loadIntegralData()]);
-        if (isTargetDevice) {
-            await checkUserAgentAndPrompt();
-            await showGreeting();
-        } else {
-            await showGreeting();
-        }
+        if (isTargetDevice) { await checkUserAgentAndPrompt(); await showGreeting(); }
+        else { await showGreeting(); }
     }
     init();
 </script>
