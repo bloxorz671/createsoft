@@ -244,6 +244,9 @@
     const SCAN_COOLDOWN = 1000;
     let defaultCameraId = null;
     
+    // 临时用于相册识别的视频流
+    let tempStreamForImage = null;
+    
     const carouselSection = document.getElementById('carouselSection');
     const carouselTrack = document.getElementById('carouselTrack');
     const dotsContainer = document.getElementById('carouselDots');
@@ -430,60 +433,110 @@
                 scanVideo.srcObject = null;
             } catch(e) {}
         }
+        // 清理临时流
+        if (tempStreamForImage) {
+            try {
+                tempStreamForImage.getTracks().forEach(t => t.stop());
+            } catch(e) {}
+            tempStreamForImage = null;
+        }
     }
     
-    // ========== 相册识别（修复版） ==========
+    // ========== 相册识别（核心修复：将图片转换为视频流，欺骗ZXing） ==========
     async function scanFromImage(file) {
         if (!file) return;
         
-        // 重新初始化 reader（避免状态问题）
-        let tempReader = null;
-        try {
-            tempReader = new ZXing.BrowserMultiFormatReader();
-        } catch(e) {
-            if (scanStatus) scanStatus.textContent = '扫码库加载失败';
-            alert('扫码库加载失败，请刷新页面重试');
-            return;
-        }
-        
-        if (scanStatus) scanStatus.textContent = '识别中...';
+        if (scanStatus) scanStatus.textContent = '处理图片中...';
         
         try {
-            // 创建图片元素
+            // 1. 先停止当前的摄像头扫描
+            if (scanCodeReader) {
+                try { scanCodeReader.reset(); } catch(e) {}
+            }
+            if (scanVideo && scanVideo.srcObject) {
+                const oldStream = scanVideo.srcObject;
+                if (oldStream && oldStream.getTracks) {
+                    oldStream.getTracks().forEach(t => t.stop());
+                }
+                scanVideo.srcObject = null;
+            }
+            
+            // 2. 将图片绘制到 Canvas
             const img = new Image();
             const imageUrl = URL.createObjectURL(file);
             
-            // 等待图片加载完成
             await new Promise((resolve, reject) => {
                 img.onload = resolve;
                 img.onerror = reject;
                 img.src = imageUrl;
             });
             
-            // 使用 ZXing 解码图片
-            const result = await tempReader.decodeFromImage(img);
+            // 创建 Canvas 并绘制图片
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+            
             URL.revokeObjectURL(imageUrl);
             
+            // 3. 将 Canvas 转换为视频流（关键步骤！）
+            // 使用 captureStream 方法将 Canvas 转换为 MediaStream
+            const canvasStream = canvas.captureStream(30); // 30fps
+            
+            // 4. 将视频流设置到 video 元素上
+            scanVideo.srcObject = canvasStream;
+            await scanVideo.play();
+            
+            // 5. 等待一帧稳定
+            await new Promise(r => setTimeout(r, 200));
+            
+            if (scanStatus) scanStatus.textContent = '识别中...';
+            
+            // 6. 创建一个临时的 Reader 来识别这一帧
+            let tempReader = null;
+            try {
+                tempReader = new ZXing.BrowserMultiFormatReader();
+            } catch(e) {
+                scanStatus.textContent = '扫码库加载失败';
+                alert('扫码库加载失败，请刷新页面重试');
+                // 恢复摄像头
+                startScanCamera();
+                return;
+            }
+            
+            // 7. 从 video 元素解码（此时 video 显示的是图片）
+            // 注意：需要使用 decodeOnce 而不是持续解码
+            const result = await tempReader.decodeFromVideoElement(scanVideo);
+            
             if (result && result.text) {
+                console.log('相册识别成功:', result.text);
                 playBeep();
                 const studentId = extractLastFiveDigits(result.text);
                 if (/^\d{5}$/.test(studentId)) {
                     saveStudentId(studentId);
                     stopScanCamera();
-                    if (scanModal) scanModal.style.display = 'none';
+                    scanModal.style.display = 'none';
                     window.location.href = `?p=${studentId}`;
                 } else {
-                    if (scanStatus) scanStatus.textContent = '未识别到有效学号';
-                    alert('未识别到5位数学号，请重试');
+                    scanStatus.textContent = '未识别到有效学号';
+                    alert(`识别到的内容不是5位数学号：${studentId}`);
+                    // 恢复摄像头
+                    startScanCamera();
                 }
             } else {
-                if (scanStatus) scanStatus.textContent = '未识别到二维码';
-                alert('未识别到二维码，请确保图片清晰');
+                scanStatus.textContent = '未识别到二维码';
+                alert('未识别到二维码，请确保图片清晰完整');
+                // 恢复摄像头
+                startScanCamera();
             }
+            
         } catch (err) {
-            console.error('图片识别失败:', err);
-            if (scanStatus) scanStatus.textContent = '识别失败';
-            alert('识别失败，请确保图片包含清晰的二维码/条形码');
+            console.error('相册识别失败:', err);
+            scanStatus.textContent = '识别失败';
+            alert('识别失败，请确保：\n1. 图片清晰完整\n2. 二维码在图片中\n3. 图片亮度足够');
+            // 恢复摄像头
+            startScanCamera();
         }
     }
     
@@ -633,7 +686,7 @@
         else { warningBanner.style.display = 'block'; warningBanner.innerHTML = '⚠️ 请输入学号以使用完整功能 | <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">点击重试</span>'; }
     }
     
-    // ========== 图片/视频预览模块（简化版，保持原有功能） ==========
+    // ========== 图片/视频预览模块 ==========
     function downloadFile(url, fileName) {
         const a = document.createElement('a');
         a.href = url;
