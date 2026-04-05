@@ -4,6 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>初二五班智慧应用平台</title>
+    
+    <!-- 浏览器标签页图标 -->
+    <link rel="icon" type="image/jpeg" href="41.jpg">
+    <link rel="shortcut icon" type="image/jpeg" href="41.jpg">
+    <link rel="apple-touch-icon" href="41.jpg">
+    
+    <!-- 微信分享/社交媒体卡片优化 -->
+    <meta property="og:title" content="初二五班智慧应用平台">
+    <meta property="og:description" content="欢迎使用初二五班智慧应用平台">
+    <meta property="og:image" content="https://luckynum.top/41.jpg">
+    <meta property="og:image:width" content="600">
+    <meta property="og:image:height" content="600">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="初二五班智慧应用平台">
+    <meta name="twitter:description" content="欢迎使用初二五班智慧应用平台">
+    <meta name="twitter:image" content="https://luckynum.top/41.jpg">
+    
+    <!-- 微信分享描述 -->
+    <meta name="description" content="欢迎使用初二五班智慧应用平台">
+    <meta name="keywords" content="初二五班,智慧平台,班级应用">
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #f5f7fc; font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; min-height: 100vh; }
@@ -18,12 +41,9 @@
         .logout-btn { background: #e74c3c; color: white; border: none; border-radius: 20px; padding: 6px 16px; font-size: 0.8rem; font-weight: 500; cursor: pointer; margin-left: 12px; }
         .logout-btn:hover { background: #c0392b; }
         
-        /* 未登录提示样式 */
         .unlogged-section { padding: 12px 20px 0 20px; background: white; }
         .unlogged-wrapper { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
         .unlogged-text { font-size: 1rem; font-weight: 500; color: #e67e22; background: #fff3e0; padding: 10px 16px; border-radius: 12px; flex: 1; text-align: center; }
-        .scan-btn { background: #2b4c8a; color: white; border: none; border-radius: 12px; padding: 10px 20px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
-        .scan-btn:hover { background: #1e3c72; transform: scale(1.02); }
         
         .rating-box { display: inline-flex; align-items: center; justify-content: center; padding: 4px 14px; font-size: 1rem; font-weight: 600; color: white; border: 2px solid; border-radius: 8px; white-space: nowrap; }
         .rating-box.level-0 { background: #e74c3c; border-color: #c0392b; }
@@ -36,9 +56,9 @@
         .score-number { font-size: 1.2rem; font-weight: 700; color: #2b4c8a; }
         
         .edit-mode .carousel-slide, .edit-mode .app-card { position: relative; }
-        .delete-btn { position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10; }
-        .edit-app-btn { position: absolute; top: 5px; left: 5px; background: #3498db; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10; }
-        .drag-handle { position: absolute; top: 5px; left: 35px; background: #95a5a6; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: grab; z-index: 10; }
+        .delete-btn { position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .edit-app-btn { position: absolute; top: 5px; left: 5px; background: #3498db; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .drag-handle { position: absolute; top: 5px; left: 35px; background: #95a5a6; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: grab; z-index: 10; display: flex; align-items: center; justify-content: center; }
         .add-fab { position: fixed; bottom: 80px; right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 100; }
         .add-btn, .file-manager-btn, .add-carousel-btn, .upload-only-btn { background: #27ae60; color: white; border: none; border-radius: 50%; width: 56px; height: 56px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         .add-carousel-btn { background: #3498db; }
@@ -54,22 +74,11 @@
         .cancel-btn { background: #95a5a6; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
         .upload-area { border: 2px dashed #ddd; border-radius: 8px; padding: 15px; margin: 10px 0; text-align: center; cursor: pointer; background: #f9f9f9; }
         
-        /* 自定义学号输入弹窗样式 */
         .student-id-modal .modal-content { text-align: center; }
         .student-id-modal h3 { color: #1e3c72; font-size: 1.4rem; margin-bottom: 8px; }
         .student-id-modal .subtitle { color: #666; font-size: 0.85rem; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
         .student-id-modal input { text-align: center; font-size: 1.2rem; letter-spacing: 2px; }
-        .student-id-modal .example { color: #999; font-size: 0.75rem; margin-top: 8px; }
         .student-id-modal .warning-text { color: #e74c3c; font-size: 0.8rem; margin-top: 12px; display: none; }
-        
-        /* 二维码弹窗样式 */
-        .qrcode-modal .modal-content { text-align: center; }
-        .qrcode-modal h3 { color: #1e3c72; margin-bottom: 8px; }
-        .qrcode-modal .qrcode-subtitle { color: #666; font-size: 0.85rem; margin-bottom: 20px; }
-        .qrcode-container { background: white; padding: 20px; border-radius: 12px; display: flex; justify-content: center; margin: 10px 0; }
-        .qrcode-placeholder { width: 200px; height: 200px; background: #f0f2f5; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; }
-        .qrcode-placeholder span { font-size: 48px; margin-bottom: 10px; }
-        .auth-hint { font-size: 0.8rem; color: #2b4c8a; margin-top: 15px; padding: 8px; background: #e8f0fe; border-radius: 8px; }
         
         .carousel-section { margin: 12px 16px 24px; background: #f0f2f6; overflow: hidden; }
         .carousel-wrapper { width: 100%; overflow: hidden; }
@@ -92,7 +101,6 @@
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; }
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; border-radius: 12px; }
         
-        /* 图片/视频预览器样式 */
         .file-viewer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 20000; display: flex; flex-direction: column; }
         .viewer-header { background: #1e2a4a; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .viewer-title { font-size: 1rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
@@ -126,7 +134,6 @@
     <div class="warning-banner" id="warningBanner" style="display: none;">⏳ 正在加载平台数据...</div>
     <div class="main-header"><h1 id="titleClickTarget">初二五班智慧应用平台</h1></div>
     
-    <!-- 已登录状态显示 -->
     <div id="greetingContainer" class="greeting-section" style="display: none;">
         <div class="greeting-wrapper" id="greetingWrapper">
             <div class="greeting-text"></div>
@@ -135,11 +142,9 @@
         </div>
     </div>
     
-    <!-- 未登录状态显示（仅普通浏览器） -->
     <div id="unloggedContainer" class="unlogged-section" style="display: none;">
         <div class="unlogged-wrapper">
-            <div class="unlogged-text">⚠️ 当前处于未登录状态，请先扫描个人系统认证码登录</div>
-            
+            <div class="unlogged-text">⚠️ 当前处于未登录状态</div>
         </div>
     </div>
     
@@ -168,6 +173,9 @@
     const NAME_FILE_URL = 'https://luckynum.top/5name.txt';
     const INTEGRAL_FILE_URL = 'https://raw.githubusercontent.com/bloxorz671/5class-system/main/student-integral.txt';
     
+    // 设置当前页面的 og:url
+    document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
+    
     const TARGET_UA = 'ClassApp/1.0 (Grade8Class5)';
     const currentUA = navigator.userAgent;
     const isTargetDevice = currentUA === TARGET_UA;
@@ -189,7 +197,6 @@
     const logoutBtn = document.getElementById('logoutBtn');
     const greetingContainer = document.getElementById('greetingContainer');
     const unloggedContainer = document.getElementById('unloggedContainer');
-    const scanAuthBtn = document.getElementById('scanAuthBtn');
     
     // ========== 评级配置 ==========
     const RATING_CONFIG = [
@@ -234,33 +241,6 @@
         currentStudentId = null;
     }
     
-    // ========== 显示认证二维码弹窗 ==========
-    function showAuthQRCode() {
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay qrcode-modal';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <h3>📱 个人系统认证码</h3>
-                <div class="qrcode-subtitle">请使用初二五班专用App扫描</div>
-                <div class="qrcode-container">
-                    <div class="qrcode-placeholder">
-                        <span>📲</span>
-                        <p style="font-size:12px; margin-top:8px;">认证码: G8C5-${Math.random().toString(36).substring(2, 10).toUpperCase()}</p>
-                    </div>
-                </div>
-                <div class="auth-hint">
-                    💡 提示：请打开初二五班专用App，点击"扫描认证码"进行登录
-                </div>
-                <div class="modal-buttons" style="margin-top: 20px;">
-                    <button class="confirm-btn" id="closeQrBtn">关闭</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        modal.querySelector('#closeQrBtn').onclick = () => modal.remove();
-        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
-    }
-    
     // ========== 加载数据 ==========
     async function loadNameMapping() {
         try {
@@ -301,27 +281,12 @@
     async function showGreeting() {
         currentStudentId = getStudentId();
         
-        // 未登录状态处理
         if (!currentStudentId) {
             greetingContainer.style.display = 'none';
-            if (!isTargetDevice) {
-                // 普通浏览器：显示未登录提示
-                unloggedContainer.style.display = 'block';
-                if (scanAuthBtn) {
-                    scanAuthBtn.onclick = showAuthQRCode;
-                }
-            } else {
-                // App设备：显示未登录提示（但没有扫描按钮）
-                unloggedContainer.style.display = 'block';
-                const wrapper = unloggedContainer.querySelector('.unlogged-wrapper');
-                if (wrapper) {
-                    wrapper.innerHTML = '<div class="unlogged-text">⚠️ 当前处于未登录状态，请重新打开App</div>';
-                }
-            }
+            unloggedContainer.style.display = 'block';
             return;
         }
         
-        // 已登录：隐藏未登录容器，显示问候语
         unloggedContainer.style.display = 'none';
         const textElem = greetingContainer?.querySelector('.greeting-text');
         
@@ -347,11 +312,16 @@
             } else ratingContainer.style.display = 'none';
         }
         
-        if (logoutBtn && isTargetDevice) {
+        // 退出登录按钮：所有已登录用户都显示
+        if (logoutBtn) {
             logoutBtn.style.display = 'inline-block';
-            logoutBtn.onclick = () => { clearStudentId(); window.location.href = window.location.pathname; };
-        } else if (logoutBtn) {
-            logoutBtn.style.display = 'none';
+            logoutBtn.onclick = () => { 
+                clearStudentId(); 
+                // 清除 URL 参数
+                const url = new URL(window.location.href);
+                url.searchParams.delete('p');
+                window.location.href = url.pathname;
+            };
         }
         
         if (greetingWrapper) {
@@ -370,10 +340,9 @@
             modal.className = 'modal-overlay student-id-modal';
             modal.innerHTML = `
                 <div class="modal-content">
-                    <h3>初二五班专用系统</h3>
+                    <h3>🔐 初二五班专用系统</h3>
                     <div class="subtitle">请验证身份以继续使用</div>
                     <input type="number" id="studentIdInput" placeholder="请输入5位数学号" maxlength="5" autocomplete="off">
-                    
                     <div class="warning-text" id="warningText">❌ 学号必须是5位数字，请重新输入</div>
                     <div class="modal-buttons">
                         <button class="confirm-btn" id="confirmBtn">确定</button>
@@ -420,7 +389,11 @@
         if (!isTargetDevice) return;
         
         let existingId = getStudentId();
-        if (existingId) { currentStudentId = existingId; await showGreeting(); return; }
+        if (existingId) { 
+            currentStudentId = existingId; 
+            await showGreeting(); 
+            return; 
+        }
         
         const studentId = await showStudentIdPrompt();
         if (studentId) {
@@ -715,7 +688,7 @@
             let img = slidesData[i].imgUrl, link = slidesData[i].linkUrl;
             if (img && !img.startsWith('http')) img = `https://luckynum.top/${img}`;
             if (link && !link.startsWith('http')) link = `https://luckynum.top/${link}`;
-            html += `<div class="carousel-slide">${isEditMode ? `<button class="delete-btn" onclick="deleteSlide(${i})">✕</button>` : ''}<a href="${escapeHtml(link)}" target="_blank"><img src="${escapeHtml(img)}" onerror="this.src='https://luckynum.top/null.jpg'"></a></div>`;
+            html += `<div class="carousel-slide">${isEditMode ? `<button class="delete-btn" onclick="deleteSlide(${i})">✕</button>` : ''}<a href="${escapeHtml(link)}" target="_blank"><img src="${escapeHtml(img)}" onerror="this.src='https://luckynum.top/41.jpg'"></a></div>`;
         }
         carouselTrack.innerHTML = html;
         let dots = '';
@@ -745,7 +718,7 @@
     
     function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
     
-    // 编辑模式
+    // ========== 编辑模式（Token持久化） ==========
     let clickCount = 0, clickTimer = null;
     document.getElementById('titleClickTarget')?.addEventListener('click', () => {
         clickCount++;
@@ -766,22 +739,177 @@
             document.body.classList.add('edit-mode');
             fabGroup.style.display = 'flex';
             renderGroups();
+            renderCarousel(); // 重新渲染轮播图以显示删除按钮
             modal.remove();
-            alert('编辑模式已启用');
+            alert('编辑模式已启用，现在可以编辑应用、轮播图和分组');
         };
         modal.querySelector('#cancelBtn').onclick = () => modal.remove();
     }
     
-    window.deleteSlide = function(idx) { if (confirm('确定删除？')) { slidesData.splice(idx, 1); renderCarousel(); } };
-    window.editGroup = function(name) { alert('编辑分组需Token'); };
-    window.deleteGroup = function(name) { alert('删除分组需Token'); };
-    window.editApp = function(name, link, icon, group) { alert('编辑应用需Token'); };
-    window.deleteApp = function(name, link) { alert('删除应用需Token'); };
-    function addApp() { alert('添加应用需先输入Token（点击标题3次）'); }
-    function addCarousel() { alert('添加轮播图需先输入Token（点击标题3次）'); }
-    function uploadFileToRoot() { alert('上传文件需先输入Token（点击标题3次）'); }
-    function openFileManager() { alert('文件管理器需先输入Token（点击标题3次）'); }
-    function addGroup() { alert('添加分组需先输入Token（点击标题3次）'); }
+    // 编辑功能（需要编辑模式才能使用）
+    window.deleteSlide = function(idx) { 
+        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
+        if (confirm('确定删除这张轮播图吗？')) { 
+            slidesData.splice(idx, 1); 
+            renderCarousel(); 
+            saveToGitHub(generateFileContent());
+        } 
+    };
+    
+    window.editGroup = function(groupName) { 
+        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
+        const newName = prompt('请输入新的分组名称', groupName);
+        if (newName && newName !== groupName) {
+            const index = groupOrder.indexOf(groupName);
+            if (index !== -1) {
+                groupOrder[index] = newName;
+                appItems.forEach(app => { if (app.group === groupName) app.group = newName; });
+                saveToGitHub(generateFileContent()).then(() => renderGroups());
+            }
+        }
+    };
+    
+    window.deleteGroup = function(groupName) { 
+        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
+        if (groupName === '其他应用') { alert('不能删除"其他应用"分组'); return; }
+        if (confirm(`确定删除分组"${groupName}"？其中的应用将移至"其他应用"`)) {
+            const index = groupOrder.indexOf(groupName);
+            if (index !== -1) {
+                groupOrder.splice(index, 1);
+                appItems.forEach(app => { if (app.group === groupName) app.group = '其他应用'; });
+                saveToGitHub(generateFileContent()).then(() => renderGroups());
+            }
+        }
+    };
+    
+    window.editApp = function(name, link, icon, group) { 
+        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
+        const modal = document.createElement('div'); modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>编辑应用</h3>
+                <label>应用名称</label><input id="appName" value="${escapeHtml(name)}">
+                <label>图标链接</label><input id="appIcon" value="${escapeHtml(icon)}">
+                <label>跳转链接</label><input id="appLink" value="${escapeHtml(link)}">
+                <label>所属分组</label>
+                <select id="appGroup">${groupOrder.map(g => `<option value="${escapeHtml(g)}" ${g === group ? 'selected' : ''}>${escapeHtml(g)}</option>`).join('')}</select>
+                <div class="modal-buttons"><button class="confirm-btn">保存</button><button class="cancel-btn">取消</button></div>
+            </div>`;
+        document.body.appendChild(modal);
+        modal.querySelector('.confirm-btn').onclick = async () => {
+            const newName = modal.querySelector('#appName').value.trim();
+            const newIcon = modal.querySelector('#appIcon').value.trim() || 'null.jpg';
+            const newLink = modal.querySelector('#appLink').value.trim();
+            const newGroup = modal.querySelector('#appGroup').value;
+            if (!newName || !newLink) { alert('请填写完整'); return; }
+            
+            const app = appItems.find(a => a.name === name && a.link === link);
+            if (app) {
+                app.name = newName;
+                app.icon = newIcon;
+                app.link = newLink;
+                app.group = newGroup;
+                if (await saveToGitHub(generateFileContent())) renderGroups();
+                modal.remove();
+            }
+        };
+        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
+    };
+    
+    window.deleteApp = async function(name, link) { 
+        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
+        if (confirm('确定删除这个应用吗？')) {
+            const index = appItems.findIndex(a => a.name === name && a.link === link);
+            if (index !== -1) appItems.splice(index, 1);
+            if (await saveToGitHub(generateFileContent())) renderGroups();
+        }
+    };
+    
+    function addApp() { 
+        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
+        const modal = document.createElement('div'); modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>添加新应用</h3>
+                <label>应用名称</label><input id="appName" placeholder="应用名称">
+                <label>图标链接</label><input id="iconUrl" placeholder="图标链接（留空则使用默认）">
+                <label>跳转链接</label><input id="appLink" placeholder="https://...">
+                <label>所属分组</label><select id="appGroup">${groupOrder.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('')}</select>
+                <div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div>
+            </div>`;
+        document.body.appendChild(modal);
+        modal.querySelector('.confirm-btn').onclick = async () => {
+            const name = modal.querySelector('#appName').value.trim();
+            const icon = modal.querySelector('#iconUrl').value.trim() || 'null.jpg';
+            const link = modal.querySelector('#appLink').value.trim();
+            const group = modal.querySelector('#appGroup').value;
+            if (!name || !link) { alert('请填写完整'); return; }
+            appItems.push({ name, icon, link, group });
+            if (await saveToGitHub(generateFileContent())) renderGroups();
+            modal.remove();
+        };
+        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
+    };
+    
+    function addCarousel() { 
+        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
+        const modal = document.createElement('div'); modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><h3>添加轮播图</h3><input id="imgUrl" placeholder="图片链接"><label>跳转链接</label><input id="linkUrl"><div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div></div>`;
+        document.body.appendChild(modal);
+        modal.querySelector('.confirm-btn').onclick = async () => {
+            const img = modal.querySelector('#imgUrl').value.trim();
+            const link = modal.querySelector('#linkUrl').value.trim();
+            if (!img) { alert('请填写图片链接'); return; }
+            slidesData.push({ imgUrl: img, linkUrl: link });
+            if (await saveToGitHub(generateFileContent())) renderCarousel();
+            modal.remove();
+        };
+        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
+    };
+    
+    function uploadFileToRoot() { alert('文件管理器需先启用编辑模式（点击标题3次输入Token）'); }
+    function openFileManager() { alert('文件管理器需先启用编辑模式（点击标题3次输入Token）'); }
+    function addGroup() { 
+        if (!isEditMode) { alert('请先启用编辑模式（点击标题3次输入Token）'); return; }
+        const newName = prompt('请输入分组名称');
+        if (newName && !groupOrder.includes(newName)) {
+            groupOrder.push(newName);
+            saveToGitHub(generateFileContent()).then(() => renderGroups());
+        } else if (newName) alert('分组名称已存在');
+    }
+    
+    function generateFileContent() {
+        let content = 'group\n';
+        for(let g of groupOrder) content += `[g=${g}]\n`;
+        content += 'pic\n';
+        for(let s of slidesData) content += `[p=${s.imgUrl} l=${s.linkUrl}]\n`;
+        content += 'app\n';
+        for(let a of appItems) content += `[n=${a.name} p=${a.icon} l=${a.link}${a.group ? ` g=${a.group}` : ''}]\n`;
+        return content;
+    }
+    
+    async function saveToGitHub(content) {
+        if (!currentToken) { alert('请先输入Token（点击标题3次）'); return false; }
+        try {
+            let sha = null;
+            const check = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
+                headers: { 'Authorization': `Bearer ${currentToken}` }
+            });
+            if (check.ok) sha = (await check.json()).sha;
+            
+            const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${currentToken}` },
+                body: JSON.stringify({ message: '更新配置', content: btoa(unescape(encodeURIComponent(content))), branch: 'main', sha })
+            });
+            if (!res.ok) throw new Error();
+            alert('保存成功！');
+            return true;
+        } catch(e) {
+            alert('保存失败: ' + e.message);
+            return false;
+        }
+    }
     
     document.getElementById('addAppFab')?.addEventListener('click', addApp);
     document.getElementById('addCarouselFab')?.addEventListener('click', addCarousel);
@@ -790,15 +918,11 @@
     document.getElementById('addGroupFab')?.addEventListener('click', addGroup);
     
     async function init() {
-        // 先加载配置数据
         await Promise.all([loadConfigFile(), loadNameMapping(), loadIntegralData()]);
-        // 然后处理登录状态显示
         if (isTargetDevice) {
-            // ClassApp 设备：弹窗输入学号
             await checkUserAgentAndPrompt();
             await showGreeting();
         } else {
-            // 普通浏览器：直接显示状态（已登录/未登录）
             await showGreeting();
         }
     }
