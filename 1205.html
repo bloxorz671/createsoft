@@ -1,1 +1,672 @@
-服务正在维护中暂时无法使用，请谅解。
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>初二五班智慧应用平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #f5f7fc; font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; min-height: 100vh; }
+        .platform-container { max-width: 550px; margin: 0 auto; background: #ffffff; }
+        .main-header { text-align: center; padding: 20px 16px 12px; background: white; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+        .main-header h1 { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; cursor: pointer; display: inline-block; padding: 0 16px; }
+        
+        .warning-banner { background: #fff3cd; color: #856404; text-align: center; padding: 8px; font-size: 0.8rem; border-bottom: 1px solid #ffeeba; }
+        .greeting-section { padding: 12px 20px 0 20px; background: white; }
+        .greeting-wrapper { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; cursor: pointer; }
+        .greeting-text { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; }
+        .logout-btn { background: #e74c3c; color: white; border: none; border-radius: 20px; padding: 6px 16px; font-size: 0.8rem; font-weight: 500; cursor: pointer; margin-left: 12px; }
+        .logout-btn:hover { background: #c0392b; }
+        
+        .rating-box { display: inline-flex; align-items: center; justify-content: center; padding: 4px 14px; font-size: 1rem; font-weight: 600; color: white; border: 2px solid; border-radius: 8px; white-space: nowrap; }
+        .rating-box.level-0 { background: #e74c3c; border-color: #c0392b; }
+        .rating-box.level-1 { background: #f39c12; border-color: #e67e22; }
+        .rating-box.level-2 { background: #f1c40f; border-color: #d4ac0d; color: #8B6914; }
+        .rating-box.level-3 { background: #fdebd0; border-color: #e6b0aa; color: #c0392b; }
+        .rating-box.level-4 { background: #95a5a6; border-color: #7f8c8d; }
+        .score-wrapper { display: inline-flex; align-items: baseline; gap: 4px; margin-left: 4px; }
+        .score-label { font-size: 0.9rem; color: #666; }
+        .score-number { font-size: 1.2rem; font-weight: 700; color: #2b4c8a; }
+        
+        .edit-mode .carousel-slide, .edit-mode .app-card { position: relative; }
+        .delete-btn { position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10; }
+        .edit-app-btn { position: absolute; top: 5px; left: 5px; background: #3498db; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10; }
+        .drag-handle { position: absolute; top: 5px; left: 35px; background: #95a5a6; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: grab; z-index: 10; }
+        .add-fab { position: fixed; bottom: 80px; right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 100; }
+        .add-btn, .file-manager-btn, .add-carousel-btn, .upload-only-btn { background: #27ae60; color: white; border: none; border-radius: 50%; width: 56px; height: 56px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .add-carousel-btn { background: #3498db; }
+        .upload-only-btn { background: #f39c12; font-size: 20px; }
+        .file-manager-btn { background: #9b59b6; font-size: 20px; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto; }
+        .modal-content h3 { margin-bottom: 16px; }
+        .modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 16px; }
+        .confirm-btn { background: #2b4c8a; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; }
+        .cancel-btn { background: #95a5a6; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; }
+        .upload-area { border: 2px dashed #ddd; border-radius: 8px; padding: 15px; margin: 10px 0; text-align: center; cursor: pointer; background: #f9f9f9; }
+        
+        .carousel-section { margin: 12px 16px 24px; background: #f0f2f6; overflow: hidden; }
+        .carousel-wrapper { width: 100%; overflow: hidden; }
+        .carousel-track { display: flex; transition: transform 0.4s; cursor: grab; }
+        .carousel-slide { flex: 0 0 100%; position: relative; }
+        .carousel-slide img { width: 100%; display: block; aspect-ratio: 16 / 9; object-fit: cover; }
+        .carousel-dots { display: flex; justify-content: center; gap: 10px; padding: 12px 0; }
+        .dot { width: 8px; height: 8px; background: #bbb; border-radius: 50%; cursor: pointer; }
+        .dot.active { width: 24px; background: #2b4c8a; border-radius: 12px; }
+        
+        .groups-container { padding: 0 20px; }
+        .group-section { margin-bottom: 24px; }
+        .group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 8px 0; border-bottom: 2px solid #eef2f8; }
+        .group-title { font-size: 1.3rem; font-weight: 600; color: #1f2937; }
+        .apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 16px; }
+        .app-card { background: #f9fafc; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 16px 8px; border: 1px solid rgba(0,0,0,0.03); cursor: pointer; position: relative; transition: all 0.2s; border-radius: 12px; }
+        .app-card:hover { transform: translateY(-4px); background: #ffffff; box-shadow: 0 18px 28px -8px rgba(0,0,0,0.12); }
+        .app-icon { width: 58px; height: 58px; object-fit: contain; margin-bottom: 14px; background: #f0f2f5; padding: 4px; border-radius: 12px; }
+        .app-name { font-size: 0.85rem; font-weight: 500; color: #1f2937; text-align: center; word-break: break-word; line-height: 1.3; }
+        .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; }
+        .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; border-radius: 12px; }
+        
+        /* 图片/视频预览器样式 */
+        .file-viewer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 20000; display: flex; flex-direction: column; }
+        .viewer-header { background: #1e2a4a; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .viewer-title { font-size: 1rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+        .viewer-controls { display: flex; gap: 12px; }
+        .viewer-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+        .viewer-btn:hover { background: rgba(255,255,255,0.4); }
+        .zoom-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; font-size: 1.2rem; font-weight: bold; }
+        .viewer-content { flex: 1; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        .image-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; touch-action: none; }
+        .zoomable-image { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; transition: transform 0.05s ease-out; transform-origin: center center; }
+        .viewer-content video { max-width: 100%; max-height: 100%; background: #000; object-fit: contain; }
+        .unsupported-view { text-align: center; padding: 60px; background: white; border-radius: 16px; margin: 20px; }
+        
+        .file-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee; }
+        .link-buttons { display: flex; gap: 10px; margin-top: 10px; }
+        .link-btn { background: #f0f2f5; border: 1px solid #ddd; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 12px; flex: 1; text-align: center; }
+        
+        @media (max-width: 768px) {
+            .apps-grid { gap: 12px; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+            .app-icon { width: 52px; height: 52px; }
+            .app-name { font-size: 0.75rem; }
+            .greeting-text { font-size: 1.6rem; }
+            .add-fab { bottom: 70px; right: 16px; }
+            .add-btn, .file-manager-btn, .add-carousel-btn, .upload-only-btn { width: 48px; height: 48px; font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="platform-container">
+    <div class="warning-banner" id="warningBanner" style="display: none;">⏳ 正在加载平台数据...</div>
+    <div class="main-header"><h1 id="titleClickTarget">初二五班智慧应用平台</h1></div>
+    
+    <div id="greetingContainer" class="greeting-section" style="display: none;">
+        <div class="greeting-wrapper" id="greetingWrapper">
+            <div class="greeting-text"></div>
+            <div id="ratingContainer" style="display: inline-flex; align-items: center; gap: 4px;"></div>
+            <button id="logoutBtn" class="logout-btn" style="display: none;">退出登录</button>
+        </div>
+    </div>
+    
+    <div class="carousel-section" id="carouselSection" style="display: none;">
+        <div class="carousel-wrapper"><div class="carousel-track" id="carouselTrack"></div></div>
+        <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+    
+    <div id="groupsContainer" class="groups-container"><div class="loading-tip">⏳ 加载应用中...</div></div>
+</div>
+
+<div class="add-fab" id="fabGroup" style="display: none;">
+    <button class="file-manager-btn" id="fileManagerBtn" title="文件管理器">📁</button>
+    <button class="upload-only-btn" id="uploadOnlyBtn" title="上传文件">📤</button>
+    <button class="add-carousel-btn" id="addCarouselFab" title="添加轮播图">🖼️</button>
+    <button class="add-btn" id="addAppFab" title="添加应用">+</button>
+    <button class="add-btn" id="addGroupFab" title="添加分组" style="background:#9b59b6;">📂</button>
+</div>
+
+<script>
+    // ========== 配置 ==========
+    const CONFIG_URL = 'https://luckynum.top/5app.txt';
+    const GITHUB_OWNER = 'bloxorz671';
+    const GITHUB_REPO = 'createsoft';
+    const GITHUB_PATH = '5app.txt';
+    const NAME_FILE_URL = 'https://luckynum.top/5name.txt';
+    const INTEGRAL_FILE_URL = 'https://raw.githubusercontent.com/bloxorz671/5class-system/main/student-integral.txt';
+    
+    const TARGET_UA = 'ClassApp/1.0 (Grade8Class5)';
+    const currentUA = navigator.userAgent;
+    const isTargetDevice = currentUA === TARGET_UA;
+    
+    let slidesData = [], appItems = [], groupOrder = ['其他应用'], currentIndex = 0, autoInterval = null, totalSlides = 0;
+    let isEditMode = false, currentToken = null;
+    let currentStudentId = null;
+    let nameMapping = {}, integralMapping = {};
+    
+    // DOM 元素
+    const carouselSection = document.getElementById('carouselSection');
+    const carouselTrack = document.getElementById('carouselTrack');
+    const dotsContainer = document.getElementById('carouselDots');
+    const groupsContainer = document.getElementById('groupsContainer');
+    const fabGroup = document.getElementById('fabGroup');
+    const warningBanner = document.getElementById('warningBanner');
+    const ratingContainer = document.getElementById('ratingContainer');
+    const greetingWrapper = document.getElementById('greetingWrapper');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    // ========== 评级配置 ==========
+    const RATING_CONFIG = [
+        { min: 80, max: Infinity, name: '夯爆了', colorClass: 'level-0' },
+        { min: 60, max: 79, name: '顶级', colorClass: 'level-1' },
+        { min: 40, max: 59, name: '人上人', colorClass: 'level-2' },
+        { min: 20, max: 39, name: 'Npc', colorClass: 'level-3' },
+        { min: 0, max: 19, name: '拉完了', colorClass: 'level-4' }
+    ];
+    
+    function getRatingByIntegral(integral) {
+        const score = parseInt(integral);
+        if (isNaN(score)) return RATING_CONFIG[4];
+        for (let config of RATING_CONFIG) {
+            if (score >= config.min && score <= config.max) return config;
+        }
+        return RATING_CONFIG[4];
+    }
+    
+    // ========== 存储机制 ==========
+    function saveStudentId(id) {
+        if (!id) return;
+        try { localStorage.setItem('studentId', id); } catch(e) {}
+        try { sessionStorage.setItem('studentId', id); } catch(e) {}
+        try { document.cookie = `studentId=${id}; path=/; max-age=${7*24*60*60}`; } catch(e) {}
+    }
+    
+    function getStudentId() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let id = urlParams.get('p');
+        if (id && /^\d{5}$/.test(id)) { saveStudentId(id); return id; }
+        try { id = localStorage.getItem('studentId'); if (id && /^\d{5}$/.test(id)) return id; } catch(e) {}
+        try { id = sessionStorage.getItem('studentId'); if (id && /^\d{5}$/.test(id)) return id; } catch(e) {}
+        try { const match = document.cookie.match(/studentId=([^;]+)/); if (match && /^\d{5}$/.test(match[1])) return match[1]; } catch(e) {}
+        return null;
+    }
+    
+    function clearStudentId() {
+        try { localStorage.removeItem('studentId'); } catch(e) {}
+        try { sessionStorage.removeItem('studentId'); } catch(e) {}
+        try { document.cookie = 'studentId=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'; } catch(e) {}
+        currentStudentId = null;
+    }
+    
+    // ========== 加载数据 ==========
+    async function loadNameMapping() {
+        try {
+            const res = await fetch(NAME_FILE_URL + '?t=' + Date.now());
+            if (res.ok) {
+                const text = await res.text();
+                nameMapping = {};
+                text.split(/\r?\n/).forEach(line => {
+                    line = line.trim();
+                    if (!line) return;
+                    const space = line.indexOf(' ');
+                    if (space !== -1) nameMapping[line.substring(0, space)] = line.substring(space + 1).trim();
+                });
+                return true;
+            }
+        } catch(e) {}
+        return false;
+    }
+    
+    async function loadIntegralData() {
+        try {
+            const res = await fetch(INTEGRAL_FILE_URL + '?t=' + Date.now());
+            if (res.ok) {
+                const text = await res.text();
+                integralMapping = {};
+                text.split(/\r?\n/).forEach(line => {
+                    line = line.trim();
+                    if (!line) return;
+                    const parts = line.split(/\s+/);
+                    if (parts.length >= 2) integralMapping[parts[0].trim()] = parts[1].trim();
+                });
+                return true;
+            }
+        } catch(e) {}
+        return false;
+    }
+    
+    async function showGreeting() {
+        const container = document.getElementById('greetingContainer');
+        const textElem = container?.querySelector('.greeting-text');
+        currentStudentId = getStudentId();
+        if (!currentStudentId) { container.style.display = 'none'; return; }
+        
+        if (Object.keys(nameMapping).length === 0) await loadNameMapping();
+        const studentName = nameMapping[currentStudentId] || currentStudentId;
+        if (container && textElem) {
+            textElem.textContent = studentName;
+            container.style.display = 'block';
+            if (Object.keys(integralMapping).length === 0) await loadIntegralData();
+            if (integralMapping[currentStudentId]) {
+                const integral = integralMapping[currentStudentId];
+                const rating = getRatingByIntegral(integral);
+                ratingContainer.innerHTML = '';
+                const ratingBox = document.createElement('div');
+                ratingBox.className = `rating-box ${rating.colorClass}`;
+                ratingBox.textContent = rating.name;
+                const scoreWrapper = document.createElement('div');
+                scoreWrapper.className = 'score-wrapper';
+                scoreWrapper.innerHTML = `<span class="score-label">分数</span><span class="score-number">${integral}</span>`;
+                ratingContainer.appendChild(ratingBox);
+                ratingContainer.appendChild(scoreWrapper);
+                ratingContainer.style.display = 'inline-flex';
+            } else ratingContainer.style.display = 'none';
+        }
+        
+        if (logoutBtn && isTargetDevice) {
+            logoutBtn.style.display = 'inline-block';
+            logoutBtn.onclick = () => { clearStudentId(); window.location.href = window.location.pathname; };
+        }
+        if (greetingWrapper) {
+            greetingWrapper.style.cursor = 'pointer';
+            greetingWrapper.onclick = (e) => {
+                if (e.target === logoutBtn || logoutBtn?.contains(e.target)) return;
+                window.location.href = '/5pm';
+            };
+        }
+    }
+    
+    // ========== 学号输入（完整提示语） ==========
+    async function checkUserAgentAndPrompt() {
+        if (!isTargetDevice) return;
+        let existingId = getStudentId();
+        if (existingId) { currentStudentId = existingId; await showGreeting(); return; }
+        
+        let studentId = prompt('🔐 初二五班专用系统\n\n请输入你的真实5位数学号：\n（例如：10001）');
+        if (studentId) {
+            studentId = studentId.trim();
+            if (/^\d{5}$/.test(studentId)) {
+                saveStudentId(studentId);
+                window.location.href = `?p=${studentId}`;
+            } else {
+                alert('❌ 学号必须是5位数字！请重新输入。');
+                window.location.reload();
+            }
+        } else if (studentId === '') {
+            warningBanner.style.display = 'block';
+            warningBanner.innerHTML = '⚠️ 请输入学号以使用完整功能 | <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">点击重试</span>';
+            warningBanner.style.background = '#f8d7da';
+            warningBanner.style.color = '#721c24';
+        }
+    }
+    
+    // ========== 图片/视频预览模块（完整版） ==========
+    function downloadFile(url, fileName) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName.split('?')[0];
+        a.target = '_blank';
+        a.click();
+    }
+    
+    function createZoomableImage(url, fileName) {
+        const container = document.createElement('div');
+        container.className = 'image-container';
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'zoomable-image';
+        img.style.transform = 'translate(0px, 0px) scale(1)';
+        container.appendChild(img);
+        
+        let scale = 1, translateX = 0, translateY = 0;
+        let initialDistance = 0, initialScale = 1, lastTouchX = 0, lastTouchY = 0, isPanning = false;
+        
+        const updateTransform = () => { img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; };
+        const clampTranslate = () => {
+            const rect = img.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const maxX = Math.max(0, (rect.width * scale - containerRect.width) / 2);
+            const maxY = Math.max(0, (rect.height * scale - containerRect.height) / 2);
+            translateX = Math.min(maxX, Math.max(-maxX, translateX));
+            translateY = Math.min(maxY, Math.max(-maxY, translateY));
+        };
+        const zoomIn = () => { scale = Math.min(scale + 0.25, 4); clampTranslate(); updateTransform(); };
+        const zoomOut = () => { scale = Math.max(scale - 0.25, 1); if (scale === 1) { translateX = 0; translateY = 0; } else clampTranslate(); updateTransform(); };
+        const resetZoom = () => { scale = 1; translateX = 0; translateY = 0; updateTransform(); };
+        
+        img.addEventListener('wheel', (e) => { e.preventDefault(); e.deltaY < 0 ? zoomIn() : zoomOut(); });
+        
+        let isDragging = false, dragStartX = 0, dragStartY = 0, startTranslateX = 0, startTranslateY = 0;
+        img.addEventListener('mousedown', (e) => {
+            if (scale > 1) {
+                isDragging = true;
+                dragStartX = e.clientX; dragStartY = e.clientY;
+                startTranslateX = translateX; startTranslateY = translateY;
+                img.style.cursor = 'grabbing';
+                e.preventDefault();
+            }
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging && scale > 1) {
+                translateX = startTranslateX + (e.clientX - dragStartX);
+                translateY = startTranslateY + (e.clientY - dragStartY);
+                clampTranslate(); updateTransform();
+            }
+        });
+        document.addEventListener('mouseup', () => { isDragging = false; if (scale > 1) img.style.cursor = 'grab'; });
+        
+        const getDistance = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+        const getCenter = (t) => ({ x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 });
+        container.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touches = Array.from(e.touches);
+            if (touches.length === 1) {
+                isPanning = true;
+                lastTouchX = touches[0].clientX; lastTouchY = touches[0].clientY;
+            } else if (touches.length === 2) {
+                initialDistance = getDistance(touches);
+                initialScale = scale;
+                const center = getCenter(touches);
+                lastTouchX = center.x; lastTouchY = center.y;
+            }
+        });
+        container.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touches = Array.from(e.touches);
+            if (touches.length === 1 && isPanning && scale > 1) {
+                translateX += touches[0].clientX - lastTouchX;
+                translateY += touches[0].clientY - lastTouchY;
+                clampTranslate(); updateTransform();
+                lastTouchX = touches[0].clientX; lastTouchY = touches[0].clientY;
+            } else if (touches.length === 2) {
+                const newDistance = getDistance(touches);
+                const newScale = initialScale * (newDistance / initialDistance);
+                scale = Math.min(Math.max(newScale, 1), 4);
+                if (scale === 1) { translateX = 0; translateY = 0; } else {
+                    const newCenter = getCenter(touches);
+                    translateX += newCenter.x - lastTouchX;
+                    translateY += newCenter.y - lastTouchY;
+                    clampTranslate();
+                    lastTouchX = newCenter.x; lastTouchY = newCenter.y;
+                }
+                updateTransform();
+                initialDistance = newDistance; initialScale = scale;
+            }
+        });
+        container.addEventListener('touchend', () => { isPanning = false; });
+        
+        img.onerror = () => {
+            container.innerHTML = `<div class="unsupported-view"><h2>🖼️ 图片加载失败</h2><button class="fallback-download">📥 立即下载</button></div>`;
+            container.querySelector('.fallback-download').onclick = () => downloadFile(url, fileName);
+        };
+        return { container, zoomIn, zoomOut, resetZoom };
+    }
+    
+    function openImageViewer(url, fileName) {
+        const overlay = document.createElement('div');
+        overlay.className = 'file-viewer-overlay';
+        const header = document.createElement('div');
+        header.className = 'viewer-header';
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><div id="zoomControls" style="display: none; gap: 8px;"></div><button class="viewer-btn download-btn">📥 下载</button><button class="viewer-btn close-btn">✕ 关闭</button></div>`;
+        const content = document.createElement('div');
+        content.className = 'viewer-content';
+        overlay.appendChild(header); overlay.appendChild(content);
+        document.body.appendChild(overlay);
+        
+        const { container, zoomIn, zoomOut, resetZoom } = createZoomableImage(url, fileName);
+        content.appendChild(container);
+        
+        const zoomControls = header.querySelector('#zoomControls');
+        zoomControls.style.display = 'flex';
+        zoomControls.innerHTML = `<button class="zoom-btn" id="zoomOutBtn">−</button><button class="zoom-btn" id="resetZoomBtn">⟳</button><button class="zoom-btn" id="zoomInBtn">+</button>`;
+        zoomControls.querySelector('#zoomInBtn').onclick = zoomIn;
+        zoomControls.querySelector('#zoomOutBtn').onclick = zoomOut;
+        zoomControls.querySelector('#resetZoomBtn').onclick = resetZoom;
+        
+        header.querySelector('.download-btn').onclick = () => downloadFile(url, fileName);
+        header.querySelector('.close-btn').onclick = () => overlay.remove();
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    }
+    
+    function openVideoViewer(url, fileName) {
+        const overlay = document.createElement('div');
+        overlay.className = 'file-viewer-overlay';
+        const header = document.createElement('div');
+        header.className = 'viewer-header';
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn download-btn">📥 下载</button><button class="viewer-btn close-btn">✕ 关闭</button></div>`;
+        const content = document.createElement('div');
+        content.className = 'viewer-content';
+        const video = document.createElement('video');
+        video.controls = true;
+        video.style.maxWidth = '100%';
+        video.style.maxHeight = '100%';
+        video.style.objectFit = 'contain';
+        video.innerHTML = `<source src="${escapeHtml(url)}">`;
+        video.onerror = () => {
+            content.innerHTML = `<div class="unsupported-view"><h2>🎬 视频加载失败</h2><button class="fallback-download">📥 立即下载</button></div>`;
+            content.querySelector('.fallback-download').onclick = () => downloadFile(url, fileName);
+        };
+        content.appendChild(video);
+        overlay.appendChild(header); overlay.appendChild(content);
+        document.body.appendChild(overlay);
+        header.querySelector('.download-btn').onclick = () => downloadFile(url, fileName);
+        header.querySelector('.close-btn').onclick = () => overlay.remove();
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    }
+    
+    function showUnsupportedDialog(url, fileName) {
+        const overlay = document.createElement('div');
+        overlay.className = 'file-viewer-overlay';
+        const header = document.createElement('div');
+        header.className = 'viewer-header';
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn close-btn">✕ 关闭</button></div>`;
+        const content = document.createElement('div');
+        content.className = 'viewer-content';
+        content.innerHTML = `<div class="unsupported-view"><h2>📄 该文件不支持预览</h2><p>${escapeHtml(fileName)}</p><button id="downloadBtn" class="download-btn">📥 立即下载</button></div>`;
+        overlay.appendChild(header); overlay.appendChild(content);
+        document.body.appendChild(overlay);
+        content.querySelector('#downloadBtn').onclick = () => downloadFile(url, fileName);
+        header.querySelector('.close-btn').onclick = () => overlay.remove();
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    }
+    
+    function isFileUrl(url) {
+        if (!url) return false;
+        let path = url.split('?')[0].split('#')[0];
+        let ext = path.split('.').pop().toLowerCase();
+        const fileExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico', 'mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'];
+        return fileExts.includes(ext);
+    }
+    
+    function getFileType(url) {
+        if (!url) return 'link';
+        let ext = url.split('.').pop().toLowerCase();
+        if (['jpg','jpeg','png','gif','webp','bmp','svg','ico'].includes(ext)) return 'image';
+        if (['mp4','webm','ogg','mov','avi','mkv'].includes(ext)) return 'video';
+        return 'file';
+    }
+    
+    // ========== 处理应用点击 ==========
+    function handleAppClick(link, name) {
+        if (link === 'ezr' || link === 'ezr/' || link === '/ezr' || (name && name.includes('电子值日码'))) {
+            const id = getStudentId();
+            window.open(`https://luckynum.top/ezr${id ? '?' + id : ''}`, '_blank');
+            return;
+        }
+        
+        let fullUrl = link;
+        if (fullUrl && !fullUrl.startsWith('http') && !fullUrl.startsWith('//')) {
+            fullUrl = `https://luckynum.top/${fullUrl}`;
+        }
+        
+        if (isFileUrl(link)) {
+            const fileType = getFileType(link);
+            if (fileType === 'image') { openImageViewer(fullUrl, name); return; }
+            if (fileType === 'video') { openVideoViewer(fullUrl, name); return; }
+            showUnsupportedDialog(fullUrl, name);
+            return;
+        }
+        window.open(fullUrl, '_blank');
+    }
+    
+    // ========== 解析配置文件 ==========
+    function parseAppTxt(raw) {
+        const lines = raw.split(/\r?\n/);
+        let mode = null;
+        let groups = [], pics = [], apps = [];
+        for (let line of lines) {
+            line = line.trim();
+            if (line === '') continue;
+            if (line.toLowerCase() === 'group') { mode = 'group'; continue; }
+            if (line.toLowerCase() === 'pic') { mode = 'pic'; continue; }
+            if (line.toLowerCase() === 'app') { mode = 'app'; continue; }
+            if (mode === 'group') {
+                let m = line.match(/\[g=([^\]]+)\]/);
+                if (m) groups.push(m[1].trim());
+            } else if (mode === 'pic') {
+                let m = line.match(/\[p=([^\s\]]+)\s+l=([^\s\]]+)\]/);
+                if (m) pics.push({ imgUrl: m[1].trim(), linkUrl: m[2].trim() });
+            } else if (mode === 'app') {
+                let m = line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)(?:\s+g=([^\s\]]+))?\]/);
+                if (!m) m = line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)(?:\s+g=(.+?))?\]/);
+                if (m) apps.push({ name: m[1].trim(), icon: m[2].trim(), link: m[3].trim(), group: m[4] ? m[4].trim() : null });
+            }
+        }
+        groupOrder = groups.length ? groups : ['其他应用'];
+        slidesData = pics;
+        appItems = apps;
+        renderGroups();
+        if (slidesData.length) { renderCarousel(); startAutoSlide(); }
+        else carouselSection.style.display = 'none';
+        warningBanner.style.display = 'none';
+    }
+    
+    // ========== 渲染分组 ==========
+    function renderGroups() {
+        if (!groupsContainer) return;
+        let appsByGroup = {};
+        for (let group of groupOrder) appsByGroup[group] = [];
+        for (let app of appItems) {
+            let group = app.group || '其他应用';
+            if (!appsByGroup[group]) appsByGroup[group] = [];
+            appsByGroup[group].push(app);
+        }
+        let html = '';
+        for (let i = 0; i < groupOrder.length; i++) {
+            const groupName = groupOrder[i];
+            const apps = appsByGroup[groupName] || [];
+            html += `<div class="group-section"><div class="group-header"><span class="group-title">${escapeHtml(groupName)}</span>${isEditMode ? `<div><button class="group-edit-btn" onclick="editGroup('${escapeHtml(groupName)}')">✎</button><button class="group-delete-btn" onclick="deleteGroup('${escapeHtml(groupName)}')">🗑</button></div>` : ''}</div><div class="apps-grid">`;
+            if (apps.length === 0) html += `<div class="empty-group">暂无应用</div>`;
+            else for (let app of apps) {
+                let icon = app.icon;
+                if (icon && !icon.startsWith('http')) icon = `https://luckynum.top/${icon}`;
+                const fallbackIcon = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\' viewBox=\'0 0 24 24\'%3E%3Crect width=\'24\' height=\'24\' fill=\'%23ddd\'/%3E%3C/svg%3E';
+                html += `<div class="app-card" data-app-name="${escapeHtml(app.name)}" data-app-link="${escapeHtml(app.link)}">${isEditMode ? `<button class="edit-app-btn" onclick="editApp('${escapeHtml(app.name)}','${escapeHtml(app.link)}','${escapeHtml(app.icon)}','${escapeHtml(groupName)}')">✎</button><button class="delete-btn" onclick="deleteApp('${escapeHtml(app.name)}','${escapeHtml(app.link)}')">✕</button><div class="drag-handle">⋮⋮</div>` : ''}<img class="app-icon" src="${escapeHtml(icon)}" onerror="this.src='${fallbackIcon}'"><span class="app-name">${escapeHtml(app.name)}</span></div>`;
+            }
+            html += `</div></div>`;
+        }
+        groupsContainer.innerHTML = html;
+        document.querySelectorAll('.app-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.classList.contains('edit-app-btn') || e.target.classList.contains('delete-btn') || e.target.classList.contains('drag-handle')) return;
+                handleAppClick(card.dataset.appLink, card.dataset.appName);
+            });
+        });
+    }
+    
+    // ========== 轮播图 ==========
+    function renderCarousel() {
+        if (!carouselTrack) return;
+        totalSlides = slidesData.length;
+        if (totalSlides === 0) { carouselSection.style.display = 'none'; return; }
+        carouselSection.style.display = 'block';
+        let html = '';
+        for (let i = 0; i < slidesData.length; i++) {
+            let img = slidesData[i].imgUrl, link = slidesData[i].linkUrl;
+            if (img && !img.startsWith('http')) img = `https://luckynum.top/${img}`;
+            if (link && !link.startsWith('http')) link = `https://luckynum.top/${link}`;
+            html += `<div class="carousel-slide">${isEditMode ? `<button class="delete-btn" onclick="deleteSlide(${i})">✕</button>` : ''}<a href="${escapeHtml(link)}" target="_blank"><img src="${escapeHtml(img)}" onerror="this.src='https://luckynum.top/null.jpg'"></a></div>`;
+        }
+        carouselTrack.innerHTML = html;
+        let dots = '';
+        for (let i = 0; i < totalSlides; i++) dots += `<div class="dot ${i === currentIndex ? 'active' : ''}" data-index="${i}"></div>`;
+        dotsContainer.innerHTML = dots;
+        updateCarouselPosition();
+        document.querySelectorAll('.dot').forEach(dot => dot.onclick = () => { currentIndex = parseInt(dot.dataset.index); updateCarouselPosition(); updateDotsActive(); resetAutoSlide(); });
+    }
+    
+    function updateCarouselPosition() { if (carouselTrack) carouselTrack.style.transform = `translateX(${-currentIndex * 100}%)`; }
+    function updateDotsActive() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentIndex)); }
+    function nextSlide() { if (totalSlides) { currentIndex = (currentIndex + 1) % totalSlides; updateCarouselPosition(); updateDotsActive(); } }
+    function startAutoSlide() { if (autoInterval) clearInterval(autoInterval); if (totalSlides > 1) autoInterval = setInterval(nextSlide, 5000); }
+    function resetAutoSlide() { startAutoSlide(); }
+    
+    // ========== 加载配置 ==========
+    async function loadConfigFile() {
+        warningBanner.style.display = 'block';
+        try {
+            const res = await fetch(CONFIG_URL + '?t=' + Date.now());
+            if (!res.ok) throw new Error();
+            parseAppTxt(await res.text());
+        } catch(e) {
+            groupsContainer.innerHTML = `<div class="error-tip">❌ 加载失败，请刷新重试</div>`;
+            warningBanner.style.display = 'none';
+        }
+    }
+    
+    // ========== 辅助函数 ==========
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+    
+    // ========== 编辑模式（点击标题3次） ==========
+    let clickCount = 0, clickTimer = null;
+    document.getElementById('titleClickTarget')?.addEventListener('click', () => {
+        clickCount++;
+        if (clickTimer) clearTimeout(clickTimer);
+        clickTimer = setTimeout(() => { clickCount = 0; }, 1000);
+        if (clickCount === 3) { clickCount = 0; showTokenModal(); }
+    });
+    
+    function showTokenModal() {
+        const modal = document.createElement('div'); modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><h3>验证Token</h3><input type="password" id="tokenInput" placeholder="GitHub Token"><div class="modal-buttons"><button class="confirm-btn" id="confirmBtn">验证</button><button class="cancel-btn" id="cancelBtn">取消</button></div></div>`;
+        document.body.appendChild(modal);
+        modal.querySelector('#confirmBtn').onclick = async () => {
+            const token = modal.querySelector('#tokenInput').value.trim();
+            if (!token) return;
+            currentToken = token;
+            isEditMode = true;
+            document.body.classList.add('edit-mode');
+            fabGroup.style.display = 'flex';
+            renderGroups();
+            modal.remove();
+            alert('编辑模式已启用');
+        };
+        modal.querySelector('#cancelBtn').onclick = () => modal.remove();
+    }
+    
+    window.deleteSlide = function(idx) { if (confirm('确定删除？')) { slidesData.splice(idx, 1); renderCarousel(); } };
+    window.editGroup = function(name) { alert('编辑分组需Token'); };
+    window.deleteGroup = function(name) { alert('删除分组需Token'); };
+    window.editApp = function(name, link, icon, group) { alert('编辑应用需Token'); };
+    window.deleteApp = function(name, link) { alert('删除应用需Token'); };
+    function addApp() { alert('添加应用需先输入Token（点击标题3次）'); }
+    function addCarousel() { alert('添加轮播图需先输入Token（点击标题3次）'); }
+    function uploadFileToRoot() { alert('上传文件需先输入Token（点击标题3次）'); }
+    function openFileManager() { alert('文件管理器需先输入Token（点击标题3次）'); }
+    function addGroup() { alert('添加分组需先输入Token（点击标题3次）'); }
+    
+    document.getElementById('addAppFab')?.addEventListener('click', addApp);
+    document.getElementById('addCarouselFab')?.addEventListener('click', addCarousel);
+    document.getElementById('uploadOnlyBtn')?.addEventListener('click', uploadFileToRoot);
+    document.getElementById('fileManagerBtn')?.addEventListener('click', openFileManager);
+    document.getElementById('addGroupFab')?.addEventListener('click', addGroup);
+    
+    // ========== 启动 ==========
+    async function init() {
+        await checkUserAgentAndPrompt();
+        await Promise.all([loadConfigFile(), loadNameMapping(), loadIntegralData()]);
+        await showGreeting();
+    }
+    init();
+</script>
+</body>
+</html>
