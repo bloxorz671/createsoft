@@ -41,11 +41,19 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; }
         .modal-content { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto; }
         .modal-content h3 { margin-bottom: 16px; }
-        .modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; }
+        .modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
         .modal-buttons { display: flex; gap: 10px; margin-top: 16px; }
-        .confirm-btn { background: #2b4c8a; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; }
-        .cancel-btn { background: #95a5a6; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; }
+        .confirm-btn { background: #2b4c8a; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+        .cancel-btn { background: #95a5a6; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
         .upload-area { border: 2px dashed #ddd; border-radius: 8px; padding: 15px; margin: 10px 0; text-align: center; cursor: pointer; background: #f9f9f9; }
+        
+        /* 自定义学号输入弹窗样式 */
+        .student-id-modal .modal-content { text-align: center; }
+        .student-id-modal h3 { color: #1e3c72; font-size: 1.4rem; margin-bottom: 8px; }
+        .student-id-modal .subtitle { color: #666; font-size: 0.85rem; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+        .student-id-modal input { text-align: center; font-size: 1.2rem; letter-spacing: 2px; }
+        .student-id-modal .example { color: #999; font-size: 0.75rem; margin-top: 8px; }
+        .student-id-modal .warning-text { color: #e74c3c; font-size: 0.8rem; margin-top: 12px; display: none; }
         
         .carousel-section { margin: 12px 16px 24px; background: #f0f2f6; overflow: hidden; }
         .carousel-wrapper { width: 100%; overflow: hidden; }
@@ -197,6 +205,67 @@
         currentStudentId = null;
     }
     
+    // ========== 自定义学号输入弹窗（解决提示文字被截断问题） ==========
+    function showStudentIdPrompt() {
+        return new Promise((resolve) => {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay student-id-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>🔐 初二五班专用系统</h3>
+                    <div class="subtitle">请验证身份以继续使用</div>
+                    <input type="number" id="studentIdInput" placeholder="请输入5位数学号" maxlength="5" autocomplete="off">
+                    <div class="example">📌 示例：10001、10002</div>
+                    <div class="warning-text" id="warningText">❌ 学号必须是5位数字，请重新输入</div>
+                    <div class="modal-buttons">
+                        <button class="confirm-btn" id="confirmBtn">确定</button>
+                        <button class="cancel-btn" id="cancelBtn">取消</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            const input = modal.querySelector('#studentIdInput');
+            const confirmBtn = modal.querySelector('#confirmBtn');
+            const cancelBtn = modal.querySelector('#cancelBtn');
+            const warningText = modal.querySelector('#warningText');
+            
+            // 自动聚焦
+            input.focus();
+            
+            const handleConfirm = () => {
+                const value = input.value.trim();
+                if (/^\d{5}$/.test(value)) {
+                    modal.remove();
+                    resolve(value);
+                } else {
+                    warningText.style.display = 'block';
+                    input.style.borderColor = '#e74c3c';
+                    input.value = '';
+                    input.focus();
+                }
+            };
+            
+            const handleCancel = () => {
+                modal.remove();
+                resolve(null);
+            };
+            
+            confirmBtn.onclick = handleConfirm;
+            cancelBtn.onclick = handleCancel;
+            
+            // 回车确认
+            input.onkeypress = (e) => {
+                if (e.key === 'Enter') handleConfirm();
+            };
+            
+            // 点击背景关闭
+            modal.onclick = (e) => {
+                if (e.target === modal) handleCancel();
+            };
+        });
+    }
+    
     // ========== 加载数据 ==========
     async function loadNameMapping() {
         try {
@@ -275,23 +344,18 @@
         }
     }
     
-    // ========== 学号输入（完整提示语） ==========
+    // ========== User-Agent 检测和学号输入（使用自定义弹窗） ==========
     async function checkUserAgentAndPrompt() {
         if (!isTargetDevice) return;
         let existingId = getStudentId();
         if (existingId) { currentStudentId = existingId; await showGreeting(); return; }
         
-        let studentId = prompt('🔐 初二五班专用系统\n\n请输入你的真实5位数学号：\n（例如：10001）');
+        const studentId = await showStudentIdPrompt();
         if (studentId) {
-            studentId = studentId.trim();
-            if (/^\d{5}$/.test(studentId)) {
-                saveStudentId(studentId);
-                window.location.href = `?p=${studentId}`;
-            } else {
-                alert('❌ 学号必须是5位数字！请重新输入。');
-                window.location.reload();
-            }
-        } else if (studentId === '') {
+            saveStudentId(studentId);
+            window.location.href = `?p=${studentId}`;
+        } else {
+            // 用户点了取消
             warningBanner.style.display = 'block';
             warningBanner.innerHTML = '⚠️ 请输入学号以使用完整功能 | <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">点击重试</span>';
             warningBanner.style.background = '#f8d7da';
@@ -299,7 +363,7 @@
         }
     }
     
-    // ========== 图片/视频预览模块（完整版） ==========
+    // ========== 图片/视频预览模块 ==========
     function downloadFile(url, fileName) {
         const a = document.createElement('a');
         a.href = url;
@@ -485,7 +549,6 @@
         return 'file';
     }
     
-    // ========== 处理应用点击 ==========
     function handleAppClick(link, name) {
         if (link === 'ezr' || link === 'ezr/' || link === '/ezr' || (name && name.includes('电子值日码'))) {
             const id = getStudentId();
@@ -508,7 +571,6 @@
         window.open(fullUrl, '_blank');
     }
     
-    // ========== 解析配置文件 ==========
     function parseAppTxt(raw) {
         const lines = raw.split(/\r?\n/);
         let mode = null;
@@ -540,7 +602,6 @@
         warningBanner.style.display = 'none';
     }
     
-    // ========== 渲染分组 ==========
     function renderGroups() {
         if (!groupsContainer) return;
         let appsByGroup = {};
@@ -573,7 +634,6 @@
         });
     }
     
-    // ========== 轮播图 ==========
     function renderCarousel() {
         if (!carouselTrack) return;
         totalSlides = slidesData.length;
@@ -600,7 +660,6 @@
     function startAutoSlide() { if (autoInterval) clearInterval(autoInterval); if (totalSlides > 1) autoInterval = setInterval(nextSlide, 5000); }
     function resetAutoSlide() { startAutoSlide(); }
     
-    // ========== 加载配置 ==========
     async function loadConfigFile() {
         warningBanner.style.display = 'block';
         try {
@@ -613,10 +672,9 @@
         }
     }
     
-    // ========== 辅助函数 ==========
     function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
     
-    // ========== 编辑模式（点击标题3次） ==========
+    // 编辑模式
     let clickCount = 0, clickTimer = null;
     document.getElementById('titleClickTarget')?.addEventListener('click', () => {
         clickCount++;
@@ -660,7 +718,6 @@
     document.getElementById('fileManagerBtn')?.addEventListener('click', openFileManager);
     document.getElementById('addGroupFab')?.addEventListener('click', addGroup);
     
-    // ========== 启动 ==========
     async function init() {
         await checkUserAgentAndPrompt();
         await Promise.all([loadConfigFile(), loadNameMapping(), loadIntegralData()]);
