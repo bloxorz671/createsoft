@@ -14,6 +14,21 @@
         .greeting-wrapper { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; cursor: pointer; }
         .greeting-text { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; }
         
+        /* 退出登录按钮 */
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 12px;
+        }
+        .logout-btn:hover { background: #c0392b; transform: scale(1.02); }
+        
         /* 评级框样式 */
         .rating-box {
             display: inline-flex;
@@ -27,33 +42,15 @@
             border-radius: 8px;
             white-space: nowrap;
         }
-        /* 夯爆了 - 红色 */
         .rating-box.level-0 { background: #e74c3c; border-color: #c0392b; color: white; }
-        /* 顶级 - 橙色 */
         .rating-box.level-1 { background: #f39c12; border-color: #e67e22; color: white; }
-        /* 人上人 - 黄色 */
         .rating-box.level-2 { background: #f1c40f; border-color: #d4ac0d; color: #8B6914; }
-        /* Npc - 浅肉色 */
         .rating-box.level-3 { background: #fdebd0; border-color: #e6b0aa; color: #c0392b; }
-        /* 拉完了 - 灰色 */
         .rating-box.level-4 { background: #95a5a6; border-color: #7f8c8d; color: white; }
         
-        /* 积分显示区域 - 与评级框同一行 */
-        .score-wrapper {
-            display: inline-flex;
-            align-items: baseline;
-            gap: 4px;
-            margin-left: 4px;
-        }
-        .score-label {
-            font-size: 0.9rem;
-            color: #666;
-        }
-        .score-number {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #2b4c8a;
-        }
+        .score-wrapper { display: inline-flex; align-items: baseline; gap: 4px; margin-left: 4px; }
+        .score-label { font-size: 0.9rem; color: #666; }
+        .score-number { font-size: 1.2rem; font-weight: 700; color: #2b4c8a; }
         
         .edit-mode .carousel-slide, .edit-mode .app-card { position: relative; }
         .edit-mode .app-card { cursor: grab; }
@@ -78,7 +75,6 @@
         .cancel-btn { background: #95a5a6; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; }
         .upload-area { border: 2px dashed #ddd; border-radius: 8px; padding: 15px; margin: 10px 0; text-align: center; cursor: pointer; background: #f9f9f9; }
         .upload-area:hover { border-color: #2b4c8a; background: #f0f7ff; }
-        .upload-status { font-size: 12px; color: #666; margin-top: 5px; }
         .carousel-section { margin: 12px 16px 24px; background: #f0f2f6; overflow: hidden; position: relative; }
         .carousel-wrapper { position: relative; width: 100%; overflow: hidden; }
         .carousel-track { display: flex; transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1); cursor: grab; }
@@ -107,7 +103,6 @@
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; background: white; }
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; }
         
-        /* 文件管理器样式 */
         .file-manager-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .file-manager { height: 55vh; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; padding: 8px; }
         .file-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; }
@@ -121,133 +116,28 @@
         .file-action-btn.delete { color: #e74c3c; }
         .current-path { padding: 8px; background: #f5f5f5; border-radius: 8px; margin-bottom: 10px; font-family: monospace; font-size: 12px; word-break: break-all; }
         
-        /* 文件上传弹窗 */
         .link-buttons { display: flex; gap: 10px; margin-top: 10px; }
         .link-btn { background: #f0f2f5; border: 1px solid #ddd; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 12px; flex: 1; text-align: center; }
         .link-btn:hover { background: #e8f0fe; border-color: #2b4c8a; }
         
-        /* 全屏图片/视频阅读器样式 */
-        .file-viewer-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 20000;
-            display: flex;
-            flex-direction: column;
-        }
-        .viewer-header {
-            background: #1e2a4a;
-            color: white;
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-            z-index: 10;
-        }
-        .viewer-title {
-            font-size: 1rem;
-            font-weight: 500;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            flex: 1;
-        }
-        .viewer-controls {
-            display: flex;
-            gap: 12px;
-        }
-        .viewer-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
+        .file-viewer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 20000; display: flex; flex-direction: column; }
+        .viewer-header { background: #1e2a4a; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .viewer-title { font-size: 1rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+        .viewer-controls { display: flex; gap: 12px; }
+        .viewer-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
         .viewer-btn:hover { background: rgba(255,255,255,0.4); }
-        .zoom-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-        .viewer-content {
-            flex: 1;
-            background: #000;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .image-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
-            touch-action: none;
-        }
-        .zoomable-image {
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-            transition: transform 0.05s ease-out;
-            transform-origin: center center;
-            will-change: transform;
-        }
-        .viewer-content video {
-            max-width: 100%;
-            max-height: 100%;
-            background: #000;
-            object-fit: contain;
-        }
-        .unsupported-view {
-            text-align: center;
-            padding: 60px;
-            background: white;
-            border-radius: 16px;
-            margin: 20px;
-        }
-        .unsupported-view h2 {
-            font-size: 1.8rem;
-            color: #666;
-            margin-bottom: 20px;
-        }
-        .unsupported-view button {
-            background: #2b4c8a;
-            color: white;
-            border: none;
-            padding: 12px 32px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            margin-top: 20px;
-        }
+        .zoom-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; font-size: 1.2rem; font-weight: bold; }
+        .viewer-content { flex: 1; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        .image-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; touch-action: none; }
+        .zoomable-image { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; transition: transform 0.05s ease-out; transform-origin: center center; }
+        .viewer-content video { max-width: 100%; max-height: 100%; background: #000; object-fit: contain; }
+        .unsupported-view { text-align: center; padding: 60px; background: white; border-radius: 16px; margin: 20px; }
         @media (max-width: 768px) {
             .apps-grid { gap: 12px; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
             .app-icon { width: 52px; height: 52px; }
             .app-name { font-size: 0.75rem; }
             .main-header h1 { font-size: 1.6rem; }
             .greeting-text { font-size: 1.6rem; }
-            .rating-box { font-size: 0.85rem; padding: 3px 10px; }
-            .score-label { font-size: 0.8rem; }
-            .score-number { font-size: 1rem; }
             .add-fab { bottom: 70px; right: 16px; gap: 10px; }
             .add-btn, .add-carousel-btn, .upload-only-btn, .file-manager-btn { width: 48px; height: 48px; font-size: 20px; }
         }
@@ -263,6 +153,7 @@
         <div class="greeting-wrapper" id="greetingWrapper">
             <div class="greeting-text"></div>
             <div id="ratingContainer" style="display: inline-flex; align-items: center; gap: 4px;"></div>
+            <button id="logoutBtn" class="logout-btn" style="display: none;">退出登录</button>
         </div>
     </div>
     
@@ -291,6 +182,11 @@
     const NAME_FILE_URL = 'https://luckynum.top/5name.txt';
     const INTEGRAL_FILE_URL = 'https://raw.githubusercontent.com/bloxorz671/5class-system/main/student-integral.txt';
     
+    // 检测 User-Agent
+    const TARGET_UA = 'ClassApp/1.0 (Grade8Class5)';
+    const currentUA = navigator.userAgent;
+    const isTargetDevice = currentUA === TARGET_UA;
+    
     let slidesData = [], appItems = [], groupOrder = ['其他应用'], currentIndex = 0, autoInterval = null, totalSlides = 0;
     let isEditMode = false, currentToken = null, fileSha = null;
     let draggedGroupIndex = null, draggedAppData = null;
@@ -300,7 +196,6 @@
     let isAddingApp = false;
     let isAddingCarousel = false;
     
-    // 评级配置
     const RATING_CONFIG = [
         { min: 80, max: Infinity, name: '夯爆了', level: 0, colorClass: 'level-0' },
         { min: 60, max: 79, name: '顶级', level: 1, colorClass: 'level-1' },
@@ -313,9 +208,7 @@
         const score = parseInt(integral);
         if (isNaN(score)) return RATING_CONFIG[4];
         for (let config of RATING_CONFIG) {
-            if (score >= config.min && score <= config.max) {
-                return config;
-            }
+            if (score >= config.min && score <= config.max) return config;
         }
         return RATING_CONFIG[4];
     }
@@ -330,19 +223,30 @@
     const addGroupFab = document.getElementById('addGroupFab');
     const ratingContainer = document.getElementById('ratingContainer');
     const greetingWrapper = document.getElementById('greetingWrapper');
+    const logoutBtn = document.getElementById('logoutBtn');
     
-    // ========== 点击积分区域跳转到 /5pm ==========
+    // ========== 退出登录功能 ==========
+    function setupLogout() {
+        if (logoutBtn && isTargetDevice) {
+            logoutBtn.style.display = 'inline-block';
+            logoutBtn.onclick = () => {
+                localStorage.removeItem('studentId');
+                localStorage.removeItem('studentNameCache');
+                window.location.href = window.location.pathname;
+            };
+        }
+    }
+    
     function setupGreetingClick() {
         if (greetingWrapper) {
             greetingWrapper.style.cursor = 'pointer';
             greetingWrapper.addEventListener('click', (e) => {
-                e.stopPropagation();
+                if (e.target === logoutBtn || logoutBtn.contains(e.target)) return;
                 window.location.href = '/5pm';
             });
         }
     }
     
-    // ========== 加载积分数据 ==========
     async function loadIntegralData() {
         try {
             const response = await fetch(INTEGRAL_FILE_URL);
@@ -354,21 +258,13 @@
                     if (line === '') continue;
                     const parts = line.split(/\s+/);
                     if (parts.length >= 2) {
-                        const studentId = parts[0].trim();
-                        const integral = parts[1].trim();
-                        if (studentId && integral) {
-                            integralMapping[studentId] = integral;
-                        }
+                        integralMapping[parts[0].trim()] = parts[1].trim();
                     }
                 }
-                console.log('积分数据加载成功，共', Object.keys(integralMapping).length, '条');
             }
-        } catch (e) {
-            console.log('无法加载积分文件:', e.message);
-        }
+        } catch (e) {}
     }
     
-    // ========== 显示问候语、评级框和积分（同一行） ==========
     function showGreetingWithIntegral(studentName, studentId) {
         const container = document.getElementById('greetingContainer');
         const textElem = container?.querySelector('.greeting-text');
@@ -380,17 +276,13 @@
             if (studentId && integralMapping[studentId]) {
                 const integral = integralMapping[studentId];
                 const rating = getRatingByIntegral(integral);
-                // 清空并重新构建评级容器
                 ratingContainer.innerHTML = '';
-                // 创建评级框
                 const ratingBox = document.createElement('div');
                 ratingBox.className = `rating-box ${rating.colorClass}`;
                 ratingBox.textContent = rating.name;
-                // 创建积分显示区域
                 const scoreWrapper = document.createElement('div');
                 scoreWrapper.className = 'score-wrapper';
                 scoreWrapper.innerHTML = `<span class="score-label">分数</span><span class="score-number">${integral}</span>`;
-                // 添加到容器
                 ratingContainer.appendChild(ratingBox);
                 ratingContainer.appendChild(scoreWrapper);
                 ratingContainer.style.display = 'inline-flex';
@@ -398,14 +290,12 @@
                 ratingContainer.style.display = 'none';
             }
         }
+        setupLogout();
     }
     
-    // ========== 工具函数 ==========
     function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
     function utf8ToBase64(str) { const bytes = new TextEncoder().encode(str); let binary = ''; for(let b of bytes) binary += String.fromCharCode(b); return btoa(binary); }
-    function base64ToUtf8(base64) { const binary = atob(base64.replace(/\n/g, '')); const bytes = new Uint8Array(binary.length); for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i); return new TextDecoder('utf-8').decode(bytes); }
     
-    // ========== 文件类型判断 ==========
     function isFileUrl(url) {
         if (!url) return false;
         let path = url.split('?')[0].split('#')[0];
@@ -433,7 +323,6 @@
         a.click();
     }
     
-    // ========== 图片缩放功能 ==========
     function createZoomableImage(url, fileName) {
         const container = document.createElement('div');
         container.className = 'image-container';
@@ -521,13 +410,12 @@
         container.addEventListener('touchend', () => { isPanning = false; });
         
         img.onerror = () => {
-            container.innerHTML = `<div class="unsupported-view"><h2>🖼️ 图片加载失败</h2><p>该图片无法显示</p><button class="fallback-download">📥 立即下载</button></div>`;
+            container.innerHTML = `<div class="unsupported-view"><h2>🖼️ 图片加载失败</h2><button class="fallback-download">📥 立即下载</button></div>`;
             container.querySelector('.fallback-download').onclick = () => downloadFile(url, fileName);
         };
         return { container, zoomIn, zoomOut, resetZoom };
     }
     
-    // ========== 图片预览窗口 ==========
     function openImageViewer(url, fileName) {
         const overlay = document.createElement('div');
         overlay.className = 'file-viewer-overlay';
@@ -554,7 +442,6 @@
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
     
-    // ========== 视频预览窗口 ==========
     function openVideoViewer(url, fileName) {
         const overlay = document.createElement('div');
         overlay.className = 'file-viewer-overlay';
@@ -582,7 +469,6 @@
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
     
-    // ========== 不支持预览的弹窗 ==========
     function showUnsupportedDialog(url, fileName) {
         const overlay = document.createElement('div');
         overlay.className = 'file-viewer-overlay';
@@ -591,13 +477,7 @@
         header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn close-btn">✕ 关闭</button></div>`;
         const content = document.createElement('div');
         content.className = 'viewer-content';
-        content.innerHTML = `
-            <div class="unsupported-view">
-                <h2>📄 该文件不支持预览</h2>
-                <p>${escapeHtml(fileName)}</p>
-                <button id="downloadBtn" class="download-btn">📥 立即下载</button>
-            </div>
-        `;
+        content.innerHTML = `<div class="unsupported-view"><h2>📄 该文件不支持预览</h2><p>${escapeHtml(fileName)}</p><button id="downloadBtn" class="download-btn">📥 立即下载</button></div>`;
         overlay.appendChild(header); overlay.appendChild(content);
         document.body.appendChild(overlay);
         
@@ -606,7 +486,6 @@
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
     
-    // ========== 处理应用点击 ==========
     function handleAppClick(link, name) {
         if (link === 'ezr' || link === 'ezr/' || link === '/ezr' || (name && name.includes('电子值日码'))) {
             if (currentStudentId) {
@@ -641,7 +520,6 @@
         window.open(fullUrl, '_blank');
     }
     
-    // ========== 生成配置文件内容 ==========
     function generateFileContent() {
         let content = 'group\n';
         for(let g of groupOrder) content += `[g=${g}]\n`;
@@ -652,7 +530,6 @@
         return content;
     }
     
-    // ========== 解析配置文件 ==========
     function parseAppTxt(raw) {
         const lines = raw.split(/\r?\n/);
         let mode = null;
@@ -689,7 +566,6 @@
         else carouselSection.style.display = 'none';
     }
     
-    // ========== 渲染分组和应用 ==========
     function renderGroups() {
         if(!groupsContainer) return;
         
@@ -757,7 +633,6 @@
         if(isEditMode) initDragSort();
     }
     
-    // ========== 问候语功能 ==========
     function getUrlParam() { return new URLSearchParams(window.location.search).get('p'); }
     
     async function loadNameMapping() {
@@ -800,7 +675,39 @@
         setupGreetingClick();
     }
     
-    // ========== 标题点击3次触发Token输入 ==========
+    // ========== User-Agent 验证 + 学号弹窗 ==========
+    function checkUserAgentAndPrompt() {
+        if (!isTargetDevice) return;
+        
+        // 检查 URL 参数中是否已有学号
+        const existingParam = getUrlParam();
+        if (existingParam) {
+            currentStudentId = existingParam;
+            return;
+        }
+        
+        // 检查 localStorage 缓存
+        const cachedId = localStorage.getItem('studentId');
+        if (cachedId && /^\d{5}$/.test(cachedId)) {
+            // 跳转到带学号的 URL
+            window.location.href = `?p=${cachedId}`;
+            return;
+        }
+        
+        // 弹出输入框
+        let studentId = prompt('请输入你的真实5位数学号：');
+        if (studentId) {
+            studentId = studentId.trim();
+            if (/^\d{5}$/.test(studentId)) {
+                localStorage.setItem('studentId', studentId);
+                window.location.href = `?p=${studentId}`;
+            } else {
+                alert('学号必须是5位数字！');
+                window.location.reload();
+            }
+        }
+    }
+    
     let clickCount = 0, clickTimer = null;
     document.getElementById('titleClickTarget').addEventListener('click', () => {
         clickCount++;
@@ -835,7 +742,6 @@
         modal.querySelector('#cancelBtn').onclick = () => modal.remove();
     }
     
-    // ========== 分组操作 ==========
     window.editGroup = function(groupName) {
         const newName = prompt('请输入新的分组名称', groupName);
         if(newName && newName !== groupName) {
@@ -868,7 +774,6 @@
         } else if(newName) alert('分组名称已存在');
     }
     
-    // ========== 应用操作 ==========
     window.editApp = function(name, link, icon, group) {
         const modal = document.createElement('div'); modal.className = 'modal-overlay';
         modal.innerHTML = `
@@ -910,12 +815,8 @@
         }
     };
     
-    // ========== 添加应用 ==========
     function addApp() {
-        if (isAddingApp) {
-            alert('请稍候，正在处理上一个添加请求...');
-            return;
-        }
+        if (isAddingApp) { alert('请稍候，正在处理上一个添加请求...'); return; }
         
         const modal = document.createElement('div'); modal.className = 'modal-overlay';
         modal.innerHTML = `
@@ -925,12 +826,8 @@
                 <label>图标链接</label><div class="upload-area" id="uploadArea">📁 点击上传图片<input type="file" id="fileInput" style="display:none"></div><input id="iconUrl" placeholder="或直接输入图片链接">
                 <label>跳转链接</label><input id="appLink" placeholder="https://...">
                 <label>所属分组</label><select id="appGroup">${groupOrder.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('')}</select>
-                <div class="modal-buttons">
-                    <button class="confirm-btn" id="confirmAddBtn">添加</button>
-                    <button class="cancel-btn" id="cancelAddBtn">取消</button>
-                </div>
-            </div>
-        `;
+                <div class="modal-buttons"><button class="confirm-btn" id="confirmAddBtn">添加</button><button class="cancel-btn" id="cancelAddBtn">取消</button></div>
+            </div>`;
         document.body.appendChild(modal);
         
         const uploadArea = modal.querySelector('#uploadArea');
@@ -955,20 +852,14 @@
         };
         
         const handleAdd = async () => {
-            if (isAddingApp) {
-                alert('请稍候...');
-                return;
-            }
+            if (isAddingApp) { alert('请稍候...'); return; }
             
             const name = modal.querySelector('#appName').value.trim();
             const icon = iconUrl.value.trim() || 'null.jpg';
             const link = modal.querySelector('#appLink').value.trim();
             const group = modal.querySelector('#appGroup').value;
             
-            if (!name || !link) {
-                alert('请填写完整');
-                return;
-            }
+            if (!name || !link) { alert('请填写完整'); return; }
             
             const newApp = { name, icon, link, group };
             appItems.push(newApp);
@@ -980,9 +871,8 @@
             
             const success = await saveToGitHub(generateFileContent());
             
-            if (success) {
-                modal.remove();
-            } else {
+            if (success) { modal.remove(); } 
+            else {
                 appItems.pop();
                 renderGroups();
                 alert('保存失败，请重试');
@@ -991,7 +881,6 @@
                 isAddingApp = false;
                 return;
             }
-            
             confirmBtn.disabled = false;
             isAddingApp = false;
         };
@@ -1000,12 +889,8 @@
         cancelBtn.onclick = () => modal.remove();
     }
     
-    // ========== 添加轮播图 ==========
     function addCarousel() {
-        if (isAddingCarousel) {
-            alert('请稍候，正在处理上一个添加请求...');
-            return;
-        }
+        if (isAddingCarousel) { alert('请稍候，正在处理上一个添加请求...'); return; }
         
         const modal = document.createElement('div'); modal.className = 'modal-overlay';
         modal.innerHTML = `<div class="modal-content"><h3>添加轮播图</h3><div class="upload-area" id="uploadArea">📁 点击上传图片<input type="file" id="fileInput" style="display:none"></div><input id="imgUrl" placeholder="或直接输入图片链接"><label>跳转链接</label><input id="linkUrl"><div class="modal-buttons"><button class="confirm-btn" id="confirmCarouselBtn">添加</button><button class="cancel-btn" id="cancelCarouselBtn">取消</button></div></div>`;
@@ -1033,18 +918,12 @@
         };
         
         const handleAdd = async () => {
-            if (isAddingCarousel) {
-                alert('请稍候...');
-                return;
-            }
+            if (isAddingCarousel) { alert('请稍候...'); return; }
             
             const img = imgUrl.value.trim();
             const link = modal.querySelector('#linkUrl').value.trim();
             
-            if (!img) {
-                alert('请填写图片链接或上传图片');
-                return;
-            }
+            if (!img) { alert('请填写图片链接或上传图片'); return; }
             
             const newSlide = { imgUrl: img, linkUrl: link };
             slidesData.push(newSlide);
@@ -1056,9 +935,8 @@
             
             const success = await saveToGitHub(generateFileContent());
             
-            if (success) {
-                modal.remove();
-            } else {
+            if (success) { modal.remove(); } 
+            else {
                 slidesData.pop();
                 renderCarousel();
                 alert('保存失败，请重试');
@@ -1067,7 +945,6 @@
                 isAddingCarousel = false;
                 return;
             }
-            
             confirmBtn.disabled = false;
             isAddingCarousel = false;
         };
@@ -1076,7 +953,7 @@
         cancelBtn.onclick = () => modal.remove();
     }
     
-    async function deleteSlide(idx) {
+    window.deleteSlide = async function(idx) {
         if(confirm('确定删除？')) {
             const deleted = slidesData[idx];
             slidesData.splice(idx,1);
@@ -1085,9 +962,8 @@
                 else carouselSection.style.display = 'none';
             } else slidesData.splice(idx,0,deleted);
         }
-    }
+    };
     
-    // ========== 文件管理器 ==========
     async function uploadToRoot(file) {
         if(!currentToken) { alert('请先输入Token'); return null; }
         try {
@@ -1222,7 +1098,6 @@
         } catch(e) { alert('删除失败'); }
     };
     
-    // ========== 拖拽排序功能 ==========
     function initDragSort() {
         const groups = document.querySelectorAll('.group-section');
         groups.forEach((group, idx) => {
@@ -1282,7 +1157,6 @@
         });
     }
     
-    // ========== 轮播图功能 ==========
     function renderCarousel() {
         if(!carouselTrack) return;
         totalSlides = slidesData.length;
@@ -1307,12 +1181,10 @@
     function updateCarouselPosition() { if(carouselTrack) carouselTrack.style.transform = `translateX(${-currentIndex*100}%)`; }
     function updateDotsActive() { document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===currentIndex)); }
     function nextSlide() { if(totalSlides) { currentIndex = (currentIndex+1)%totalSlides; updateCarouselPosition(); updateDotsActive(); } }
-    function prevSlide() { if(totalSlides) { currentIndex = (currentIndex-1+totalSlides)%totalSlides; updateCarouselPosition(); updateDotsActive(); } }
     function startAutoSlide() { if(autoInterval) clearInterval(autoInterval); if(totalSlides>1) autoInterval = setInterval(nextSlide,5000); }
     function resetAutoSlide() { startAutoSlide(); }
-    function initSwipe() { /* 触摸滑动实现省略 */ }
+    function initSwipe() {}
     
-    // ========== 保存和加载 ==========
     async function loadConfigFile() {
         try {
             const res = await fetch(CONFIG_URL);
@@ -1347,14 +1219,16 @@
         }
     }
     
-    // ========== 事件绑定 ==========
     addAppFab.addEventListener('click', addApp);
     addCarouselFab.addEventListener('click', addCarousel);
     uploadOnlyBtn.addEventListener('click', uploadFileToRoot);
     fileManagerBtn.addEventListener('click', openFileManager);
     addGroupFab.addEventListener('click', addGroup);
     
-    // ========== 启动 ==========
+    // ========== 启动流程 ==========
+    // 先执行 User-Agent 检测（仅目标设备会触发学号弹窗/跳转）
+    checkUserAgentAndPrompt();
+    // 然后加载其他内容
     initGreeting();
     loadConfigFile();
     window.addEventListener('resize', () => setTimeout(() => renderGroups(), 100));
