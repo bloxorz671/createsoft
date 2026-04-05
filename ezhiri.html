@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>个人值日码</title>
+    <title>班级服务认证码</title>
     <style>
         * {
             margin: 0;
@@ -231,12 +231,12 @@
                 const qrImageUrl = generateQRCode(studentId);
                 
                 contentDiv.innerHTML = `
-                    <h1>个人值日码</h1>
+                    <h1>班级服务认证码</h1>
                     <div class="student-info">
-                        <span class="student-name">${escapeHtml(studentName)}</span> 同学你好，请使用教室中控设备（或大屏）上的“值日管理系统”软件来扫描统计！先用系统扫描值日挂牌，再扫描本码！感谢你的配合。
+                        <span class="student-name">${escapeHtml(studentName)}</span> 同学你好，你可以通过本二维码卡片登录班级智慧应用平台，打卡值日等功能，请妥善保管本卡片。
                     </div>
                     <div class="qr-section">
-                        <div class="qr-title">你的二维码</div>
+                        <div class="qr-title">二维码</div>
                         <div class="qr-code">
                             <img src="${escapeHtml(qrImageUrl)}" alt="二维码" id="qrImage">
                         </div>
@@ -251,11 +251,11 @@
                 `;
             } else {
                 contentDiv.innerHTML = `
-                    <h1>个人值日码</h1>
+                    <h1>班级服务认证码</h1>
                     <div style="text-align: center; padding: 40px 20px;">
                         <p style="color: #868e96; margin-bottom: 24px;">未获取到值日码</p>
                         <div class="back-link">
-                            <a href="/1205">返回班级平台</a>
+                            
                         </div>
                     </div>
                 `;
