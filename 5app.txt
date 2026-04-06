@@ -3,6 +3,7 @@ group
 [g=班级应用]
 [g=生物（学科）资料]
 [g=美术（学科）资料]
+[g=物理（学科）资料]
 pic
 [p=/install.jpg l=https://www.kdocs.cn/l/cly4WbPEpjLd]
 app
