@@ -1,12 +1,11 @@
 group
 [g=每日内容]
-[h[g=本周调课]
+[g=本周调课]
 [g=班级应用]
 [g=生物（学科）资料]
 [g=美术（学科）资料]
 [g=物理（学科）资料]
 pic
-[p=/install.jpg l=https://www.kdocs.cn/l/cly4WbPEpjLd]
 app
 [n=电子作业提交平台 p=homeworkapp.jpg l=homeworkapp g=班级应用]
 [n=电子值日码 p=ezr.jpg l=ezr g=班级应用]
