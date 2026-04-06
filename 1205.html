@@ -132,9 +132,19 @@
         .viewer-content video { max-width: 100%; max-height: 100%; background: #000; object-fit: contain; }
         .unsupported-view { text-align: center; padding: 60px; background: white; border-radius: 16px; margin: 20px; }
         
-        .file-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee; }
+        .file-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .file-item:hover { background: #f5f5f5; }
+        .file-item.folder { color: #2b4c8a; font-weight: 500; }
+        .file-item.folder:before { content: "📁 "; }
+        .file-item.file:before { content: "📄 "; }
+        .file-actions { display: flex; gap: 8px; }
+        .file-action-btn { background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .file-action-btn:hover { background: #e0e0e0; }
+        .file-action-btn.delete { color: #e74c3c; }
+        .current-path { padding: 8px; background: #f5f5f5; border-radius: 8px; margin-bottom: 10px; font-family: monospace; font-size: 12px; word-break: break-all; }
         .link-buttons { display: flex; gap: 10px; margin-top: 10px; }
         .link-btn { background: #f0f2f5; border: 1px solid #ddd; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 12px; flex: 1; text-align: center; }
+        .link-btn:hover { background: #e8f0fe; border-color: #2b4c8a; }
         
         .profile-card {
             background: linear-gradient(135deg, #2b4c8a, #1e3c72);
@@ -304,6 +314,10 @@
     let lastScanTime = 0;
     const SCAN_COOLDOWN = 1000;
     let defaultCameraId = null;
+    
+    // 拖拽排序相关变量
+    let draggedGroupIndex = null;
+    let draggedAppData = null;
     
     const carouselSection = document.getElementById('carouselSection');
     const carouselTrack = document.getElementById('carouselTrack');
@@ -742,7 +756,6 @@
         else { warningBanner.style.display = 'block'; warningBanner.innerHTML = '⚠️ 请输入学号以使用完整功能 | <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">点击重试</span>'; }
     }
     
-    // ========== 图片预览模块（简化） ==========
     function handleAppClick(link, name) {
         if (link === 'ezr' || link === 'ezr/' || link === '/ezr' || (name && name.includes('电子值日码'))) {
             const id = getStudentId();
@@ -785,6 +798,7 @@
         warningBanner.style.display = 'none';
     }
     
+    // ========== 渲染分组（包含拖拽功能） ==========
     function renderGroups() {
         if (!groupsContainer) return;
         let appsByGroup = {};
@@ -798,22 +812,104 @@
         for (let i = 0; i < groupOrder.length; i++) {
             const groupName = groupOrder[i];
             const apps = appsByGroup[groupName] || [];
-            html += `<div class="group-section"><div class="group-header"><span class="group-title">${escapeHtml(groupName)}</span>${isEditMode ? `<div><button class="group-edit-btn" onclick="editGroup('${escapeHtml(groupName)}')">✎</button><button class="group-delete-btn" onclick="deleteGroup('${escapeHtml(groupName)}')">🗑</button></div>` : ''}</div><div class="apps-grid">`;
+            html += `<div class="group-section" data-group-index="${i}">
+                <div class="group-header ${isEditMode ? 'draggable' : ''}" data-group="${escapeHtml(groupName)}">
+                    <span class="group-title">${escapeHtml(groupName)}</span>
+                    ${isEditMode ? `<div><button class="group-edit-btn" onclick="editGroup('${escapeHtml(groupName)}')">✎</button><button class="group-delete-btn" onclick="deleteGroup('${escapeHtml(groupName)}')">🗑</button></div>` : ''}
+                </div>
+                <div class="apps-grid" data-group="${escapeHtml(groupName)}" data-group-index="${i}">`;
             if (apps.length === 0) html += `<div class="empty-group">暂无应用</div>`;
             else for (let app of apps) {
                 let icon = app.icon;
                 if (icon && !icon.startsWith('http')) icon = `https://luckynum.top/${icon}`;
                 const fallbackIcon = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\' viewBox=\'0 0 24 24\'%3E%3Crect width=\'24\' height=\'24\' fill=\'%23ddd\'/%3E%3C/svg%3E';
-                html += `<div class="app-card" data-app-name="${escapeHtml(app.name)}" data-app-link="${escapeHtml(app.link)}">${isEditMode ? `<button class="edit-app-btn" onclick="editApp('${escapeHtml(app.name)}','${escapeHtml(app.link)}','${escapeHtml(app.icon)}','${escapeHtml(groupName)}')">✎</button><button class="delete-btn" onclick="deleteApp('${escapeHtml(app.name)}','${escapeHtml(app.link)}')">✕</button><div class="drag-handle">⋮⋮</div>` : ''}<img class="app-icon" src="${escapeHtml(icon)}" onerror="this.src='${fallbackIcon}'"><span class="app-name">${escapeHtml(app.name)}</span></div>`;
+                html += `<div class="app-card" data-app-name="${escapeHtml(app.name)}" data-app-link="${escapeHtml(app.link)}" data-app-icon="${escapeHtml(app.icon)}" data-app-group="${escapeHtml(groupName)}">
+                    ${isEditMode ? `<button class="edit-app-btn" onclick="editApp('${escapeHtml(app.name)}','${escapeHtml(app.link)}','${escapeHtml(app.icon)}','${escapeHtml(groupName)}')">✎</button><button class="delete-btn" onclick="deleteApp('${escapeHtml(app.name)}','${escapeHtml(app.link)}')">✕</button><div class="drag-handle" draggable="true">⋮⋮</div>` : ''}
+                    <img class="app-icon" src="${escapeHtml(icon)}" onerror="this.src='${fallbackIcon}'">
+                    <span class="app-name">${escapeHtml(app.name)}</span>
+                </div>`;
             }
             html += `</div></div>`;
         }
         groupsContainer.innerHTML = html;
+        
         document.querySelectorAll('.app-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 if (e.target.classList.contains('edit-app-btn') || e.target.classList.contains('delete-btn') || e.target.classList.contains('drag-handle')) return;
                 handleAppClick(card.dataset.appLink, card.dataset.appName);
             });
+        });
+        
+        // 拖拽排序功能（仅编辑模式下启用）
+        if (isEditMode) {
+            initDragSort();
+        }
+    }
+    
+    // ========== 拖拽排序初始化 ==========
+    function initDragSort() {
+        // 分组拖拽
+        const groupHeaders = document.querySelectorAll('.group-header.draggable');
+        groupHeaders.forEach(header => {
+            header.setAttribute('draggable', 'true');
+            header.ondragstart = (e) => {
+                const groupDiv = header.closest('.group-section');
+                draggedGroupIndex = parseInt(groupDiv.dataset.groupIndex);
+                e.dataTransfer.setData('text/plain', draggedGroupIndex);
+                e.dataTransfer.effectAllowed = 'move';
+            };
+            header.ondragover = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
+            header.ondrop = async (e) => {
+                e.preventDefault();
+                const targetGroup = header.closest('.group-section');
+                const targetIndex = parseInt(targetGroup.dataset.groupIndex);
+                if (draggedGroupIndex !== null && draggedGroupIndex !== targetIndex) {
+                    const movedGroup = groupOrder[draggedGroupIndex];
+                    groupOrder.splice(draggedGroupIndex, 1);
+                    groupOrder.splice(targetIndex, 0, movedGroup);
+                    if (await saveToGitHub(generateFileContent())) renderGroups();
+                }
+                draggedGroupIndex = null;
+            };
+        });
+        
+        // 应用拖拽
+        const appCards = document.querySelectorAll('.app-card');
+        appCards.forEach(card => {
+            const dragHandle = card.querySelector('.drag-handle');
+            if (!dragHandle) return;
+            
+            dragHandle.setAttribute('draggable', 'true');
+            dragHandle.ondragstart = (e) => {
+                draggedAppData = {
+                    name: card.dataset.appName,
+                    link: card.dataset.appLink,
+                    icon: card.dataset.appIcon,
+                    group: card.dataset.appGroup
+                };
+                e.dataTransfer.setData('text/plain', JSON.stringify(draggedAppData));
+                e.dataTransfer.effectAllowed = 'move';
+                card.classList.add('dragging');
+            };
+            dragHandle.ondragend = () => { card.classList.remove('dragging'); draggedAppData = null; };
+        });
+        
+        // 应用网格放置区域
+        const appGrids = document.querySelectorAll('.apps-grid');
+        appGrids.forEach(grid => {
+            grid.ondragover = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
+            grid.ondrop = async (e) => {
+                e.preventDefault();
+                if (draggedAppData) {
+                    const targetGroup = grid.dataset.group;
+                    const app = appItems.find(a => a.name === draggedAppData.name && a.link === draggedAppData.link);
+                    if (app && app.group !== targetGroup) {
+                        app.group = targetGroup;
+                        if (await saveToGitHub(generateFileContent())) renderGroups();
+                    }
+                    draggedAppData = null;
+                }
+            };
         });
     }
     
@@ -865,7 +961,6 @@
         clickTimer = setTimeout(() => { clickCount = 0; }, 1000);
         if (clickCount === 3) {
             clickCount = 0;
-            // 如果已经处于编辑模式，提示已开启
             if (isEditMode) {
                 alert('编辑模式已开启，无需重复输入Token');
                 return;
@@ -887,38 +982,27 @@
         
         confirmBtn.onclick = async () => {
             const token = tokenInput.value.trim();
-            if (!token) {
-                alert('请输入Token');
-                return;
-            }
+            if (!token) { alert('请输入Token'); return; }
             confirmBtn.disabled = true;
             confirmBtn.textContent = '验证中...';
             
             try {
-                // 验证Token有效性
                 const testRes = await fetch('https://api.github.com/user', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!testRes.ok) throw new Error('Token无效');
                 
-                // Token有效，开启编辑模式
                 currentToken = token;
                 isEditMode = true;
-                
-                // 添加编辑模式样式
                 document.body.classList.add('edit-mode');
-                
-                // 显示编辑按钮组
                 fabGroup.style.display = 'flex';
                 
-                // 重新渲染分组（显示编辑按钮）
+                // 重新渲染（显示编辑按钮）
                 renderGroups();
-                
-                // 重新渲染轮播图（显示删除按钮）
                 renderCarousel();
                 
                 modal.remove();
-                alert('✅ 编辑模式已启用！\n\n现在可以：\n- 添加/删除应用\n- 添加/删除轮播图\n- 管理分组\n- 使用文件管理器');
+                alert('✅ 编辑模式已启用！\n\n现在可以：\n- 添加/删除应用\n- 拖拽排序应用和分组\n- 添加/删除轮播图\n- 管理分组\n- 使用文件管理器');
                 
             } catch (e) {
                 alert('❌ Token验证失败：' + e.message);
@@ -931,7 +1015,7 @@
         modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     }
     
-    // 编辑功能函数（需要编辑模式才能执行）
+    // ========== 编辑功能函数 ==========
     window.deleteSlide = function(idx) {
         if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; }
         if (confirm('确定删除这张轮播图吗？')) {
@@ -1063,8 +1147,6 @@
         modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     }
     
-    function uploadFileToRoot() { if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; } alert('文件管理器功能开发中'); }
-    function openFileManager() { if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; } alert('文件管理器功能开发中'); }
     function addGroup() {
         if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; }
         const newName = prompt('请输入分组名称');
@@ -1108,6 +1190,110 @@
             return false;
         }
     }
+    
+    // ========== 文件管理器功能 ==========
+    async function uploadToRoot(file) {
+        if (!currentToken) { alert('请先输入Token'); return null; }
+        try {
+            const reader = new FileReader();
+            const base64 = await new Promise(r => { reader.onload = e => r(e.target.result.split(',')[1]); reader.readAsDataURL(file); });
+            const fileName = file.name;
+            const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fileName}`, {
+                method: 'PUT', headers: { 'Authorization': `Bearer ${currentToken}` },
+                body: JSON.stringify({ message: `上传 ${fileName}`, content: base64, branch: 'main' })
+            });
+            if(!res.ok) throw new Error();
+            alert(`✅ 上传成功：${fileName}`);
+            return fileName;
+        } catch(e) { alert('上传失败'); return null; }
+    }
+    
+    function uploadFileToRoot() {
+        if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; }
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (file) await uploadToRoot(file);
+        };
+        input.click();
+    }
+    
+    async function openFileManager() {
+        if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; }
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width:500px;">
+                <div class="file-manager-header" style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                    <h3>📁 文件管理器</h3>
+                    <button class="cancel-btn" id="closeFileManagerBtn" style="width:auto; padding:5px 15px;">关闭</button>
+                </div>
+                <div class="current-path" id="currentPath">/</div>
+                <div id="fileList" class="file-manager" style="max-height:400px; overflow-y:auto;"></div>
+            </div>`;
+        document.body.appendChild(modal);
+        modal.classList.add('show');
+        
+        await loadFileList(modal);
+        
+        modal.querySelector('#closeFileManagerBtn').onclick = () => modal.remove();
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    }
+    
+    async function loadFileList(modal) {
+        const fileListDiv = modal.querySelector('#fileList');
+        try {
+            const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/`, {
+                headers: { 'Authorization': `Bearer ${currentToken}` }
+            });
+            if(!res.ok) throw new Error();
+            const items = await res.json();
+            let html = '';
+            for(let item of items) {
+                const name = item.name;
+                const isFolder = item.type === 'dir';
+                if(!isFolder && name.toLowerCase().endsWith('.html')) continue;
+                html += `<div class="file-item ${isFolder ? 'folder' : 'file'}">
+                    <span>${escapeHtml(name)}</span>
+                    <div class="file-actions">
+                        <button class="file-action-btn" onclick="copyFileLink('${name}')">🔗</button>
+                        <button class="file-action-btn delete" onclick="deleteFile('${name}')">🗑</button>
+                    </div>
+                </div>`;
+            }
+            fileListDiv.innerHTML = html;
+        } catch(e) {
+            fileListDiv.innerHTML = '<div class="error-tip">加载失败</div>';
+        }
+    }
+    
+    window.copyFileLink = function(fileName) {
+        const innerLink = `/${fileName}`;
+        const outerLink = `https://luckynum.top/${fileName}`;
+        navigator.clipboard.writeText(`${innerLink}\n${outerLink}`);
+        alert('已复制链接');
+    };
+    
+    window.deleteFile = async function(fileName) {
+        if (!confirm(`确定删除 ${fileName} 吗？`)) return;
+        try {
+            const checkRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fileName}`, {
+                headers: { 'Authorization': `Bearer ${currentToken}` }
+            });
+            const data = await checkRes.json();
+            const sha = data.sha;
+            const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fileName}`, {
+                method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` },
+                body: JSON.stringify({ message: `删除 ${fileName}`, sha, branch: 'main' })
+            });
+            if(res.ok) {
+                alert('删除成功');
+                const modal = document.querySelector('.modal-overlay');
+                if(modal) loadFileList(modal);
+            } else alert('删除失败');
+        } catch(e) { alert('删除失败'); }
+    };
     
     // 绑定事件
     document.getElementById('addAppFab')?.addEventListener('click', addApp);
