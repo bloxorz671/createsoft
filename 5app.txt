@@ -16,4 +16,4 @@ app
 [n=将初二五班智慧应用平台安装到设备上 p=apk.jpg l=/5class_app_android.apk g=班级应用]
 [n=月考模拟试题(三份).zip p=docx.jpg l=/月考模拟试题(三份).zip g=物理（学科）资料]
 [n=调课通知 p=下周调课.jpg l=/下周调课.jpg g=本周调课]
-[n=407作业登记.jpg p=407作业登记.jpg l=/407作业登记.jpg g=每日内容]
+[n=408作业登记.jpg p=408作业登记.jpg l=/408作业登记.jpg g=每日内容]
