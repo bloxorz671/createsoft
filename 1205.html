@@ -119,18 +119,119 @@
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; }
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; border-radius: 12px; }
         
-        .file-viewer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 20000; display: flex; flex-direction: column; }
-        .viewer-header { background: #1e2a4a; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-        .viewer-title { font-size: 1rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-        .viewer-controls { display: flex; gap: 12px; }
-        .viewer-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+        /* 图片/视频预览器样式 */
+        .file-viewer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 20000;
+            display: flex;
+            flex-direction: column;
+        }
+        .viewer-header {
+            background: #1e2a4a;
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .viewer-title {
+            font-size: 1rem;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+        .viewer-controls {
+            display: flex;
+            gap: 12px;
+        }
+        .viewer-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
         .viewer-btn:hover { background: rgba(255,255,255,0.4); }
-        .zoom-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; font-size: 1.2rem; font-weight: bold; }
-        .viewer-content { flex: 1; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        .image-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; touch-action: none; }
-        .zoomable-image { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; transition: transform 0.05s ease-out; transform-origin: center center; }
-        .viewer-content video { max-width: 100%; max-height: 100%; background: #000; object-fit: contain; }
-        .unsupported-view { text-align: center; padding: 60px; background: white; border-radius: 16px; margin: 20px; }
+        .zoom-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .viewer-content {
+            flex: 1;
+            background: #000;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .image-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            touch-action: none;
+        }
+        .zoomable-image {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            transition: transform 0.05s ease-out;
+            transform-origin: center center;
+            will-change: transform;
+        }
+        .viewer-content video {
+            max-width: 100%;
+            max-height: 100%;
+            background: #000;
+            object-fit: contain;
+        }
+        .unsupported-view {
+            text-align: center;
+            padding: 60px;
+            background: white;
+            border-radius: 16px;
+            margin: 20px;
+        }
+        .unsupported-view h2 {
+            font-size: 1.8rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .unsupported-view button {
+            background: #2b4c8a;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px;
+        }
         
         .file-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; }
         .file-item:hover { background: #f5f5f5; }
@@ -560,7 +661,25 @@
     function showScanModalFunc() { if (scanModal) scanModal.classList.add('show'); setTimeout(() => startScanCamera(), 100); }
     function closeScanModalFunc() { stopScanCamera(); if (scanModal) scanModal.classList.remove('show'); }
     
-    // ========== 图片/视频预览模块 ==========
+    // ========== 分享功能 ==========
+    function copyShareLink(appName) {
+        let shareUrl = window.location.origin + window.location.pathname;
+        if (appName) {
+            shareUrl += `?app=${encodeURIComponent(appName)}`;
+        }
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            // 显示提示弹窗
+            const tip = document.createElement('div');
+            tip.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:white;padding:12px 24px;border-radius:30px;z-index:30000;font-size:14px;text-align:center;';
+            tip.textContent = '✅ 网址已复制';
+            document.body.appendChild(tip);
+            setTimeout(() => tip.remove(), 1500);
+        }).catch(() => {
+            alert('复制失败，请手动复制');
+        });
+    }
+    
+    // ========== 图片/视频预览模块（增加分享按钮） ==========
     function downloadFile(url, fileName) {
         const a = document.createElement('a');
         a.href = url;
@@ -667,7 +786,7 @@
         overlay.className = 'file-viewer-overlay';
         const header = document.createElement('div');
         header.className = 'viewer-header';
-        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><div id="zoomControls" style="display: none; gap: 8px;"></div><button class="viewer-btn download-btn">📥 下载</button><button class="viewer-btn close-btn">✕ 关闭</button></div>`;
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><div id="zoomControls" style="display: none; gap: 8px;"></div><button class="viewer-btn download-btn">📥 下载</button><button class="viewer-btn share-btn">🔗 分享</button><button class="viewer-btn close-btn">✕ 关闭</button></div>`;
         const content = document.createElement('div');
         content.className = 'viewer-content';
         overlay.appendChild(header); overlay.appendChild(content);
@@ -684,6 +803,7 @@
         zoomControls.querySelector('#resetZoomBtn').onclick = resetZoom;
         
         header.querySelector('.download-btn').onclick = () => downloadFile(url, fileName);
+        header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
         header.querySelector('.close-btn').onclick = () => overlay.remove();
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
@@ -693,7 +813,7 @@
         overlay.className = 'file-viewer-overlay';
         const header = document.createElement('div');
         header.className = 'viewer-header';
-        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn download-btn">📥 下载</button><button class="viewer-btn close-btn">✕ 关闭</button></div>`;
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn download-btn">📥 下载</button><button class="viewer-btn share-btn">🔗 分享</button><button class="viewer-btn close-btn">✕ 关闭</button></div>`;
         const content = document.createElement('div');
         content.className = 'viewer-content';
         const video = document.createElement('video');
@@ -710,6 +830,7 @@
         overlay.appendChild(header); overlay.appendChild(content);
         document.body.appendChild(overlay);
         header.querySelector('.download-btn').onclick = () => downloadFile(url, fileName);
+        header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
         header.querySelector('.close-btn').onclick = () => overlay.remove();
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
@@ -719,7 +840,7 @@
         overlay.className = 'file-viewer-overlay';
         const header = document.createElement('div');
         header.className = 'viewer-header';
-        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn close-btn">✕ 关闭</button></div>`;
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn share-btn">🔗 分享</button><button class="viewer-btn close-btn">✕ 关闭</button></div>`;
         const content = document.createElement('div');
         content.className = 'viewer-content';
         content.innerHTML = `
@@ -732,6 +853,7 @@
         overlay.appendChild(header); overlay.appendChild(content);
         document.body.appendChild(overlay);
         content.querySelector('#downloadBtn').onclick = () => downloadFile(url, fileName);
+        header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
         header.querySelector('.close-btn').onclick = () => overlay.remove();
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
@@ -752,14 +874,13 @@
         return 'file';
     }
     
-    // ========== 核心功能：处理应用点击（支持URL参数自动打开） ==========
+    // ========== 核心功能：处理应用点击 ==========
     function handleAppClick(link, name) {
         let fullUrl = link;
         if (fullUrl && !fullUrl.startsWith('http') && !fullUrl.startsWith('//')) {
             fullUrl = `https://luckynum.top/${fullUrl}`;
         }
         
-        // 判断是否为文件
         if (isFileUrl(link)) {
             const fileType = getFileType(link);
             if (fileType === 'image') {
@@ -776,26 +897,63 @@
         window.open(fullUrl, '_blank');
     }
     
-    // ========== 处理 URL 参数 ?app=应用名 自动打开 ==========
+    // ========== 处理 URL 参数 ?app= 自动打开（修复版：支持带后缀的文件名） ==========
     async function handleUrlAppParameter() {
         const urlParams = new URLSearchParams(window.location.search);
-        const appName = urlParams.get('app');
+        let appParam = urlParams.get('app');
         
-        if (!appName) return;
+        if (!appParam) return;
         
-        console.log('检测到 URL 参数 app:', appName);
+        // URL 解码
+        try {
+            appParam = decodeURIComponent(appParam);
+        } catch(e) {
+            console.warn('URL解码失败:', e);
+        }
+        
+        console.log('检测到 URL 参数 app:', appParam);
         
         // 等待应用列表加载完成
         let retryCount = 0;
-        while (appItems.length === 0 && retryCount < 20) {
+        while (appItems.length === 0 && retryCount < 30) {
             await new Promise(r => setTimeout(r, 200));
             retryCount++;
         }
         
-        // 查找匹配的应用（精确匹配或包含匹配）
-        let targetApp = appItems.find(app => app.name === appName);
+        // 辅助函数：判断是否为可预览的文件
+        function isPreviewableFile(urlOrName) {
+            const fileExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico', 'mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'];
+            const ext = urlOrName.split('.').pop().toLowerCase();
+            return fileExts.includes(ext);
+        }
+        
+        // 辅助函数：直接预览文件
+        function previewFile(fileName) {
+            let fileUrl = fileName;
+            if (!fileUrl.startsWith('http')) {
+                fileUrl = `https://luckynum.top/${fileUrl}`;
+            }
+            const fileType = getFileType(fileUrl);
+            if (fileType === 'image') {
+                openImageViewer(fileUrl, fileName);
+            } else if (fileType === 'video') {
+                openVideoViewer(fileUrl, fileName);
+            } else {
+                showUnsupportedDialog(fileUrl, fileName);
+            }
+        }
+        
+        // 1. 先在应用列表中查找匹配的应用（精确匹配或包含匹配）
+        let targetApp = null;
+        
+        // 精确匹配
+        targetApp = appItems.find(app => app.name === appParam);
+        
+        // 包含匹配（不区分大小写）
         if (!targetApp) {
-            targetApp = appItems.find(app => app.name.toLowerCase().includes(appName.toLowerCase()));
+            targetApp = appItems.find(app => 
+                app.name.toLowerCase().includes(appParam.toLowerCase())
+            );
         }
         
         if (targetApp) {
@@ -803,15 +961,19 @@
             setTimeout(() => {
                 handleAppClick(targetApp.link, targetApp.name);
             }, 500);
-        } else {
-            console.log('未找到应用:', appName);
-            // 可选：显示提示
-            const tip = document.createElement('div');
-            tip.style.cssText = 'position:fixed;bottom:100px;left:20px;right:20px;background:#e74c3c;color:white;padding:12px;border-radius:12px;text-align:center;z-index:1000;';
-            tip.textContent = `未找到应用：${appName}`;
-            document.body.appendChild(tip);
-            setTimeout(() => tip.remove(), 3000);
+            return;
         }
+        
+        // 2. 如果不是应用，判断是否为可预览的文件
+        if (isPreviewableFile(appParam)) {
+            console.log('检测到文件参数，直接预览:', appParam);
+            previewFile(appParam);
+            return;
+        }
+        
+        // 3. 都不存在，弹窗提示
+        console.log('未找到匹配的应用或文件:', appParam);
+        alert(`❌ 应用/文件不存在或已被删除\n\n“${appParam}”`);
     }
     
     function parseAppTxt(raw) {
