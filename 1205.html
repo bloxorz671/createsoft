@@ -119,119 +119,18 @@
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; }
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; border-radius: 12px; }
         
-        /* ========== 图片/视频预览器样式 ========== */
-        .file-viewer-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 20000;
-            display: flex;
-            flex-direction: column;
-        }
-        .viewer-header {
-            background: #1e2a4a;
-            color: white;
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-            z-index: 10;
-        }
-        .viewer-title {
-            font-size: 1rem;
-            font-weight: 500;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            flex: 1;
-        }
-        .viewer-controls {
-            display: flex;
-            gap: 12px;
-        }
-        .viewer-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
+        .file-viewer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 20000; display: flex; flex-direction: column; }
+        .viewer-header { background: #1e2a4a; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .viewer-title { font-size: 1rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+        .viewer-controls { display: flex; gap: 12px; }
+        .viewer-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
         .viewer-btn:hover { background: rgba(255,255,255,0.4); }
-        .zoom-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-        .viewer-content {
-            flex: 1;
-            background: #000;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .image-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
-            touch-action: none;
-        }
-        .zoomable-image {
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-            transition: transform 0.05s ease-out;
-            transform-origin: center center;
-            will-change: transform;
-        }
-        .viewer-content video {
-            max-width: 100%;
-            max-height: 100%;
-            background: #000;
-            object-fit: contain;
-        }
-        .unsupported-view {
-            text-align: center;
-            padding: 60px;
-            background: white;
-            border-radius: 16px;
-            margin: 20px;
-        }
-        .unsupported-view h2 {
-            font-size: 1.8rem;
-            color: #666;
-            margin-bottom: 20px;
-        }
-        .unsupported-view button {
-            background: #2b4c8a;
-            color: white;
-            border: none;
-            padding: 12px 32px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            margin-top: 20px;
-        }
+        .zoom-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; font-size: 1.2rem; font-weight: bold; }
+        .viewer-content { flex: 1; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        .image-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; touch-action: none; }
+        .zoomable-image { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; transition: transform 0.05s ease-out; transform-origin: center center; }
+        .viewer-content video { max-width: 100%; max-height: 100%; background: #000; object-fit: contain; }
+        .unsupported-view { text-align: center; padding: 60px; background: white; border-radius: 16px; margin: 20px; }
         
         .file-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; }
         .file-item:hover { background: #f5f5f5; }
@@ -245,7 +144,6 @@
         .current-path { padding: 8px; background: #f5f5f5; border-radius: 8px; margin-bottom: 10px; font-family: monospace; font-size: 12px; word-break: break-all; }
         .link-buttons { display: flex; gap: 10px; margin-top: 10px; }
         .link-btn { background: #f0f2f5; border: 1px solid #ddd; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 12px; flex: 1; text-align: center; }
-        .link-btn:hover { background: #e8f0fe; border-color: #2b4c8a; }
         
         .profile-card {
             background: linear-gradient(135deg, #2b4c8a, #1e3c72);
@@ -397,8 +295,10 @@
     const GITHUB_REPO = 'createsoft';
     const GITHUB_PATH = '5app.txt';
     const NAME_FILE_URL = 'https://luckynum.top/5name.txt';
-    const INTEGRAL_FILE_URL = 'https://ghproxy.net/https://raw.githubusercontent.com/bloxorz671/5class-system/main/student-integral.txt';
-    const JFFI_FILE_URL = 'https://ghproxy.net/https://raw.githubusercontent.com/bloxorz671/5class-system/main/jffi.txt';
+    
+    // 使用 ghproxy 代理中转 raw.githubusercontent.com
+    const INTEGRAL_FILE_URL = 'https://ghproxy.com/https://raw.githubusercontent.com/bloxorz671/5class-system/main/student-integral.txt';
+    const JFFI_FILE_URL = 'https://ghproxy.com/https://raw.githubusercontent.com/bloxorz671/5class-system/main/jffi.txt';
     
     const TARGET_UA = 'ClassApp/1.0 (Grade8Class5)';
     const currentUA = navigator.userAgent;
@@ -416,7 +316,6 @@
     const SCAN_COOLDOWN = 1000;
     let defaultCameraId = null;
     
-    // 拖拽排序相关变量
     let draggedGroupIndex = null;
     let draggedAppData = null;
     
@@ -452,7 +351,7 @@
         { min: 60, max: 79, name: '顶级', colorClass: 'level-1' },
         { min: 40, max: 59, name: '人上人', colorClass: 'level-2' },
         { min: 20, max: 39, name: 'Npc', colorClass: 'level-3' },
-        { min: 0, max: 19, name: '拉完了', colorClass: 'level-4' }
+        { min: -Infinity, max: 19, name: '拉完了', colorClass: 'level-4' }
     ];
     
     function getRatingByIntegral(integral) {
@@ -661,7 +560,7 @@
     function showScanModalFunc() { if (scanModal) scanModal.classList.add('show'); setTimeout(() => startScanCamera(), 100); }
     function closeScanModalFunc() { stopScanCamera(); if (scanModal) scanModal.classList.remove('show'); }
     
-    // ========== 图片/视频预览模块（完整版） ==========
+    // ========== 图片/视频预览模块 ==========
     function downloadFile(url, fileName) {
         const a = document.createElement('a');
         a.href = url;
@@ -853,14 +752,12 @@
         return 'file';
     }
     
+    // ========== 核心功能：处理应用点击（支持URL参数自动打开） ==========
     function handleAppClick(link, name) {
-        if (link === 'ezr' || link === 'ezr/' || link === '/ezr' || (name && name.includes('电子值日码'))) {
-            const id = getStudentId();
-            window.open(`https://luckynum.top/ezr${id ? '?' + id : ''}`, '_blank');
-            return;
-        }
         let fullUrl = link;
-        if (fullUrl && !fullUrl.startsWith('http') && !fullUrl.startsWith('//')) fullUrl = `https://luckynum.top/${fullUrl}`;
+        if (fullUrl && !fullUrl.startsWith('http') && !fullUrl.startsWith('//')) {
+            fullUrl = `https://luckynum.top/${fullUrl}`;
+        }
         
         // 判断是否为文件
         if (isFileUrl(link)) {
@@ -877,6 +774,44 @@
             return;
         }
         window.open(fullUrl, '_blank');
+    }
+    
+    // ========== 处理 URL 参数 ?app=应用名 自动打开 ==========
+    async function handleUrlAppParameter() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const appName = urlParams.get('app');
+        
+        if (!appName) return;
+        
+        console.log('检测到 URL 参数 app:', appName);
+        
+        // 等待应用列表加载完成
+        let retryCount = 0;
+        while (appItems.length === 0 && retryCount < 20) {
+            await new Promise(r => setTimeout(r, 200));
+            retryCount++;
+        }
+        
+        // 查找匹配的应用（精确匹配或包含匹配）
+        let targetApp = appItems.find(app => app.name === appName);
+        if (!targetApp) {
+            targetApp = appItems.find(app => app.name.toLowerCase().includes(appName.toLowerCase()));
+        }
+        
+        if (targetApp) {
+            console.log('找到应用:', targetApp.name, targetApp.link);
+            setTimeout(() => {
+                handleAppClick(targetApp.link, targetApp.name);
+            }, 500);
+        } else {
+            console.log('未找到应用:', appName);
+            // 可选：显示提示
+            const tip = document.createElement('div');
+            tip.style.cssText = 'position:fixed;bottom:100px;left:20px;right:20px;background:#e74c3c;color:white;padding:12px;border-radius:12px;text-align:center;z-index:1000;';
+            tip.textContent = `未找到应用：${appName}`;
+            document.body.appendChild(tip);
+            setTimeout(() => tip.remove(), 3000);
+        }
     }
     
     function parseAppTxt(raw) {
@@ -908,9 +843,11 @@
         if (slidesData.length) { renderCarousel(); startAutoSlide(); }
         else carouselSection.style.display = 'none';
         warningBanner.style.display = 'none';
+        
+        // 加载完成后检查 URL 参数
+        handleUrlAppParameter();
     }
     
-    // ========== 渲染分组（包含拖拽功能） ==========
     function renderGroups() {
         if (!groupsContainer) return;
         let appsByGroup = {};
@@ -955,7 +892,6 @@
         if (isEditMode) { initDragSort(); }
     }
     
-    // ========== 拖拽排序初始化 ==========
     function initDragSort() {
         const groupHeaders = document.querySelectorAll('.group-header.draggable');
         groupHeaders.forEach(header => {
@@ -1058,6 +994,198 @@
     
     function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
     
+    // ========== 积分相关 ==========
+    async function loadPointsRecords(studentId) {
+        try {
+            const response = await fetch(JFFI_FILE_URL + '?t=' + Date.now());
+            if (!response.ok) return { records: [], total: 0 };
+            const text = await response.text();
+            const lines = text.split(/\r?\n/);
+            const records = [];
+            let total = 0;
+            for (let line of lines) {
+                line = line.trim();
+                if (line === '') continue;
+                const regex = /^(\d{4}\/\d{2}\/\d{2})\s+(\d{2}:\d{2})\s+(\d{5})\s+(.+?)\s+([+-]\d+)$/;
+                const match = line.match(regex);
+                if (match) {
+                    const date = match[1], time = match[2], sid = match[3], event = match[4], scoreStr = match[5];
+                    const score = parseInt(scoreStr);
+                    if (sid === studentId) {
+                        records.push({ datetime: `${date} ${time}`, event: event, score: score, isPlus: score > 0 });
+                        total += score;
+                    }
+                }
+            }
+            records.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+            return { records, total };
+        } catch (e) { return { records: [], total: 0 }; }
+    }
+    
+    async function showPointsDetail() {
+        if (!currentStudentId) { alert('请先登录'); return; }
+        pointsModal.classList.add('show');
+        pointsModalBody.innerHTML = '<div class="loading-tip">📡 加载积分记录中...</div>';
+        const { records, total } = await loadPointsRecords(currentStudentId);
+        if (records.length === 0) { pointsModalBody.innerHTML = '<div class="empty-records">暂无积分记录</div>'; return; }
+        let html = '';
+        for (const record of records) {
+            const scoreClass = record.isPlus ? 'plus' : 'minus';
+            const scoreSymbol = record.isPlus ? `+${record.score}` : `${record.score}`;
+            html += `<div class="record-item"><span class="record-date">${escapeHtml(record.datetime)}</span><span class="record-event">${escapeHtml(record.event)}</span><span class="record-score ${scoreClass}">${scoreSymbol}</span></div>`;
+        }
+        const totalClass = total >= 0 ? 'plus' : 'minus';
+        const totalSymbol = total >= 0 ? `+${total}` : `${total}`;
+        pointsModalBody.innerHTML = `<div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #eef2f8;"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600; color: #1e293b;">📈 当前总积分</span><span class="record-score ${totalClass}" style="font-size: 1.2rem;">${totalSymbol}</span></div></div>${html}`;
+    }
+    
+    function closePointsModalFunc() { pointsModal.classList.remove('show'); }
+    
+    async function renderProfilePage() {
+        if (!profileContent) return;
+        if (!currentStudentId) {
+            profileContent.innerHTML = `<div class="login-prompt"><p>👤 您还未登录</p><button class="login-btn" onclick="window.location.href='/'">返回首页登录</button></div>`;
+            return;
+        }
+        const studentName = nameMapping[currentStudentId] || currentStudentId;
+        const currentTotal = integralMapping[currentStudentId] || 0;
+        profileContent.innerHTML = `
+            <div class="profile-card">
+                <img class="avatar" src="41.jpg" alt="头像" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%234a90e2\'/%3E%3Ctext x=\'50\' y=\'70\' text-anchor=\'middle\' fill=\'white\' font-size=\'40\'%3E👤%3C/text%3E%3C/svg%3E'">
+                <div class="profile-info">
+                    <div class="profile-name">${escapeHtml(studentName)}</div>
+                    <div class="profile-student-id">学号：${currentStudentId}</div>
+                    <div class="profile-student-id" style="margin-top: 4px;">⭐ 当前积分：${currentTotal}</div>
+                </div>
+                <button class="profile-logout" id="profileLogoutBtn">退出登录</button>
+            </div>
+            <div class="menu-section">
+                <div class="menu-item" id="pointsMenuItem"><div class="menu-left"><span class="menu-icon">📊</span><span class="menu-title">积分明细</span></div><span class="menu-arrow">›</span></div>
+            </div>
+        `;
+        const profileLogoutBtn = document.getElementById('profileLogoutBtn');
+        if (profileLogoutBtn) profileLogoutBtn.onclick = () => { clearStudentId(); window.location.href = window.location.pathname; };
+        const pointsMenuItem = document.getElementById('pointsMenuItem');
+        if (pointsMenuItem) pointsMenuItem.onclick = () => showPointsDetail();
+    }
+    
+    function showHome() { homePage.classList.add('active'); profilePage.classList.remove('active'); navHomeBtn.classList.add('active'); navProfileBtn.classList.remove('active'); }
+    async function showProfile() { homePage.classList.remove('active'); profilePage.classList.add('active'); navProfileBtn.classList.add('active'); navHomeBtn.classList.remove('active'); await renderProfilePage(); }
+    
+    async function loadNameMapping() {
+        try {
+            const res = await fetch(NAME_FILE_URL + '?t=' + Date.now());
+            if (res.ok) {
+                const text = await res.text();
+                nameMapping = {};
+                text.split(/\r?\n/).forEach(line => {
+                    line = line.trim();
+                    if (!line) return;
+                    const space = line.indexOf(' ');
+                    if (space !== -1) nameMapping[line.substring(0, space)] = line.substring(space + 1).trim();
+                });
+                return true;
+            }
+        } catch(e) {}
+        return false;
+    }
+    
+    async function loadIntegralData() {
+        try {
+            const res = await fetch(INTEGRAL_FILE_URL + '?t=' + Date.now());
+            if (res.ok) {
+                const text = await res.text();
+                integralMapping = {};
+                text.split(/\r?\n/).forEach(line => {
+                    line = line.trim();
+                    if (!line) return;
+                    const parts = line.split(/\s+/);
+                    if (parts.length >= 2) integralMapping[parts[0].trim()] = parts[1].trim();
+                });
+                return true;
+            }
+        } catch(e) {}
+        return false;
+    }
+    
+    async function showGreeting() {
+        currentStudentId = getStudentId();
+        if (!currentStudentId) {
+            greetingContainer.style.display = 'none';
+            unloggedContainer.style.display = 'block';
+            if (isTargetDevice && scanLoginBtn) scanLoginBtn.style.display = 'none';
+            return;
+        }
+        unloggedContainer.style.display = 'none';
+        const textElem = greetingContainer?.querySelector('.greeting-text');
+        if (Object.keys(nameMapping).length === 0) await loadNameMapping();
+        const studentName = nameMapping[currentStudentId] || currentStudentId;
+        if (greetingContainer && textElem) {
+            textElem.textContent = studentName;
+            greetingContainer.style.display = 'block';
+            if (Object.keys(integralMapping).length === 0) await loadIntegralData();
+            if (integralMapping[currentStudentId]) {
+                const integral = integralMapping[currentStudentId];
+                const rating = getRatingByIntegral(integral);
+                ratingContainer.innerHTML = '';
+                const ratingBox = document.createElement('div');
+                ratingBox.className = `rating-box ${rating.colorClass}`;
+                ratingBox.textContent = rating.name;
+                const scoreWrapper = document.createElement('div');
+                scoreWrapper.className = 'score-wrapper';
+                scoreWrapper.innerHTML = `<span class="score-label">分数</span><span class="score-number">${integral}</span>`;
+                ratingContainer.appendChild(ratingBox);
+                ratingContainer.appendChild(scoreWrapper);
+                ratingContainer.style.display = 'inline-flex';
+            } else ratingContainer.style.display = 'none';
+        }
+        if (logoutBtn) {
+            logoutBtn.style.display = 'inline-block';
+            logoutBtn.onclick = () => { clearStudentId(); window.location.href = window.location.pathname; };
+        }
+        if (greetingWrapper) {
+            greetingWrapper.style.cursor = 'pointer';
+            greetingWrapper.onclick = (e) => {
+                if (e.target === logoutBtn || logoutBtn?.contains(e.target)) return;
+                window.location.href = '/5pm';
+            };
+        }
+    }
+    
+    function showStudentIdPrompt() {
+        return new Promise((resolve) => {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay student-id-modal';
+            modal.innerHTML = `<div class="modal-content"><h3>🔐 初二五班专用系统</h3><div class="subtitle">请验证身份以继续使用</div><input type="number" id="studentIdInput" placeholder="请输入5位数学号" maxlength="5" autocomplete="off"><div class="warning-text" id="warningText">❌ 学号必须是5位数字，请重新输入</div><div class="modal-buttons"><button class="confirm-btn" id="confirmBtn">确定</button><button class="cancel-btn" id="cancelBtn">取消</button></div></div>`;
+            document.body.appendChild(modal);
+            modal.classList.add('show');
+            const input = modal.querySelector('#studentIdInput');
+            const confirmBtn = modal.querySelector('#confirmBtn');
+            const cancelBtn = modal.querySelector('#cancelBtn');
+            const warningText = modal.querySelector('#warningText');
+            input.focus();
+            const handleConfirm = () => {
+                const value = input.value.trim();
+                if (/^\d{5}$/.test(value)) { modal.remove(); resolve(value); }
+                else { warningText.style.display = 'block'; input.style.borderColor = '#e74c3c'; input.value = ''; input.focus(); }
+            };
+            const handleCancel = () => { modal.remove(); resolve(null); };
+            confirmBtn.onclick = handleConfirm;
+            cancelBtn.onclick = handleCancel;
+            input.onkeypress = (e) => { if (e.key === 'Enter') handleConfirm(); };
+            modal.onclick = (e) => { if (e.target === modal) handleCancel(); };
+        });
+    }
+    
+    async function checkUserAgentAndPrompt() {
+        if (!isTargetDevice) return;
+        let existingId = getStudentId();
+        if (existingId) { currentStudentId = existingId; await showGreeting(); return; }
+        const studentId = await showStudentIdPrompt();
+        if (studentId) { saveStudentId(studentId); window.location.href = `?p=${studentId}`; }
+        else { warningBanner.style.display = 'block'; warningBanner.innerHTML = '⚠️ 请输入学号以使用完整功能 | <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">点击重试</span>'; }
+    }
+    
     // ========== 编辑模式 ==========
     let clickCount = 0, clickTimer = null;
     document.getElementById('titleClickTarget')?.addEventListener('click', () => {
@@ -1117,7 +1245,6 @@
         modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     }
     
-    // 编辑功能函数
     window.deleteSlide = function(idx) {
         if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; }
         if (confirm('确定删除这张轮播图吗？')) {
@@ -1395,202 +1522,6 @@
             } else alert('删除失败');
         } catch(e) { alert('删除失败'); }
     };
-    
-    let cachedPointsRecords = [];
-    let cachedCurrentTotal = 0;
-    
-    async function loadPointsRecords(studentId) {
-        try {
-            const response = await fetch(JFFI_FILE_URL + '?t=' + Date.now());
-            if (!response.ok) return { records: [], total: 0 };
-            const text = await response.text();
-            const lines = text.split(/\r?\n/);
-            const records = [];
-            let total = 0;
-            for (let line of lines) {
-                line = line.trim();
-                if (line === '') continue;
-                const regex = /^(\d{4}\/\d{2}\/\d{2})\s+(\d{2}:\d{2})\s+(\d{5})\s+(.+?)\s+([+-]\d+)$/;
-                const match = line.match(regex);
-                if (match) {
-                    const date = match[1], time = match[2], sid = match[3], event = match[4], scoreStr = match[5];
-                    const score = parseInt(scoreStr);
-                    if (sid === studentId) {
-                        records.push({ datetime: `${date} ${time}`, event: event, score: score, isPlus: score > 0 });
-                        total += score;
-                    }
-                }
-            }
-            records.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
-            return { records, total };
-        } catch (e) { return { records: [], total: 0 }; }
-    }
-    
-    async function showPointsDetail() {
-        if (!currentStudentId) { alert('请先登录'); return; }
-        pointsModal.classList.add('show');
-        pointsModalBody.innerHTML = '<div class="loading-tip">📡 加载积分记录中...</div>';
-        const { records, total } = await loadPointsRecords(currentStudentId);
-        cachedPointsRecords = records;
-        cachedCurrentTotal = total;
-        if (records.length === 0) { pointsModalBody.innerHTML = '<div class="empty-records">暂无积分记录</div>'; return; }
-        let html = '';
-        for (const record of records) {
-            const scoreClass = record.isPlus ? 'plus' : 'minus';
-            const scoreSymbol = record.isPlus ? `+${record.score}` : `${record.score}`;
-            html += `<div class="record-item"><span class="record-date">${escapeHtml(record.datetime)}</span><span class="record-event">${escapeHtml(record.event)}</span><span class="record-score ${scoreClass}">${scoreSymbol}</span></div>`;
-        }
-        const totalClass = total >= 0 ? 'plus' : 'minus';
-        const totalSymbol = total >= 0 ? `+${total}` : `${total}`;
-        pointsModalBody.innerHTML = `<div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #eef2f8;"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600; color: #1e293b;">📈 当前总积分</span><span class="record-score ${totalClass}" style="font-size: 1.2rem;">${totalSymbol}</span></div></div>${html}`;
-    }
-    
-    function closePointsModalFunc() { pointsModal.classList.remove('show'); }
-    
-    async function renderProfilePage() {
-        if (!profileContent) return;
-        if (!currentStudentId) {
-            profileContent.innerHTML = `<div class="login-prompt"><p>👤 您还未登录</p><button class="login-btn" onclick="window.location.href='/1205'">返回首页登录</button></div>`;
-            return;
-        }
-        const studentName = nameMapping[currentStudentId] || currentStudentId;
-        const currentTotal = integralMapping[currentStudentId] || 0;
-        profileContent.innerHTML = `
-            <div class="profile-card">
-                <img class="avatar" src="41.jpg" alt="头像" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%234a90e2\'/%3E%3Ctext x=\'50\' y=\'70\' text-anchor=\'middle\' fill=\'white\' font-size=\'40\'%3E👤%3C/text%3E%3C/svg%3E'">
-                <div class="profile-info">
-                    <div class="profile-name">${escapeHtml(studentName)}</div>
-                    <div class="profile-student-id">学号：${currentStudentId}</div>
-                    <div class="profile-student-id" style="margin-top: 4px;">⭐ 当前积分：${currentTotal}</div>
-                </div>
-                <button class="profile-logout" id="profileLogoutBtn">退出登录</button>
-            </div>
-            <div class="menu-section">
-                <div class="menu-item" id="pointsMenuItem"><div class="menu-left"><span class="menu-icon">📊</span><span class="menu-title">积分明细</span></div><span class="menu-arrow">›</span></div>
-            </div>
-        `;
-        const profileLogoutBtn = document.getElementById('profileLogoutBtn');
-        if (profileLogoutBtn) profileLogoutBtn.onclick = () => { clearStudentId(); window.location.href = window.location.pathname; };
-        const pointsMenuItem = document.getElementById('pointsMenuItem');
-        if (pointsMenuItem) pointsMenuItem.onclick = () => showPointsDetail();
-    }
-    
-    function showHome() { homePage.classList.add('active'); profilePage.classList.remove('active'); navHomeBtn.classList.add('active'); navProfileBtn.classList.remove('active'); }
-    async function showProfile() { homePage.classList.remove('active'); profilePage.classList.add('active'); navProfileBtn.classList.add('active'); navHomeBtn.classList.remove('active'); await renderProfilePage(); }
-    
-    async function loadNameMapping() {
-        try {
-            const res = await fetch(NAME_FILE_URL + '?t=' + Date.now());
-            if (res.ok) {
-                const text = await res.text();
-                nameMapping = {};
-                text.split(/\r?\n/).forEach(line => {
-                    line = line.trim();
-                    if (!line) return;
-                    const space = line.indexOf(' ');
-                    if (space !== -1) nameMapping[line.substring(0, space)] = line.substring(space + 1).trim();
-                });
-                return true;
-            }
-        } catch(e) {}
-        return false;
-    }
-    
-    async function loadIntegralData() {
-        try {
-            const res = await fetch(INTEGRAL_FILE_URL + '?t=' + Date.now());
-            if (res.ok) {
-                const text = await res.text();
-                integralMapping = {};
-                text.split(/\r?\n/).forEach(line => {
-                    line = line.trim();
-                    if (!line) return;
-                    const parts = line.split(/\s+/);
-                    if (parts.length >= 2) integralMapping[parts[0].trim()] = parts[1].trim();
-                });
-                return true;
-            }
-        } catch(e) {}
-        return false;
-    }
-    
-    async function showGreeting() {
-        currentStudentId = getStudentId();
-        if (!currentStudentId) {
-            greetingContainer.style.display = 'none';
-            unloggedContainer.style.display = 'block';
-            if (isTargetDevice && scanLoginBtn) scanLoginBtn.style.display = 'none';
-            return;
-        }
-        unloggedContainer.style.display = 'none';
-        const textElem = greetingContainer?.querySelector('.greeting-text');
-        if (Object.keys(nameMapping).length === 0) await loadNameMapping();
-        const studentName = nameMapping[currentStudentId] || currentStudentId;
-        if (greetingContainer && textElem) {
-            textElem.textContent = studentName;
-            greetingContainer.style.display = 'block';
-            if (Object.keys(integralMapping).length === 0) await loadIntegralData();
-            if (integralMapping[currentStudentId]) {
-                const integral = integralMapping[currentStudentId];
-                const rating = getRatingByIntegral(integral);
-                ratingContainer.innerHTML = '';
-                const ratingBox = document.createElement('div');
-                ratingBox.className = `rating-box ${rating.colorClass}`;
-                ratingBox.textContent = rating.name;
-                const scoreWrapper = document.createElement('div');
-                scoreWrapper.className = 'score-wrapper';
-                scoreWrapper.innerHTML = `<span class="score-label">分数</span><span class="score-number">${integral}</span>`;
-                ratingContainer.appendChild(ratingBox);
-                ratingContainer.appendChild(scoreWrapper);
-                ratingContainer.style.display = 'inline-flex';
-            } else ratingContainer.style.display = 'none';
-        }
-        if (logoutBtn) {
-            logoutBtn.style.display = 'inline-block';
-            logoutBtn.onclick = () => { clearStudentId(); window.location.href = window.location.pathname; };
-        }
-        if (greetingWrapper) {
-            greetingWrapper.style.cursor = 'pointer';
-            greetingWrapper.onclick = (e) => {
-                if (e.target === logoutBtn || logoutBtn?.contains(e.target)) return;
-                window.location.href = '/5pm';
-            };
-        }
-    }
-    
-    function showStudentIdPrompt() {
-        return new Promise((resolve) => {
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay student-id-modal';
-            modal.innerHTML = `<div class="modal-content"><h3>🔐 初二五班专用系统</h3><div class="subtitle">请验证身份以继续使用</div><input type="number" id="studentIdInput" placeholder="请输入5位数学号" maxlength="5" autocomplete="off"><div class="warning-text" id="warningText">❌ 学号必须是5位数字，请重新输入</div><div class="modal-buttons"><button class="confirm-btn" id="confirmBtn">确定</button><button class="cancel-btn" id="cancelBtn">取消</button></div></div>`;
-            document.body.appendChild(modal);
-            modal.classList.add('show');
-            const input = modal.querySelector('#studentIdInput');
-            const confirmBtn = modal.querySelector('#confirmBtn');
-            const cancelBtn = modal.querySelector('#cancelBtn');
-            const warningText = modal.querySelector('#warningText');
-            input.focus();
-            const handleConfirm = () => {
-                const value = input.value.trim();
-                if (/^\d{5}$/.test(value)) { modal.remove(); resolve(value); }
-                else { warningText.style.display = 'block'; input.style.borderColor = '#e74c3c'; input.value = ''; input.focus(); }
-            };
-            const handleCancel = () => { modal.remove(); resolve(null); };
-            confirmBtn.onclick = handleConfirm;
-            cancelBtn.onclick = handleCancel;
-            input.onkeypress = (e) => { if (e.key === 'Enter') handleConfirm(); };
-            modal.onclick = (e) => { if (e.target === modal) handleCancel(); };
-        });
-    }
-    
-    async function checkUserAgentAndPrompt() {
-        if (!isTargetDevice) return;
-        let existingId = getStudentId();
-        if (existingId) { currentStudentId = existingId; await showGreeting(); return; }
-        const studentId = await showStudentIdPrompt();
-        if (studentId) { saveStudentId(studentId); window.location.href = `?p=${studentId}`; }
-        else { warningBanner.style.display = 'block'; warningBanner.innerHTML = '⚠️ 请输入学号以使用完整功能 | <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">点击重试</span>'; }
-    }
     
     document.getElementById('addAppFab')?.addEventListener('click', addApp);
     document.getElementById('addCarouselFab')?.addEventListener('click', addCarousel);
