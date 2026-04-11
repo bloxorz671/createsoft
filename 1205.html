@@ -119,7 +119,7 @@
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; }
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; border-radius: 12px; }
         
-        /* 图片/视频预览器样式 - 修复版 */
+        /* 图片/视频预览器样式 */
         .file-viewer-overlay {
             position: fixed;
             top: 0;
@@ -197,7 +197,6 @@
             position: relative;
             touch-action: none;
         }
-        /* 图片元素 - 保留浏览器长按菜单 */
         .zoomable-image {
             max-width: 100%;
             max-height: 100%;
@@ -687,7 +686,7 @@
         });
     }
     
-    // ========== 图片/视频预览模块（修复版） ==========
+    // ========== 图片预览模块（按钮无图标） ==========
     function downloadFile(url, fileName) {
         const a = document.createElement('a');
         a.href = url;
@@ -703,7 +702,6 @@
         img.src = url;
         img.className = 'zoomable-image';
         img.style.transform = 'translate(0px, 0px) scale(1)';
-        // 启用长按菜单
         img.style.webkitTouchCallout = 'default';
         img.style.userSelect = 'auto';
         container.appendChild(img);
@@ -797,7 +795,8 @@
         overlay.className = 'file-viewer-overlay';
         const header = document.createElement('div');
         header.className = 'viewer-header';
-        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><div id="zoomControls" style="display: flex; gap: 8px;"></div><button class="viewer-btn download-btn">📥 下载</button><button class="viewer-btn share-btn">🔗 分享</button><button class="viewer-btn close-btn">✕ 关闭</button></div>`;
+        // 按钮文字去掉图标符号
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><div id="zoomControls" style="display: flex; gap: 8px;"></div><button class="viewer-btn download-btn">下载</button><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
         const content = document.createElement('div');
         content.className = 'viewer-content';
         overlay.appendChild(header); overlay.appendChild(content);
@@ -823,7 +822,7 @@
         overlay.className = 'file-viewer-overlay';
         const header = document.createElement('div');
         header.className = 'viewer-header';
-        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn download-btn">📥 下载</button><button class="viewer-btn share-btn">🔗 分享</button><button class="viewer-btn close-btn">✕ 关闭</button></div>`;
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn download-btn">下载</button><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
         const content = document.createElement('div');
         content.className = 'viewer-content';
         const video = document.createElement('video');
@@ -850,7 +849,7 @@
         overlay.className = 'file-viewer-overlay';
         const header = document.createElement('div');
         header.className = 'viewer-header';
-        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn share-btn">🔗 分享</button><button class="viewer-btn close-btn">✕ 关闭</button></div>`;
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
         const content = document.createElement('div');
         content.className = 'viewer-content';
         content.innerHTML = `
@@ -884,7 +883,6 @@
         return 'file';
     }
     
-    // ========== 核心功能：处理应用点击 ==========
     function handleAppClick(link, name) {
         let fullUrl = link;
         if (fullUrl && !fullUrl.startsWith('http') && !fullUrl.startsWith('//')) {
@@ -907,7 +905,6 @@
         window.open(fullUrl, '_blank');
     }
     
-    // ========== 处理 URL 参数 ?app= 自动打开 ==========
     async function handleUrlAppParameter() {
         const urlParams = new URLSearchParams(window.location.search);
         let appParam = urlParams.get('app');
