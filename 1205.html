@@ -44,6 +44,7 @@
             height: 20px;
             object-fit: contain;
             vertical-align: middle;
+            filter: invert(1); /* 反色处理 */
         }
         .scan-login-btn {
             background: #2b4c8a;
@@ -369,6 +370,7 @@
         .login-option-btn img {
             width: 22px;
             height: 22px;
+            filter: invert(1); /* 反色处理 */
         }
         .login-option-btn:active {
             transform: scale(0.98);
@@ -1267,7 +1269,7 @@
     async function renderProfilePage() {
         if (!profileContent) return;
         if (!currentStudentId) {
-            profileContent.innerHTML = `<div class="login-prompt"><p>👤 您还未登录</p><button class="login-btn" onclick="window.location.href='/'">立即登录</button></div>`;
+            profileContent.innerHTML = `<div class="login-prompt"><p>👤 您还未登录</p><button class="login-btn" onclick="showLoginOptions()">立即登录</button></div>`;
             return;
         }
         const studentName = nameMapping[currentStudentId] || currentStudentId;
