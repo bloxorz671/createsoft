@@ -39,7 +39,26 @@
         .unlogged-section { padding: 12px 20px 0 20px; background: white; }
         .unlogged-wrapper { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; }
         .unlogged-text { font-size: 1rem; font-weight: 500; color: #e67e22; background: #fff3e0; padding: 10px 16px; border-radius: 12px; text-align: center; }
-        .scan-login-btn { background: #2b4c8a; color: white; border: none; border-radius: 12px; padding: 10px 20px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .login-icon-img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            vertical-align: middle;
+        }
+        .scan-login-btn {
+            background: #2b4c8a;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
         .scan-login-btn:hover { background: #1e3c72; transform: scale(1.02); }
         
         .rating-box { display: inline-flex; align-items: center; justify-content: center; padding: 4px 14px; font-size: 1rem; font-weight: 600; color: white; border: 2px solid; border-radius: 8px; white-space: nowrap; }
@@ -119,7 +138,6 @@
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; }
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; border-radius: 12px; }
         
-        /* 图片/视频预览器样式 */
         .file-viewer-overlay {
             position: fixed;
             top: 0;
@@ -323,6 +341,41 @@
             .viewer-controls { gap: 8px; }
             .viewer-btn { padding: 6px 12px; font-size: 0.8rem; }
         }
+        
+        /* 登录选项弹窗 */
+        .login-options-modal .modal-content {
+            text-align: center;
+        }
+        .login-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .login-option-btn {
+            background: #2b4c8a;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .login-option-btn img {
+            width: 22px;
+            height: 22px;
+        }
+        .login-option-btn:active {
+            transform: scale(0.98);
+        }
+        .login-option-cancel {
+            background: #95a5a6;
+        }
     </style>
     <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 </head>
@@ -342,7 +395,9 @@
     <div id="unloggedContainer" class="unlogged-section" style="display: none;">
         <div class="unlogged-wrapper">
             <div class="unlogged-text">⚠️ 当前处于未登录状态</div>
-            <button id="scanLoginBtn" class="scan-login-btn">📷 扫码登录</button>
+            <button id="showLoginOptionsBtn" class="scan-login-btn">
+                <img src="ezr.jpg" alt="登录" class="login-icon-img" onerror="this.style.display='none'"> 立即登录
+            </button>
         </div>
     </div>
     
@@ -376,7 +431,7 @@
 
 <div id="scanModal" class="modal-overlay scan-modal" style="z-index: 10000;">
     <div class="modal-content" style="padding: 0; max-width: 100%; width: 100%; height: 100%; border-radius: 0; background: #000; display: flex; flex-direction: column;">
-        <div class="scan-header"><h3>📷 扫码登录</h3><button id="closeScanModal" class="scan-close">✕</button></div>
+        <div class="scan-header"><h3>扫码登录</h3><button id="closeScanModal" class="scan-close">✕</button></div>
         <div class="scan-video-container">
             <video id="scanVideo" autoplay playsinline muted></video>
             <div class="scan-area"><div class="scan-line"></div><div class="corner corner-tl"></div><div class="corner corner-tr"></div><div class="corner corner-bl"></div><div class="corner corner-br"></div></div>
@@ -397,6 +452,20 @@
     </div>
 </div>
 
+<!-- 登录选项弹窗 -->
+<div id="loginOptionsModal" class="modal-overlay" style="z-index: 10002;">
+    <div class="modal-content login-options-modal">
+        <h3>请选择登录方式</h3>
+        <div class="login-options">
+            <button id="scanLoginOptionBtn" class="login-option-btn">
+                <img src="ezr.jpg" alt="扫码" onerror="this.style.display='none'"> 扫码登录
+            </button>
+            <button id="inputIdLoginOptionBtn" class="login-option-btn">输入学号登录</button>
+            <button id="cancelLoginOptionBtn" class="login-option-btn login-option-cancel">取消</button>
+        </div>
+    </div>
+</div>
+
 <script>
     // ========== 配置 ==========
     const CONFIG_URL = 'https://luckynum.top/5app.txt';
@@ -405,9 +474,9 @@
     const GITHUB_PATH = '5app.txt';
     const NAME_FILE_URL = 'https://luckynum.top/5name.txt';
     
-    // 使用 ghproxy 代理中转 raw.githubusercontent.com
-    const INTEGRAL_FILE_URL = 'https://ghproxy.com/https://raw.githubusercontent.com/bloxorz671/5class-system/main/student-integral.txt';
-    const JFFI_FILE_URL = 'https://ghproxy.com/https://raw.githubusercontent.com/bloxorz671/5class-system/main/jffi.txt';
+    // 使用 ghproxy.net 代理中转 raw.githubusercontent.com
+    const INTEGRAL_FILE_URL = 'https://ghproxy.net/https://raw.githubusercontent.com/bloxorz671/5class-system/main/student-integral.txt';
+    const JFFI_FILE_URL = 'https://ghproxy.net/https://raw.githubusercontent.com/bloxorz671/5class-system/main/jffi.txt';
     
     const TARGET_UA = 'ClassApp/1.0 (Grade8Class5)';
     const currentUA = navigator.userAgent;
@@ -439,7 +508,11 @@
     const logoutBtn = document.getElementById('logoutBtn');
     const greetingContainer = document.getElementById('greetingContainer');
     const unloggedContainer = document.getElementById('unloggedContainer');
-    const scanLoginBtn = document.getElementById('scanLoginBtn');
+    const showLoginOptionsBtn = document.getElementById('showLoginOptionsBtn');
+    const loginOptionsModal = document.getElementById('loginOptionsModal');
+    const scanLoginOptionBtn = document.getElementById('scanLoginOptionBtn');
+    const inputIdLoginOptionBtn = document.getElementById('inputIdLoginOptionBtn');
+    const cancelLoginOptionBtn = document.getElementById('cancelLoginOptionBtn');
     const scanModal = document.getElementById('scanModal');
     const scanVideo = document.getElementById('scanVideo');
     const scanStatus = document.getElementById('scanStatus');
@@ -669,7 +742,6 @@
     function showScanModalFunc() { if (scanModal) scanModal.classList.add('show'); setTimeout(() => startScanCamera(), 100); }
     function closeScanModalFunc() { stopScanCamera(); if (scanModal) scanModal.classList.remove('show'); }
     
-    // ========== 分享功能 ==========
     function copyShareLink(appName) {
         let shareUrl = window.location.origin + window.location.pathname;
         if (appName) {
@@ -686,7 +758,6 @@
         });
     }
     
-    // ========== 图片预览模块（按钮无图标） ==========
     function downloadFile(url, fileName) {
         const a = document.createElement('a');
         a.href = url;
@@ -795,7 +866,6 @@
         overlay.className = 'file-viewer-overlay';
         const header = document.createElement('div');
         header.className = 'viewer-header';
-        // 按钮文字去掉图标符号
         header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><div id="zoomControls" style="display: flex; gap: 8px;"></div><button class="viewer-btn download-btn">下载</button><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
         const content = document.createElement('div');
         content.className = 'viewer-content';
@@ -1197,7 +1267,7 @@
     async function renderProfilePage() {
         if (!profileContent) return;
         if (!currentStudentId) {
-            profileContent.innerHTML = `<div class="login-prompt"><p>👤 您还未登录</p><button class="login-btn" onclick="window.location.href='/'">返回首页登录</button></div>`;
+            profileContent.innerHTML = `<div class="login-prompt"><p>👤 您还未登录</p><button class="login-btn" onclick="window.location.href='/'">立即登录</button></div>`;
             return;
         }
         const studentName = nameMapping[currentStudentId] || currentStudentId;
@@ -1266,7 +1336,6 @@
         if (!currentStudentId) {
             greetingContainer.style.display = 'none';
             unloggedContainer.style.display = 'block';
-            if (isTargetDevice && scanLoginBtn) scanLoginBtn.style.display = 'none';
             return;
         }
         unloggedContainer.style.display = 'none';
@@ -1338,6 +1407,58 @@
         if (studentId) { saveStudentId(studentId); window.location.href = `?p=${studentId}`; }
         else { warningBanner.style.display = 'block'; warningBanner.innerHTML = '⚠️ 请输入学号以使用完整功能 | <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">点击重试</span>'; }
     }
+    
+    // ========== 登录选项弹窗控制 ==========
+    function showLoginOptions() {
+        loginOptionsModal.classList.add('show');
+    }
+    
+    function hideLoginOptions() {
+        loginOptionsModal.classList.remove('show');
+    }
+    
+    // 显示学号输入弹窗
+    function showManualIdInput() {
+        hideLoginOptions();
+        showStudentIdPrompt().then(studentId => {
+            if (studentId) {
+                saveStudentId(studentId);
+                window.location.href = `?p=${studentId}`;
+            }
+        });
+    }
+    
+    // 事件绑定
+    if (showLoginOptionsBtn) {
+        // App端只显示输入学号，不显示选项
+        if (isTargetDevice) {
+            showLoginOptionsBtn.onclick = () => {
+                showStudentIdPrompt().then(studentId => {
+                    if (studentId) {
+                        saveStudentId(studentId);
+                        window.location.href = `?p=${studentId}`;
+                    }
+                });
+            };
+        } else {
+            showLoginOptionsBtn.onclick = showLoginOptions;
+        }
+    }
+    
+    if (scanLoginOptionBtn) scanLoginOptionBtn.onclick = () => {
+        hideLoginOptions();
+        showScanModalFunc();
+    };
+    
+    if (inputIdLoginOptionBtn) inputIdLoginOptionBtn.onclick = () => {
+        hideLoginOptions();
+        showManualIdInput();
+    };
+    
+    if (cancelLoginOptionBtn) cancelLoginOptionBtn.onclick = hideLoginOptions;
+    
+    // 点击弹窗外关闭
+    if (loginOptionsModal) loginOptionsModal.onclick = (e) => { if (e.target === loginOptionsModal) hideLoginOptions(); };
     
     // ========== 编辑模式 ==========
     let clickCount = 0, clickTimer = null;
@@ -1682,10 +1803,6 @@
     document.getElementById('fileManagerBtn')?.addEventListener('click', openFileManager);
     document.getElementById('addGroupFab')?.addEventListener('click', addGroup);
     
-    if (scanLoginBtn) {
-        if (isTargetDevice) { scanLoginBtn.style.display = 'none'; }
-        else { scanLoginBtn.addEventListener('click', showScanModalFunc); }
-    }
     if (closeScanModal) closeScanModal.addEventListener('click', closeScanModalFunc);
     if (scanAlbumBtn) scanAlbumBtn.addEventListener('click', () => scanAlbumInput?.click());
     if (scanAlbumInput) scanAlbumInput.addEventListener('change', (e) => { if (e.target.files && e.target.files[0]) { scanFromImage(e.target.files[0]); } scanAlbumInput.value = ''; });
