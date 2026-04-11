@@ -1259,7 +1259,7 @@
         }
         const totalClass = total >= 0 ? 'plus' : 'minus';
         const totalSymbol = total >= 0 ? `+${total}` : `${total}`;
-        pointsModalBody.innerHTML = `<div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #eef2f8;"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600; color: #1e293b;">📈 当前总积分</span><span class="record-score ${totalClass}" style="font-size: 1.2rem;">${totalSymbol}</span></div></div>${html}`;
+        pointsModalBody.innerHTML = html;
     }
     
     function closePointsModalFunc() { pointsModal.classList.remove('show'); }
