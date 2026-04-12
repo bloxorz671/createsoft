@@ -357,6 +357,12 @@
             margin-top: 16px;
             font-size: 0.9rem;
         }
+        .loading-percent {
+            color: #00ff00;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 8px;
+        }
         
         .video-container {
             width: 100%;
@@ -582,8 +588,8 @@
     const GITHUB_REPO = 'createsoft';
     const GITHUB_PATH = '5app.txt';
     const NAME_FILE_URL = 'https://luckynum.top/5name.txt';
-    const INTEGRAL_FILE_URL = 'https://ghproxy.net/https://raw.githubusercontent.com/bloxorz671/5class-system/main/student-integral.txt';
-    const JFFI_FILE_URL = 'https://ghproxy.net/https://raw.githubusercontent.com/bloxorz671/5class-system/main/jffi.txt';
+    const INTEGRAL_FILE_URL = 'https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/5class-system/main/student-integral.txt';
+    const JFFI_FILE_URL = 'https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/5class-system/main/jffi.txt';
     
     const TARGET_UA = 'ClassApp/1.0 (Grade8Class5)';
     const currentUA = navigator.userAgent;
@@ -964,11 +970,10 @@
     async function fetchLyrics(audioFileName) {
         const lrcFileName = audioFileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '.lrc');
         try {
-            const url = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${encodeURIComponent(lrcFileName)}`;
+            const url = `https://gh-proxy.com/https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${encodeURIComponent(lrcFileName)}`;
             const response = await fetch(url);
             if (response.ok) {
                 const arrayBuffer = await response.arrayBuffer();
-                // 尝试 UTF-8 解码，解决中文乱码
                 const decoder = new TextDecoder('utf-8');
                 const text = decoder.decode(arrayBuffer);
                 return parseLrc(text);
@@ -1023,11 +1028,20 @@
         if (!loading) {
             loading = document.createElement('div');
             loading.className = 'loading-overlay';
-            loading.innerHTML = '<div class="loading-spinner"></div><div class="loading-text"></div>';
+            loading.innerHTML = '<div class="loading-spinner"></div><div class="loading-text"></div><div class="loading-percent"></div>';
             document.body.appendChild(loading);
         }
         loading.querySelector('.loading-text').textContent = text;
+        loading.querySelector('.loading-percent').textContent = '';
         loading.style.display = 'flex';
+    }
+    
+    function updateLoadingPercent(percent) {
+        const loading = document.querySelector('.loading-overlay');
+        if (loading) {
+            const percentDiv = loading.querySelector('.loading-percent');
+            if (percentDiv) percentDiv.textContent = `${percent}%`;
+        }
     }
     
     function hideLoading() {
@@ -1035,11 +1049,32 @@
         if (loading) loading.style.display = 'none';
     }
     
-    // 缓存音频文件
-    async function cacheAudio(url) {
+    // 缓存音频文件（带进度）
+    async function cacheAudio(url, onProgress) {
         const response = await fetch(url);
         if (!response.ok) throw new Error('下载失败');
-        const blob = await response.blob();
+        
+        const contentLength = response.headers.get('content-length');
+        const total = contentLength ? parseInt(contentLength) : 0;
+        
+        const reader = response.body.getReader();
+        const chunks = [];
+        let receivedLength = 0;
+        
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            chunks.push(value);
+            receivedLength += value.length;
+            
+            if (total && onProgress) {
+                const percent = Math.round((receivedLength / total) * 100);
+                onProgress(percent);
+            }
+        }
+        
+        const blob = new Blob(chunks);
         return URL.createObjectURL(blob);
     }
     
@@ -1048,7 +1083,7 @@
     let currentLyrics = null;
     let currentSeriesFiles = [];
     let currentSeriesIndex = 0;
-    let currentPlayMode = 'list_loop'; // single, list_loop, single_play
+    let currentPlayMode = 'list_loop';
     let currentSpeed = 1.0;
     let currentFileName = '';
     let currentAudioBlobUrl = null;
@@ -1062,7 +1097,6 @@
         const currentFileIndex = seriesFiles.findIndex(f => f.fileName === fileName);
         currentSeriesIndex = currentFileIndex >= 0 ? currentFileIndex : 0;
         
-        // 恢复播放进度
         const savedProgress = getPlayProgress(fileName);
         let savedTime = savedProgress ? savedProgress.currentTime : 0;
         
@@ -1140,7 +1174,6 @@
         
         let audio = null;
         let isPlaying = false;
-        let lyricsUpdateInterval = null;
         
         function formatTime(seconds) {
             if (isNaN(seconds)) return '00:00';
@@ -1180,7 +1213,6 @@
             }
             lyricsArea.innerHTML = html;
             
-            // 绑定点击跳转事件
             lyricsArea.querySelectorAll('.lyrics-line').forEach(line => {
                 line.addEventListener('click', () => {
                     const time = parseFloat(line.dataset.time);
@@ -1201,7 +1233,6 @@
         
         function loadAudio(fileUrl, targetTime = null) {
             showLoading('缓存音频中...');
-            // 清理旧的 blob URL
             if (currentAudioBlobUrl) {
                 URL.revokeObjectURL(currentAudioBlobUrl);
                 currentAudioBlobUrl = null;
@@ -1210,7 +1241,9 @@
                 audio.pause();
                 audio.src = '';
             }
-            cacheAudio(fileUrl).then(blobUrl => {
+            cacheAudio(fileUrl, (percent) => {
+                updateLoadingPercent(percent);
+            }).then(blobUrl => {
                 currentAudioBlobUrl = blobUrl;
                 audio = new Audio(blobUrl);
                 currentAudio = audio;
@@ -1231,7 +1264,6 @@
                 audio.addEventListener('timeupdate', () => {
                     updateProgress();
                     if (currentLyrics) updateLyricsDisplay();
-                    // 保存进度
                     savePlayProgress(currentFileName, audio.currentTime, currentSeriesIndex);
                 });
                 
@@ -1240,7 +1272,6 @@
                         audio.currentTime = 0;
                         audio.play();
                     } else if (currentPlayMode === 'list_loop' && currentSeriesFiles.length > 1) {
-                        // 自动播放下一集
                         if (currentSeriesIndex < currentSeriesFiles.length - 1) {
                             loadEpisode(currentSeriesIndex + 1);
                         } else if (currentSeriesIndex === currentSeriesFiles.length - 1) {
@@ -1309,12 +1340,10 @@
             const savedProgress = getPlayProgress(episode.fileName);
             const savedTime = savedProgress ? savedProgress.currentTime : 0;
             
-            // 更新标题
             const titleSpan = header.querySelector('.viewer-title');
             if (titleSpan) titleSpan.textContent = episode.displayName || episode.fileName;
             if (seriesSelect) seriesSelect.value = index;
             
-            // 加载歌词
             lyricsArea.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 加载歌词中...</div>';
             fetchLyrics(episode.fileName).then(lyrics => {
                 currentLyrics = lyrics;
@@ -1325,7 +1354,6 @@
                 }
             });
             
-            // 加载音频
             loadAudio(episode.url, savedTime);
             isPlaying = true;
             playPauseBtn.textContent = '⏸';
@@ -1396,12 +1424,10 @@
                 audio.src = '';
             }
             if (currentAudioBlobUrl) URL.revokeObjectURL(currentAudioBlobUrl);
-            if (lyricsUpdateInterval) clearInterval(lyricsUpdateInterval);
             overlay.remove();
         };
         overlay.onclick = (e) => { if (e.target === overlay) { if (audio) audio.pause(); overlay.remove(); } };
         
-        // 加载歌词
         fetchLyrics(fileName).then(lyrics => {
             currentLyrics = lyrics;
             if (currentLyrics && currentLyrics.length > 0) {
@@ -1411,7 +1437,6 @@
             }
         });
         
-        // 加载音频
         loadAudio(url, savedTime);
         isPlaying = true;
         playPauseBtn.textContent = '⏸';
@@ -1647,7 +1672,6 @@
         return 'file';
     }
     
-    // 处理应用点击（支持系列文件）
     async function handleAppClick(link, name) {
         let fullUrl = link;
         if (fullUrl && !fullUrl.startsWith('http') && !fullUrl.startsWith('//')) {
@@ -1663,7 +1687,6 @@
                 return;
             }
             if (fileType === 'video') {
-                // 提取文件名主体
                 const info = parseEpisodeInfo(fileName);
                 if (info && info.baseName) {
                     const seriesFiles = await findSeriesFiles(info.baseName);
