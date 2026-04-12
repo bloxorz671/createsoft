@@ -139,7 +139,6 @@
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; }
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; border-radius: 12px; }
         
-        /* 通用预览器样式 */
         .file-viewer-overlay {
             position: fixed;
             top: 0;
@@ -231,7 +230,7 @@
             pointer-events: auto;
         }
         
-        /* 音频预览器专用样式 */
+        /* 音频预览器样式 */
         .audio-container {
             width: 100%;
             display: flex;
@@ -322,6 +321,32 @@
         .audio-select option {
             background: #1e2a4a;
             color: white;
+        }
+        
+        /* 歌词显示区域 */
+        .lyrics-container {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 10px;
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .lyrics-line {
+            padding: 4px 0;
+            transition: all 0.2s;
+        }
+        .lyrics-line.current {
+            color: #00ff00;
+            font-weight: bold;
+            font-size: 1rem;
+            text-shadow: 0 0 5px rgba(0,255,0,0.5);
         }
         
         .video-container {
@@ -447,6 +472,7 @@
             .audio-controls { padding: 15px; }
             .audio-btn { width: 40px; height: 40px; font-size: 1rem; }
             .audio-btn.primary { width: 48px; height: 48px; font-size: 1.2rem; }
+            .lyrics-container { max-height: 120px; font-size: 0.8rem; }
         }
         
         .login-options-modal .modal-content { text-align: center; }
@@ -568,7 +594,6 @@
     let draggedGroupIndex = null;
     let draggedAppData = null;
     
-    // 文件列表缓存（用于选集功能）
     let cachedFileList = null;
     let fileListLoading = false;
     
@@ -841,7 +866,7 @@
         a.click();
     }
     
-    // ========== 扫描根目录获取文件列表（用于选集） ==========
+    // ========== 扫描根目录获取文件列表 ==========
     async function fetchFileList() {
         if (cachedFileList) return cachedFileList;
         if (fileListLoading) {
@@ -868,15 +893,30 @@
         return cachedFileList;
     }
     
-    // 解析文件名，提取主体和集号
+    // 解析文件名，提取主体、集号和集名称（格式：原名-集号-集名称.后缀）
+    function parseEpisodeInfoDetailed(fileName) {
+        const match = fileName.match(/^(.+?)-(\d+)-(.+?)\.([^.]+)$/);
+        if (match) {
+            return { baseName: match[1], episode: parseInt(match[2]), episodeName: match[3], ext: match[4] };
+        }
+        const match2 = fileName.match(/^(.+?)-0*(\d+)-(.+?)\.([^.]+)$/);
+        if (match2) {
+            return { baseName: match2[1], episode: parseInt(match2[2]), episodeName: match2[3], ext: match2[4] };
+        }
+        return null;
+    }
+    
+    // 简化版：只提取主体和集号（兼容旧格式）
     function parseEpisodeInfo(fileName) {
+        const detailed = parseEpisodeInfoDetailed(fileName);
+        if (detailed) return detailed;
         const match = fileName.match(/^(.+?)-(\d+)\.([^.]+)$/);
         if (match) {
-            return { baseName: match[1], episode: parseInt(match[2]), ext: match[3] };
+            return { baseName: match[1], episode: parseInt(match[2]), episodeName: null, ext: match[3] };
         }
         const match2 = fileName.match(/^(.+?)-0*(\d+)\.([^.]+)$/);
         if (match2) {
-            return { baseName: match2[1], episode: parseInt(match2[2]), ext: match2[3] };
+            return { baseName: match2[1], episode: parseInt(match2[2]), episodeName: null, ext: match2[3] };
         }
         return null;
     }
@@ -893,15 +933,66 @@
         for (const fileName of fileList) {
             const info = parseEpisodeInfo(fileName);
             if (info && info.baseName === currentInfo.baseName && info.ext === currentInfo.ext) {
-                seriesFiles.push({ fileName, episode: info.episode, url: `https://luckynum.top/${fileName}` });
+                let displayName = fileName;
+                if (info.episodeName) {
+                    displayName = `${info.baseName}-${info.episodeName}`;
+                }
+                seriesFiles.push({ 
+                    fileName, 
+                    episode: info.episode, 
+                    episodeName: info.episodeName,
+                    displayName: displayName,
+                    url: `https://luckynum.top/${fileName}` 
+                });
             }
         }
         seriesFiles.sort((a, b) => a.episode - b.episode);
         return seriesFiles;
     }
     
-    // ========== 音频预览器 ==========
+    // 获取歌词文件
+    async function fetchLyrics(audioFileName) {
+        const lrcFileName = audioFileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '.lrc');
+        try {
+            const url = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${encodeURIComponent(lrcFileName)}`;
+            const response = await fetch(url);
+            if (response.ok) {
+                const text = await response.text();
+                return parseLrc(text);
+            }
+        } catch(e) {
+            console.log('无歌词文件:', lrcFileName);
+        }
+        return null;
+    }
+    
+    // 解析 LRC 歌词
+    function parseLrc(lrcText) {
+        const lines = lrcText.split(/\r?\n/);
+        const lyrics = [];
+        const timeRegex = /\[(\d{2}):(\d{2})\.?(\d{0,3})\]/;
+        
+        for (let line of lines) {
+            const match = line.match(timeRegex);
+            if (match) {
+                const minutes = parseInt(match[1]);
+                const seconds = parseInt(match[2]);
+                const milliseconds = match[3] ? parseInt(match[3].padEnd(3, '0')) : 0;
+                const time = minutes * 60 + seconds + milliseconds / 1000;
+                const text = line.replace(timeRegex, '').trim();
+                if (text) {
+                    lyrics.push({ time, text });
+                }
+            }
+        }
+        lyrics.sort((a, b) => a.time - b.time);
+        return lyrics;
+    }
+    
+    // ========== 音频预览器（完整版：下载+歌词+选集显示原名-集名称） ==========
     let currentAudio = null;
+    let currentLyrics = null;
+    let lyricsUpdateInterval = null;
     
     function openAudioViewer(url, fileName, seriesFiles) {
         const overlay = document.createElement('div');
@@ -912,14 +1003,14 @@
             let options = '';
             for (let i = 0; i < seriesFiles.length; i++) {
                 const selected = seriesFiles[i].fileName === fileName ? 'selected' : '';
-                options += `<option value="${i}" ${selected}>第${seriesFiles[i].episode}集 - ${seriesFiles[i].fileName}</option>`;
+                options += `<option value="${i}" ${selected}>${seriesFiles[i].displayName}</option>`;
             }
             seriesHtml = `<select id="audioSeriesSelect" class="audio-select">${options}</select>`;
         }
         
         const header = document.createElement('div');
         header.className = 'viewer-header';
-        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn download-btn">下载</button><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
         
         const content = document.createElement('div');
         content.className = 'viewer-content';
@@ -999,6 +1090,9 @@
                     </div>
                     ${seriesHtml}
                 </div>
+                <div class="lyrics-container" id="lyricsContainer">
+                    <div style="text-align:center; opacity:0.6;">🎤 暂无歌词</div>
+                </div>
             </div>
         `;
         
@@ -1018,6 +1112,7 @@
         const currentTimeSpan = content.querySelector('#audioCurrentTime');
         const durationSpan = content.querySelector('#audioDuration');
         const seriesSelect = content.querySelector('#audioSeriesSelect');
+        const lyricsContainer = content.querySelector('#lyricsContainer');
         
         let isPlaying = false;
         
@@ -1037,7 +1132,38 @@
             }
         }
         
-        audio.addEventListener('timeupdate', updateProgress);
+        // 更新歌词显示
+        function updateLyrics() {
+            if (!currentLyrics || currentLyrics.length === 0) return;
+            const currentTime = audio.currentTime;
+            let currentLineIndex = -1;
+            for (let i = 0; i < currentLyrics.length; i++) {
+                if (currentTime >= currentLyrics[i].time) {
+                    currentLineIndex = i;
+                } else {
+                    break;
+                }
+            }
+            
+            let html = '';
+            for (let i = 0; i < currentLyrics.length; i++) {
+                const isCurrent = (i === currentLineIndex);
+                html += `<div class="lyrics-line ${isCurrent ? 'current' : ''}">${escapeHtml(currentLyrics[i].text)}</div>`;
+            }
+            lyricsContainer.innerHTML = html;
+            
+            if (currentLineIndex >= 0) {
+                const currentLine = lyricsContainer.children[currentLineIndex];
+                if (currentLine) {
+                    currentLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+        
+        audio.addEventListener('timeupdate', () => {
+            updateProgress();
+            if (currentLyrics) updateLyrics();
+        });
         audio.addEventListener('loadedmetadata', () => {
             durationSpan.textContent = formatTime(audio.duration);
         });
@@ -1064,6 +1190,7 @@
             isPlaying = false;
             playPauseBtn.textContent = '▶';
             updateProgress();
+            if (currentLyrics) updateLyrics();
         }
         
         playPauseBtn.onclick = () => {
@@ -1079,6 +1206,7 @@
             if (audio.duration) {
                 audio.currentTime = percent * audio.duration;
                 updateProgress();
+                if (currentLyrics) updateLyrics();
             }
         };
         
@@ -1086,12 +1214,25 @@
             const episode = seriesFiles[index];
             if (!episode) return;
             stopAudio();
+            if (lyricsUpdateInterval) clearInterval(lyricsUpdateInterval);
+            currentLyrics = null;
+            lyricsContainer.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 加载歌词中...</div>';
             audio.src = episode.url;
             audio.load();
+            
+            fetchLyrics(episode.fileName).then(lyrics => {
+                currentLyrics = lyrics;
+                if (currentLyrics && currentLyrics.length > 0) {
+                    updateLyrics();
+                } else {
+                    lyricsContainer.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 暂无歌词</div>';
+                }
+            });
+            
             audio.addEventListener('canplay', () => {
                 if (seriesSelect) seriesSelect.value = index;
                 const titleSpan = header.querySelector('.viewer-title');
-                if (titleSpan) titleSpan.textContent = episode.fileName;
+                if (titleSpan) titleSpan.textContent = episode.displayName || episode.fileName;
                 playAudio();
             }, { once: true });
         }
@@ -1125,19 +1266,32 @@
             };
         }
         
+        header.querySelector('.download-btn').onclick = () => downloadFile(url, fileName);
         header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
         header.querySelector('.close-btn').onclick = () => {
+            if (lyricsUpdateInterval) clearInterval(lyricsUpdateInterval);
             audio.pause();
             audio.src = '';
             currentAudio = null;
+            currentLyrics = null;
             overlay.remove();
         };
         overlay.onclick = (e) => { if (e.target === overlay) { audio.pause(); overlay.remove(); } };
         
+        // 加载歌词
+        fetchLyrics(fileName).then(lyrics => {
+            currentLyrics = lyrics;
+            if (currentLyrics && currentLyrics.length > 0) {
+                updateLyrics();
+            } else {
+                lyricsContainer.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 暂无歌词</div>';
+            }
+        });
+        
         audio.load();
     }
     
-    // ========== 视频预览器 ==========
+    // ========== 视频预览器（添加下载按钮） ==========
     function openVideoViewer(url, fileName, seriesFiles) {
         const overlay = document.createElement('div');
         overlay.className = 'file-viewer-overlay';
@@ -1147,14 +1301,14 @@
             let options = '';
             for (let i = 0; i < seriesFiles.length; i++) {
                 const selected = seriesFiles[i].fileName === fileName ? 'selected' : '';
-                options += `<option value="${i}" ${selected}>第${seriesFiles[i].episode}集 - ${seriesFiles[i].fileName}</option>`;
+                options += `<option value="${i}" ${selected}>${seriesFiles[i].displayName}</option>`;
             }
             seriesHtml = `<select id="videoSeriesSelect" class="audio-select" style="margin-top: 10px;">${options}</select>`;
         }
         
         const header = document.createElement('div');
         header.className = 'viewer-header';
-        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn download-btn">下载</button><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
         
         const content = document.createElement('div');
         content.className = 'viewer-content';
@@ -1182,7 +1336,7 @@
             video.load();
             if (seriesSelect) seriesSelect.value = index;
             const titleSpan = header.querySelector('.viewer-title');
-            if (titleSpan) titleSpan.textContent = episode.fileName;
+            if (titleSpan) titleSpan.textContent = episode.displayName || episode.fileName;
             video.play().catch(e => console.log('播放失败:', e));
         }
         
@@ -1195,6 +1349,7 @@
             };
         }
         
+        header.querySelector('.download-btn').onclick = () => downloadFile(url, fileName);
         header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
         header.querySelector('.close-btn').onclick = () => {
             video.pause();
