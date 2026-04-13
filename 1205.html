@@ -230,6 +230,58 @@
             color: white;
         }
         
+        .preload-progress-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.85);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            z-index: 30000;
+            min-width: 250px;
+            backdrop-filter: blur(10px);
+        }
+        .preload-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: #00ff00;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .preload-text {
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        .preload-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+        .preload-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: #00ff00;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+        .preload-percent {
+            color: #00ff00;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
         .video-container {
             width: 100%;
             height: 100%;
@@ -477,6 +529,9 @@
     
     // 播放进度存储 key
     const PLAY_PROGRESS_KEY = 'audio_play_progress';
+    // 预加载缓存存储
+    let preloadCache = new Map(); // key: url, value: blobUrl
+    let isPreloading = false;
     
     const carouselSection = document.getElementById('carouselSection');
     const carouselTrack = document.getElementById('carouselTrack');
@@ -774,7 +829,7 @@
         return cachedFileList;
     }
     
-    // 解析文件名，提取主体、集号和集名称（格式：原名-集号-集名称.后缀）
+    // 解析文件名，提取主体、集号和集名称
     function parseEpisodeInfoDetailed(fileName) {
         const match = fileName.match(/^(.+?)-(\d+)-(.+?)\.([^.]+)$/);
         if (match) {
@@ -830,7 +885,7 @@
         return seriesFiles;
     }
     
-    // 为无集号文件查找同系列（用于记录进度和选集）
+    // 为无集号文件查找同系列
     async function findSeriesForSingleFile(fileName) {
         const fileList = await fetchFileList();
         if (!fileList || fileList.length === 0) return [];
@@ -857,7 +912,6 @@
                         });
                     }
                 } else {
-                    // 没有集号的文件本身
                     seriesMap.set(0, {
                         fileName: f,
                         episode: 0,
@@ -873,12 +927,11 @@
         return seriesFiles;
     }
     
-    // 获取歌词文件（修复中文乱码）
+    // 获取歌词文件
     async function fetchLyrics(audioFileName) {
         const lrcFileName = audioFileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '.lrc');
         try {
             const url = `https://gh-proxy.com/https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${encodeURIComponent(lrcFileName)}`;
-            console.log('请求歌词:', url);
             const response = await fetch(url);
             if (response.ok) {
                 const arrayBuffer = await response.arrayBuffer();
@@ -935,16 +988,120 @@
         } catch(e) { return null; }
     }
     
-    // ========== 音频预览器（使用原生控件） ==========
+    // 预加载单个音频文件
+    async function preloadAudio(url, onProgress) {
+        if (preloadCache.has(url)) return preloadCache.get(url);
+        
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('下载失败');
+        
+        const contentLength = response.headers.get('content-length');
+        const total = contentLength ? parseInt(contentLength) : 0;
+        
+        const reader = response.body.getReader();
+        const chunks = [];
+        let receivedLength = 0;
+        
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            chunks.push(value);
+            receivedLength += value.length;
+            
+            if (total && onProgress) {
+                const percent = Math.round((receivedLength / total) * 100);
+                onProgress(percent);
+            }
+        }
+        
+        const blob = new Blob(chunks);
+        const blobUrl = URL.createObjectURL(blob);
+        preloadCache.set(url, blobUrl);
+        return blobUrl;
+    }
+    
+    // 预加载所有集数
+    async function preloadAllEpisodes(seriesFiles, onTotalProgress) {
+        if (isPreloading) return;
+        isPreloading = true;
+        
+        const total = seriesFiles.length;
+        let completed = 0;
+        let currentTotalPercent = 0;
+        
+        for (let i = 0; i < seriesFiles.length; i++) {
+            const episode = seriesFiles[i];
+            try {
+                await preloadAudio(episode.url, (percent) => {
+                    // 单个文件进度贡献到总进度：每个文件占总进度的 1/total
+                    const episodeContribution = (percent / 100) * (1 / total);
+                    const newTotalPercent = ((completed / total) * 100) + (episodeContribution * 100);
+                    if (onTotalProgress) onTotalProgress(Math.min(99, Math.floor(newTotalPercent)), i + 1, total);
+                });
+                completed++;
+                if (onTotalProgress) onTotalProgress(Math.floor((completed / total) * 100), completed, total);
+            } catch(e) {
+                console.error('预加载失败:', episode.url, e);
+            }
+        }
+        
+        isPreloading = false;
+        if (onTotalProgress) onTotalProgress(100, total, total);
+        return true;
+    }
+    
+    // 显示预加载进度界面
+    function showPreloadProgress(total, onComplete) {
+        const overlay = document.createElement('div');
+        overlay.id = 'preloadOverlay';
+        overlay.className = 'preload-progress-container';
+        overlay.innerHTML = `
+            <div class="preload-spinner"></div>
+            <div class="preload-text">正在预加载音频文件...</div>
+            <div class="preload-bar"><div class="preload-bar-fill" id="preloadBarFill"></div></div>
+            <div class="preload-percent" id="preloadPercent">0%</div>
+            <div class="preload-text" id="preloadCount" style="font-size:0.8rem; margin-top:5px;">0 / ${total}</div>
+        `;
+        document.body.appendChild(overlay);
+        
+        let currentPercent = 0;
+        const barFill = document.getElementById('preloadBarFill');
+        const percentSpan = document.getElementById('preloadPercent');
+        const countSpan = document.getElementById('preloadCount');
+        
+        const updateProgress = (percent, completed, totalCount) => {
+            currentPercent = percent;
+            if (barFill) barFill.style.width = `${percent}%`;
+            if (percentSpan) percentSpan.textContent = `${percent}%`;
+            if (countSpan && totalCount) countSpan.textContent = `${completed} / ${totalCount}`;
+            if (percent >= 100 && onComplete) {
+                setTimeout(() => {
+                    if (overlay) overlay.remove();
+                    if (onComplete) onComplete();
+                }, 500);
+            }
+        };
+        
+        return { updateProgress, overlay };
+    }
+    
+    // ========== 音频预览器（使用原生控件 + 预加载） ==========
     let currentAudio = null;
     let currentLyrics = null;
     let currentSeriesFiles = [];
     let currentSeriesIndex = 0;
     let currentFileName = '';
+    let currentAudioElement = null;
+    let currentOverlay = null;
     
-    function openAudioViewer(url, fileName, seriesFiles) {
+    async function openAudioViewer(url, fileName, seriesFiles) {
+        // 如果已经有预加载弹窗，先移除
+        if (currentOverlay && currentOverlay.remove) currentOverlay.remove();
+        
         const overlay = document.createElement('div');
         overlay.className = 'file-viewer-overlay';
+        currentOverlay = overlay;
         
         currentSeriesFiles = seriesFiles;
         currentFileName = fileName;
@@ -988,16 +1145,41 @@
         const audio = content.querySelector('#nativeAudio');
         const seriesSelect = content.querySelector('#audioSeriesSelect');
         
-        currentAudio = audio;
+        currentAudioElement = audio;
+        
+        // 如果有预加载的缓存，使用缓存
+        if (preloadCache.has(url)) {
+            const cachedUrl = preloadCache.get(url);
+            audio.src = cachedUrl;
+            audio.load();
+        }
         
         // 恢复播放进度
         if (savedTime && savedTime > 0) {
             audio.currentTime = savedTime;
         }
         
+        // 加载歌词
+        let lyricsLoaded = false;
+        
+        async function loadLyricsForEpisode(episodeFileName, retryCount = 0) {
+            lyricsArea.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 加载歌词中...</div>';
+            const lyrics = await fetchLyrics(episodeFileName);
+            currentLyrics = lyrics;
+            if (currentLyrics && currentLyrics.length > 0) {
+                updateLyricsDisplay();
+                lyricsLoaded = true;
+            } else if (retryCount < 2) {
+                // 重试一次
+                setTimeout(() => loadLyricsForEpisode(episodeFileName, retryCount + 1), 500);
+            } else {
+                lyricsArea.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 暂无歌词</div>';
+            }
+        }
+        
         function updateLyricsDisplay() {
             if (!currentLyrics || currentLyrics.length === 0) {
-                lyricsArea.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 暂无歌词</div>';
+                if (!lyricsLoaded) lyricsArea.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 暂无歌词</div>';
                 return;
             }
             const currentTime = audio.currentTime;
@@ -1040,7 +1222,6 @@
         });
         
         audio.addEventListener('ended', () => {
-            // 自动播放下一集（如果有）
             if (currentSeriesFiles.length > 1 && currentSeriesIndex < currentSeriesFiles.length - 1) {
                 loadEpisode(currentSeriesIndex + 1);
             }
@@ -1060,17 +1241,25 @@
             if (titleSpan) titleSpan.textContent = episode.displayName || episode.fileName;
             if (seriesSelect) seriesSelect.value = index;
             
-            lyricsArea.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 加载歌词中...</div>';
-            fetchLyrics(episode.fileName).then(lyrics => {
-                currentLyrics = lyrics;
-                updateLyricsDisplay();
-            });
+            // 重新加载音频（使用缓存或重新请求）
+            lyricsLoaded = false;
+            if (preloadCache.has(episode.url)) {
+                const cachedUrl = preloadCache.get(episode.url);
+                audio.src = cachedUrl;
+                audio.load();
+            } else {
+                audio.src = episode.url;
+                audio.load();
+            }
             
-            audio.src = episode.url;
-            audio.load();
             if (savedTime && savedTime > 0) {
                 audio.currentTime = savedTime;
             }
+            
+            // 重新加载歌词
+            loadLyricsForEpisode(episode.fileName);
+            
+            // 播放
             audio.play().catch(e => console.log('播放失败:', e));
         }
         
@@ -1089,13 +1278,26 @@
             audio.pause();
             audio.src = '';
             overlay.remove();
+            currentOverlay = null;
         };
-        overlay.onclick = (e) => { if (e.target === overlay) { audio.pause(); overlay.remove(); } };
+        overlay.onclick = (e) => { if (e.target === overlay) { audio.pause(); overlay.remove(); currentOverlay = null; } };
         
-        fetchLyrics(fileName).then(lyrics => {
-            currentLyrics = lyrics;
-            updateLyricsDisplay();
-        });
+        // 先加载歌词，然后预加载其他集数
+        loadLyricsForEpisode(fileName);
+        
+        // 如果有多集且没有预加载过，启动预加载
+        if (seriesFiles.length > 1 && preloadCache.size === 0) {
+            const { updateProgress } = showPreloadProgress(seriesFiles.length, () => {
+                console.log('预加载完成');
+            });
+            
+            // 延迟一点开始预加载，避免影响当前播放
+            setTimeout(() => {
+                preloadAllEpisodes(seriesFiles, (percent, completed, total) => {
+                    updateProgress(percent, completed, total);
+                });
+            }, 1000);
+        }
         
         audio.play().catch(e => console.log('自动播放失败:', e));
     }
