@@ -166,57 +166,16 @@
             white-space: nowrap;
         }
         .viewer-btn:hover { background: rgba(255,255,255,0.4); }
-        .zoom-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
+        
         .viewer-content {
             flex: 1;
             background: #000;
             overflow: hidden;
             position: relative;
             display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .image-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
-            touch-action: none;
-        }
-        .zoomable-image {
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-            transition: transform 0.05s ease-out;
-            transform-origin: center center;
-            will-change: transform;
-            -webkit-touch-callout: default;
-            user-select: auto;
-            pointer-events: auto;
-        }
-        
-        /* 音频预览器样式 - 无音浪动画 */
-        .audio-container {
-            width: 100%;
-            display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             padding: 20px;
         }
         .lyrics-area {
@@ -248,63 +207,14 @@
             text-shadow: 0 0 5px rgba(0,255,0,0.5);
             background: rgba(0,255,0,0.1);
         }
-        .audio-controls {
+        .native-audio {
             width: 100%;
-            max-width: 400px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 60px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .audio-progress-bar {
-            width: 100%;
-            height: 4px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 2px;
-            cursor: pointer;
-            position: relative;
-            margin-bottom: 12px;
-        }
-        .audio-progress-fill {
-            width: 0%;
-            height: 100%;
-            background: #00ff00;
-            border-radius: 2px;
-            position: relative;
-        }
-        .audio-time {
-            display: flex;
-            justify-content: space-between;
-            color: rgba(255,255,255,0.7);
-            font-size: 0.8rem;
-            margin-bottom: 16px;
-        }
-        .audio-buttons-row {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-        .audio-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .audio-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
-        .audio-btn.primary {
-            width: 52px;
-            height: 52px;
-            font-size: 1.2rem;
+            max-width: 500px;
+            margin: 20px 0;
         }
         .audio-select {
             width: 100%;
+            max-width: 500px;
             padding: 10px;
             background: rgba(255,255,255,0.2);
             border: 1px solid rgba(255,255,255,0.3);
@@ -318,50 +228,6 @@
         .audio-select option {
             background: #1e2a4a;
             color: white;
-        }
-        .play-mode-select, .speed-select {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 30px;
-            color: white;
-            padding: 6px 12px;
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 30000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255,255,255,0.3);
-            border-top-color: #00ff00;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .loading-text {
-            color: white;
-            margin-top: 16px;
-            font-size: 0.9rem;
-        }
-        .loading-percent {
-            color: #00ff00;
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-top: 8px;
         }
         
         .video-container {
@@ -484,11 +350,7 @@
             .nav-item { padding: 4px 12px; }
             .viewer-controls { gap: 8px; }
             .viewer-btn { padding: 6px 12px; font-size: 0.8rem; }
-            .audio-controls { padding: 15px; }
-            .audio-btn { width: 40px; height: 40px; font-size: 0.9rem; }
-            .audio-btn.primary { width: 48px; height: 48px; font-size: 1.1rem; }
             .lyrics-area { font-size: 0.85rem; max-height: 250px; }
-            .audio-buttons-row { gap: 8px; }
         }
         
         .login-options-modal .modal-content { text-align: center; }
@@ -1020,9 +882,7 @@
             const response = await fetch(url);
             if (response.ok) {
                 const arrayBuffer = await response.arrayBuffer();
-                // 尝试 UTF-8 解码
                 let text = new TextDecoder('utf-8').decode(arrayBuffer);
-                // 如果还有乱码，尝试 GBK
                 if (text.includes('��') || text.charCodeAt(0) === 65533) {
                     try {
                         const decoder = new TextDecoder('gbk');
@@ -1075,72 +935,12 @@
         } catch(e) { return null; }
     }
     
-    // 显示 loading
-    function showLoading(text = '加载中...') {
-        let loading = document.querySelector('.loading-overlay');
-        if (!loading) {
-            loading = document.createElement('div');
-            loading.className = 'loading-overlay';
-            loading.innerHTML = '<div class="loading-spinner"></div><div class="loading-text"></div><div class="loading-percent"></div>';
-            document.body.appendChild(loading);
-        }
-        loading.querySelector('.loading-text').textContent = text;
-        loading.querySelector('.loading-percent').textContent = '';
-        loading.style.display = 'flex';
-    }
-    
-    function updateLoadingPercent(percent) {
-        const loading = document.querySelector('.loading-overlay');
-        if (loading) {
-            const percentDiv = loading.querySelector('.loading-percent');
-            if (percentDiv) percentDiv.textContent = `${percent}%`;
-        }
-    }
-    
-    function hideLoading() {
-        const loading = document.querySelector('.loading-overlay');
-        if (loading) loading.style.display = 'none';
-    }
-    
-    // 缓存音频文件（带进度）
-    async function cacheAudio(url, onProgress) {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('下载失败');
-        
-        const contentLength = response.headers.get('content-length');
-        const total = contentLength ? parseInt(contentLength) : 0;
-        
-        const reader = response.body.getReader();
-        const chunks = [];
-        let receivedLength = 0;
-        
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            
-            chunks.push(value);
-            receivedLength += value.length;
-            
-            if (total && onProgress) {
-                const percent = Math.round((receivedLength / total) * 100);
-                onProgress(percent);
-            }
-        }
-        
-        const blob = new Blob(chunks);
-        return URL.createObjectURL(blob);
-    }
-    
-    // ========== 音频预览器（修复版） ==========
+    // ========== 音频预览器（使用原生控件） ==========
     let currentAudio = null;
     let currentLyrics = null;
     let currentSeriesFiles = [];
     let currentSeriesIndex = 0;
-    let currentPlayMode = 'list_loop';
-    let currentSpeed = 1.0;
     let currentFileName = '';
-    let currentAudioBlobUrl = null;
-    let isDraggingProgress = false;
     
     function openAudioViewer(url, fileName, seriesFiles) {
         const overlay = document.createElement('div');
@@ -1171,42 +971,13 @@
         const content = document.createElement('div');
         content.className = 'viewer-content';
         content.innerHTML = `
-            <div class="audio-container">
-                <div class="lyrics-area" id="lyricsArea">
-                    <div style="text-align:center; opacity:0.6;">🎤 加载歌词中...</div>
-                </div>
-                <div class="audio-controls">
-                    <div class="audio-progress-bar" id="audioProgressBar">
-                        <div class="audio-progress-fill" id="audioProgressFill"></div>
-                    </div>
-                    <div class="audio-time">
-                        <span id="audioCurrentTime">00:00</span>
-                        <span id="audioDuration">00:00</span>
-                    </div>
-                    <div class="audio-buttons-row">
-                        <select id="playModeSelect" class="play-mode-select">
-                            <option value="single">🔂 单曲播放</option>
-                            <option value="list_loop" selected>🔁 列表循环</option>
-                            <option value="single_loop">🔁 单曲循环</option>
-                        </select>
-                        <select id="speedSelect" class="speed-select">
-                            <option value="0.5">0.5x</option>
-                            <option value="0.75">0.75x</option>
-                            <option value="1.0" selected>1.0x</option>
-                            <option value="1.25">1.25x</option>
-                            <option value="1.5">1.5x</option>
-                            <option value="2.0">2.0x</option>
-                        </select>
-                    </div>
-                    <div class="audio-buttons-row">
-                        <button class="audio-btn" id="audioPrevBtn" ${!seriesFiles || seriesFiles.length <= 1 ? 'disabled style="opacity:0.3"' : ''}>⏮</button>
-                        <button class="audio-btn primary" id="audioPlayPauseBtn">▶</button>
-                        <button class="audio-btn" id="audioStopBtn">⏹</button>
-                        <button class="audio-btn" id="audioNextBtn" ${!seriesFiles || seriesFiles.length <= 1 ? 'disabled style="opacity:0.3"' : ''}>⏭</button>
-                    </div>
-                    ${seriesHtml}
-                </div>
+            <div class="lyrics-area" id="lyricsArea">
+                <div style="text-align:center; opacity:0.6;">🎤 加载歌词中...</div>
             </div>
+            <audio id="nativeAudio" class="native-audio" controls preload="auto">
+                <source src="${escapeHtml(url)}">
+            </audio>
+            ${seriesHtml}
         `;
         
         overlay.appendChild(header);
@@ -1214,39 +985,18 @@
         document.body.appendChild(overlay);
         
         const lyricsArea = content.querySelector('#lyricsArea');
-        const playPauseBtn = content.querySelector('#audioPlayPauseBtn');
-        const stopBtn = content.querySelector('#audioStopBtn');
-        const prevBtn = content.querySelector('#audioPrevBtn');
-        const nextBtn = content.querySelector('#audioNextBtn');
-        const progressBar = content.querySelector('#audioProgressBar');
-        const progressFill = content.querySelector('#audioProgressFill');
-        const currentTimeSpan = content.querySelector('#audioCurrentTime');
-        const durationSpan = content.querySelector('#audioDuration');
+        const audio = content.querySelector('#nativeAudio');
         const seriesSelect = content.querySelector('#audioSeriesSelect');
-        const playModeSelect = content.querySelector('#playModeSelect');
-        const speedSelect = content.querySelector('#speedSelect');
         
-        let audio = null;
-        let isPlaying = false;
+        currentAudio = audio;
         
-        function formatTime(seconds) {
-            if (isNaN(seconds)) return '00:00';
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-        
-        function updateProgress() {
-            if (audio && audio.duration) {
-                const percent = (audio.currentTime / audio.duration) * 100;
-                progressFill.style.width = `${percent}%`;
-                currentTimeSpan.textContent = formatTime(audio.currentTime);
-                durationSpan.textContent = formatTime(audio.duration);
-            }
+        // 恢复播放进度
+        if (savedTime && savedTime > 0) {
+            audio.currentTime = savedTime;
         }
         
         function updateLyricsDisplay() {
-            if (!currentLyrics || currentLyrics.length === 0 || !audio) {
+            if (!currentLyrics || currentLyrics.length === 0) {
                 lyricsArea.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 暂无歌词</div>';
                 return;
             }
@@ -1270,9 +1020,8 @@
             lyricsArea.querySelectorAll('.lyrics-line').forEach(line => {
                 line.addEventListener('click', () => {
                     const time = parseFloat(line.dataset.time);
-                    if (audio && !isNaN(time)) {
+                    if (!isNaN(time)) {
                         audio.currentTime = time;
-                        updateProgress();
                     }
                 });
             });
@@ -1285,111 +1034,23 @@
             }
         }
         
-        function loadAudio(fileUrl, targetTime = null) {
-            showLoading('缓存音频中...');
-            if (currentAudioBlobUrl) {
-                URL.revokeObjectURL(currentAudioBlobUrl);
-                currentAudioBlobUrl = null;
-            }
-            if (audio) {
-                audio.pause();
-                audio.src = '';
-            }
-            cacheAudio(fileUrl, (percent) => {
-                updateLoadingPercent(percent);
-            }).then(blobUrl => {
-                currentAudioBlobUrl = blobUrl;
-                audio = new Audio(blobUrl);
-                currentAudio = audio;
-                audio.playbackRate = currentSpeed;
-                
-                audio.addEventListener('loadedmetadata', () => {
-                    durationSpan.textContent = formatTime(audio.duration);
-                    if (targetTime !== null && targetTime > 0 && targetTime < audio.duration) {
-                        audio.currentTime = targetTime;
-                    }
-                    updateProgress();
-                    hideLoading();
-                    if (isPlaying) {
-                        audio.play().catch(e => console.log('播放失败:', e));
-                    }
-                });
-                
-                audio.addEventListener('timeupdate', () => {
-                    updateProgress();
-                    if (currentLyrics) updateLyricsDisplay();
-                    savePlayProgress(currentFileName, audio.currentTime, currentSeriesIndex);
-                });
-                
-                audio.addEventListener('ended', () => {
-                    if (currentPlayMode === 'single_loop') {
-                        audio.currentTime = 0;
-                        audio.play();
-                    } else if (currentPlayMode === 'list_loop' && currentSeriesFiles.length > 1) {
-                        if (currentSeriesIndex < currentSeriesFiles.length - 1) {
-                            loadEpisode(currentSeriesIndex + 1);
-                        } else if (currentSeriesIndex === currentSeriesFiles.length - 1) {
-                            loadEpisode(0);
-                        }
-                    } else {
-                        isPlaying = false;
-                        playPauseBtn.textContent = '▶';
-                    }
-                });
-                
-                audio.addEventListener('canplay', () => {
-                    hideLoading();
-                });
-                
-                // 静默处理错误，不弹窗
-                audio.onerror = () => {
-                    console.log('音频加载错误，可能是格式不支持');
-                    hideLoading();
-                };
-            }).catch(err => {
-                console.log('缓存失败:', err);
-                hideLoading();
-            });
-        }
+        audio.addEventListener('timeupdate', () => {
+            if (currentLyrics) updateLyricsDisplay();
+            savePlayProgress(currentFileName, audio.currentTime, currentSeriesIndex);
+        });
         
-        function playAudio() {
-            if (audio) {
-                audio.play().catch(e => console.log('播放失败:', e));
-                isPlaying = true;
-                playPauseBtn.textContent = '⏸';
+        audio.addEventListener('ended', () => {
+            // 自动播放下一集（如果有）
+            if (currentSeriesFiles.length > 1 && currentSeriesIndex < currentSeriesFiles.length - 1) {
+                loadEpisode(currentSeriesIndex + 1);
             }
-        }
-        
-        function pauseAudio() {
-            if (audio) {
-                audio.pause();
-                isPlaying = false;
-                playPauseBtn.textContent = '▶';
-            }
-        }
-        
-        function stopAudio() {
-            if (audio) {
-                audio.pause();
-                audio.currentTime = 0;
-                isPlaying = false;
-                playPauseBtn.textContent = '▶';
-                updateProgress();
-                if (currentLyrics) updateLyricsDisplay();
-                savePlayProgress(currentFileName, 0, currentSeriesIndex);
-            }
-        }
+        });
         
         function loadEpisode(index) {
             if (!currentSeriesFiles || index < 0 || index >= currentSeriesFiles.length) return;
             const episode = currentSeriesFiles[index];
             if (!episode) return;
             
-            if (audio) {
-                audio.pause();
-                isPlaying = false;
-                playPauseBtn.textContent = '▶';
-            }
             currentSeriesIndex = index;
             currentFileName = episode.fileName;
             const savedProgress = getPlayProgress(episode.fileName);
@@ -1402,86 +1063,15 @@
             lyricsArea.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 加载歌词中...</div>';
             fetchLyrics(episode.fileName).then(lyrics => {
                 currentLyrics = lyrics;
-                if (currentLyrics && currentLyrics.length > 0) {
-                    updateLyricsDisplay();
-                } else {
-                    lyricsArea.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 暂无歌词</div>';
-                }
+                updateLyricsDisplay();
             });
             
-            loadAudio(episode.url, savedTime);
-            isPlaying = true;
-            playPauseBtn.textContent = '⏸';
-        }
-        
-        playPauseBtn.onclick = () => {
-            if (isPlaying) pauseAudio();
-            else playAudio();
-        };
-        
-        stopBtn.onclick = stopAudio;
-        
-        // 进度条拖动支持（点击和拖动）
-        const handleProgressChange = (clientX) => {
-            const rect = progressBar.getBoundingClientRect();
-            let percent = (clientX - rect.left) / rect.width;
-            percent = Math.min(1, Math.max(0, percent));
-            if (audio && audio.duration) {
-                audio.currentTime = percent * audio.duration;
-                updateProgress();
-                if (currentLyrics) updateLyricsDisplay();
+            audio.src = episode.url;
+            audio.load();
+            if (savedTime && savedTime > 0) {
+                audio.currentTime = savedTime;
             }
-        };
-        
-        progressBar.addEventListener('mousedown', (e) => {
-            isDraggingProgress = true;
-            handleProgressChange(e.clientX);
-            e.preventDefault();
-        });
-        
-        document.addEventListener('mousemove', (e) => {
-            if (isDraggingProgress && audio) {
-                handleProgressChange(e.clientX);
-            }
-        });
-        
-        document.addEventListener('mouseup', () => {
-            isDraggingProgress = false;
-        });
-        
-        progressBar.addEventListener('touchstart', (e) => {
-            isDraggingProgress = true;
-            const touch = e.touches[0];
-            handleProgressChange(touch.clientX);
-            e.preventDefault();
-        });
-        
-        document.addEventListener('touchmove', (e) => {
-            if (isDraggingProgress && audio && e.touches.length) {
-                handleProgressChange(e.touches[0].clientX);
-            }
-        });
-        
-        document.addEventListener('touchend', () => {
-            isDraggingProgress = false;
-        });
-        
-        if (prevBtn) {
-            prevBtn.onclick = () => {
-                if (!currentSeriesFiles || currentSeriesFiles.length <= 1) return;
-                let newIndex = currentSeriesIndex - 1;
-                if (newIndex < 0) newIndex = currentSeriesFiles.length - 1;
-                loadEpisode(newIndex);
-            };
-        }
-        
-        if (nextBtn) {
-            nextBtn.onclick = () => {
-                if (!currentSeriesFiles || currentSeriesFiles.length <= 1) return;
-                let newIndex = currentSeriesIndex + 1;
-                if (newIndex >= currentSeriesFiles.length) newIndex = 0;
-                loadEpisode(newIndex);
-            };
+            audio.play().catch(e => console.log('播放失败:', e));
         }
         
         if (seriesSelect) {
@@ -1493,43 +1083,21 @@
             };
         }
         
-        if (playModeSelect) {
-            playModeSelect.onchange = () => {
-                currentPlayMode = playModeSelect.value;
-            };
-        }
-        
-        if (speedSelect) {
-            speedSelect.onchange = () => {
-                currentSpeed = parseFloat(speedSelect.value);
-                if (audio) audio.playbackRate = currentSpeed;
-            };
-        }
-        
         header.querySelector('.download-btn').onclick = () => downloadFile(url, fileName);
         header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
         header.querySelector('.close-btn').onclick = () => {
-            if (audio) {
-                audio.pause();
-                audio.src = '';
-            }
-            if (currentAudioBlobUrl) URL.revokeObjectURL(currentAudioBlobUrl);
+            audio.pause();
+            audio.src = '';
             overlay.remove();
         };
-        overlay.onclick = (e) => { if (e.target === overlay) { if (audio) audio.pause(); overlay.remove(); } };
+        overlay.onclick = (e) => { if (e.target === overlay) { audio.pause(); overlay.remove(); } };
         
         fetchLyrics(fileName).then(lyrics => {
             currentLyrics = lyrics;
-            if (currentLyrics && currentLyrics.length > 0) {
-                updateLyricsDisplay();
-            } else {
-                lyricsArea.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 暂无歌词</div>';
-            }
+            updateLyricsDisplay();
         });
         
-        loadAudio(url, savedTime);
-        isPlaying = true;
-        playPauseBtn.textContent = '⏸';
+        audio.play().catch(e => console.log('自动播放失败:', e));
     }
     
     // ========== 视频预览器 ==========
@@ -1792,7 +1360,6 @@
                     const seriesFiles = await findSeriesFiles(info.baseName);
                     openAudioViewer(fullUrl, name, seriesFiles);
                 } else {
-                    // 无集号文件，查找同系列
                     const seriesFiles = await findSeriesForSingleFile(fileName);
                     if (seriesFiles.length > 0) {
                         openAudioViewer(fullUrl, name, seriesFiles);
