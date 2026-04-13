@@ -939,43 +939,96 @@
         return null;
     }
     
-    // 查找同系列的所有集数（支持多种格式）
+    // 查找同系列的所有集数（去重）
     async function findSeriesFiles(baseNamePattern) {
         const fileList = await fetchFileList();
         if (!fileList || fileList.length === 0) return [];
         
-        // 匹配以 baseNamePattern 开头的文件
-        const seriesFiles = [];
+        const seriesMap = new Map();
         for (const fileName of fileList) {
             const info = parseEpisodeInfo(fileName);
             if (info && info.baseName === baseNamePattern) {
-                let displayName = fileName;
-                if (info.episodeName) {
-                    displayName = `${info.baseName}-${info.episodeName}`;
+                if (!seriesMap.has(info.episode)) {
+                    let displayName = fileName;
+                    if (info.episodeName) {
+                        displayName = `${info.baseName}-${info.episodeName}`;
+                    }
+                    seriesMap.set(info.episode, {
+                        fileName, 
+                        episode: info.episode, 
+                        episodeName: info.episodeName,
+                        displayName: displayName,
+                        url: `https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/createsoft/main/${fileName}`
+                    });
                 }
-                seriesFiles.push({ 
-                    fileName, 
-                    episode: info.episode, 
-                    episodeName: info.episodeName,
-                    displayName: displayName,
-                    url: `https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/createsoft/main/${fileName}`
-                });
             }
         }
+        const seriesFiles = Array.from(seriesMap.values());
         seriesFiles.sort((a, b) => a.episode - b.episode);
         return seriesFiles;
     }
     
-    // 获取歌词文件（解决中文乱码）
+    // 为无集号文件查找同系列（用于记录进度和选集）
+    async function findSeriesForSingleFile(fileName) {
+        const fileList = await fetchFileList();
+        if (!fileList || fileList.length === 0) return [];
+        
+        const baseWithoutExt = fileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '');
+        const seriesMap = new Map();
+        
+        for (const f of fileList) {
+            const fBase = f.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '');
+            if (fBase === baseWithoutExt || fBase.startsWith(baseWithoutExt + '-')) {
+                const info = parseEpisodeInfo(f);
+                if (info) {
+                    if (!seriesMap.has(info.episode)) {
+                        let displayName = f;
+                        if (info.episodeName) {
+                            displayName = `${info.baseName}-${info.episodeName}`;
+                        }
+                        seriesMap.set(info.episode, {
+                            fileName: f,
+                            episode: info.episode,
+                            episodeName: info.episodeName,
+                            displayName: displayName,
+                            url: `https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/createsoft/main/${f}`
+                        });
+                    }
+                } else {
+                    // 没有集号的文件本身
+                    seriesMap.set(0, {
+                        fileName: f,
+                        episode: 0,
+                        episodeName: null,
+                        displayName: f,
+                        url: `https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/createsoft/main/${f}`
+                    });
+                }
+            }
+        }
+        const seriesFiles = Array.from(seriesMap.values());
+        seriesFiles.sort((a, b) => a.episode - b.episode);
+        return seriesFiles;
+    }
+    
+    // 获取歌词文件（修复中文乱码）
     async function fetchLyrics(audioFileName) {
         const lrcFileName = audioFileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '.lrc');
         try {
             const url = `https://gh-proxy.com/https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${encodeURIComponent(lrcFileName)}`;
+            console.log('请求歌词:', url);
             const response = await fetch(url);
             if (response.ok) {
                 const arrayBuffer = await response.arrayBuffer();
-                const decoder = new TextDecoder('utf-8');
-                const text = decoder.decode(arrayBuffer);
+                // 尝试 UTF-8 解码
+                let text = new TextDecoder('utf-8').decode(arrayBuffer);
+                // 如果还有乱码，尝试 GBK
+                if (text.includes('��') || text.charCodeAt(0) === 65533) {
+                    try {
+                        const decoder = new TextDecoder('gbk');
+                        text = decoder.decode(arrayBuffer);
+                    } catch(e) {}
+                }
                 return parseLrc(text);
             }
         } catch(e) {
@@ -1078,7 +1131,7 @@
         return URL.createObjectURL(blob);
     }
     
-    // ========== 音频预览器（完整版） ==========
+    // ========== 音频预览器（修复版） ==========
     let currentAudio = null;
     let currentLyrics = null;
     let currentSeriesFiles = [];
@@ -1087,6 +1140,7 @@
     let currentSpeed = 1.0;
     let currentFileName = '';
     let currentAudioBlobUrl = null;
+    let isDraggingProgress = false;
     
     function openAudioViewer(url, fileName, seriesFiles) {
         const overlay = document.createElement('div');
@@ -1287,13 +1341,14 @@
                     hideLoading();
                 });
                 
+                // 静默处理错误，不弹窗
                 audio.onerror = () => {
+                    console.log('音频加载错误，可能是格式不支持');
                     hideLoading();
-                    alert('音频加载失败');
                 };
             }).catch(err => {
+                console.log('缓存失败:', err);
                 hideLoading();
-                alert('缓存失败: ' + err.message);
             });
         }
         
@@ -1366,15 +1421,50 @@
         
         stopBtn.onclick = stopAudio;
         
-        progressBar.onclick = (e) => {
+        // 进度条拖动支持（点击和拖动）
+        const handleProgressChange = (clientX) => {
             const rect = progressBar.getBoundingClientRect();
-            const percent = (e.clientX - rect.left) / rect.width;
+            let percent = (clientX - rect.left) / rect.width;
+            percent = Math.min(1, Math.max(0, percent));
             if (audio && audio.duration) {
                 audio.currentTime = percent * audio.duration;
                 updateProgress();
                 if (currentLyrics) updateLyricsDisplay();
             }
         };
+        
+        progressBar.addEventListener('mousedown', (e) => {
+            isDraggingProgress = true;
+            handleProgressChange(e.clientX);
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (isDraggingProgress && audio) {
+                handleProgressChange(e.clientX);
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isDraggingProgress = false;
+        });
+        
+        progressBar.addEventListener('touchstart', (e) => {
+            isDraggingProgress = true;
+            const touch = e.touches[0];
+            handleProgressChange(touch.clientX);
+            e.preventDefault();
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (isDraggingProgress && audio && e.touches.length) {
+                handleProgressChange(e.touches[0].clientX);
+            }
+        });
+        
+        document.addEventListener('touchend', () => {
+            isDraggingProgress = false;
+        });
         
         if (prevBtn) {
             prevBtn.onclick = () => {
@@ -1702,7 +1792,13 @@
                     const seriesFiles = await findSeriesFiles(info.baseName);
                     openAudioViewer(fullUrl, name, seriesFiles);
                 } else {
-                    openAudioViewer(fullUrl, name, []);
+                    // 无集号文件，查找同系列
+                    const seriesFiles = await findSeriesForSingleFile(fileName);
+                    if (seriesFiles.length > 0) {
+                        openAudioViewer(fullUrl, name, seriesFiles);
+                    } else {
+                        openAudioViewer(fullUrl, name, []);
+                    }
                 }
                 return;
             }
@@ -1752,7 +1848,8 @@
                     const seriesFiles = await findSeriesFiles(info.baseName);
                     openAudioViewer(fullUrl, fileName, seriesFiles);
                 } else {
-                    openAudioViewer(fullUrl, fileName, []);
+                    const seriesFiles = await findSeriesForSingleFile(fileName);
+                    openAudioViewer(fullUrl, fileName, seriesFiles);
                 }
                 return;
             }
