@@ -39,27 +39,7 @@
         .unlogged-section { padding: 12px 20px 0 20px; background: white; }
         .unlogged-wrapper { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; }
         .unlogged-text { font-size: 1rem; font-weight: 500; color: #e67e22; background: #fff3e0; padding: 10px 16px; border-radius: 12px; text-align: center; }
-        .login-icon-img {
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
-            vertical-align: middle;
-            filter: invert(1);
-        }
-        .scan-login-btn {
-            background: #2b4c8a;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 10px 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .scan-login-btn { background: #2b4c8a; color: white; border: none; border-radius: 12px; padding: 10px 20px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
         .scan-login-btn:hover { background: #1e3c72; transform: scale(1.02); }
         
         .rating-box { display: inline-flex; align-items: center; justify-content: center; padding: 4px 14px; font-size: 1rem; font-weight: 600; color: white; border: 2px solid; border-radius: 8px; white-space: nowrap; }
@@ -139,7 +119,6 @@
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; }
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; border-radius: 12px; }
         
-        /* 通用预览器样式 */
         .file-viewer-overlay {
             position: fixed;
             top: 0;
@@ -187,17 +166,7 @@
             white-space: nowrap;
         }
         .viewer-btn:hover { background: rgba(255,255,255,0.4); }
-        .zoom-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
+        
         .viewer-content {
             flex: 1;
             background: #000;
@@ -217,11 +186,12 @@
             position: relative;
             touch-action: none;
         }
+        /* 修复图片缩放：移除 max-width/max-height 限制，让 transform 完全控制 */
         .zoomable-image {
-            max-width: 100%;
-            max-height: 100%;
             width: auto;
             height: auto;
+            max-width: none;
+            max-height: none;
             object-fit: contain;
             transition: transform 0.05s ease-out;
             transform-origin: center center;
@@ -230,100 +200,6 @@
             user-select: auto;
             pointer-events: auto;
         }
-        
-        /* 音频预览器专用样式 */
-        .audio-container {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .audio-wave {
-            width: 80%;
-            height: 120px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-        .audio-wave svg {
-            width: 100%;
-            height: 100%;
-        }
-        .audio-controls {
-            width: 100%;
-            max-width: 400px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 60px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .audio-progress-bar {
-            width: 100%;
-            height: 4px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 2px;
-            cursor: pointer;
-            position: relative;
-            margin-bottom: 12px;
-        }
-        .audio-progress-fill {
-            width: 0%;
-            height: 100%;
-            background: #00ff00;
-            border-radius: 2px;
-            position: relative;
-        }
-        .audio-time {
-            display: flex;
-            justify-content: space-between;
-            color: rgba(255,255,255,0.7);
-            font-size: 0.8rem;
-            margin-bottom: 16px;
-        }
-        .audio-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 16px;
-        }
-        .audio-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .audio-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
-        .audio-btn.primary {
-            width: 56px;
-            height: 56px;
-            font-size: 1.4rem;
-        }
-        .audio-select {
-            width: 100%;
-            padding: 10px;
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 30px;
-            color: white;
-            font-size: 0.9rem;
-            text-align: center;
-            cursor: pointer;
-        }
-        .audio-select option {
-            background: #1e2a4a;
-            color: white;
-        }
-        
         .video-container {
             width: 100%;
             height: 100%;
@@ -444,9 +320,6 @@
             .nav-item { padding: 4px 12px; }
             .viewer-controls { gap: 8px; }
             .viewer-btn { padding: 6px 12px; font-size: 0.8rem; }
-            .audio-controls { padding: 15px; }
-            .audio-btn { width: 40px; height: 40px; font-size: 1rem; }
-            .audio-btn.primary { width: 48px; height: 48px; font-size: 1.2rem; }
         }
         
         .login-options-modal .modal-content { text-align: center; }
@@ -546,8 +419,8 @@
     const GITHUB_REPO = 'createsoft';
     const GITHUB_PATH = '5app.txt';
     const NAME_FILE_URL = 'https://luckynum.top/5name.txt';
-    const INTEGRAL_FILE_URL = 'https://ghproxy.net/https://raw.githubusercontent.com/bloxorz671/5class-system/main/student-integral.txt';
-    const JFFI_FILE_URL = 'https://ghproxy.net/https://raw.githubusercontent.com/bloxorz671/5class-system/main/jffi.txt';
+    const INTEGRAL_FILE_URL = 'https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/5class-system/main/student-integral.txt';
+    const JFFI_FILE_URL = 'https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/5class-system/main/jffi.txt';
     
     const TARGET_UA = 'ClassApp/1.0 (Grade8Class5)';
     const currentUA = navigator.userAgent;
@@ -568,9 +441,11 @@
     let draggedGroupIndex = null;
     let draggedAppData = null;
     
-    // 文件列表缓存（用于选集功能）
     let cachedFileList = null;
     let fileListLoading = false;
+    
+    // 播放进度存储 key
+    const PLAY_PROGRESS_KEY = 'audio_play_progress';
     
     const carouselSection = document.getElementById('carouselSection');
     const carouselTrack = document.getElementById('carouselTrack');
@@ -841,7 +716,7 @@
         a.click();
     }
     
-    // ========== 扫描根目录获取文件列表（用于选集） ==========
+    // ========== 扫描根目录获取文件列表 ==========
     async function fetchFileList() {
         if (cachedFileList) return cachedFileList;
         if (fileListLoading) {
@@ -868,273 +743,430 @@
         return cachedFileList;
     }
     
-    // 解析文件名，提取主体和集号
-    function parseEpisodeInfo(fileName) {
-        const match = fileName.match(/^(.+?)-(\d+)\.([^.]+)$/);
+    // 解析文件名，提取主体、集号和集名称（格式：原名-集号-集名称.后缀）
+    function parseEpisodeInfoDetailed(fileName) {
+        const match = fileName.match(/^(.+?)-(\d+)-(.+?)\.([^.]+)$/);
         if (match) {
-            return { baseName: match[1], episode: parseInt(match[2]), ext: match[3] };
+            return { baseName: match[1], episode: parseInt(match[2]), episodeName: match[3], ext: match[4] };
         }
-        const match2 = fileName.match(/^(.+?)-0*(\d+)\.([^.]+)$/);
+        const match2 = fileName.match(/^(.+?)-0*(\d+)-(.+?)\.([^.]+)$/);
         if (match2) {
-            return { baseName: match2[1], episode: parseInt(match2[2]), ext: match2[3] };
+            return { baseName: match2[1], episode: parseInt(match2[2]), episodeName: match2[3], ext: match2[4] };
         }
         return null;
     }
     
-    // 查找同系列的所有集数
-    async function findSeriesFiles(currentFileName) {
+    function parseEpisodeInfo(fileName) {
+        const detailed = parseEpisodeInfoDetailed(fileName);
+        if (detailed) return detailed;
+        const match = fileName.match(/^(.+?)-(\d+)\.([^.]+)$/);
+        if (match) {
+            return { baseName: match[1], episode: parseInt(match[2]), episodeName: null, ext: match[3] };
+        }
+        const match2 = fileName.match(/^(.+?)-0*(\d+)\.([^.]+)$/);
+        if (match2) {
+            return { baseName: match2[1], episode: parseInt(match2[2]), episodeName: null, ext: match2[3] };
+        }
+        return null;
+    }
+    
+    // 查找同系列的所有集数（去重）
+    async function findSeriesFiles(baseNamePattern) {
         const fileList = await fetchFileList();
         if (!fileList || fileList.length === 0) return [];
         
-        const currentInfo = parseEpisodeInfo(currentFileName);
-        if (!currentInfo) return [];
-        
-        const seriesFiles = [];
+        const seriesMap = new Map();
         for (const fileName of fileList) {
             const info = parseEpisodeInfo(fileName);
-            if (info && info.baseName === currentInfo.baseName && info.ext === currentInfo.ext) {
-                seriesFiles.push({ fileName, episode: info.episode, url: `https://luckynum.top/${fileName}` });
+            if (info && info.baseName === baseNamePattern) {
+                if (!seriesMap.has(info.episode)) {
+                    let displayName = fileName;
+                    if (info.episodeName) {
+                        displayName = `${info.baseName}-${info.episodeName}`;
+                    }
+                    seriesMap.set(info.episode, {
+                        fileName, 
+                        episode: info.episode, 
+                        episodeName: info.episodeName,
+                        displayName: displayName,
+                        url: `https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/createsoft/main/${fileName}`
+                    });
+                }
             }
         }
+        const seriesFiles = Array.from(seriesMap.values());
         seriesFiles.sort((a, b) => a.episode - b.episode);
         return seriesFiles;
     }
     
-    // ========== 音频预览器 ==========
-    let currentAudio = null;
+    // 为无集号文件查找同系列（用于记录进度和选集）
+    async function findSeriesForSingleFile(fileName) {
+        const fileList = await fetchFileList();
+        if (!fileList || fileList.length === 0) return [];
+        
+        const baseWithoutExt = fileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '');
+        const seriesMap = new Map();
+        
+        for (const f of fileList) {
+            const fBase = f.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '');
+            if (fBase === baseWithoutExt || fBase.startsWith(baseWithoutExt + '-')) {
+                const info = parseEpisodeInfo(f);
+                if (info) {
+                    if (!seriesMap.has(info.episode)) {
+                        let displayName = f;
+                        if (info.episodeName) {
+                            displayName = `${info.baseName}-${info.episodeName}`;
+                        }
+                        seriesMap.set(info.episode, {
+                            fileName: f,
+                            episode: info.episode,
+                            episodeName: info.episodeName,
+                            displayName: displayName,
+                            url: `https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/createsoft/main/${f}`
+                        });
+                    }
+                } else {
+                    // 没有集号的文件本身
+                    seriesMap.set(0, {
+                        fileName: f,
+                        episode: 0,
+                        episodeName: null,
+                        displayName: f,
+                        url: `https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/createsoft/main/${f}`
+                    });
+                }
+            }
+        }
+        const seriesFiles = Array.from(seriesMap.values());
+        seriesFiles.sort((a, b) => a.episode - b.episode);
+        return seriesFiles;
+    }
     
-    function openAudioViewer(url, fileName, seriesFiles) {
+    // 获取歌词文件（解决中文乱码）
+    async function fetchLyrics(audioFileName) {
+        const lrcFileName = audioFileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '.lrc');
+        try {
+            const url = `https://gh-proxy.com/https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${encodeURIComponent(lrcFileName)}`;
+            const response = await fetch(url);
+            if (response.ok) {
+                const arrayBuffer = await response.arrayBuffer();
+                let text = new TextDecoder('utf-8').decode(arrayBuffer);
+                if (text.includes('��') || text.charCodeAt(0) === 65533) {
+                    try {
+                        const decoder = new TextDecoder('gbk');
+                        text = decoder.decode(arrayBuffer);
+                    } catch(e) {}
+                }
+                return parseLrc(text);
+            }
+        } catch(e) {
+            console.log('无歌词文件:', lrcFileName);
+        }
+        return null;
+    }
+    
+    function parseLrc(lrcText) {
+        const lines = lrcText.split(/\r?\n/);
+        const lyrics = [];
+        const timeRegex = /\[(\d{2}):(\d{2})\.?(\d{0,3})\]/;
+        
+        for (let line of lines) {
+            const match = line.match(timeRegex);
+            if (match) {
+                const minutes = parseInt(match[1]);
+                const seconds = parseInt(match[2]);
+                const milliseconds = match[3] ? parseInt(match[3].padEnd(3, '0')) : 0;
+                const time = minutes * 60 + seconds + milliseconds / 1000;
+                const text = line.replace(timeRegex, '').trim();
+                if (text) {
+                    lyrics.push({ time, text });
+                }
+            }
+        }
+        lyrics.sort((a, b) => a.time - b.time);
+        return lyrics;
+    }
+    
+    // 保存播放进度
+    function savePlayProgress(fileName, currentTime, episodeIndex) {
+        try {
+            const progress = JSON.parse(localStorage.getItem(PLAY_PROGRESS_KEY) || '{}');
+            progress[fileName] = { currentTime, episodeIndex, timestamp: Date.now() };
+            localStorage.setItem(PLAY_PROGRESS_KEY, JSON.stringify(progress));
+        } catch(e) {}
+    }
+    
+    function getPlayProgress(fileName) {
+        try {
+            const progress = JSON.parse(localStorage.getItem(PLAY_PROGRESS_KEY) || '{}');
+            return progress[fileName] || null;
+        } catch(e) { return null; }
+    }
+    
+    // 显示 loading
+    function showLoading(text = '加载中...') {
+        let loading = document.querySelector('.loading-overlay');
+        if (!loading) {
+            loading = document.createElement('div');
+            loading.className = 'loading-overlay';
+            loading.innerHTML = '<div class="loading-spinner"></div><div class="loading-text"></div><div class="loading-percent"></div>';
+            document.body.appendChild(loading);
+        }
+        loading.querySelector('.loading-text').textContent = text;
+        loading.querySelector('.loading-percent').textContent = '';
+        loading.style.display = 'flex';
+    }
+    
+    function updateLoadingPercent(percent) {
+        const loading = document.querySelector('.loading-overlay');
+        if (loading) {
+            const percentDiv = loading.querySelector('.loading-percent');
+            if (percentDiv) percentDiv.textContent = `${percent}%`;
+        }
+    }
+    
+    function hideLoading() {
+        const loading = document.querySelector('.loading-overlay');
+        if (loading) loading.style.display = 'none';
+    }
+    
+    // 缓存音频文件（带进度）
+    async function cacheAudio(url, onProgress) {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('下载失败');
+        
+        const contentLength = response.headers.get('content-length');
+        const total = contentLength ? parseInt(contentLength) : 0;
+        
+        const reader = response.body.getReader();
+        const chunks = [];
+        let receivedLength = 0;
+        
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            chunks.push(value);
+            receivedLength += value.length;
+            
+            if (total && onProgress) {
+                const percent = Math.round((receivedLength / total) * 100);
+                onProgress(percent);
+            }
+        }
+        
+        const blob = new Blob(chunks);
+        return URL.createObjectURL(blob);
+    }
+    
+    // ========== 音频预览器（使用原生控件） ==========
+    let currentAudio = null;
+    let currentLyrics = null;
+    let currentSeriesFiles = [];
+    let currentSeriesIndex = 0;
+    let currentFileName = '';
+    let currentAudioElement = null;
+    
+    async function openAudioViewer(url, fileName, seriesFiles) {
         const overlay = document.createElement('div');
         overlay.className = 'file-viewer-overlay';
+        
+        currentSeriesFiles = seriesFiles;
+        currentFileName = fileName;
+        const currentFileIndex = seriesFiles.findIndex(f => f.fileName === fileName);
+        currentSeriesIndex = currentFileIndex >= 0 ? currentFileIndex : 0;
+        
+        const savedProgress = getPlayProgress(fileName);
+        let savedTime = savedProgress ? savedProgress.currentTime : 0;
         
         let seriesHtml = '';
         if (seriesFiles && seriesFiles.length > 1) {
             let options = '';
             for (let i = 0; i < seriesFiles.length; i++) {
                 const selected = seriesFiles[i].fileName === fileName ? 'selected' : '';
-                options += `<option value="${i}" ${selected}>第${seriesFiles[i].episode}集 - ${seriesFiles[i].fileName}</option>`;
+                options += `<option value="${i}" ${selected}>${seriesFiles[i].displayName}</option>`;
             }
             seriesHtml = `<select id="audioSeriesSelect" class="audio-select">${options}</select>`;
         }
         
         const header = document.createElement('div');
         header.className = 'viewer-header';
-        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn download-btn">下载</button><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
         
         const content = document.createElement('div');
         content.className = 'viewer-content';
         content.innerHTML = `
-            <div class="audio-container">
-                <div class="audio-wave">
-                    <svg viewBox="0 0 400 100" width="80%" height="80">
-                        <rect x="20" y="30" width="8" height="40" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="40;60;40;20;40" dur="1.5s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="40" y="20" width="8" height="60" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="60;40;20;40;60" dur="1.2s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="60" y="10" width="8" height="80" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="80;60;40;60;80" dur="1.8s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="80" y="25" width="8" height="50" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="50;30;50;70;50" dur="1.4s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="100" y="15" width="8" height="70" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="70;50;30;50;70" dur="1.6s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="120" y="35" width="8" height="30" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="30;50;70;50;30" dur="1.3s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="140" y="20" width="8" height="60" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="60;40;20;40;60" dur="1.7s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="160" y="30" width="8" height="40" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="40;60;40;20;40" dur="1.1s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="180" y="10" width="8" height="80" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="80;60;40;60;80" dur="1.9s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="200" y="25" width="8" height="50" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="50;70;50;30;50" dur="1.5s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="220" y="15" width="8" height="70" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="70;50;30;50;70" dur="1.2s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="240" y="35" width="8" height="30" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="30;20;40;20;30" dur="1.4s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="260" y="20" width="8" height="60" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="60;40;20;40;60" dur="1.8s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="280" y="30" width="8" height="40" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="40;20;40;60;40" dur="1.6s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="300" y="10" width="8" height="80" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="80;60;40;60;80" dur="1.3s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="320" y="25" width="8" height="50" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="50;30;50;70;50" dur="1.9s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="340" y="15" width="8" height="70" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="70;50;30;50;70" dur="1.1s" repeatCount="indefinite"/>
-                        </rect>
-                        <rect x="360" y="35" width="8" height="30" fill="#00ff00" rx="4">
-                            <animate attributeName="height" values="30;50;70;50;30" dur="1.7s" repeatCount="indefinite"/>
-                        </rect>
-                    </svg>
-                </div>
-                <div class="audio-controls">
-                    <div class="audio-progress-bar" id="audioProgressBar">
-                        <div class="audio-progress-fill" id="audioProgressFill"></div>
-                    </div>
-                    <div class="audio-time">
-                        <span id="audioCurrentTime">00:00</span>
-                        <span id="audioDuration">00:00</span>
-                    </div>
-                    <div class="audio-buttons">
-                        <button class="audio-btn" id="audioPrevBtn" ${!seriesFiles || seriesFiles.length <= 1 ? 'disabled style="opacity:0.3"' : ''}>⏮</button>
-                        <button class="audio-btn primary" id="audioPlayPauseBtn">▶</button>
-                        <button class="audio-btn" id="audioStopBtn">⏹</button>
-                        <button class="audio-btn" id="audioNextBtn" ${!seriesFiles || seriesFiles.length <= 1 ? 'disabled style="opacity:0.3"' : ''}>⏭</button>
-                    </div>
-                    ${seriesHtml}
-                </div>
+            <div class="lyrics-area" id="lyricsArea">
+                <div style="text-align:center; opacity:0.6;">🎤 加载歌词中...</div>
             </div>
+            <audio id="nativeAudio" class="native-audio" controls preload="auto">
+                <source src="${escapeHtml(url)}">
+            </audio>
+            ${seriesHtml}
         `;
         
         overlay.appendChild(header);
         overlay.appendChild(content);
         document.body.appendChild(overlay);
         
-        const audio = new Audio(url);
-        currentAudio = audio;
-        
-        const playPauseBtn = content.querySelector('#audioPlayPauseBtn');
-        const stopBtn = content.querySelector('#audioStopBtn');
-        const prevBtn = content.querySelector('#audioPrevBtn');
-        const nextBtn = content.querySelector('#audioNextBtn');
-        const progressBar = content.querySelector('#audioProgressBar');
-        const progressFill = content.querySelector('#audioProgressFill');
-        const currentTimeSpan = content.querySelector('#audioCurrentTime');
-        const durationSpan = content.querySelector('#audioDuration');
+        const lyricsArea = content.querySelector('#lyricsArea');
+        const audio = content.querySelector('#nativeAudio');
         const seriesSelect = content.querySelector('#audioSeriesSelect');
         
-        let isPlaying = false;
+        currentAudioElement = audio;
         
-        function formatTime(seconds) {
-            if (isNaN(seconds)) return '00:00';
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        // 如果有预加载的缓存，使用缓存
+        if (preloadCache.has(url)) {
+            const cachedUrl = preloadCache.get(url);
+            audio.src = cachedUrl;
+            audio.load();
         }
         
-        function updateProgress() {
-            if (audio.duration) {
-                const percent = (audio.currentTime / audio.duration) * 100;
-                progressFill.style.width = `${percent}%`;
-                currentTimeSpan.textContent = formatTime(audio.currentTime);
-                durationSpan.textContent = formatTime(audio.duration);
+        // 恢复播放进度
+        if (savedTime && savedTime > 0) {
+            audio.currentTime = savedTime;
+        }
+        
+        // 加载歌词
+        let lyricsLoaded = false;
+        
+        async function loadLyricsForEpisode(episodeFileName, retryCount = 0) {
+            lyricsArea.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 加载歌词中...</div>';
+            const lyrics = await fetchLyrics(episodeFileName);
+            currentLyrics = lyrics;
+            if (currentLyrics && currentLyrics.length > 0) {
+                updateLyricsDisplay();
+                lyricsLoaded = true;
+            } else if (retryCount < 2) {
+                // 重试一次
+                setTimeout(() => loadLyricsForEpisode(episodeFileName, retryCount + 1), 500);
+            } else {
+                lyricsArea.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 暂无歌词</div>';
             }
         }
         
-        audio.addEventListener('timeupdate', updateProgress);
-        audio.addEventListener('loadedmetadata', () => {
-            durationSpan.textContent = formatTime(audio.duration);
+        function updateLyricsDisplay() {
+            if (!currentLyrics || currentLyrics.length === 0) {
+                if (!lyricsLoaded) lyricsArea.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 暂无歌词</div>';
+                return;
+            }
+            const currentTime = audio.currentTime;
+            let currentLineIndex = -1;
+            for (let i = 0; i < currentLyrics.length; i++) {
+                if (currentTime >= currentLyrics[i].time) {
+                    currentLineIndex = i;
+                } else {
+                    break;
+                }
+            }
+            
+            let html = '';
+            for (let i = 0; i < currentLyrics.length; i++) {
+                const isCurrent = (i === currentLineIndex);
+                html += `<div class="lyrics-line ${isCurrent ? 'current' : ''}" data-time="${currentLyrics[i].time}">${escapeHtml(currentLyrics[i].text)}</div>`;
+            }
+            lyricsArea.innerHTML = html;
+            
+            lyricsArea.querySelectorAll('.lyrics-line').forEach(line => {
+                line.addEventListener('click', () => {
+                    const time = parseFloat(line.dataset.time);
+                    if (!isNaN(time)) {
+                        audio.currentTime = time;
+                    }
+                });
+            });
+            
+            if (currentLineIndex >= 0) {
+                const currentLine = lyricsArea.children[currentLineIndex];
+                if (currentLine) {
+                    currentLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+        
+        audio.addEventListener('timeupdate', () => {
+            if (currentLyrics) updateLyricsDisplay();
+            savePlayProgress(currentFileName, audio.currentTime, currentSeriesIndex);
         });
+        
         audio.addEventListener('ended', () => {
-            isPlaying = false;
-            playPauseBtn.textContent = '▶';
-        });
-        
-        function playAudio() {
-            audio.play().catch(e => console.log('播放失败:', e));
-            isPlaying = true;
-            playPauseBtn.textContent = '⏸';
-        }
-        
-        function pauseAudio() {
-            audio.pause();
-            isPlaying = false;
-            playPauseBtn.textContent = '▶';
-        }
-        
-        function stopAudio() {
-            audio.pause();
-            audio.currentTime = 0;
-            isPlaying = false;
-            playPauseBtn.textContent = '▶';
-            updateProgress();
-        }
-        
-        playPauseBtn.onclick = () => {
-            if (isPlaying) pauseAudio();
-            else playAudio();
-        };
-        
-        stopBtn.onclick = stopAudio;
-        
-        progressBar.onclick = (e) => {
-            const rect = progressBar.getBoundingClientRect();
-            const percent = (e.clientX - rect.left) / rect.width;
-            if (audio.duration) {
-                audio.currentTime = percent * audio.duration;
-                updateProgress();
+            if (currentSeriesFiles.length > 1 && currentSeriesIndex < currentSeriesFiles.length - 1) {
+                loadEpisode(currentSeriesIndex + 1);
             }
-        };
+        });
         
         function loadEpisode(index) {
-            const episode = seriesFiles[index];
+            if (!currentSeriesFiles || index < 0 || index >= currentSeriesFiles.length) return;
+            const episode = currentSeriesFiles[index];
             if (!episode) return;
-            stopAudio();
-            audio.src = episode.url;
-            audio.load();
-            audio.addEventListener('canplay', () => {
-                if (seriesSelect) seriesSelect.value = index;
-                const titleSpan = header.querySelector('.viewer-title');
-                if (titleSpan) titleSpan.textContent = episode.fileName;
-                playAudio();
-            }, { once: true });
-        }
-        
-        if (prevBtn) {
-            prevBtn.onclick = () => {
-                if (!seriesFiles || seriesFiles.length <= 1) return;
-                const currentIndex = seriesFiles.findIndex(f => f.fileName === fileName);
-                if (currentIndex > 0) {
-                    loadEpisode(currentIndex - 1);
-                }
-            };
-        }
-        
-        if (nextBtn) {
-            nextBtn.onclick = () => {
-                if (!seriesFiles || seriesFiles.length <= 1) return;
-                const currentIndex = seriesFiles.findIndex(f => f.fileName === fileName);
-                if (currentIndex < seriesFiles.length - 1) {
-                    loadEpisode(currentIndex + 1);
-                }
-            };
+            
+            currentSeriesIndex = index;
+            currentFileName = episode.fileName;
+            const savedProgress = getPlayProgress(episode.fileName);
+            const savedTime = savedProgress ? savedProgress.currentTime : 0;
+            
+            const titleSpan = header.querySelector('.viewer-title');
+            if (titleSpan) titleSpan.textContent = episode.displayName || episode.fileName;
+            if (seriesSelect) seriesSelect.value = index;
+            
+            // 重新加载音频（使用缓存或重新请求）
+            lyricsLoaded = false;
+            if (preloadCache.has(episode.url)) {
+                const cachedUrl = preloadCache.get(episode.url);
+                audio.src = cachedUrl;
+                audio.load();
+            } else {
+                audio.src = episode.url;
+                audio.load();
+            }
+            
+            if (savedTime && savedTime > 0) {
+                audio.currentTime = savedTime;
+            }
+            
+            // 重新加载歌词
+            loadLyricsForEpisode(episode.fileName);
+            
+            // 播放
+            audio.play().catch(e => console.log('播放失败:', e));
         }
         
         if (seriesSelect) {
             seriesSelect.onchange = () => {
                 const idx = parseInt(seriesSelect.value);
-                if (!isNaN(idx) && seriesFiles[idx]) {
+                if (!isNaN(idx) && currentSeriesFiles[idx]) {
                     loadEpisode(idx);
                 }
             };
         }
         
+        header.querySelector('.download-btn').onclick = () => downloadFile(url, fileName);
         header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
         header.querySelector('.close-btn').onclick = () => {
             audio.pause();
             audio.src = '';
-            currentAudio = null;
             overlay.remove();
         };
         overlay.onclick = (e) => { if (e.target === overlay) { audio.pause(); overlay.remove(); } };
         
-        audio.load();
+        // 先加载歌词，然后预加载其他集数
+        loadLyricsForEpisode(fileName);
+        
+        // 如果有多集且没有预加载过，启动预加载
+        if (seriesFiles.length > 1 && preloadCache.size === 0) {
+            const { updateProgress } = showPreloadProgress(seriesFiles.length, () => {
+                console.log('预加载完成');
+            });
+            
+            // 延迟一点开始预加载，避免影响当前播放
+            setTimeout(() => {
+                preloadAllEpisodes(seriesFiles, (percent, completed, total) => {
+                    updateProgress(percent, completed, total);
+                });
+            }, 1000);
+        }
+        
+        audio.play().catch(e => console.log('自动播放失败:', e));
     }
     
     // ========== 视频预览器 ==========
@@ -1147,14 +1179,14 @@
             let options = '';
             for (let i = 0; i < seriesFiles.length; i++) {
                 const selected = seriesFiles[i].fileName === fileName ? 'selected' : '';
-                options += `<option value="${i}" ${selected}>第${seriesFiles[i].episode}集 - ${seriesFiles[i].fileName}</option>`;
+                options += `<option value="${i}" ${selected}>${seriesFiles[i].displayName}</option>`;
             }
             seriesHtml = `<select id="videoSeriesSelect" class="audio-select" style="margin-top: 10px;">${options}</select>`;
         }
         
         const header = document.createElement('div');
         header.className = 'viewer-header';
-        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn download-btn">下载</button><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
         
         const content = document.createElement('div');
         content.className = 'viewer-content';
@@ -1182,7 +1214,7 @@
             video.load();
             if (seriesSelect) seriesSelect.value = index;
             const titleSpan = header.querySelector('.viewer-title');
-            if (titleSpan) titleSpan.textContent = episode.fileName;
+            if (titleSpan) titleSpan.textContent = episode.displayName || episode.fileName;
             video.play().catch(e => console.log('播放失败:', e));
         }
         
@@ -1195,6 +1227,7 @@
             };
         }
         
+        header.querySelector('.download-btn').onclick = () => downloadFile(url, fileName);
         header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
         header.querySelector('.close-btn').onclick = () => {
             video.pause();
@@ -1204,14 +1237,19 @@
         overlay.onclick = (e) => { if (e.target === overlay) { video.pause(); overlay.remove(); } };
     }
     
-    // ========== 图片预览器 ==========
+    // ========== 图片预览器（修复缩放问题） ==========
     function createZoomableImage(url, fileName) {
         const container = document.createElement('div');
         container.className = 'image-container';
         const img = document.createElement('img');
         img.src = url;
         img.className = 'zoomable-image';
+        // 初始状态：不设限制，由 transform 控制
         img.style.transform = 'translate(0px, 0px) scale(1)';
+        img.style.width = 'auto';
+        img.style.height = 'auto';
+        img.style.maxWidth = 'none';
+        img.style.maxHeight = 'none';
         img.style.webkitTouchCallout = 'default';
         img.style.userSelect = 'auto';
         container.appendChild(img);
@@ -1219,20 +1257,57 @@
         let scale = 1, translateX = 0, translateY = 0;
         let initialDistance = 0, initialScale = 1, lastTouchX = 0, lastTouchY = 0, isPanning = false;
         
-        const updateTransform = () => { img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; };
-        const clampTranslate = () => {
-            const rect = img.getBoundingClientRect();
+        // 计算图片实际显示尺寸（在容器内适应屏幕的尺寸）
+        function getDisplaySize() {
             const containerRect = container.getBoundingClientRect();
-            const maxX = Math.max(0, (rect.width * scale - containerRect.width) / 2);
-            const maxY = Math.max(0, (rect.height * scale - containerRect.height) / 2);
+            const imgRect = img.getBoundingClientRect();
+            return { width: imgRect.width, height: imgRect.height, containerWidth: containerRect.width, containerHeight: containerRect.height };
+        }
+        
+        const updateTransform = () => { 
+            img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; 
+        };
+        
+        const clampTranslate = () => {
+            const imgRect = img.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            // 计算当前图片实际显示尺寸（考虑缩放）
+            const scaledWidth = imgRect.width;
+            const scaledHeight = imgRect.height;
+            const maxX = Math.max(0, (scaledWidth - containerRect.width) / 2);
+            const maxY = Math.max(0, (scaledHeight - containerRect.height) / 2);
             translateX = Math.min(maxX, Math.max(-maxX, translateX));
             translateY = Math.min(maxY, Math.max(-maxY, translateY));
         };
-        const zoomIn = () => { scale = Math.min(scale + 0.25, 4); clampTranslate(); updateTransform(); };
-        const zoomOut = () => { scale = Math.max(scale - 0.25, 1); if (scale === 1) { translateX = 0; translateY = 0; } else clampTranslate(); updateTransform(); };
-        const resetZoom = () => { scale = 1; translateX = 0; translateY = 0; updateTransform(); };
         
-        img.addEventListener('wheel', (e) => { e.preventDefault(); e.deltaY < 0 ? zoomIn() : zoomOut(); });
+        const zoomIn = () => { 
+            scale = Math.min(scale + 0.25, 4); 
+            clampTranslate(); 
+            updateTransform(); 
+        };
+        
+        const zoomOut = () => { 
+            scale = Math.max(scale - 0.25, 1); 
+            if (scale === 1) { 
+                translateX = 0; 
+                translateY = 0; 
+            } else { 
+                clampTranslate(); 
+            } 
+            updateTransform(); 
+        };
+        
+        const resetZoom = () => { 
+            scale = 1; 
+            translateX = 0; 
+            translateY = 0; 
+            updateTransform(); 
+        };
+        
+        img.addEventListener('wheel', (e) => { 
+            e.preventDefault(); 
+            e.deltaY < 0 ? zoomIn() : zoomOut(); 
+        });
         
         let isDragging = false, dragStartX = 0, dragStartY = 0, startTranslateX = 0, startTranslateY = 0;
         img.addEventListener('mousedown', (e) => {
@@ -1248,13 +1323,18 @@
             if (isDragging && scale > 1) {
                 translateX = startTranslateX + (e.clientX - dragStartX);
                 translateY = startTranslateY + (e.clientY - dragStartY);
-                clampTranslate(); updateTransform();
+                clampTranslate();
+                updateTransform();
             }
         });
-        document.addEventListener('mouseup', () => { isDragging = false; if (scale > 1) img.style.cursor = 'grab'; });
+        document.addEventListener('mouseup', () => { 
+            isDragging = false; 
+            if (scale > 1) img.style.cursor = 'grab'; 
+        });
         
         const getDistance = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
         const getCenter = (t) => ({ x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 });
+        
         container.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const touches = Array.from(e.touches);
@@ -1268,19 +1348,24 @@
                 lastTouchX = center.x; lastTouchY = center.y;
             }
         });
+        
         container.addEventListener('touchmove', (e) => {
             e.preventDefault();
             const touches = Array.from(e.touches);
             if (touches.length === 1 && isPanning && scale > 1) {
                 translateX += touches[0].clientX - lastTouchX;
                 translateY += touches[0].clientY - lastTouchY;
-                clampTranslate(); updateTransform();
+                clampTranslate();
+                updateTransform();
                 lastTouchX = touches[0].clientX; lastTouchY = touches[0].clientY;
             } else if (touches.length === 2) {
                 const newDistance = getDistance(touches);
                 const newScale = initialScale * (newDistance / initialDistance);
                 scale = Math.min(Math.max(newScale, 1), 4);
-                if (scale === 1) { translateX = 0; translateY = 0; } else {
+                if (scale === 1) { 
+                    translateX = 0; 
+                    translateY = 0; 
+                } else {
                     const newCenter = getCenter(touches);
                     translateX += newCenter.x - lastTouchX;
                     translateY += newCenter.y - lastTouchY;
@@ -1291,12 +1376,16 @@
                 initialDistance = newDistance; initialScale = scale;
             }
         });
-        container.addEventListener('touchend', () => { isPanning = false; });
+        
+        container.addEventListener('touchend', () => { 
+            isPanning = false; 
+        });
         
         img.onerror = () => {
             container.innerHTML = `<div class="unsupported-view"><h2>🖼️ 图片加载失败</h2><p>该图片无法显示</p><button class="fallback-download">📥 立即下载</button></div>`;
             container.querySelector('.fallback-download').onclick = () => downloadFile(url, fileName);
         };
+        
         return { container, zoomIn, zoomOut, resetZoom };
     }
     
@@ -1366,6 +1455,7 @@
         return 'file';
     }
     
+    // 处理应用点击（支持系列文件）
     async function handleAppClick(link, name) {
         let fullUrl = link;
         if (fullUrl && !fullUrl.startsWith('http') && !fullUrl.startsWith('//')) {
@@ -1381,13 +1471,28 @@
                 return;
             }
             if (fileType === 'video') {
-                const seriesFiles = await findSeriesFiles(fileName);
-                openVideoViewer(fullUrl, name, seriesFiles);
+                const info = parseEpisodeInfo(fileName);
+                if (info && info.baseName) {
+                    const seriesFiles = await findSeriesFiles(info.baseName);
+                    openVideoViewer(fullUrl, name, seriesFiles);
+                } else {
+                    openVideoViewer(fullUrl, name, []);
+                }
                 return;
             }
             if (fileType === 'audio') {
-                const seriesFiles = await findSeriesFiles(fileName);
-                openAudioViewer(fullUrl, name, seriesFiles);
+                const info = parseEpisodeInfo(fileName);
+                if (info && info.baseName) {
+                    const seriesFiles = await findSeriesFiles(info.baseName);
+                    openAudioViewer(fullUrl, name, seriesFiles);
+                } else {
+                    const seriesFiles = await findSeriesForSingleFile(fileName);
+                    if (seriesFiles.length > 0) {
+                        openAudioViewer(fullUrl, name, seriesFiles);
+                    } else {
+                        openAudioViewer(fullUrl, name, []);
+                    }
+                }
                 return;
             }
             showUnsupportedDialog(fullUrl, name);
@@ -1421,13 +1526,24 @@
             if (!fullUrl.startsWith('http')) fullUrl = `https://luckynum.top/${fullUrl}`;
             if (fileType === 'image') { openImageViewer(fullUrl, fileName); return; }
             if (fileType === 'video') {
-                const seriesFiles = await findSeriesFiles(fileName);
-                openVideoViewer(fullUrl, fileName, seriesFiles);
+                const info = parseEpisodeInfo(fileName);
+                if (info && info.baseName) {
+                    const seriesFiles = await findSeriesFiles(info.baseName);
+                    openVideoViewer(fullUrl, fileName, seriesFiles);
+                } else {
+                    openVideoViewer(fullUrl, fileName, []);
+                }
                 return;
             }
             if (fileType === 'audio') {
-                const seriesFiles = await findSeriesFiles(fileName);
-                openAudioViewer(fullUrl, fileName, seriesFiles);
+                const info = parseEpisodeInfo(fileName);
+                if (info && info.baseName) {
+                    const seriesFiles = await findSeriesFiles(info.baseName);
+                    openAudioViewer(fullUrl, fileName, seriesFiles);
+                } else {
+                    const seriesFiles = await findSeriesForSingleFile(fileName);
+                    openAudioViewer(fullUrl, fileName, seriesFiles);
+                }
                 return;
             }
             showUnsupportedDialog(fullUrl, fileName);
