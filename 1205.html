@@ -1,1 +1,1907 @@
-系统被奶龙抓走了，完成所有作业解救它
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>初二五班智慧应用平台</title>
+    
+    <link rel="icon" href="41.jpg" type="image/jpeg">
+    <link rel="shortcut icon" href="41.jpg" type="image/jpeg">
+    <link rel="apple-touch-icon" href="41.jpg">
+    
+    <meta property="og:title" content="初二五班智慧应用平台" />
+    <meta property="og:description" content="欢迎使用初二五班智慧应用平台" />
+    <meta property="og:image" content="https://luckynum.top/41.jpg" />
+    <meta property="og:image:secure_url" content="https://luckynum.top/41.jpg" />
+    <meta property="og:url" content="https://luckynum.top/1205" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="初二五班智慧应用平台" />
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="初二五班智慧应用平台">
+    <meta name="twitter:description" content="欢迎使用初二五班智慧应用平台">
+    <meta name="twitter:image" content="https://luckynum.top/41.jpg">
+    <meta name="description" content="欢迎使用初二五班智慧应用平台">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #f5f7fc; font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; min-height: 100vh; padding-bottom: 70px; }
+        .platform-container { max-width: 550px; margin: 0 auto; background: #ffffff; min-height: calc(100vh - 70px); }
+        .main-header { text-align: center; padding: 20px 16px 12px; background: white; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+        .main-header h1 { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; cursor: pointer; display: inline-block; padding: 0 16px; }
+        
+        .warning-banner { background: #fff3cd; color: #856404; text-align: center; padding: 8px; font-size: 0.8rem; border-bottom: 1px solid #ffeeba; }
+        .greeting-section { padding: 12px 20px 0 20px; background: white; }
+        .greeting-wrapper { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; cursor: pointer; }
+        .greeting-text { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; }
+        .logout-btn { background: #e74c3c; color: white; border: none; border-radius: 20px; padding: 6px 16px; font-size: 0.8rem; font-weight: 500; cursor: pointer; margin-left: 12px; }
+        .logout-btn:hover { background: #c0392b; }
+        
+        .unlogged-section { padding: 12px 20px 0 20px; background: white; }
+        .unlogged-wrapper { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; }
+        .unlogged-text { font-size: 1rem; font-weight: 500; color: #e67e22; background: #fff3e0; padding: 10px 16px; border-radius: 12px; text-align: center; }
+        .scan-login-btn { background: #2b4c8a; color: white; border: none; border-radius: 12px; padding: 10px 20px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .scan-login-btn:hover { background: #1e3c72; transform: scale(1.02); }
+        
+        .rating-box { display: inline-flex; align-items: center; justify-content: center; padding: 4px 14px; font-size: 1rem; font-weight: 600; color: white; border: 2px solid; border-radius: 8px; white-space: nowrap; }
+        .rating-box.level-0 { background: #e74c3c; border-color: #c0392b; }
+        .rating-box.level-1 { background: #f39c12; border-color: #e67e22; }
+        .rating-box.level-2 { background: #f1c40f; border-color: #d4ac0d; color: #8B6914; }
+        .rating-box.level-3 { background: #fdebd0; border-color: #e6b0aa; color: #c0392b; }
+        .rating-box.level-4 { background: #95a5a6; border-color: #7f8c8d; }
+        .score-wrapper { display: inline-flex; align-items: baseline; gap: 4px; margin-left: 4px; }
+        .score-label { font-size: 0.9rem; color: #666; }
+        .score-number { font-size: 1.2rem; font-weight: 700; color: #2b4c8a; }
+        
+        .edit-mode .carousel-slide, .edit-mode .app-card { position: relative; }
+        .delete-btn { position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .edit-app-btn { position: absolute; top: 5px; left: 5px; background: #3498db; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .drag-handle { position: absolute; top: 5px; left: 35px; background: #95a5a6; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: grab; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .add-fab { position: fixed; bottom: 80px; right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 100; }
+        .add-btn, .file-manager-btn, .add-carousel-btn, .upload-only-btn { background: #27ae60; color: white; border: none; border-radius: 50%; width: 56px; height: 56px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .add-carousel-btn { background: #3498db; }
+        .upload-only-btn { background: #f39c12; font-size: 20px; }
+        .file-manager-btn { background: #9b59b6; font-size: 20px; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: all 0.2s; }
+        .modal-overlay.show { visibility: visible; opacity: 1; }
+        .modal-content { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto; }
+        .modal-content h3 { margin-bottom: 16px; }
+        .modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 16px; }
+        .confirm-btn { background: #2b4c8a; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+        .cancel-btn { background: #95a5a6; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+        .upload-area { border: 2px dashed #ddd; border-radius: 8px; padding: 15px; margin: 10px 0; text-align: center; cursor: pointer; background: #f9f9f9; }
+        
+        .student-id-modal .modal-content { text-align: center; }
+        .student-id-modal h3 { color: #1e3c72; font-size: 1.4rem; margin-bottom: 8px; }
+        .student-id-modal .subtitle { color: #666; font-size: 0.85rem; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+        .student-id-modal input { text-align: center; font-size: 1.2rem; letter-spacing: 2px; }
+        .student-id-modal .warning-text { color: #e74c3c; font-size: 0.8rem; margin-top: 12px; display: none; }
+        
+        .scan-modal .modal-content { padding: 0; overflow: hidden; max-width: 100%; width: 100%; height: 100%; max-height: 100%; border-radius: 0; background: #000; display: flex; flex-direction: column; }
+        .scan-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; background: #1a1a2e; color: white; flex-shrink: 0; }
+        .scan-header h3 { margin: 0; font-size: 1.2rem; }
+        .scan-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0 8px; }
+        .scan-video-container { flex: 1; position: relative; background: #000; overflow: hidden; }
+        #scanVideo { width: 100%; height: 100%; object-fit: cover; }
+        .scan-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 280px; border: 2px solid rgba(255,255,255,0.8); border-radius: 24px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.6); z-index: 10; }
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, transparent 0%, rgba(0,255,0,0.3) 20%, #00ff00 45%, #00ff00 55%, rgba(0,255,0,0.3) 80%, transparent 100%); box-shadow: 0 0 8px #00ff00; animation: scanMove 2.5s ease-in-out infinite; pointer-events: none; }
+        @keyframes scanMove { 0% { top: 0; opacity: 1; } 45% { opacity: 1; } 55% { opacity: 0.8; } 100% { top: 100%; opacity: 0.3; } }
+        .corner { position: absolute; width: 30px; height: 30px; border-color: #00ff00; border-style: solid; border-width: 0; }
+        .corner-tl { top: -2px; left: -2px; border-top-width: 4px; border-left-width: 4px; border-radius: 8px 0 0 0; }
+        .corner-tr { top: -2px; right: -2px; border-top-width: 4px; border-right-width: 4px; border-radius: 0 8px 0 0; }
+        .corner-bl { bottom: -2px; left: -2px; border-bottom-width: 4px; border-left-width: 4px; border-radius: 0 0 0 8px; }
+        .corner-br { bottom: -2px; right: -2px; border-bottom-width: 4px; border-right-width: 4px; border-radius: 0 0 8px 0; }
+        .scan-tip { position: absolute; bottom: 20%; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.8); font-size: 14px; z-index: 20; background: rgba(0,0,0,0.5); padding: 8px 16px; width: fit-content; margin: 0 auto; border-radius: 20px; backdrop-filter: blur(4px); pointer-events: none; }
+        .album-btn { position: absolute; bottom: 40px; right: 20px; width: 56px; height: 56px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.3); cursor: pointer; z-index: 30; }
+        .album-btn svg { width: 28px; height: 28px; fill: white; }
+        .album-btn input { display: none; }
+        .scan-status { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; z-index: 30; backdrop-filter: blur(4px); }
+        
+        .carousel-section { margin: 12px 16px 24px; background: #f0f2f6; overflow: hidden; }
+        .carousel-wrapper { width: 100%; overflow: hidden; }
+        .carousel-track { display: flex; transition: transform 0.4s; cursor: grab; }
+        .carousel-slide { flex: 0 0 100%; position: relative; }
+        .carousel-slide img { width: 100%; display: block; aspect-ratio: 16 / 9; object-fit: cover; }
+        .carousel-dots { display: flex; justify-content: center; gap: 10px; padding: 12px 0; }
+        .dot { width: 8px; height: 8px; background: #bbb; border-radius: 50%; cursor: pointer; }
+        .dot.active { width: 24px; background: #2b4c8a; border-radius: 12px; }
+        
+        .groups-container { padding: 0 20px; }
+        .group-section { margin-bottom: 24px; }
+        .group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 8px 0; border-bottom: 2px solid #eef2f8; }
+        .group-title { font-size: 1.3rem; font-weight: 600; color: #1f2937; }
+        .apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 16px; }
+        .app-card { background: #f9fafc; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 16px 8px; border: 1px solid rgba(0,0,0,0.03); cursor: pointer; position: relative; transition: all 0.2s; border-radius: 12px; }
+        .app-card:hover { transform: translateY(-4px); background: #ffffff; box-shadow: 0 18px 28px -8px rgba(0,0,0,0.12); }
+        .app-icon { width: 58px; height: 58px; object-fit: contain; margin-bottom: 14px; background: #f0f2f5; padding: 4px; border-radius: 12px; }
+        .app-name { font-size: 0.85rem; font-weight: 500; color: #1f2937; text-align: center; word-break: break-word; line-height: 1.3; }
+        .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; }
+        .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; border-radius: 12px; }
+        
+        .file-viewer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 20000;
+            display: flex;
+            flex-direction: column;
+        }
+        .viewer-header {
+            background: #1e2a4a;
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .viewer-title {
+            font-size: 1rem;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            margin-right: 12px;
+        }
+        .viewer-controls {
+            display: flex;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .viewer-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .viewer-btn:hover { background: rgba(255,255,255,0.4); }
+        
+        .viewer-content {
+            flex: 1;
+            background: #000;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .lyrics-area {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 1rem;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+        .lyrics-line {
+            padding: 8px 0;
+            transition: all 0.2s;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+        .lyrics-line.current {
+            color: #00ff00;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: 0 0 5px rgba(0,255,0,0.5);
+            background: rgba(0,255,0,0.1);
+        }
+        .native-audio {
+            width: 100%;
+            max-width: 500px;
+            margin: 20px 0;
+        }
+        .audio-select {
+            width: 100%;
+            max-width: 500px;
+            padding: 10px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 30px;
+            color: white;
+            font-size: 0.9rem;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .audio-select option {
+            background: #1e2a4a;
+            color: white;
+        }
+        
+        .video-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+        }
+        .video-container video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .unsupported-view {
+            text-align: center;
+            padding: 60px;
+            background: white;
+            border-radius: 16px;
+            margin: 20px;
+        }
+        .unsupported-view h2 {
+            font-size: 1.8rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .unsupported-view button {
+            background: #2b4c8a;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+        
+        .file-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .file-item:hover { background: #f5f5f5; }
+        .file-item.folder { color: #2b4c8a; font-weight: 500; }
+        .file-item.folder:before { content: "📁 "; }
+        .file-item.file:before { content: "📄 "; }
+        .file-actions { display: flex; gap: 8px; }
+        .file-action-btn { background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .file-action-btn:hover { background: #e0e0e0; }
+        .file-action-btn.delete { color: #e74c3c; }
+        .current-path { padding: 8px; background: #f5f5f5; border-radius: 8px; margin-bottom: 10px; font-family: monospace; font-size: 12px; word-break: break-all; }
+        .link-buttons { display: flex; gap: 10px; margin-top: 10px; }
+        .link-btn { background: #f0f2f5; border: 1px solid #ddd; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 12px; flex: 1; text-align: center; }
+        
+        .profile-card {
+            background: linear-gradient(135deg, #2b4c8a, #1e3c72);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background: #f0f2f5;
+        }
+        .profile-info { flex: 1; }
+        .profile-name { font-size: 1.4rem; font-weight: 600; margin-bottom: 4px; }
+        .profile-student-id { font-size: 0.85rem; opacity: 0.85; font-family: monospace; }
+        .profile-logout { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; padding: 8px 16px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+        .profile-logout:hover { background: rgba(255,255,255,0.3); }
+        .menu-section { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eef2f8; }
+        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #f0f2f5; cursor: pointer; transition: background 0.2s; }
+        .menu-item:last-child { border-bottom: none; }
+        .menu-left { display: flex; align-items: center; gap: 14px; }
+        .menu-icon { font-size: 1.4rem; }
+        .menu-title { font-size: 1rem; font-weight: 500; color: #1f2937; }
+        .menu-arrow { color: #94a3b8; font-size: 1.2rem; }
+        .record-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f2f5; }
+        .record-item:last-child { border-bottom: none; }
+        .record-date { font-size: 0.8rem; color: #64748b; min-width: 100px; }
+        .record-event { flex: 1; font-size: 0.9rem; color: #1e293b; margin: 0 12px; word-break: break-all; }
+        .record-score { font-weight: 600; font-size: 0.9rem; }
+        .record-score.plus { color: #10b981; }
+        .record-score.minus { color: #ef4444; }
+        .empty-records { text-align: center; padding: 40px; color: #94a3b8; }
+        .login-prompt { background: white; border-radius: 24px; padding: 48px 24px; text-align: center; margin: 40px 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .login-prompt p { color: #64748b; margin-bottom: 20px; }
+        .login-btn { background: #2b4c8a; color: white; border: none; padding: 12px 32px; border-radius: 40px; font-size: 1rem; font-weight: 500; cursor: pointer; }
+        
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #eef2f8; display: flex; padding: 10px 30px 14px; justify-content: space-between; max-width: 550px; margin: 0 auto; z-index: 100; }
+        .bottom-nav-wrapper { max-width: 550px; margin: 0 auto; position: relative; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; padding: 4px 16px; border-radius: 30px; transition: all 0.2s; }
+        .nav-icon { font-size: 1.6rem; }
+        .nav-label { font-size: 0.7rem; color: #94a3b8; }
+        .nav-item.active .nav-label { color: #2b4c8a; font-weight: 500; }
+        .nav-item.active .nav-icon { color: #2b4c8a; }
+        
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        @media (max-width: 768px) {
+            .apps-grid { gap: 12px; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+            .app-icon { width: 52px; height: 52px; }
+            .app-name { font-size: 0.75rem; }
+            .greeting-text { font-size: 1.6rem; }
+            .unlogged-text { font-size: 0.85rem; }
+            .add-fab { bottom: 80px; right: 16px; }
+            .add-btn, .file-manager-btn, .add-carousel-btn, .upload-only-btn { width: 48px; height: 48px; font-size: 20px; }
+            .profile-card { padding: 16px; }
+            .avatar { width: 60px; height: 60px; }
+            .profile-name { font-size: 1.1rem; }
+            .bottom-nav { padding: 8px 20px 12px; }
+            .nav-item { padding: 4px 12px; }
+            .viewer-controls { gap: 8px; }
+            .viewer-btn { padding: 6px 12px; font-size: 0.8rem; }
+            .lyrics-area { font-size: 0.85rem; max-height: 250px; }
+        }
+        
+        .login-options-modal .modal-content { text-align: center; }
+        .login-options { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+        .login-option-btn { background: #2b4c8a; color: white; border: none; padding: 14px; border-radius: 40px; font-size: 1rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .login-option-btn:active { transform: scale(0.98); }
+        .login-option-cancel { background: #95a5a6; }
+    </style>
+    <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
+</head>
+<body>
+<div class="platform-container">
+    <div class="warning-banner" id="warningBanner" style="display: none;">⏳ 正在加载平台数据...</div>
+    <div class="main-header"><h1 id="titleClickTarget">初二五班智慧应用平台</h1></div>
+    
+    <div id="greetingContainer" class="greeting-section" style="display: none;">
+        <div class="greeting-wrapper" id="greetingWrapper">
+            <div class="greeting-text"></div>
+            <div id="ratingContainer" style="display: inline-flex; align-items: center; gap: 4px;"></div>
+            <button id="logoutBtn" class="logout-btn" style="display: none;">退出登录</button>
+        </div>
+    </div>
+    
+    <div id="unloggedContainer" class="unlogged-section" style="display: none;">
+        <div class="unlogged-wrapper">
+            <div class="unlogged-text">⚠️ 当前处于未登录状态</div>
+            <button id="showLoginOptionsBtn" class="scan-login-btn">立即登录</button>
+        </div>
+    </div>
+    
+    <div id="homePage" class="page active">
+        <div class="carousel-section" id="carouselSection" style="display: none;">
+            <div class="carousel-wrapper"><div class="carousel-track" id="carouselTrack"></div></div>
+            <div class="carousel-dots" id="carouselDots"></div>
+        </div>
+        <div id="groupsContainer" class="groups-container"><div class="loading-tip">⏳ 加载应用中...</div></div>
+    </div>
+    
+    <div id="profilePage" class="page">
+        <div id="profileContent" style="padding: 16px;"></div>
+    </div>
+</div>
+
+<div class="bottom-nav-wrapper">
+    <div class="bottom-nav">
+        <button class="nav-item active" id="navHomeBtn"><div class="nav-icon">🏠</div><span class="nav-label">主页</span></button>
+        <button class="nav-item" id="navProfileBtn"><div class="nav-icon">👤</div><span class="nav-label">我的</span></button>
+    </div>
+</div>
+
+<div class="add-fab" id="fabGroup" style="display: none;">
+    <button class="file-manager-btn" id="fileManagerBtn" title="文件管理器">📁</button>
+    <button class="upload-only-btn" id="uploadOnlyBtn" title="上传文件">📤</button>
+    <button class="add-carousel-btn" id="addCarouselFab" title="添加轮播图">🖼️</button>
+    <button class="add-btn" id="addAppFab" title="添加应用">+</button>
+    <button class="add-btn" id="addGroupFab" title="添加分组" style="background:#9b59b6;">📂</button>
+</div>
+
+<div id="scanModal" class="modal-overlay scan-modal" style="z-index: 10000;">
+    <div class="modal-content" style="padding: 0; max-width: 100%; width: 100%; height: 100%; border-radius: 0; background: #000; display: flex; flex-direction: column;">
+        <div class="scan-header"><h3>扫码登录</h3><button id="closeScanModal" class="scan-close">✕</button></div>
+        <div class="scan-video-container">
+            <video id="scanVideo" autoplay playsinline muted></video>
+            <div class="scan-area"><div class="scan-line"></div><div class="corner corner-tl"></div><div class="corner corner-tr"></div><div class="corner corner-bl"></div><div class="corner corner-br"></div></div>
+            <div class="scan-tip">将二维码/条形码放入框内</div>
+            <div class="album-btn" id="scanAlbumBtn"><svg viewBox="0 0 24 24" width="28" height="28" fill="white"><path d="M18 3v2h2v14H4V5h2V3H2v18h20V3h-4zM9 9h2v2H9V9zm-2 4h2v2H7v-2zm4-4h2v2h-2V9zm-2 4h2v2H9v-2zm4-4h2v2h-2V9zm-2 4h2v2h-2v-2zm4-4h2v2h-2V9zM7 5h10V3H7v2z"/></svg><input type="file" id="scanAlbumInput" accept="image/*"></div>
+            <div id="scanStatus" class="scan-status">启动摄像头中...</div>
+        </div>
+    </div>
+</div>
+
+<div id="pointsModal" class="modal-overlay" style="z-index: 10001;">
+    <div class="modal-content">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3>📊 积分明细</h3>
+            <button id="closePointsModal" class="modal-close" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">✕</button>
+        </div>
+        <div id="pointsModalBody" style="max-height: 60vh; overflow-y: auto;"></div>
+    </div>
+</div>
+
+<div id="loginOptionsModal" class="modal-overlay" style="z-index: 10002;">
+    <div class="modal-content login-options-modal">
+        <h3>请选择登录方式</h3>
+        <div class="login-options">
+            <button id="scanLoginOptionBtn" class="login-option-btn">扫码登录</button>
+            <button id="inputIdLoginOptionBtn" class="login-option-btn">输入学号登录</button>
+            <button id="cancelLoginOptionBtn" class="login-option-btn login-option-cancel">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== 配置 ==========
+    const CONFIG_URL = 'https://luckynum.top/5app.txt';
+    const GITHUB_OWNER = 'bloxorz671';
+    const GITHUB_REPO = 'createsoft';
+    const GITHUB_PATH = '5app.txt';
+    const NAME_FILE_URL = 'https://luckynum.top/5name.txt';
+    const INTEGRAL_FILE_URL = 'https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/5class-system/main/student-integral.txt';
+    const JFFI_FILE_URL = 'https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/5class-system/main/jffi.txt';
+    
+    const TARGET_UA = 'ClassApp/1.0 (Grade8Class5)';
+    const currentUA = navigator.userAgent;
+    const isTargetDevice = currentUA === TARGET_UA;
+    
+    let slidesData = [], appItems = [], groupOrder = ['其他应用'], currentIndex = 0, autoInterval = null, totalSlides = 0;
+    let isEditMode = false, currentToken = null, fileSha = null;
+    let currentStudentId = null;
+    let nameMapping = {}, integralMapping = {};
+    let isAddingApp = false, isAddingCarousel = false;
+    
+    let scanCodeReader = null;
+    let scanningActive = false;
+    let lastScanTime = 0;
+    const SCAN_COOLDOWN = 1000;
+    let defaultCameraId = null;
+    
+    let draggedGroupIndex = null;
+    let draggedAppData = null;
+    
+    let cachedFileList = null;
+    let fileListLoading = false;
+    
+    // 播放进度存储 key
+    const PLAY_PROGRESS_KEY = 'audio_play_progress';
+    
+    const carouselSection = document.getElementById('carouselSection');
+    const carouselTrack = document.getElementById('carouselTrack');
+    const dotsContainer = document.getElementById('carouselDots');
+    const groupsContainer = document.getElementById('groupsContainer');
+    const fabGroup = document.getElementById('fabGroup');
+    const warningBanner = document.getElementById('warningBanner');
+    const ratingContainer = document.getElementById('ratingContainer');
+    const greetingWrapper = document.getElementById('greetingWrapper');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const greetingContainer = document.getElementById('greetingContainer');
+    const unloggedContainer = document.getElementById('unloggedContainer');
+    const showLoginOptionsBtn = document.getElementById('showLoginOptionsBtn');
+    const loginOptionsModal = document.getElementById('loginOptionsModal');
+    const scanLoginOptionBtn = document.getElementById('scanLoginOptionBtn');
+    const inputIdLoginOptionBtn = document.getElementById('inputIdLoginOptionBtn');
+    const cancelLoginOptionBtn = document.getElementById('cancelLoginOptionBtn');
+    const scanModal = document.getElementById('scanModal');
+    const scanVideo = document.getElementById('scanVideo');
+    const scanStatus = document.getElementById('scanStatus');
+    const closeScanModal = document.getElementById('closeScanModal');
+    const scanAlbumBtn = document.getElementById('scanAlbumBtn');
+    const scanAlbumInput = document.getElementById('scanAlbumInput');
+    const homePage = document.getElementById('homePage');
+    const profilePage = document.getElementById('profilePage');
+    const navHomeBtn = document.getElementById('navHomeBtn');
+    const navProfileBtn = document.getElementById('navProfileBtn');
+    const profileContent = document.getElementById('profileContent');
+    const pointsModal = document.getElementById('pointsModal');
+    const pointsModalBody = document.getElementById('pointsModalBody');
+    const closePointsModal = document.getElementById('closePointsModal');
+    
+    const RATING_CONFIG = [
+        { min: 80, max: Infinity, name: '夯爆了', colorClass: 'level-0' },
+        { min: 60, max: 79, name: '顶级', colorClass: 'level-1' },
+        { min: 40, max: 59, name: '人上人', colorClass: 'level-2' },
+        { min: 20, max: 39, name: 'Npc', colorClass: 'level-3' },
+        { min: -Infinity, max: 19, name: '拉完了', colorClass: 'level-4' }
+    ];
+    
+    function getRatingByIntegral(integral) {
+        const score = parseInt(integral);
+        if (isNaN(score)) return RATING_CONFIG[4];
+        for (let config of RATING_CONFIG) {
+            if (score >= config.min && score <= config.max) return config;
+        }
+        return RATING_CONFIG[4];
+    }
+    
+    function saveStudentId(id) {
+        if (!id) return;
+        try { localStorage.setItem('studentId', id); } catch(e) {}
+        try { sessionStorage.setItem('studentId', id); } catch(e) {}
+        try { document.cookie = `studentId=${id}; path=/; max-age=${7*24*60*60}`; } catch(e) {}
+    }
+    
+    function getStudentId() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let id = urlParams.get('p');
+        if (id && /^\d{5}$/.test(id)) { saveStudentId(id); return id; }
+        try { id = localStorage.getItem('studentId'); if (id && /^\d{5}$/.test(id)) return id; } catch(e) {}
+        try { id = sessionStorage.getItem('studentId'); if (id && /^\d{5}$/.test(id)) return id; } catch(e) {}
+        try { const match = document.cookie.match(/studentId=([^;]+)/); if (match && /^\d{5}$/.test(match[1])) return match[1]; } catch(e) {}
+        return null;
+    }
+    
+    function clearStudentId() {
+        try { localStorage.removeItem('studentId'); } catch(e) {}
+        try { sessionStorage.removeItem('studentId'); } catch(e) {}
+        try { document.cookie = 'studentId=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'; } catch(e) {}
+        currentStudentId = null;
+    }
+    
+    function saveDefaultCamera(deviceId) {
+        if (deviceId) {
+            try { localStorage.setItem('scan_defaultCameraId', deviceId); } catch(e) {}
+            defaultCameraId = deviceId;
+        }
+    }
+    
+    function loadDefaultCamera() {
+        try { defaultCameraId = localStorage.getItem('scan_defaultCameraId'); } catch(e) {}
+        return defaultCameraId;
+    }
+    
+    let audioContext = null;
+    function playBeep() {
+        try {
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioContext.state === 'suspended') audioContext.resume().then(() => playBeepSound());
+            else playBeepSound();
+        } catch(e) {}
+    }
+    function playBeepSound() {
+        try {
+            const now = audioContext.currentTime;
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            osc.frequency.value = 600;
+            osc.type = 'square';
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+            osc.start(now);
+            osc.stop(now + 0.12);
+        } catch(e) {}
+    }
+    
+    function extractLastFiveDigits(fullCode) {
+        const numbers = fullCode.match(/\d/g);
+        if (numbers && numbers.length >= 5) return numbers.slice(-5).join('');
+        const lastFive = fullCode.slice(-5);
+        if (/^\d{5}$/.test(lastFive)) return lastFive;
+        return fullCode;
+    }
+    
+    function onScanSuccess(fullCode) {
+        const now = Date.now();
+        if (now - lastScanTime < SCAN_COOLDOWN) return;
+        lastScanTime = now;
+        playBeep();
+        const studentId = extractLastFiveDigits(fullCode);
+        if (/^\d{5}$/.test(studentId)) {
+            saveStudentId(studentId);
+            stopScanCamera();
+            scanModal.classList.remove('show');
+            window.location.href = `?p=${studentId}`;
+        } else {
+            scanStatus.textContent = '识别失败，请重试';
+            setTimeout(() => { if (scanStatus) scanStatus.textContent = '扫描中...'; }, 2000);
+        }
+    }
+    
+    async function startScanCamera() {
+        if (!scanCodeReader) {
+            try { scanCodeReader = new ZXing.BrowserMultiFormatReader(); } catch(e) {
+                scanStatus.textContent = '扫码库加载失败';
+                return;
+            }
+        }
+        if (scanVideo && scanVideo.srcObject) { try { stopScanCamera(); } catch(e) {} }
+        scanStatus.textContent = '获取摄像头列表...';
+        scanningActive = true;
+        try {
+            let devices = [];
+            try { devices = await scanCodeReader.listVideoInputDevices(); } catch(e) {
+                const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                tempStream.getTracks().forEach(t => t.stop());
+                devices = await scanCodeReader.listVideoInputDevices();
+            }
+            if (devices.length === 0) throw new Error('未找到摄像头');
+            let selectedId = loadDefaultCamera();
+            if (!selectedId || !devices.find(d => d.deviceId === selectedId)) {
+                const backCam = devices.find(d => {
+                    const label = (d.label || '').toLowerCase();
+                    return label.includes('back') || label.includes('rear') || label.includes('后置') || label.includes('environment');
+                });
+                selectedId = backCam ? backCam.deviceId : devices[0].deviceId;
+                saveDefaultCamera(selectedId);
+            }
+            const selected = devices.find(d => d.deviceId === selectedId);
+            scanStatus.textContent = `使用: ${selected?.label?.slice(0, 30) || '摄像头'}`;
+            await scanCodeReader.decodeFromVideoDevice(selectedId, 'scanVideo', (result, err) => {
+                if (result && scanningActive) onScanSuccess(result.getText());
+                if (err && !(err instanceof ZXing.NotFoundException)) console.warn(err);
+            });
+        } catch(err) {
+            scanStatus.textContent = '摄像头启动失败';
+            console.error(err);
+        }
+    }
+    
+    function stopScanCamera() {
+        scanningActive = false;
+        if (scanCodeReader) { try { scanCodeReader.reset(); } catch(e) {} }
+        if (scanVideo && scanVideo.srcObject) {
+            try {
+                const stream = scanVideo.srcObject;
+                if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
+                scanVideo.srcObject = null;
+            } catch(e) {}
+        }
+    }
+    
+    async function scanFromImage(file) {
+        if (!file) return;
+        if (scanStatus) scanStatus.textContent = '处理图片中...';
+        try {
+            if (scanCodeReader) { try { scanCodeReader.reset(); } catch(e) {} }
+            if (scanVideo && scanVideo.srcObject) {
+                const oldStream = scanVideo.srcObject;
+                if (oldStream && oldStream.getTracks) oldStream.getTracks().forEach(t => t.stop());
+                scanVideo.srcObject = null;
+            }
+            const img = new Image();
+            const imageUrl = URL.createObjectURL(file);
+            await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = imageUrl; });
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+            URL.revokeObjectURL(imageUrl);
+            const canvasStream = canvas.captureStream(30);
+            scanVideo.srcObject = canvasStream;
+            await scanVideo.play();
+            await new Promise(r => setTimeout(r, 200));
+            if (scanStatus) scanStatus.textContent = '识别中...';
+            let tempReader = null;
+            try { tempReader = new ZXing.BrowserMultiFormatReader(); } catch(e) {
+                scanStatus.textContent = '扫码库加载失败';
+                alert('扫码库加载失败，请刷新页面重试');
+                startScanCamera();
+                return;
+            }
+            const result = await tempReader.decodeFromVideoElement(scanVideo);
+            if (result && result.text) {
+                playBeep();
+                const studentId = extractLastFiveDigits(result.text);
+                if (/^\d{5}$/.test(studentId)) {
+                    saveStudentId(studentId);
+                    stopScanCamera();
+                    scanModal.classList.remove('show');
+                    window.location.href = `?p=${studentId}`;
+                } else {
+                    scanStatus.textContent = '未识别到有效学号';
+                    alert(`识别到的内容不是5位数学号：${studentId}`);
+                    startScanCamera();
+                }
+            } else {
+                scanStatus.textContent = '未识别到二维码';
+                alert('未识别到二维码，请确保图片清晰完整');
+                startScanCamera();
+            }
+        } catch (err) {
+            console.error('相册识别失败:', err);
+            scanStatus.textContent = '识别失败';
+            alert('识别失败，请确保图片清晰完整');
+            startScanCamera();
+        }
+    }
+    
+    function showScanModalFunc() { if (scanModal) scanModal.classList.add('show'); setTimeout(() => startScanCamera(), 100); }
+    function closeScanModalFunc() { stopScanCamera(); if (scanModal) scanModal.classList.remove('show'); }
+    
+    function copyShareLink(appName) {
+        let shareUrl = window.location.origin + window.location.pathname;
+        if (appName) {
+            shareUrl += `?app=${encodeURIComponent(appName)}`;
+        }
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            const tip = document.createElement('div');
+            tip.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:white;padding:12px 24px;border-radius:30px;z-index:30000;font-size:14px;text-align:center;';
+            tip.textContent = '✅ 网址已复制';
+            document.body.appendChild(tip);
+            setTimeout(() => tip.remove(), 1500);
+        }).catch(() => {
+            alert('复制失败，请手动复制');
+        });
+    }
+    
+    function downloadFile(url, fileName) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName.split('?')[0];
+        a.target = '_blank';
+        a.click();
+    }
+    
+    // ========== 扫描根目录获取文件列表 ==========
+    async function fetchFileList() {
+        if (cachedFileList) return cachedFileList;
+        if (fileListLoading) {
+            await new Promise(r => setTimeout(r, 500));
+            return cachedFileList;
+        }
+        fileListLoading = true;
+        try {
+            const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/`;
+            const response = await fetch(url, {
+                headers: currentToken ? { 'Authorization': `Bearer ${currentToken}` } : {}
+            });
+            if (response.ok) {
+                const items = await response.json();
+                cachedFileList = items.filter(item => item.type === 'file').map(item => item.name);
+            } else {
+                cachedFileList = [];
+            }
+        } catch(e) {
+            console.warn('获取文件列表失败:', e);
+            cachedFileList = [];
+        }
+        fileListLoading = false;
+        return cachedFileList;
+    }
+    
+    // 解析文件名，提取主体、集号和集名称（格式：原名-集号-集名称.后缀）
+    function parseEpisodeInfoDetailed(fileName) {
+        const match = fileName.match(/^(.+?)-(\d+)-(.+?)\.([^.]+)$/);
+        if (match) {
+            return { baseName: match[1], episode: parseInt(match[2]), episodeName: match[3], ext: match[4] };
+        }
+        const match2 = fileName.match(/^(.+?)-0*(\d+)-(.+?)\.([^.]+)$/);
+        if (match2) {
+            return { baseName: match2[1], episode: parseInt(match2[2]), episodeName: match2[3], ext: match2[4] };
+        }
+        return null;
+    }
+    
+    function parseEpisodeInfo(fileName) {
+        const detailed = parseEpisodeInfoDetailed(fileName);
+        if (detailed) return detailed;
+        const match = fileName.match(/^(.+?)-(\d+)\.([^.]+)$/);
+        if (match) {
+            return { baseName: match[1], episode: parseInt(match[2]), episodeName: null, ext: match[3] };
+        }
+        const match2 = fileName.match(/^(.+?)-0*(\d+)\.([^.]+)$/);
+        if (match2) {
+            return { baseName: match2[1], episode: parseInt(match2[2]), episodeName: null, ext: match2[3] };
+        }
+        return null;
+    }
+    
+    // 查找同系列的所有集数（去重）
+    async function findSeriesFiles(baseNamePattern) {
+        const fileList = await fetchFileList();
+        if (!fileList || fileList.length === 0) return [];
+        
+        const seriesMap = new Map();
+        for (const fileName of fileList) {
+            const info = parseEpisodeInfo(fileName);
+            if (info && info.baseName === baseNamePattern) {
+                if (!seriesMap.has(info.episode)) {
+                    let displayName = fileName;
+                    if (info.episodeName) {
+                        displayName = `${info.baseName}-${info.episodeName}`;
+                    }
+                    seriesMap.set(info.episode, {
+                        fileName, 
+                        episode: info.episode, 
+                        episodeName: info.episodeName,
+                        displayName: displayName,
+                        url: `https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/createsoft/main/${fileName}`
+                    });
+                }
+            }
+        }
+        const seriesFiles = Array.from(seriesMap.values());
+        seriesFiles.sort((a, b) => a.episode - b.episode);
+        return seriesFiles;
+    }
+    
+    // 为无集号文件查找同系列（用于记录进度和选集）
+    async function findSeriesForSingleFile(fileName) {
+        const fileList = await fetchFileList();
+        if (!fileList || fileList.length === 0) return [];
+        
+        const baseWithoutExt = fileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '');
+        const seriesMap = new Map();
+        
+        for (const f of fileList) {
+            const fBase = f.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '');
+            if (fBase === baseWithoutExt || fBase.startsWith(baseWithoutExt + '-')) {
+                const info = parseEpisodeInfo(f);
+                if (info) {
+                    if (!seriesMap.has(info.episode)) {
+                        let displayName = f;
+                        if (info.episodeName) {
+                            displayName = `${info.baseName}-${info.episodeName}`;
+                        }
+                        seriesMap.set(info.episode, {
+                            fileName: f,
+                            episode: info.episode,
+                            episodeName: info.episodeName,
+                            displayName: displayName,
+                            url: `https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/createsoft/main/${f}`
+                        });
+                    }
+                } else {
+                    // 没有集号的文件本身
+                    seriesMap.set(0, {
+                        fileName: f,
+                        episode: 0,
+                        episodeName: null,
+                        displayName: f,
+                        url: `https://gh-proxy.com/https://raw.githubusercontent.com/bloxorz671/createsoft/main/${f}`
+                    });
+                }
+            }
+        }
+        const seriesFiles = Array.from(seriesMap.values());
+        seriesFiles.sort((a, b) => a.episode - b.episode);
+        return seriesFiles;
+    }
+    
+    // 获取歌词文件（修复中文乱码）
+    async function fetchLyrics(audioFileName) {
+        const lrcFileName = audioFileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '.lrc');
+        try {
+            const url = `https://gh-proxy.com/https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${encodeURIComponent(lrcFileName)}`;
+            console.log('请求歌词:', url);
+            const response = await fetch(url);
+            if (response.ok) {
+                const arrayBuffer = await response.arrayBuffer();
+                let text = new TextDecoder('utf-8').decode(arrayBuffer);
+                if (text.includes('��') || text.charCodeAt(0) === 65533) {
+                    try {
+                        const decoder = new TextDecoder('gbk');
+                        text = decoder.decode(arrayBuffer);
+                    } catch(e) {}
+                }
+                return parseLrc(text);
+            }
+        } catch(e) {
+            console.log('无歌词文件:', lrcFileName);
+        }
+        return null;
+    }
+    
+    function parseLrc(lrcText) {
+        const lines = lrcText.split(/\r?\n/);
+        const lyrics = [];
+        const timeRegex = /\[(\d{2}):(\d{2})\.?(\d{0,3})\]/;
+        
+        for (let line of lines) {
+            const match = line.match(timeRegex);
+            if (match) {
+                const minutes = parseInt(match[1]);
+                const seconds = parseInt(match[2]);
+                const milliseconds = match[3] ? parseInt(match[3].padEnd(3, '0')) : 0;
+                const time = minutes * 60 + seconds + milliseconds / 1000;
+                const text = line.replace(timeRegex, '').trim();
+                if (text) {
+                    lyrics.push({ time, text });
+                }
+            }
+        }
+        lyrics.sort((a, b) => a.time - b.time);
+        return lyrics;
+    }
+    
+    // 保存播放进度
+    function savePlayProgress(fileName, currentTime, episodeIndex) {
+        try {
+            const progress = JSON.parse(localStorage.getItem(PLAY_PROGRESS_KEY) || '{}');
+            progress[fileName] = { currentTime, episodeIndex, timestamp: Date.now() };
+            localStorage.setItem(PLAY_PROGRESS_KEY, JSON.stringify(progress));
+        } catch(e) {}
+    }
+    
+    function getPlayProgress(fileName) {
+        try {
+            const progress = JSON.parse(localStorage.getItem(PLAY_PROGRESS_KEY) || '{}');
+            return progress[fileName] || null;
+        } catch(e) { return null; }
+    }
+    
+    // ========== 音频预览器（使用原生控件） ==========
+    let currentAudio = null;
+    let currentLyrics = null;
+    let currentSeriesFiles = [];
+    let currentSeriesIndex = 0;
+    let currentFileName = '';
+    
+    function openAudioViewer(url, fileName, seriesFiles) {
+        const overlay = document.createElement('div');
+        overlay.className = 'file-viewer-overlay';
+        
+        currentSeriesFiles = seriesFiles;
+        currentFileName = fileName;
+        const currentFileIndex = seriesFiles.findIndex(f => f.fileName === fileName);
+        currentSeriesIndex = currentFileIndex >= 0 ? currentFileIndex : 0;
+        
+        const savedProgress = getPlayProgress(fileName);
+        let savedTime = savedProgress ? savedProgress.currentTime : 0;
+        
+        let seriesHtml = '';
+        if (seriesFiles && seriesFiles.length > 1) {
+            let options = '';
+            for (let i = 0; i < seriesFiles.length; i++) {
+                const selected = seriesFiles[i].fileName === fileName ? 'selected' : '';
+                options += `<option value="${i}" ${selected}>${seriesFiles[i].displayName}</option>`;
+            }
+            seriesHtml = `<select id="audioSeriesSelect" class="audio-select">${options}</select>`;
+        }
+        
+        const header = document.createElement('div');
+        header.className = 'viewer-header';
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn download-btn">下载</button><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
+        
+        const content = document.createElement('div');
+        content.className = 'viewer-content';
+        content.innerHTML = `
+            <div class="lyrics-area" id="lyricsArea">
+                <div style="text-align:center; opacity:0.6;">🎤 加载歌词中...</div>
+            </div>
+            <audio id="nativeAudio" class="native-audio" controls preload="auto">
+                <source src="${escapeHtml(url)}">
+            </audio>
+            ${seriesHtml}
+        `;
+        
+        overlay.appendChild(header);
+        overlay.appendChild(content);
+        document.body.appendChild(overlay);
+        
+        const lyricsArea = content.querySelector('#lyricsArea');
+        const audio = content.querySelector('#nativeAudio');
+        const seriesSelect = content.querySelector('#audioSeriesSelect');
+        
+        currentAudio = audio;
+        
+        // 恢复播放进度
+        if (savedTime && savedTime > 0) {
+            audio.currentTime = savedTime;
+        }
+        
+        function updateLyricsDisplay() {
+            if (!currentLyrics || currentLyrics.length === 0) {
+                lyricsArea.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 暂无歌词</div>';
+                return;
+            }
+            const currentTime = audio.currentTime;
+            let currentLineIndex = -1;
+            for (let i = 0; i < currentLyrics.length; i++) {
+                if (currentTime >= currentLyrics[i].time) {
+                    currentLineIndex = i;
+                } else {
+                    break;
+                }
+            }
+            
+            let html = '';
+            for (let i = 0; i < currentLyrics.length; i++) {
+                const isCurrent = (i === currentLineIndex);
+                html += `<div class="lyrics-line ${isCurrent ? 'current' : ''}" data-time="${currentLyrics[i].time}">${escapeHtml(currentLyrics[i].text)}</div>`;
+            }
+            lyricsArea.innerHTML = html;
+            
+            lyricsArea.querySelectorAll('.lyrics-line').forEach(line => {
+                line.addEventListener('click', () => {
+                    const time = parseFloat(line.dataset.time);
+                    if (!isNaN(time)) {
+                        audio.currentTime = time;
+                    }
+                });
+            });
+            
+            if (currentLineIndex >= 0) {
+                const currentLine = lyricsArea.children[currentLineIndex];
+                if (currentLine) {
+                    currentLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+        
+        audio.addEventListener('timeupdate', () => {
+            if (currentLyrics) updateLyricsDisplay();
+            savePlayProgress(currentFileName, audio.currentTime, currentSeriesIndex);
+        });
+        
+        audio.addEventListener('ended', () => {
+            // 自动播放下一集（如果有）
+            if (currentSeriesFiles.length > 1 && currentSeriesIndex < currentSeriesFiles.length - 1) {
+                loadEpisode(currentSeriesIndex + 1);
+            }
+        });
+        
+        function loadEpisode(index) {
+            if (!currentSeriesFiles || index < 0 || index >= currentSeriesFiles.length) return;
+            const episode = currentSeriesFiles[index];
+            if (!episode) return;
+            
+            currentSeriesIndex = index;
+            currentFileName = episode.fileName;
+            const savedProgress = getPlayProgress(episode.fileName);
+            const savedTime = savedProgress ? savedProgress.currentTime : 0;
+            
+            const titleSpan = header.querySelector('.viewer-title');
+            if (titleSpan) titleSpan.textContent = episode.displayName || episode.fileName;
+            if (seriesSelect) seriesSelect.value = index;
+            
+            lyricsArea.innerHTML = '<div style="text-align:center; opacity:0.6;">🎤 加载歌词中...</div>';
+            fetchLyrics(episode.fileName).then(lyrics => {
+                currentLyrics = lyrics;
+                updateLyricsDisplay();
+            });
+            
+            audio.src = episode.url;
+            audio.load();
+            if (savedTime && savedTime > 0) {
+                audio.currentTime = savedTime;
+            }
+            audio.play().catch(e => console.log('播放失败:', e));
+        }
+        
+        if (seriesSelect) {
+            seriesSelect.onchange = () => {
+                const idx = parseInt(seriesSelect.value);
+                if (!isNaN(idx) && currentSeriesFiles[idx]) {
+                    loadEpisode(idx);
+                }
+            };
+        }
+        
+        header.querySelector('.download-btn').onclick = () => downloadFile(url, fileName);
+        header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
+        header.querySelector('.close-btn').onclick = () => {
+            audio.pause();
+            audio.src = '';
+            overlay.remove();
+        };
+        overlay.onclick = (e) => { if (e.target === overlay) { audio.pause(); overlay.remove(); } };
+        
+        fetchLyrics(fileName).then(lyrics => {
+            currentLyrics = lyrics;
+            updateLyricsDisplay();
+        });
+        
+        audio.play().catch(e => console.log('自动播放失败:', e));
+    }
+    
+    // ========== 视频预览器 ==========
+    function openVideoViewer(url, fileName, seriesFiles) {
+        const overlay = document.createElement('div');
+        overlay.className = 'file-viewer-overlay';
+        
+        let seriesHtml = '';
+        if (seriesFiles && seriesFiles.length > 1) {
+            let options = '';
+            for (let i = 0; i < seriesFiles.length; i++) {
+                const selected = seriesFiles[i].fileName === fileName ? 'selected' : '';
+                options += `<option value="${i}" ${selected}>${seriesFiles[i].displayName}</option>`;
+            }
+            seriesHtml = `<select id="videoSeriesSelect" class="audio-select" style="margin-top: 10px;">${options}</select>`;
+        }
+        
+        const header = document.createElement('div');
+        header.className = 'viewer-header';
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn download-btn">下载</button><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
+        
+        const content = document.createElement('div');
+        content.className = 'viewer-content';
+        content.innerHTML = `
+            <div class="video-container">
+                <video id="videoPlayer" controls style="max-width:100%; max-height:100%; object-fit:contain;">
+                    <source src="${escapeHtml(url)}">
+                </video>
+                ${seriesHtml}
+            </div>
+        `;
+        
+        overlay.appendChild(header);
+        overlay.appendChild(content);
+        document.body.appendChild(overlay);
+        
+        const video = content.querySelector('#videoPlayer');
+        const seriesSelect = content.querySelector('#videoSeriesSelect');
+        
+        function loadEpisode(index) {
+            const episode = seriesFiles[index];
+            if (!episode) return;
+            video.pause();
+            video.src = episode.url;
+            video.load();
+            if (seriesSelect) seriesSelect.value = index;
+            const titleSpan = header.querySelector('.viewer-title');
+            if (titleSpan) titleSpan.textContent = episode.displayName || episode.fileName;
+            video.play().catch(e => console.log('播放失败:', e));
+        }
+        
+        if (seriesSelect) {
+            seriesSelect.onchange = () => {
+                const idx = parseInt(seriesSelect.value);
+                if (!isNaN(idx) && seriesFiles[idx]) {
+                    loadEpisode(idx);
+                }
+            };
+        }
+        
+        header.querySelector('.download-btn').onclick = () => downloadFile(url, fileName);
+        header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
+        header.querySelector('.close-btn').onclick = () => {
+            video.pause();
+            video.src = '';
+            overlay.remove();
+        };
+        overlay.onclick = (e) => { if (e.target === overlay) { video.pause(); overlay.remove(); } };
+    }
+    
+    // ========== 图片预览器 ==========
+    function createZoomableImage(url, fileName) {
+        const container = document.createElement('div');
+        container.className = 'image-container';
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'zoomable-image';
+        img.style.transform = 'translate(0px, 0px) scale(1)';
+        img.style.webkitTouchCallout = 'default';
+        img.style.userSelect = 'auto';
+        container.appendChild(img);
+        
+        let scale = 1, translateX = 0, translateY = 0;
+        let initialDistance = 0, initialScale = 1, lastTouchX = 0, lastTouchY = 0, isPanning = false;
+        
+        const updateTransform = () => { img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; };
+        const clampTranslate = () => {
+            const rect = img.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const maxX = Math.max(0, (rect.width * scale - containerRect.width) / 2);
+            const maxY = Math.max(0, (rect.height * scale - containerRect.height) / 2);
+            translateX = Math.min(maxX, Math.max(-maxX, translateX));
+            translateY = Math.min(maxY, Math.max(-maxY, translateY));
+        };
+        const zoomIn = () => { scale = Math.min(scale + 0.25, 4); clampTranslate(); updateTransform(); };
+        const zoomOut = () => { scale = Math.max(scale - 0.25, 1); if (scale === 1) { translateX = 0; translateY = 0; } else clampTranslate(); updateTransform(); };
+        const resetZoom = () => { scale = 1; translateX = 0; translateY = 0; updateTransform(); };
+        
+        img.addEventListener('wheel', (e) => { e.preventDefault(); e.deltaY < 0 ? zoomIn() : zoomOut(); });
+        
+        let isDragging = false, dragStartX = 0, dragStartY = 0, startTranslateX = 0, startTranslateY = 0;
+        img.addEventListener('mousedown', (e) => {
+            if (scale > 1) {
+                isDragging = true;
+                dragStartX = e.clientX; dragStartY = e.clientY;
+                startTranslateX = translateX; startTranslateY = translateY;
+                img.style.cursor = 'grabbing';
+                e.preventDefault();
+            }
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging && scale > 1) {
+                translateX = startTranslateX + (e.clientX - dragStartX);
+                translateY = startTranslateY + (e.clientY - dragStartY);
+                clampTranslate(); updateTransform();
+            }
+        });
+        document.addEventListener('mouseup', () => { isDragging = false; if (scale > 1) img.style.cursor = 'grab'; });
+        
+        const getDistance = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+        const getCenter = (t) => ({ x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 });
+        container.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touches = Array.from(e.touches);
+            if (touches.length === 1) {
+                isPanning = true;
+                lastTouchX = touches[0].clientX; lastTouchY = touches[0].clientY;
+            } else if (touches.length === 2) {
+                initialDistance = getDistance(touches);
+                initialScale = scale;
+                const center = getCenter(touches);
+                lastTouchX = center.x; lastTouchY = center.y;
+            }
+        });
+        container.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touches = Array.from(e.touches);
+            if (touches.length === 1 && isPanning && scale > 1) {
+                translateX += touches[0].clientX - lastTouchX;
+                translateY += touches[0].clientY - lastTouchY;
+                clampTranslate(); updateTransform();
+                lastTouchX = touches[0].clientX; lastTouchY = touches[0].clientY;
+            } else if (touches.length === 2) {
+                const newDistance = getDistance(touches);
+                const newScale = initialScale * (newDistance / initialDistance);
+                scale = Math.min(Math.max(newScale, 1), 4);
+                if (scale === 1) { translateX = 0; translateY = 0; } else {
+                    const newCenter = getCenter(touches);
+                    translateX += newCenter.x - lastTouchX;
+                    translateY += newCenter.y - lastTouchY;
+                    clampTranslate();
+                    lastTouchX = newCenter.x; lastTouchY = newCenter.y;
+                }
+                updateTransform();
+                initialDistance = newDistance; initialScale = scale;
+            }
+        });
+        container.addEventListener('touchend', () => { isPanning = false; });
+        
+        img.onerror = () => {
+            container.innerHTML = `<div class="unsupported-view"><h2>🖼️ 图片加载失败</h2><p>该图片无法显示</p><button class="fallback-download">📥 立即下载</button></div>`;
+            container.querySelector('.fallback-download').onclick = () => downloadFile(url, fileName);
+        };
+        return { container, zoomIn, zoomOut, resetZoom };
+    }
+    
+    function openImageViewer(url, fileName) {
+        const overlay = document.createElement('div');
+        overlay.className = 'file-viewer-overlay';
+        const header = document.createElement('div');
+        header.className = 'viewer-header';
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><div id="zoomControls" style="display: flex; gap: 8px;"></div><button class="viewer-btn download-btn">下载</button><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
+        const content = document.createElement('div');
+        content.className = 'viewer-content';
+        overlay.appendChild(header); overlay.appendChild(content);
+        document.body.appendChild(overlay);
+        
+        const { container, zoomIn, zoomOut, resetZoom } = createZoomableImage(url, fileName);
+        content.appendChild(container);
+        
+        const zoomControls = header.querySelector('#zoomControls');
+        zoomControls.innerHTML = `<button class="zoom-btn" id="zoomOutBtn">−</button><button class="zoom-btn" id="resetZoomBtn">⟳</button><button class="zoom-btn" id="zoomInBtn">+</button>`;
+        zoomControls.querySelector('#zoomInBtn').onclick = zoomIn;
+        zoomControls.querySelector('#zoomOutBtn').onclick = zoomOut;
+        zoomControls.querySelector('#resetZoomBtn').onclick = resetZoom;
+        
+        header.querySelector('.download-btn').onclick = () => downloadFile(url, fileName);
+        header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
+        header.querySelector('.close-btn').onclick = () => overlay.remove();
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    }
+    
+    function showUnsupportedDialog(url, fileName) {
+        const overlay = document.createElement('div');
+        overlay.className = 'file-viewer-overlay';
+        const header = document.createElement('div');
+        header.className = 'viewer-header';
+        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
+        const content = document.createElement('div');
+        content.className = 'viewer-content';
+        content.innerHTML = `
+            <div class="unsupported-view">
+                <h2>📄 该文件不支持预览</h2>
+                <p>${escapeHtml(fileName)}</p>
+                <button id="downloadBtn" class="download-btn">📥 立即下载</button>
+            </div>
+        `;
+        overlay.appendChild(header); overlay.appendChild(content);
+        document.body.appendChild(overlay);
+        content.querySelector('#downloadBtn').onclick = () => downloadFile(url, fileName);
+        header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
+        header.querySelector('.close-btn').onclick = () => overlay.remove();
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    }
+    
+    function isFileUrl(url) {
+        if (!url) return false;
+        let path = url.split('?')[0].split('#')[0];
+        let ext = path.split('.').pop().toLowerCase();
+        const fileExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico', 'mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'mp3', 'm4a', 'wav', 'flac', 'aac'];
+        return fileExts.includes(ext);
+    }
+    
+    function getFileType(url) {
+        if (!url) return 'link';
+        let ext = url.split('.').pop().toLowerCase();
+        if (['jpg','jpeg','png','gif','webp','bmp','svg','ico'].includes(ext)) return 'image';
+        if (['mp4','webm','ogg','mov','avi','mkv'].includes(ext)) return 'video';
+        if (['mp3','m4a','wav','flac','aac'].includes(ext)) return 'audio';
+        return 'file';
+    }
+    
+    async function handleAppClick(link, name) {
+        let fullUrl = link;
+        if (fullUrl && !fullUrl.startsWith('http') && !fullUrl.startsWith('//')) {
+            fullUrl = `https://luckynum.top/${fullUrl}`;
+        }
+        
+        if (isFileUrl(link)) {
+            const fileType = getFileType(link);
+            const fileName = link.split('/').pop();
+            
+            if (fileType === 'image') {
+                openImageViewer(fullUrl, name);
+                return;
+            }
+            if (fileType === 'video') {
+                const info = parseEpisodeInfo(fileName);
+                if (info && info.baseName) {
+                    const seriesFiles = await findSeriesFiles(info.baseName);
+                    openVideoViewer(fullUrl, name, seriesFiles);
+                } else {
+                    openVideoViewer(fullUrl, name, []);
+                }
+                return;
+            }
+            if (fileType === 'audio') {
+                const info = parseEpisodeInfo(fileName);
+                if (info && info.baseName) {
+                    const seriesFiles = await findSeriesFiles(info.baseName);
+                    openAudioViewer(fullUrl, name, seriesFiles);
+                } else {
+                    const seriesFiles = await findSeriesForSingleFile(fileName);
+                    if (seriesFiles.length > 0) {
+                        openAudioViewer(fullUrl, name, seriesFiles);
+                    } else {
+                        openAudioViewer(fullUrl, name, []);
+                    }
+                }
+                return;
+            }
+            showUnsupportedDialog(fullUrl, name);
+            return;
+        }
+        window.open(fullUrl, '_blank');
+    }
+    
+    async function handleUrlAppParameter() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let appParam = urlParams.get('app');
+        if (!appParam) return;
+        try { appParam = decodeURIComponent(appParam); } catch(e) {}
+        let retryCount = 0;
+        while (appItems.length === 0 && retryCount < 30) {
+            await new Promise(r => setTimeout(r, 200));
+            retryCount++;
+        }
+        let targetApp = appItems.find(app => app.name === appParam);
+        if (!targetApp) {
+            targetApp = appItems.find(app => app.name.toLowerCase().includes(appParam.toLowerCase()));
+        }
+        if (targetApp) {
+            setTimeout(() => { handleAppClick(targetApp.link, targetApp.name); }, 500);
+            return;
+        }
+        if (isFileUrl(appParam)) {
+            const fileType = getFileType(appParam);
+            const fileName = appParam.split('/').pop();
+            let fullUrl = appParam;
+            if (!fullUrl.startsWith('http')) fullUrl = `https://luckynum.top/${fullUrl}`;
+            if (fileType === 'image') { openImageViewer(fullUrl, fileName); return; }
+            if (fileType === 'video') {
+                const info = parseEpisodeInfo(fileName);
+                if (info && info.baseName) {
+                    const seriesFiles = await findSeriesFiles(info.baseName);
+                    openVideoViewer(fullUrl, fileName, seriesFiles);
+                } else {
+                    openVideoViewer(fullUrl, fileName, []);
+                }
+                return;
+            }
+            if (fileType === 'audio') {
+                const info = parseEpisodeInfo(fileName);
+                if (info && info.baseName) {
+                    const seriesFiles = await findSeriesFiles(info.baseName);
+                    openAudioViewer(fullUrl, fileName, seriesFiles);
+                } else {
+                    const seriesFiles = await findSeriesForSingleFile(fileName);
+                    openAudioViewer(fullUrl, fileName, seriesFiles);
+                }
+                return;
+            }
+            showUnsupportedDialog(fullUrl, fileName);
+            return;
+        }
+        alert(`❌ 应用/文件不存在或已被删除\n\n“${appParam}”`);
+    }
+    
+    function parseAppTxt(raw) {
+        const lines = raw.split(/\r?\n/);
+        let mode = null;
+        let groups = [], pics = [], apps = [];
+        for (let line of lines) {
+            line = line.trim();
+            if (line === '') continue;
+            if (line.toLowerCase() === 'group') { mode = 'group'; continue; }
+            if (line.toLowerCase() === 'pic') { mode = 'pic'; continue; }
+            if (line.toLowerCase() === 'app') { mode = 'app'; continue; }
+            if (mode === 'group') {
+                let m = line.match(/\[g=([^\]]+)\]/);
+                if (m) groups.push(m[1].trim());
+            } else if (mode === 'pic') {
+                let m = line.match(/\[p=([^\s\]]+)\s+l=([^\s\]]+)\]/);
+                if (m) pics.push({ imgUrl: m[1].trim(), linkUrl: m[2].trim() });
+            } else if (mode === 'app') {
+                let m = line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)(?:\s+g=([^\s\]]+))?\]/);
+                if (!m) m = line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)(?:\s+g=(.+?))?\]/);
+                if (m) apps.push({ name: m[1].trim(), icon: m[2].trim(), link: m[3].trim(), group: m[4] ? m[4].trim() : null });
+            }
+        }
+        groupOrder = groups.length ? groups : ['其他应用'];
+        slidesData = pics;
+        appItems = apps;
+        renderGroups();
+        if (slidesData.length) { renderCarousel(); startAutoSlide(); }
+        else carouselSection.style.display = 'none';
+        warningBanner.style.display = 'none';
+        handleUrlAppParameter();
+    }
+    
+    function renderGroups() {
+        if (!groupsContainer) return;
+        let appsByGroup = {};
+        for (let group of groupOrder) appsByGroup[group] = [];
+        for (let app of appItems) {
+            let group = app.group || '其他应用';
+            if (!appsByGroup[group]) appsByGroup[group] = [];
+            appsByGroup[group].push(app);
+        }
+        let html = '';
+        for (let i = 0; i < groupOrder.length; i++) {
+            const groupName = groupOrder[i];
+            const apps = appsByGroup[groupName] || [];
+            html += `<div class="group-section" data-group-index="${i}">
+                <div class="group-header ${isEditMode ? 'draggable' : ''}" data-group="${escapeHtml(groupName)}">
+                    <span class="group-title">${escapeHtml(groupName)}</span>
+                    ${isEditMode ? `<div><button class="group-edit-btn" onclick="editGroup('${escapeHtml(groupName)}')">✎</button><button class="group-delete-btn" onclick="deleteGroup('${escapeHtml(groupName)}')">🗑</button></div>` : ''}
+                </div>
+                <div class="apps-grid" data-group="${escapeHtml(groupName)}" data-group-index="${i}">`;
+            if (apps.length === 0) html += `<div class="empty-group">暂无应用</div>`;
+            else for (let app of apps) {
+                let icon = app.icon;
+                if (icon && !icon.startsWith('http')) icon = `https://luckynum.top/${icon}`;
+                const fallbackIcon = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\' viewBox=\'0 0 24 24\'%3E%3Crect width=\'24\' height=\'24\' fill=\'%23ddd\'/%3E%3C/svg%3E';
+                html += `<div class="app-card" data-app-name="${escapeHtml(app.name)}" data-app-link="${escapeHtml(app.link)}" data-app-icon="${escapeHtml(app.icon)}" data-app-group="${escapeHtml(groupName)}">
+                    ${isEditMode ? `<button class="edit-app-btn" onclick="editApp('${escapeHtml(app.name)}','${escapeHtml(app.link)}','${escapeHtml(app.icon)}','${escapeHtml(groupName)}')">✎</button><button class="delete-btn" onclick="deleteApp('${escapeHtml(app.name)}','${escapeHtml(app.link)}')">✕</button><div class="drag-handle" draggable="true">⋮⋮</div>` : ''}
+                    <img class="app-icon" src="${escapeHtml(icon)}" onerror="this.src='${fallbackIcon}'">
+                    <span class="app-name">${escapeHtml(app.name)}</span>
+                </div>`;
+            }
+            html += `</div></div>`;
+        }
+        groupsContainer.innerHTML = html;
+        
+        document.querySelectorAll('.app-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.classList.contains('edit-app-btn') || e.target.classList.contains('delete-btn') || e.target.classList.contains('drag-handle')) return;
+                handleAppClick(card.dataset.appLink, card.dataset.appName);
+            });
+        });
+        if (isEditMode) { initDragSort(); }
+    }
+    
+    function initDragSort() {
+        const groupHeaders = document.querySelectorAll('.group-header.draggable');
+        groupHeaders.forEach(header => {
+            header.setAttribute('draggable', 'true');
+            header.ondragstart = (e) => {
+                const groupDiv = header.closest('.group-section');
+                draggedGroupIndex = parseInt(groupDiv.dataset.groupIndex);
+                e.dataTransfer.setData('text/plain', draggedGroupIndex);
+                e.dataTransfer.effectAllowed = 'move';
+            };
+            header.ondragover = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
+            header.ondrop = async (e) => {
+                e.preventDefault();
+                const targetGroup = header.closest('.group-section');
+                const targetIndex = parseInt(targetGroup.dataset.groupIndex);
+                if (draggedGroupIndex !== null && draggedGroupIndex !== targetIndex) {
+                    const movedGroup = groupOrder[draggedGroupIndex];
+                    groupOrder.splice(draggedGroupIndex, 1);
+                    groupOrder.splice(targetIndex, 0, movedGroup);
+                    if (await saveToGitHub(generateFileContent())) renderGroups();
+                }
+                draggedGroupIndex = null;
+            };
+        });
+        
+        const appCards = document.querySelectorAll('.app-card');
+        appCards.forEach(card => {
+            const dragHandle = card.querySelector('.drag-handle');
+            if (!dragHandle) return;
+            dragHandle.setAttribute('draggable', 'true');
+            dragHandle.ondragstart = (e) => {
+                draggedAppData = {
+                    name: card.dataset.appName,
+                    link: card.dataset.appLink,
+                    icon: card.dataset.appIcon,
+                    group: card.dataset.appGroup
+                };
+                e.dataTransfer.setData('text/plain', JSON.stringify(draggedAppData));
+                e.dataTransfer.effectAllowed = 'move';
+                card.classList.add('dragging');
+            };
+            dragHandle.ondragend = () => { card.classList.remove('dragging'); draggedAppData = null; };
+        });
+        
+        const appGrids = document.querySelectorAll('.apps-grid');
+        appGrids.forEach(grid => {
+            grid.ondragover = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
+            grid.ondrop = async (e) => {
+                e.preventDefault();
+                if (draggedAppData) {
+                    const targetGroup = grid.dataset.group;
+                    const app = appItems.find(a => a.name === draggedAppData.name && a.link === draggedAppData.link);
+                    if (app && app.group !== targetGroup) {
+                        app.group = targetGroup;
+                        if (await saveToGitHub(generateFileContent())) renderGroups();
+                    }
+                    draggedAppData = null;
+                }
+            };
+        });
+    }
+    
+    function renderCarousel() {
+        if (!carouselTrack) return;
+        totalSlides = slidesData.length;
+        if (totalSlides === 0) { carouselSection.style.display = 'none'; return; }
+        carouselSection.style.display = 'block';
+        let html = '';
+        for (let i = 0; i < slidesData.length; i++) {
+            let img = slidesData[i].imgUrl, link = slidesData[i].linkUrl;
+            if (img && !img.startsWith('http')) img = `https://luckynum.top/${img}`;
+            if (link && !link.startsWith('http')) link = `https://luckynum.top/${link}`;
+            html += `<div class="carousel-slide">${isEditMode ? `<button class="delete-btn" onclick="deleteSlide(${i})">✕</button>` : ''}<a href="${escapeHtml(link)}" target="_blank"><img src="${escapeHtml(img)}" onerror="this.src='https://luckynum.top/41.jpg'"></a></div>`;
+        }
+        carouselTrack.innerHTML = html;
+        let dots = '';
+        for (let i = 0; i < totalSlides; i++) dots += `<div class="dot ${i === currentIndex ? 'active' : ''}" data-index="${i}"></div>`;
+        dotsContainer.innerHTML = dots;
+        updateCarouselPosition();
+        document.querySelectorAll('.dot').forEach(dot => dot.onclick = () => { currentIndex = parseInt(dot.dataset.index); updateCarouselPosition(); updateDotsActive(); resetAutoSlide(); });
+    }
+    
+    function updateCarouselPosition() { if (carouselTrack) carouselTrack.style.transform = `translateX(${-currentIndex * 100}%)`; }
+    function updateDotsActive() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentIndex)); }
+    function nextSlide() { if (totalSlides) { currentIndex = (currentIndex + 1) % totalSlides; updateCarouselPosition(); updateDotsActive(); } }
+    function startAutoSlide() { if (autoInterval) clearInterval(autoInterval); if (totalSlides > 1) autoInterval = setInterval(nextSlide, 5000); }
+    function resetAutoSlide() { startAutoSlide(); }
+    
+    async function loadConfigFile() {
+        warningBanner.style.display = 'block';
+        try {
+            const res = await fetch(CONFIG_URL + '?t=' + Date.now());
+            if (!res.ok) throw new Error();
+            parseAppTxt(await res.text());
+        } catch(e) {
+            groupsContainer.innerHTML = `<div class="error-tip">❌ 加载失败，请刷新重试</div>`;
+            warningBanner.style.display = 'none';
+        }
+    }
+    
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+    
+    async function loadPointsRecords(studentId) {
+        try {
+            const response = await fetch(JFFI_FILE_URL + '?t=' + Date.now());
+            if (!response.ok) return { records: [], total: 0 };
+            const text = await response.text();
+            const lines = text.split(/\r?\n/);
+            const records = [];
+            let total = 0;
+            for (let line of lines) {
+                line = line.trim();
+                if (line === '') continue;
+                const regex = /^(\d{4}\/\d{2}\/\d{2})\s+(\d{2}:\d{2})\s+(\d{5})\s+(.+?)\s+([+-]\d+)$/;
+                const match = line.match(regex);
+                if (match) {
+                    const date = match[1], time = match[2], sid = match[3], event = match[4], scoreStr = match[5];
+                    const score = parseInt(scoreStr);
+                    if (sid === studentId) {
+                        records.push({ datetime: `${date} ${time}`, event: event, score: score, isPlus: score > 0 });
+                        total += score;
+                    }
+                }
+            }
+            records.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+            return { records, total };
+        } catch (e) { return { records: [], total: 0 }; }
+    }
+    
+    async function showPointsDetail() {
+        if (!currentStudentId) { alert('请先登录'); return; }
+        pointsModal.classList.add('show');
+        pointsModalBody.innerHTML = '<div class="loading-tip">📡 加载积分记录中...</div>';
+        const { records, total } = await loadPointsRecords(currentStudentId);
+        if (records.length === 0) { pointsModalBody.innerHTML = '<div class="empty-records">暂无积分记录</div>'; return; }
+        let html = '';
+        for (const record of records) {
+            const scoreClass = record.isPlus ? 'plus' : 'minus';
+            const scoreSymbol = record.isPlus ? `+${record.score}` : `${record.score}`;
+            html += `<div class="record-item"><span class="record-date">${escapeHtml(record.datetime)}</span><span class="record-event">${escapeHtml(record.event)}</span><span class="record-score ${scoreClass}">${scoreSymbol}</span></div>`;
+        }
+        pointsModalBody.innerHTML = html;
+    }
+    
+    function closePointsModalFunc() { pointsModal.classList.remove('show'); }
+    
+    async function renderProfilePage() {
+        if (!profileContent) return;
+        if (!currentStudentId) {
+            profileContent.innerHTML = `<div class="login-prompt"><p>👤 您还未登录</p><button class="login-btn" onclick="showLoginOptions()">立即登录</button></div>`;
+            return;
+        }
+        const studentName = nameMapping[currentStudentId] || currentStudentId;
+        const currentTotal = integralMapping[currentStudentId] || 0;
+        profileContent.innerHTML = `
+            <div class="profile-card">
+                <img class="avatar" src="41.jpg" alt="头像" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%234a90e2\'/%3E%3Ctext x=\'50\' y=\'70\' text-anchor=\'middle\' fill=\'white\' font-size=\'40\'%3E👤%3C/text%3E%3C/svg%3E'">
+                <div class="profile-info">
+                    <div class="profile-name">${escapeHtml(studentName)}</div>
+                    <div class="profile-student-id">学号：${currentStudentId}</div>
+                    <div class="profile-student-id" style="margin-top: 4px;">⭐ 当前积分：${currentTotal}</div>
+                </div>
+                <button class="profile-logout" id="profileLogoutBtn">退出登录</button>
+            </div>
+            <div class="menu-section">
+                <div class="menu-item" id="pointsMenuItem"><div class="menu-left"><span class="menu-icon">📊</span><span class="menu-title">积分明细</span></div><span class="menu-arrow">›</span></div>
+            </div>
+        `;
+        const profileLogoutBtn = document.getElementById('profileLogoutBtn');
+        if (profileLogoutBtn) profileLogoutBtn.onclick = () => { clearStudentId(); window.location.href = window.location.pathname; };
+        const pointsMenuItem = document.getElementById('pointsMenuItem');
+        if (pointsMenuItem) pointsMenuItem.onclick = () => showPointsDetail();
+    }
+    
+    function showHome() { homePage.classList.add('active'); profilePage.classList.remove('active'); navHomeBtn.classList.add('active'); navProfileBtn.classList.remove('active'); }
+    async function showProfile() { homePage.classList.remove('active'); profilePage.classList.add('active'); navProfileBtn.classList.add('active'); navHomeBtn.classList.remove('active'); await renderProfilePage(); }
+    
+    async function loadNameMapping() {
+        try {
+            const res = await fetch(NAME_FILE_URL + '?t=' + Date.now());
+            if (res.ok) {
+                const text = await res.text();
+                nameMapping = {};
+                text.split(/\r?\n/).forEach(line => {
+                    line = line.trim();
+                    if (!line) return;
+                    const space = line.indexOf(' ');
+                    if (space !== -1) nameMapping[line.substring(0, space)] = line.substring(space + 1).trim();
+                });
+                return true;
+            }
+        } catch(e) {}
+        return false;
+    }
+    
+    async function loadIntegralData() {
+        try {
+            const res = await fetch(INTEGRAL_FILE_URL + '?t=' + Date.now());
+            if (res.ok) {
+                const text = await res.text();
+                integralMapping = {};
+                text.split(/\r?\n/).forEach(line => {
+                    line = line.trim();
+                    if (!line) return;
+                    const parts = line.split(/\s+/);
+                    if (parts.length >= 2) integralMapping[parts[0].trim()] = parts[1].trim();
+                });
+                return true;
+            }
+        } catch(e) {}
+        return false;
+    }
+    
+    async function showGreeting() {
+        currentStudentId = getStudentId();
+        if (!currentStudentId) {
+            greetingContainer.style.display = 'none';
+            unloggedContainer.style.display = 'block';
+            return;
+        }
+        unloggedContainer.style.display = 'none';
+        const textElem = greetingContainer?.querySelector('.greeting-text');
+        if (Object.keys(nameMapping).length === 0) await loadNameMapping();
+        const studentName = nameMapping[currentStudentId] || currentStudentId;
+        if (greetingContainer && textElem) {
+            textElem.textContent = studentName;
+            greetingContainer.style.display = 'block';
+            if (Object.keys(integralMapping).length === 0) await loadIntegralData();
+            if (integralMapping[currentStudentId]) {
+                const integral = integralMapping[currentStudentId];
+                const rating = getRatingByIntegral(integral);
+                ratingContainer.innerHTML = '';
+                const ratingBox = document.createElement('div');
+                ratingBox.className = `rating-box ${rating.colorClass}`;
+                ratingBox.textContent = rating.name;
+                const scoreWrapper = document.createElement('div');
+                scoreWrapper.className = 'score-wrapper';
+                scoreWrapper.innerHTML = `<span class="score-label">分数</span><span class="score-number">${integral}</span>`;
+                ratingContainer.appendChild(ratingBox);
+                ratingContainer.appendChild(scoreWrapper);
+                ratingContainer.style.display = 'inline-flex';
+            } else ratingContainer.style.display = 'none';
+        }
+        if (logoutBtn) {
+            logoutBtn.style.display = 'inline-block';
+            logoutBtn.onclick = () => { clearStudentId(); window.location.href = window.location.pathname; };
+        }
+        if (greetingWrapper) {
+            greetingWrapper.style.cursor = 'pointer';
+            greetingWrapper.onclick = (e) => {
+                if (e.target === logoutBtn || logoutBtn?.contains(e.target)) return;
+                window.location.href = '/5pm';
+            };
+        }
+    }
+    
+    function showStudentIdPrompt() {
+        return new Promise((resolve) => {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay student-id-modal';
+            modal.innerHTML = `<div class="modal-content"><h3>🔐 初二五班专用系统</h3><div class="subtitle">请验证身份以继续使用</div><input type="number" id="studentIdInput" placeholder="请输入5位数学号" maxlength="5" autocomplete="off"><div class="warning-text" id="warningText">❌ 学号必须是5位数字，请重新输入</div><div class="modal-buttons"><button class="confirm-btn" id="confirmBtn">确定</button><button class="cancel-btn" id="cancelBtn">取消</button></div></div>`;
+            document.body.appendChild(modal);
+            modal.classList.add('show');
+            const input = modal.querySelector('#studentIdInput');
+            const confirmBtn = modal.querySelector('#confirmBtn');
+            const cancelBtn = modal.querySelector('#cancelBtn');
+            const warningText = modal.querySelector('#warningText');
+            input.focus();
+            const handleConfirm = () => {
+                const value = input.value.trim();
+                if (/^\d{5}$/.test(value)) { modal.remove(); resolve(value); }
+                else { warningText.style.display = 'block'; input.style.borderColor = '#e74c3c'; input.value = ''; input.focus(); }
+            };
+            const handleCancel = () => { modal.remove(); resolve(null); };
+            confirmBtn.onclick = handleConfirm;
+            cancelBtn.onclick = handleCancel;
+            input.onkeypress = (e) => { if (e.key === 'Enter') handleConfirm(); };
+            modal.onclick = (e) => { if (e.target === modal) handleCancel(); };
+        });
+    }
+    
+    async function checkUserAgentAndPrompt() {
+        if (!isTargetDevice) return;
+        let existingId = getStudentId();
+        if (existingId) { currentStudentId = existingId; await showGreeting(); return; }
+        const studentId = await showStudentIdPrompt();
+        if (studentId) { saveStudentId(studentId); window.location.href = `?p=${studentId}`; }
+        else { warningBanner.style.display = 'block'; warningBanner.innerHTML = '⚠️ 请输入学号以使用完整功能 | <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">点击重试</span>'; }
+    }
+    
+    function showLoginOptions() { loginOptionsModal.classList.add('show'); }
+    function hideLoginOptions() { loginOptionsModal.classList.remove('show'); }
+    function showManualIdInput() { hideLoginOptions(); showStudentIdPrompt().then(studentId => { if (studentId) { saveStudentId(studentId); window.location.href = `?p=${studentId}`; } }); }
+    
+    if (showLoginOptionsBtn) {
+        if (isTargetDevice) {
+            showLoginOptionsBtn.onclick = () => { showStudentIdPrompt().then(studentId => { if (studentId) { saveStudentId(studentId); window.location.href = `?p=${studentId}`; } }); };
+        } else {
+            showLoginOptionsBtn.onclick = showLoginOptions;
+        }
+    }
+    if (scanLoginOptionBtn) scanLoginOptionBtn.onclick = () => { hideLoginOptions(); showScanModalFunc(); };
+    if (inputIdLoginOptionBtn) inputIdLoginOptionBtn.onclick = () => { hideLoginOptions(); showManualIdInput(); };
+    if (cancelLoginOptionBtn) cancelLoginOptionBtn.onclick = hideLoginOptions;
+    if (loginOptionsModal) loginOptionsModal.onclick = (e) => { if (e.target === loginOptionsModal) hideLoginOptions(); };
+    
+    let clickCount = 0, clickTimer = null;
+    document.getElementById('titleClickTarget')?.addEventListener('click', () => {
+        clickCount++;
+        if (clickTimer) clearTimeout(clickTimer);
+        clickTimer = setTimeout(() => { clickCount = 0; }, 1000);
+        if (clickCount === 3) {
+            clickCount = 0;
+            if (isEditMode) { alert('编辑模式已开启，无需重复输入Token'); return; }
+            showTokenModal();
+        }
+    });
+    
+    function showTokenModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><h3>验证Token</h3><input type="password" id="tokenInput" placeholder="GitHub Token" autocomplete="off"><div class="modal-buttons"><button class="confirm-btn" id="confirmBtn">验证</button><button class="cancel-btn" id="cancelBtn">取消</button></div></div>`;
+        document.body.appendChild(modal);
+        modal.classList.add('show');
+        const confirmBtn = modal.querySelector('#confirmBtn');
+        const cancelBtn = modal.querySelector('#cancelBtn');
+        const tokenInput = modal.querySelector('#tokenInput');
+        confirmBtn.onclick = async () => {
+            const token = tokenInput.value.trim();
+            if (!token) { alert('请输入Token'); return; }
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = '验证中...';
+            try {
+                const testRes = await fetch('https://api.github.com/user', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!testRes.ok) throw new Error('Token无效');
+                currentToken = token;
+                isEditMode = true;
+                document.body.classList.add('edit-mode');
+                fabGroup.style.display = 'flex';
+                renderGroups();
+                renderCarousel();
+                modal.remove();
+                alert('✅ 编辑模式已启用！');
+            } catch (e) {
+                alert('❌ Token验证失败：' + e.message);
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '验证';
+            }
+        };
+        cancelBtn.onclick = () => modal.remove();
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    }
+    
+    window.deleteSlide = function(idx) { if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; } if (confirm('确定删除这张轮播图吗？')) { slidesData.splice(idx, 1); renderCarousel(); saveToGitHub(generateFileContent()); } };
+    window.editGroup = function(groupName) { if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; } const newName = prompt('请输入新的分组名称', groupName); if (newName && newName !== groupName) { const index = groupOrder.indexOf(groupName); if (index !== -1) { groupOrder[index] = newName; appItems.forEach(app => { if (app.group === groupName) app.group = newName; }); saveToGitHub(generateFileContent()).then(() => { renderGroups(); }); } } };
+    window.deleteGroup = function(groupName) { if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; } if (groupName === '其他应用') { alert('不能删除"其他应用"分组'); return; } if (confirm(`确定删除分组"${groupName}"？`)) { const index = groupOrder.indexOf(groupName); if (index !== -1) { groupOrder.splice(index, 1); appItems.forEach(app => { if (app.group === groupName) app.group = '其他应用'; }); saveToGitHub(generateFileContent()).then(() => { renderGroups(); }); } } };
+    window.editApp = function(name, link, icon, group) { if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; } const modal = document.createElement('div'); modal.className = 'modal-overlay'; modal.innerHTML = `<div class="modal-content"><h3>编辑应用</h3><label>应用名称</label><input id="appName" value="${escapeHtml(name)}"><label>图标链接</label><input id="appIcon" value="${escapeHtml(icon)}"><label>跳转链接</label><input id="appLink" value="${escapeHtml(link)}"><label>所属分组</label><select id="appGroup">${groupOrder.map(g => `<option value="${escapeHtml(g)}" ${g === group ? 'selected' : ''}>${escapeHtml(g)}</option>`).join('')}</select><div class="modal-buttons"><button class="confirm-btn">保存</button><button class="cancel-btn">取消</button></div></div>`; document.body.appendChild(modal); modal.classList.add('show'); modal.querySelector('.confirm-btn').onclick = async () => { const newName = modal.querySelector('#appName').value.trim(); const newIcon = modal.querySelector('#appIcon').value.trim() || 'null.jpg'; const newLink = modal.querySelector('#appLink').value.trim(); const newGroup = modal.querySelector('#appGroup').value; if (!newName || !newLink) { alert('请填写完整'); return; } const app = appItems.find(a => a.name === name && a.link === link); if (app) { app.name = newName; app.icon = newIcon; app.link = newLink; app.group = newGroup; if (await saveToGitHub(generateFileContent())) { renderGroups(); } modal.remove(); } }; modal.querySelector('.cancel-btn').onclick = () => modal.remove(); modal.onclick = (e) => { if (e.target === modal) modal.remove(); }; };
+    window.deleteApp = async function(name, link) { if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; } if (confirm('确定删除这个应用吗？')) { const index = appItems.findIndex(a => a.name === name && a.link === link); if (index !== -1) appItems.splice(index, 1); if (await saveToGitHub(generateFileContent())) { renderGroups(); } } };
+    
+    function addApp() { if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; } if (isAddingApp) { alert('请稍候...'); return; } const modal = document.createElement('div'); modal.className = 'modal-overlay'; modal.innerHTML = `<div class="modal-content"><h3>添加新应用</h3><label>应用名称</label><input id="appName" placeholder="应用名称"><label>图标链接</label><input id="iconUrl" placeholder="图标链接"><label>跳转链接</label><input id="appLink" placeholder="https://..."><label>所属分组</label><select id="appGroup">${groupOrder.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('')}</select><div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div></div>`; document.body.appendChild(modal); modal.classList.add('show'); const confirmBtn = modal.querySelector('.confirm-btn'); const cancelBtn = modal.querySelector('.cancel-btn'); confirmBtn.onclick = async () => { const name = modal.querySelector('#appName').value.trim(); const icon = modal.querySelector('#iconUrl').value.trim() || 'null.jpg'; const link = modal.querySelector('#appLink').value.trim(); const group = modal.querySelector('#appGroup').value; if (!name || !link) { alert('请填写完整'); return; } isAddingApp = true; confirmBtn.disabled = true; confirmBtn.textContent = '保存中...'; appItems.push({ name, icon, link, group }); renderGroups(); const success = await saveToGitHub(generateFileContent()); if (success) { modal.remove(); } else { appItems.pop(); renderGroups(); alert('保存失败'); } confirmBtn.disabled = false; isAddingApp = false; }; cancelBtn.onclick = () => modal.remove(); modal.onclick = (e) => { if (e.target === modal) modal.remove(); }; };
+    
+    function addCarousel() { if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; } if (isAddingCarousel) { alert('请稍候...'); return; } const modal = document.createElement('div'); modal.className = 'modal-overlay'; modal.innerHTML = `<div class="modal-content"><h3>添加轮播图</h3><input id="imgUrl" placeholder="图片链接"><label>跳转链接</label><input id="linkUrl"><div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div></div>`; document.body.appendChild(modal); modal.classList.add('show'); const confirmBtn = modal.querySelector('.confirm-btn'); const cancelBtn = modal.querySelector('.cancel-btn'); confirmBtn.onclick = async () => { const img = modal.querySelector('#imgUrl').value.trim(); const link = modal.querySelector('#linkUrl').value.trim(); if (!img) { alert('请填写图片链接'); return; } isAddingCarousel = true; confirmBtn.disabled = true; confirmBtn.textContent = '保存中...'; slidesData.push({ imgUrl: img, linkUrl: link }); renderCarousel(); const success = await saveToGitHub(generateFileContent()); if (success) { modal.remove(); } else { slidesData.pop(); renderCarousel(); alert('保存失败'); } confirmBtn.disabled = false; isAddingCarousel = false; }; cancelBtn.onclick = () => modal.remove(); modal.onclick = (e) => { if (e.target === modal) modal.remove(); }; };
+    
+    function addGroup() { if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; } const newName = prompt('请输入分组名称'); if (newName && !groupOrder.includes(newName)) { groupOrder.push(newName); saveToGitHub(generateFileContent()).then(() => { renderGroups(); }); } else if (newName) alert('分组名称已存在'); }
+    function generateFileContent() { let content = 'group\n'; for(let g of groupOrder) content += `[g=${g}]\n`; content += 'pic\n'; for(let s of slidesData) content += `[p=${s.imgUrl} l=${s.linkUrl}]\n`; content += 'app\n'; for(let a of appItems) content += `[n=${a.name} p=${a.icon} l=${a.link}${a.group ? ` g=${a.group}` : ''}]\n`; return content; }
+    
+    async function saveToGitHub(content) { if (!currentToken) { alert('请先输入Token（点击标题3次）'); return false; } try { let sha = fileSha; if (!sha) { const check = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, { headers: { 'Authorization': `Bearer ${currentToken}` } }); if (check.ok) sha = (await check.json()).sha; } const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${currentToken}` }, body: JSON.stringify({ message: '更新配置', content: btoa(unescape(encodeURIComponent(content))), branch: 'main', sha }) }); if (!res.ok) throw new Error(); fileSha = (await res.json()).content.sha; alert('保存成功！'); return true; } catch(e) { alert('保存失败: ' + e.message); return false; } }
+    
+    async function uploadToRoot(file) { if (!currentToken) { alert('请先输入Token'); return null; } try { const reader = new FileReader(); const base64 = await new Promise(r => { reader.onload = e => r(e.target.result.split(',')[1]); reader.readAsDataURL(file); }); const fileName = file.name; const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fileName}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${currentToken}` }, body: JSON.stringify({ message: `上传 ${fileName}`, content: base64, branch: 'main' }) }); if(!res.ok) throw new Error(); alert(`✅ 上传成功：${fileName}`); return fileName; } catch(e) { alert('上传失败'); return null; } }
+    
+    function uploadFileToRoot() { if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; } const input = document.createElement('input'); input.type = 'file'; input.onchange = async (e) => { const file = e.target.files[0]; if (file) await uploadToRoot(file); }; input.click(); }
+    
+    async function openFileManager() { if (!isEditMode) { alert('请先点击标题3次输入Token开启编辑模式'); return; } const modal = document.createElement('div'); modal.className = 'modal-overlay'; modal.innerHTML = `<div class="modal-content" style="max-width:500px;"><div class="file-manager-header" style="display:flex; justify-content:space-between; margin-bottom:12px;"><h3>📁 文件管理器</h3><button class="cancel-btn" id="closeFileManagerBtn" style="width:auto; padding:5px 15px;">关闭</button></div><div class="current-path" id="currentPath">/</div><div id="fileList" class="file-manager" style="max-height:400px; overflow-y:auto;"></div></div>`; document.body.appendChild(modal); modal.classList.add('show'); await loadFileList(modal); modal.querySelector('#closeFileManagerBtn').onclick = () => modal.remove(); modal.onclick = (e) => { if (e.target === modal) modal.remove(); }; }
+    
+    async function loadFileList(modal) { const fileListDiv = modal.querySelector('#fileList'); try { const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/`, { headers: { 'Authorization': `Bearer ${currentToken}` } }); if(!res.ok) throw new Error(); const items = await res.json(); let html = ''; for(let item of items) { const name = item.name; const isFolder = item.type === 'dir'; if(!isFolder && name.toLowerCase().endsWith('.html')) continue; html += `<div class="file-item ${isFolder ? 'folder' : 'file'}"><span>${escapeHtml(name)}</span><div class="file-actions"><button class="file-action-btn" onclick="copyFileLink('${name}')">🔗</button><button class="file-action-btn delete" onclick="deleteFile('${name}')">🗑</button></div></div>`; } fileListDiv.innerHTML = html; } catch(e) { fileListDiv.innerHTML = '<div class="error-tip">加载失败</div>'; } }
+    
+    window.copyFileLink = function(fileName) { const innerLink = `/${fileName}`; const outerLink = `https://luckynum.top/${fileName}`; navigator.clipboard.writeText(`${innerLink}\n${outerLink}`); alert('已复制链接'); };
+    
+    window.deleteFile = async function(fileName) { if (!confirm(`确定删除 ${fileName} 吗？`)) return; try { const checkRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fileName}`, { headers: { 'Authorization': `Bearer ${currentToken}` } }); const data = await checkRes.json(); const sha = data.sha; const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fileName}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` }, body: JSON.stringify({ message: `删除 ${fileName}`, sha, branch: 'main' }) }); if(res.ok) { alert('删除成功'); const modal = document.querySelector('.modal-overlay'); if(modal) loadFileList(modal); } else alert('删除失败'); } catch(e) { alert('删除失败'); } };
+    
+    document.getElementById('addAppFab')?.addEventListener('click', addApp);
+    document.getElementById('addCarouselFab')?.addEventListener('click', addCarousel);
+    document.getElementById('uploadOnlyBtn')?.addEventListener('click', uploadFileToRoot);
+    document.getElementById('fileManagerBtn')?.addEventListener('click', openFileManager);
+    document.getElementById('addGroupFab')?.addEventListener('click', addGroup);
+    
+    if (closeScanModal) closeScanModal.addEventListener('click', closeScanModalFunc);
+    if (scanAlbumBtn) scanAlbumBtn.addEventListener('click', () => scanAlbumInput?.click());
+    if (scanAlbumInput) scanAlbumInput.addEventListener('change', (e) => { if (e.target.files && e.target.files[0]) { scanFromImage(e.target.files[0]); } scanAlbumInput.value = ''; });
+    if (navHomeBtn) navHomeBtn.addEventListener('click', showHome);
+    if (navProfileBtn) navProfileBtn.addEventListener('click', showProfile);
+    if (closePointsModal) closePointsModal.addEventListener('click', closePointsModalFunc);
+    if (pointsModal) pointsModal.addEventListener('click', (e) => { if (e.target === pointsModal) closePointsModalFunc(); });
+    
+    async function init() {
+        await Promise.all([loadConfigFile(), loadNameMapping(), loadIntegralData()]);
+        if (isTargetDevice) { await checkUserAgentAndPrompt(); await showGreeting(); }
+        else { await showGreeting(); }
+        showHome();
+    }
+    init();
+</script>
+</body>
+</html>
