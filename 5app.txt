@@ -19,4 +19,4 @@ app
 
 [n=英语课文听力（目前MP3预览模块异常，暂时无法使用） p=null.jpg l=/Reading.mp3 g=英语（学科）资料]
 [n=广州市第四十一中学2025学年第二学期八年级历史学科综合练习（答案）.docx p=word.jpg l=https://www.kdocs.cn/l/ccw2p7FXbnDG g=历史（学科）资料]
-[n=414作业.jpg p=414作业.jpg l=/414作业.jpg g=每日内容]
+[n=414作业1.jpg p=414作业1.jpg l=414作业1.jpg g=每日内容]
