@@ -5,6 +5,7 @@ group
 [g=英语（学科）资料]
 [g=生物（学科）资料]
 [g=美术（学科）资料]
+[g=历史（学科）资料]
 pic
 app
 [n=电子作业提交平台 p=homeworkapp.jpg l=homeworkapp g=班级应用]
