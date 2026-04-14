@@ -7,7 +7,7 @@ group
 [g=生物（学科）资料]
 [g=美术（学科）资料]
 pic
-[p=41819.jpg l=41819.jpg]
+[p=41819min.jpg l=41819min.jpg]
 app
 [n=电子作业提交平台 p=homeworkapp.jpg l=homeworkapp g=班级应用]
 [n=电子值日码 p=ezr.jpg l=ezr g=班级应用]
