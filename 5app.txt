@@ -17,3 +17,4 @@ app
 [n=调课通知 p=第7周调课.jpg l=/第7周调课.jpg g=本周调课]
 [n=413作业登记.jpg p=413作业登记.jpg l=/413作业登记.jpg g=每日内容]
 [n=英语课文听力 p=null.jpg l=/Reading-1-Unit1.mp3 g=英语（学科）资料]
+[n=广州市第四十一中学2025学年第二学期八年级历史学科综合练习（答案）.docx p=word.jpg l=https://www.kdocs.cn/l/ccw2p7FXbnDG g=每日内容]
