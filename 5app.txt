@@ -21,3 +21,4 @@ app
 [n=英语课文听力（目前MP3预览模块异常，暂时无法使用） p=null.jpg l=/Reading.mp3 g=英语（学科）资料]
 [n=广州市第四十一中学2025学年第二学期八年级历史学科综合练习（答案）.docx p=word.jpg l=https://www.kdocs.cn/l/ccw2p7FXbnDG g=历史（学科）资料]
 [n=415作业登记.jpg p=415作业登记.jpg l=415作业登记.jpg g=每日内容]
+[n=5.1 人民代表大会制度.pptx p=ppt.jpg l=https://www.kdocs.cn/l/coORXaIJ3qIU g=政治（学科）资料]
