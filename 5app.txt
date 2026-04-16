@@ -6,6 +6,7 @@ group
 [g=历史（学科）资料]
 [g=生物（学科）资料]
 [g=美术（学科）资料]
+[g=政治（学科）资料]
 pic
 [p=41819min_1776179240356edit.jpg l=41819min_1776179240356edit.jpg]
 app
@@ -17,7 +18,6 @@ app
 [n=观察小鱼尾鳍血管实验操作视频.mp4 p=null.jpg l=/媒体1.mp4 g=生物（学科）资料]
 [n=将初二五班智慧应用平台安装到设备上 p=apk.jpg l=/5class_app_android.apk g=班级应用]
 [n=调课通知 p=第7周调课.jpg l=/第7周调课.jpg g=本周调课]
-
 [n=英语课文听力（目前MP3预览模块异常，暂时无法使用） p=null.jpg l=/Reading.mp3 g=英语（学科）资料]
 [n=广州市第四十一中学2025学年第二学期八年级历史学科综合练习（答案）.docx p=word.jpg l=https://www.kdocs.cn/l/ccw2p7FXbnDG g=历史（学科）资料]
 [n=415作业登记.jpg p=415作业登记.jpg l=415作业登记.jpg g=每日内容]
