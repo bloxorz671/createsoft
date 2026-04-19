@@ -849,55 +849,7 @@
 }
     
     // ========== 音频预览器 ==========
-    function openAudioViewer(url, fileName, seriesFiles) {
-        const overlay = document.createElement('div');
-        overlay.className = 'file-viewer-overlay';
-        
-        const header = document.createElement('div');
-        header.className = 'viewer-header';
-        header.innerHTML = `<div class="viewer-title">🎵 音频列表</div><div class="viewer-controls"><button class="viewer-btn close-btn">关闭</button></div>`;
-        
-        const content = document.createElement('div');
-        content.className = 'viewer-content';
-        
-        if (!seriesFiles || seriesFiles.length === 0) {
-            // 如果没有找到同系列，只显示当前文件
-            let displayName = fileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '');
-            content.innerHTML = `
-                <div class="audio-list-container">
-                    <div class="audio-list-item">
-                        <div class="audio-item-title">📻 ${escapeHtml(displayName)}</div>
-                        <div class="audio-item-controls">
-                            <audio controls preload="metadata" src="${escapeHtml(url)}"></audio>
-                        </div>
-                    </div>
-                </div>
-            `;
-        } else {
-            let listHtml = '<div class="audio-list-container">';
-            for (let i = 0; i < seriesFiles.length; i++) {
-                const item = seriesFiles[i];
-                let displayName = item.fileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '');
-                listHtml += `
-                    <div class="audio-list-item">
-                        <div class="audio-item-title">📻 ${escapeHtml(displayName)}</div>
-                        <div class="audio-item-controls">
-                            <audio controls preload="metadata" src="${escapeHtml(item.url)}"></audio>
-                        </div>
-                    </div>
-                `;
-            }
-            listHtml += '</div>';
-            content.innerHTML = listHtml;
-        }
-        
-        overlay.appendChild(header);
-        overlay.appendChild(content);
-        document.body.appendChild(overlay);
-        
-        header.querySelector('.close-btn').onclick = () => overlay.remove();
-        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
-    }
+    
     
     // ========== 视频预览器 ==========
     function openVideoViewer(url, fileName, seriesFiles) {
