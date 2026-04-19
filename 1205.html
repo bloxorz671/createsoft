@@ -1041,30 +1041,7 @@ function openAudioViewer(url, fileName, seriesFiles) {
     }
     
     function openImageViewer(url, fileName) {
-        const overlay = document.createElement('div');
-        overlay.className = 'file-viewer-overlay';
-        const header = document.createElement('div');
-        header.className = 'viewer-header';
-        header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><div id="zoomControls" style="display: flex; gap: 8px;"></div><button class="viewer-btn download-btn">下载</button><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
-        const content = document.createElement('div');
-        content.className = 'viewer-content';
-        overlay.appendChild(header); overlay.appendChild(content);
-        document.body.appendChild(overlay);
-        
-        const { container, zoomIn, zoomOut, resetZoom } = createZoomableImage(url, fileName);
-        content.appendChild(container);
-        
-        const zoomControls = header.querySelector('#zoomControls');
-        zoomControls.innerHTML = `<button class="zoom-btn" id="zoomOutBtn">−</button><button class="zoom-btn" id="resetZoomBtn">⟳</button><button class="zoom-btn" id="zoomInBtn">+</button>`;
-        zoomControls.querySelector('#zoomInBtn').onclick = zoomIn;
-        zoomControls.querySelector('#zoomOutBtn').onclick = zoomOut;
-        zoomControls.querySelector('#resetZoomBtn').onclick = resetZoom;
-        
-        header.querySelector('.download-btn').onclick = () => downloadFile(url, fileName);
-        header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
-        header.querySelector('.close-btn').onclick = () => overlay.remove();
-        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
-    }
+
     
     function showUnsupportedDialog(url, fileName) {
         const overlay = document.createElement('div');
