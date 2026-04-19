@@ -800,52 +800,53 @@
     
     // 解析文件名，提取主体和集号（支持多种格式）
     function parseEpisodeInfo(fileName) {
-        // 格式1: 名称-数字.扩展名 (如 故事-01.mp3)
-        let match = fileName.match(/^(.+?)-(\d+)\.([^.]+)$/);
-        if (match) {
-            return { baseName: match[1], episode: parseInt(match[2]), ext: match[3] };
-        }
-        // 格式2: 名称数字.扩展名 (如 故事01.mp3)
-        match = fileName.match(/^(.+?)(\d+)\.([^.]+)$/);
-        if (match && match[2].length >= 2) {
-            return { baseName: match[1], episode: parseInt(match[2]), ext: match[3] };
-        }
-        // 格式3: 名称_数字.扩展名 (如 故事_01.mp3)
-        match = fileName.match(/^(.+?)_(\d+)\.([^.]+)$/);
-        if (match) {
-            return { baseName: match[1], episode: parseInt(match[2]), ext: match[3] };
-        }
-        return null;
+    // 匹配格式：系列名-集数-集名.扩展名  例如 Reading-1-Unit1.mp3
+    const match = fileName.match(/^(.+?)-(\d+)-(.+?)\.([^.]+)$/);
+    if (match) {
+        return { 
+            seriesName: match[1],      // 系列名，如 Reading
+            episode: parseInt(match[2]), // 集数，如 1
+            episodeName: match[3],      // 集名，如 Unit1
+            ext: match[4]               // 扩展名
+        };
     }
+    return null;
+}
     
     // 查找同系列的所有文件
     async function findSeriesFiles(currentFileName, allowedExts = ['mp3', 'm4a', 'wav', 'flac', 'aac', 'mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv']) {
-        const fileList = await fetchFileList();
-        if (!fileList || fileList.length === 0) {
-            console.log('文件列表为空，无法查找同系列');
-            return [];
-        }
-        
-        const currentInfo = parseEpisodeInfo(currentFileName);
-        if (!currentInfo) {
-            console.log('无法解析当前文件名:', currentFileName);
-            // 如果没有匹配到格式，返回只包含当前文件
-            return [{ fileName: currentFileName, episode: 0, url: `https://luckynum.top/${currentFileName}` }];
-        }
-        
-        console.log('当前文件信息:', currentInfo);
-        
-        const seriesFiles = [];
-        for (const fileName of fileList) {
-            const info = parseEpisodeInfo(fileName);
-            if (info && info.baseName === currentInfo.baseName && allowedExts.includes(info.ext)) {
-                seriesFiles.push({ fileName, episode: info.episode, url: `https://luckynum.top/${fileName}` });
-            }
-        }
-        seriesFiles.sort((a, b) => a.episode - b.episode);
-        console.log('找到同系列文件', seriesFiles.length, '个:', seriesFiles);
-        return seriesFiles;
+    const fileList = await fetchFileList();
+    if (!fileList || fileList.length === 0) {
+        console.log('文件列表为空');
+        return [];
     }
+    
+    const currentInfo = parseEpisodeInfo(currentFileName);
+    if (!currentInfo) {
+        console.log('无法解析当前文件名:', currentFileName);
+        // 如果解析失败，返回只包含当前文件
+        return [{ fileName: currentFileName, episode: 0, displayName: currentFileName, url: `https://luckynum.top/${currentFileName}` }];
+    }
+    
+    console.log('当前文件信息:', currentInfo);
+    
+    const seriesFiles = [];
+    for (const fileName of fileList) {
+        const info = parseEpisodeInfo(fileName);
+        // 匹配相同系列名（seriesName）和允许的扩展名
+        if (info && info.seriesName === currentInfo.seriesName && allowedExts.includes(info.ext)) {
+            seriesFiles.push({
+                fileName: fileName,
+                episode: info.episode,
+                displayName: `${info.seriesName}-${info.episodeName}`,  // 显示格式：Reading-Unit1
+                url: `https://luckynum.top/${fileName}`
+            });
+        }
+    }
+    seriesFiles.sort((a, b) => a.episode - b.episode);
+    console.log('找到同系列文件', seriesFiles.length, '个:', seriesFiles);
+    return seriesFiles;
+}
     
     // ========== 音频预览器 ==========
     function openAudioViewer(url, fileName, seriesFiles) {
@@ -942,28 +943,56 @@
         if (seriesFiles && seriesFiles.length > 1) {
             const videoItems = content.querySelectorAll('[data-video-url]');
             videoItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    const newUrl = item.dataset.videoUrl;
-                    const newName = item.dataset.videoName;
-                    video.src = newUrl;
-                    video.load();
-                    video.play().catch(e => console.log('播放失败:', e));
-                    const titleSpan = header.querySelector('.viewer-title');
-                    if (titleSpan) titleSpan.textContent = newName;
-                    videoItems.forEach(vi => vi.style.background = 'rgba(255,255,255,0.08)');
-                    item.style.background = 'rgba(255,255,255,0.2)';
-                });
-            });
+function openAudioViewer(url, fileName, seriesFiles) {
+    const overlay = document.createElement('div');
+    overlay.className = 'file-viewer-overlay';
+    
+    const header = document.createElement('div');
+    header.className = 'viewer-header';
+    header.innerHTML = `<div class="viewer-title">🎵 音频列表</div><div class="viewer-controls"><button class="viewer-btn close-btn">关闭</button></div>`;
+    
+    const content = document.createElement('div');
+    content.className = 'viewer-content';
+    
+    if (!seriesFiles || seriesFiles.length === 0) {
+        // 没有同系列，显示当前文件
+        let displayName = fileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '');
+        content.innerHTML = `
+            <div class="audio-list-container">
+                <div class="audio-list-item">
+                    <div class="audio-item-title">📻 ${escapeHtml(displayName)}</div>
+                    <div class="audio-item-controls">
+                        <audio controls preload="metadata" src="${escapeHtml(url)}"></audio>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        // 显示所有同系列音频，使用 displayName（格式：系列名-集名）
+        let listHtml = '<div class="audio-list-container">';
+        for (let i = 0; i < seriesFiles.length; i++) {
+            const item = seriesFiles[i];
+            // 使用预先计算好的 displayName，不再重新截取文件名
+            listHtml += `
+                <div class="audio-list-item">
+                    <div class="audio-item-title">📻 ${escapeHtml(item.displayName)}</div>
+                    <div class="audio-item-controls">
+                        <audio controls preload="metadata" src="${escapeHtml(item.url)}"></audio>
+                    </div>
+                </div>
+            `;
         }
-        
-        header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
-        header.querySelector('.close-btn').onclick = () => {
-            video.pause();
-            video.src = '';
-            overlay.remove();
-        };
-        overlay.onclick = (e) => { if (e.target === overlay) { video.pause(); overlay.remove(); } };
+        listHtml += '</div>';
+        content.innerHTML = listHtml;
     }
+    
+    overlay.appendChild(header);
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+    
+    header.querySelector('.close-btn').onclick = () => overlay.remove();
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+}
     
     // ========== 图片预览器 ==========
     function createZoomableImage(url, fileName) {
