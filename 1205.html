@@ -119,7 +119,6 @@
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; }
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; border-radius: 12px; }
         
-        /* 预览器样式 */
         .file-viewer-overlay {
             position: fixed;
             top: 0;
@@ -186,7 +185,6 @@
             padding: 16px;
         }
         
-        /* 音频列表样式 */
         .audio-list-container {
             width: 100%;
             max-width: 600px;
@@ -771,7 +769,6 @@
         a.click();
     }
     
-    // 直接通过GitHub API获取文件列表（无需Token，公开仓库）
     async function fetchFileList() {
         if (cachedFileList) return cachedFileList;
         if (fileListLoading) {
@@ -798,7 +795,6 @@
         return cachedFileList;
     }
     
-    // 解析文件名：系列名-集数-集名.扩展名  例如 Reading-1-Unit1.mp3
     function parseEpisodeInfo(fileName) {
         const match = fileName.match(/^(.+?)-(\d+)-(.+?)\.([^.]+)$/);
         if (match) {
@@ -812,7 +808,6 @@
         return null;
     }
     
-    // 查找同系列的所有文件
     async function findSeriesFiles(currentFileName, allowedExts = ['mp3', 'm4a', 'wav', 'flac', 'aac', 'mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv']) {
         const fileList = await fetchFileList();
         if (!fileList || fileList.length === 0) {
@@ -820,18 +815,27 @@
             return [];
         }
         
-        const currentInfo = parseEpisodeInfo(currentFileName);
-        if (!currentInfo) {
-            console.log('无法解析当前文件名:', currentFileName);
-            return [{ fileName: currentFileName, episode: 0, displayName: currentFileName, url: `https://luckynum.top/${currentFileName}` }];
+        let seriesName = null;
+        let currentInfo = parseEpisodeInfo(currentFileName);
+        
+        if (currentInfo) {
+            seriesName = currentInfo.seriesName;
+            console.log('解析到完整格式，系列名:', seriesName);
+        } else {
+            let nameWithoutExt = currentFileName.replace(/\.(mp3|m4a|wav|flac|aac|mp4|webm|ogg|mov|avi|mkv)$/i, '');
+            seriesName = nameWithoutExt;
+            console.log('解析到简单文件名，提取系列名:', seriesName);
         }
         
-        console.log('当前文件信息:', currentInfo);
+        if (!seriesName) {
+            console.log('无法提取系列名:', currentFileName);
+            return [{ fileName: currentFileName, episode: 0, displayName: currentFileName, url: `https://luckynum.top/${currentFileName}` }];
+        }
         
         const seriesFiles = [];
         for (const fileName of fileList) {
             const info = parseEpisodeInfo(fileName);
-            if (info && info.seriesName === currentInfo.seriesName && allowedExts.includes(info.ext)) {
+            if (info && info.seriesName === seriesName && allowedExts.includes(info.ext)) {
                 seriesFiles.push({
                     fileName: fileName,
                     episode: info.episode,
@@ -841,11 +845,16 @@
             }
         }
         seriesFiles.sort((a, b) => a.episode - b.episode);
+        
+        if (seriesFiles.length === 0) {
+            console.log('未找到同系列文件，只显示当前文件');
+            return [{ fileName: currentFileName, episode: 0, displayName: currentFileName, url: `https://luckynum.top/${currentFileName}` }];
+        }
+        
         console.log('找到同系列文件', seriesFiles.length, '个:', seriesFiles);
         return seriesFiles;
     }
     
-    // ========== 音频预览器 ==========
     function openAudioViewer(url, fileName, seriesFiles) {
         const overlay = document.createElement('div');
         overlay.className = 'file-viewer-overlay';
@@ -894,7 +903,6 @@
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
     
-    // ========== 视频预览器 ==========
     function openVideoViewer(url, fileName, seriesFiles) {
         const overlay = document.createElement('div');
         overlay.className = 'file-viewer-overlay';
@@ -961,7 +969,6 @@
         overlay.onclick = (e) => { if (e.target === overlay) { video.pause(); overlay.remove(); } };
     }
     
-    // ========== 图片预览器 ==========
     function createZoomableImage(url, fileName) {
         const container = document.createElement('div');
         container.className = 'image-container';
