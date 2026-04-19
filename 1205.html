@@ -13,7 +13,7 @@
     <meta property="og:description" content="欢迎使用初二五班智慧应用平台" />
     <meta property="og:image" content="https://luckynum.top/41.jpg" />
     <meta property="og:image:secure_url" content="https://luckynum.top/41.jpg" />
-    <meta property="og:url" content="https://luckynum.top/1205" />
+   meta property="og:url" content="https://luckynum.top/1205" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="初二五班智慧应用平台" />
     <meta name="twitter:card" content="summary_large_image">
@@ -39,27 +39,7 @@
         .unlogged-section { padding: 12px 20px 0 20px; background: white; }
         .unlogged-wrapper { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; }
         .unlogged-text { font-size: 1rem; font-weight: 500; color: #e67e22; background: #fff3e0; padding: 10px 16px; border-radius: 12px; text-align: center; }
-        .login-icon-img {
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
-            vertical-align: middle;
-            filter: invert(1);
-        }
-        .scan-login-btn {
-            background: #2b4c8a;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 10px 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .scan-login-btn { background: #2b4c8a; color: white; border: none; border-radius: 12px; padding: 10px 20px; font-size: 0.9rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
         .scan-login-btn:hover { background: #1e3c72; transform: scale(1.02); }
         
         .rating-box { display: inline-flex; align-items: center; justify-content: center; padding: 4px 14px; font-size: 1rem; font-weight: 600; color: white; border: 2px solid; border-radius: 8px; white-space: nowrap; }
@@ -139,20 +119,20 @@
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; }
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; border-radius: 12px; }
         
-        /* 通用预览器样式 */
+        /* 预览器样式 - 修复音频列表显示问题 */
         .file-viewer-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #000;
+            background: #1a1a2e;
             z-index: 20000;
             display: flex;
             flex-direction: column;
         }
         .viewer-header {
-            background: #1e2a4a;
+            background: #16213e;
             color: white;
             padding: 12px 20px;
             display: flex;
@@ -200,13 +180,49 @@
         }
         .viewer-content {
             flex: 1;
-            background: #000;
-            overflow: auto;
+            background: #0f0f1a;
+            overflow-y: auto;
             position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            padding: 16px;
         }
+        
+        /* 音频列表样式 - 修复显示问题 */
+        .audio-list-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .audio-list-item {
+            background: #ffffff;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            padding: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .audio-item-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 12px;
+            word-break: break-word;
+            padding-left: 4px;
+        }
+        .audio-item-controls audio {
+            width: 100%;
+            height: 44px;
+            border-radius: 8px;
+        }
+        
+        /* 深色模式下的音频控件适配 */
+        @media (prefers-color-scheme: dark) {
+            .audio-list-item {
+                background: #2d2d44;
+            }
+            .audio-item-title {
+                color: #f1f5f9;
+            }
+        }
+        
         .image-container {
             width: 100%;
             height: 100%;
@@ -231,47 +247,18 @@
             pointer-events: auto;
         }
         
-        /* 音频列表样式 - 简洁列表 */
-        .audio-list-container {
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 16px;
-        }
-        .audio-list-item {
-            background: rgba(255,255,255,0.08);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            padding: 12px;
-            transition: background 0.2s;
-        }
-        .audio-list-item:hover {
-            background: rgba(255,255,255,0.15);
-        }
-        .audio-item-title {
-            font-size: 1rem;
-            font-weight: 500;
-            color: white;
-            margin-bottom: 8px;
-            word-break: break-word;
-        }
-        .audio-item-controls audio {
-            width: 100%;
-            height: 40px;
-            border-radius: 8px;
-        }
-        
         .video-container {
             width: 100%;
             height: 100%;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             background: #000;
         }
         .video-container video {
             max-width: 100%;
-            max-height: 100%;
+            max-height: 70%;
             object-fit: contain;
         }
         
@@ -381,8 +368,8 @@
             .nav-item { padding: 4px 12px; }
             .viewer-controls { gap: 8px; }
             .viewer-btn { padding: 6px 12px; font-size: 0.8rem; }
-            .audio-list-container { padding: 12px; }
-            .audio-list-item { padding: 10px; }
+            .audio-list-container { padding: 0; }
+            .audio-list-item { padding: 12px; }
             .audio-item-title { font-size: 0.9rem; }
         }
         
@@ -392,7 +379,6 @@
         .login-option-btn:active { transform: scale(0.98); }
         .login-option-cancel { background: #95a5a6; }
         
-        /* 滚动条美化 */
         .viewer-content::-webkit-scrollbar {
             width: 6px;
         }
@@ -517,7 +503,6 @@
     let draggedGroupIndex = null;
     let draggedAppData = null;
     
-    // 文件列表缓存（用于选集功能）
     let cachedFileList = null;
     let fileListLoading = false;
     
@@ -790,7 +775,6 @@
         a.click();
     }
     
-    // ========== 扫描根目录获取文件列表（用于选集功能） ==========
     async function fetchFileList() {
         if (cachedFileList) return cachedFileList;
         if (fileListLoading) {
@@ -817,7 +801,6 @@
         return cachedFileList;
     }
     
-    // 解析文件名，提取主体和集号
     function parseEpisodeInfo(fileName) {
         const match = fileName.match(/^(.+?)-(\d+)\.([^.]+)$/);
         if (match) {
@@ -830,7 +813,6 @@
         return null;
     }
     
-    // 查找同系列的所有文件（音频或视频）
     async function findSeriesFiles(currentFileName, allowedExts = ['mp3', 'm4a', 'wav', 'flac', 'aac', 'mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv']) {
         const fileList = await fetchFileList();
         if (!fileList || fileList.length === 0) return [];
@@ -849,7 +831,7 @@
         return seriesFiles;
     }
     
-    // ========== 音频预览器 - 简洁列表形式 ==========
+    // ========== 音频预览器 - 简洁列表形式，修复显示问题 ==========
     function openAudioViewer(url, fileName, seriesFiles) {
         const overlay = document.createElement('div');
         overlay.className = 'file-viewer-overlay';
@@ -861,11 +843,9 @@
         const content = document.createElement('div');
         content.className = 'viewer-content';
         
-        // 构建音频列表
         let listHtml = '<div class="audio-list-container">';
         for (let i = 0; i < seriesFiles.length; i++) {
             const item = seriesFiles[i];
-            // 集名：去掉扩展名，保留主体+集号
             let displayName = item.fileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '');
             listHtml += `
                 <div class="audio-list-item">
@@ -884,7 +864,6 @@
         overlay.appendChild(content);
         document.body.appendChild(overlay);
         
-        // 关闭按钮
         header.querySelector('.close-btn').onclick = () => overlay.remove();
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
@@ -902,22 +881,21 @@
         content.className = 'viewer-content';
         content.innerHTML = `
             <div class="video-container">
-                <video id="videoPlayer" controls style="max-width:100%; max-height:100%; object-fit:contain;">
+                <video id="videoPlayer" controls style="max-width:100%; max-height:70%; object-fit:contain;">
                     <source src="${escapeHtml(url)}">
                 </video>
             </div>
         `;
         
-        // 如果有多个视频，添加列表
         if (seriesFiles && seriesFiles.length > 1) {
-            let listHtml = '<div class="audio-list-container" style="margin-top: 0; padding-top: 0;"><div style="color: white; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.2); margin-bottom: 8px;">📋 同系列视频</div>';
+            let listHtml = '<div class="audio-list-container" style="margin-top: 16px;"><div style="color: white; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.2); margin-bottom: 8px;">📋 同系列视频</div>';
             for (let i = 0; i < seriesFiles.length; i++) {
                 const item = seriesFiles[i];
                 let displayName = item.fileName.replace(/\.(mp4|webm|ogg|mov|avi|mkv)$/i, '');
                 const isCurrent = item.fileName === fileName;
                 listHtml += `
                     <div class="audio-list-item" style="cursor: pointer; ${isCurrent ? 'background: rgba(255,255,255,0.2);' : ''}" data-video-url="${escapeHtml(item.url)}" data-video-name="${escapeHtml(displayName)}">
-                        <div class="audio-item-title">🎬 ${escapeHtml(displayName)}</div>
+                        <div class="audio-item-title" style="color: white;">🎬 ${escapeHtml(displayName)}</div>
                     </div>
                 `;
             }
@@ -931,7 +909,6 @@
         
         const video = content.querySelector('#videoPlayer');
         
-        // 绑定视频列表点击事件
         if (seriesFiles && seriesFiles.length > 1) {
             const videoItems = content.querySelectorAll('[data-video-url]');
             videoItems.forEach(item => {
@@ -943,7 +920,6 @@
                     video.play().catch(e => console.log('播放失败:', e));
                     const titleSpan = header.querySelector('.viewer-title');
                     if (titleSpan) titleSpan.textContent = newName;
-                    // 更新高亮
                     videoItems.forEach(vi => vi.style.background = 'rgba(255,255,255,0.08)');
                     item.style.background = 'rgba(255,255,255,0.2)';
                 });
