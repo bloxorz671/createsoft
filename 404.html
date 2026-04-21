@@ -1,93 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>页面跳转</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>404</title>
     <style>
-        body { font-family: system-ui; text-align: center; padding: 50px; background: #f5f7fc; }
-        .spinner { width: 40px; height: 40px; margin: 20px auto; border: 3px solid #ddd; border-top-color: #2b4c8a; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .error-box { max-width: 500px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .error-code { font-size: 80px; color: #ddd; margin-bottom: 20px; }
-        .home-link { color: #2b4c8a; text-decoration: none; margin-top: 20px; display: inline-block; }
+        /* 极简重置 + 无任何多余装饰，但按钮可稍作美化 (无emoji、无额外文字) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;      /* 纯白背景，无任何渐变/图案/装饰 */
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 主容器：正中间，无边框，无阴影，无圆角背景 */
+        .error-container {
+            text-align: center;
+            max-width: 90%;
+            width: auto;
+        }
+
+        /* 图片样式：保持原始比例，无任何修饰（无边框、无圆角、无阴影） */
+        .error-image {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto;
+            border: 0;
+        }
+
+        /* 按钮容器：仅用于布局，无装饰 */
+        .button-wrapper {
+            margin-top: 28px;   /* 适当间距，保持舒适，但无额外美化装饰元素 */
+            text-align: center;
+        }
+
+        /* 返回主页按钮：稍作美化 —— 保留纯文字，无emoji，无额外文字内容
+           美化限定在: 细边框、轻柔背景、微圆角、柔和的过渡，但整体仍保持干净，没有多余图标/emoji */
+        .home-btn {
+            display: inline-block;
+            background-color: #f8f9fa;      /* 极浅灰色背景，干净素雅 */
+            border: 1px solid #d1d5db;       /* 柔和灰边框，不抢眼 */
+            padding: 10px 28px;
+            font-size: 1rem;
+            font-family: inherit;
+            font-weight: 500;
+            color: #1f2937;                  /* 深灰文字，阅读舒适 */
+            text-decoration: none;
+            cursor: pointer;
+            line-height: 1;
+            text-align: center;
+            border-radius: 30px;              /* 微圆角，不过分花哨，属于基础美化 */
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            /* 确保没有任何伪元素生成额外内容（emoji或文字） */
+        }
+
+        /* hover效果：简约变化，无额外装饰，不加任何图标/文字 */
+        .home-btn:hover {
+            background-color: #eef2f6;
+            border-color: #9ca3af;
+            color: #111827;
+        }
+
+        /* 聚焦和激活状态保持一致风格，无额外文字/emoji */
+        .home-btn:focus,
+        .home-btn:active {
+            background-color: #e5e7eb;
+            border-color: #6b7280;
+            color: #111827;
+            outline: none;
+        }
+
+        /* 强制清除任何伪元素内容，确保没有emoji或额外字符 */
+        .home-btn::before,
+        .home-btn::after {
+            display: none;
+            content: none;
+        }
+
+        /* 移动端去除tap高亮，无多余样式 */
+        .home-btn {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 确保页面没有任何私自添加的文字段落、提示、额外标签或emoji。
+           图片下方仅存在按钮，按钮文字为“返回主页”，无其他任何文字内容。
+        */
     </style>
 </head>
 <body>
-    <div id="content">
-        <div class="spinner"></div>
-        <div>加载中...</div>
+<div class="error-container">
+    <!-- 正中间图片：404.jpg (相对路径，与html同目录或根据部署，此处使用 "./404.jpg") -->
+    <img class="error-image" src="./404.jpg" alt="404">
+    <!-- 按钮区域：只有返回主页按钮，引导至根目录 "/"，无任何多余文字或emoji -->
+    <div class="button-wrapper">
+        <a href="/" class="home-btn">返回主页</a>
     </div>
-
-    <script>
-        (function() {
-            const currentPath = window.location.pathname;
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            // 判断是否是值日码请求（精确匹配 /zhiri 路径）
-            const isZhiriPath = (currentPath === '/zhiri' || currentPath === '/zhiri/');
-            
-            // 提取学号
-            let studentId = null;
-            
-            if (isZhiriPath) {
-                
-                if (urlParams.get('p')) studentId = urlParams.get('p');
-                if (!studentId) {
-                    for (let [key, value] of urlParams.entries()) {
-                        if (key.match(/^\d+$/)) {
-                            studentId = key;
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            const contentDiv = document.getElementById('content');
-            
-            if (isZhiriPath) {
-                // 值日码请求：跳转到班级页面，学号通过 URL 参数传递
-                if (studentId) {
-                    contentDiv.innerHTML = `
-                        <div class="spinner"></div>
-                        <div><strong>${escapeHtml(studentId)}</strong>登录中...</div>
-                    `;
-                    setTimeout(() => {
-                        window.location.replace(`/1205?p=${studentId}`);
-                    }, 100);
-                } else {
-                    contentDiv.innerHTML = `
-                        <div class="spinner"></div>
-                        <div>正在跳转到班级页面...</div>
-                    `;
-                    setTimeout(() => {
-                        window.location.replace('/1205');
-                    }, 100);
-                }
-            } else {
-                // 真正的 404：返回主页
-                contentDiv.innerHTML = `
-                    <div class="error-box">
-                        <div class="error-code">404</div>
-                        <div class="error-message">
-                            <p>抱歉，您访问的页面不存在</p>
-                            <p style="font-size: 14px; color: #999;">${escapeHtml(currentPath)}</p>
-                        </div>
-                        <a href="/" class="home-link">← 返回首页</a>
-                    </div>
-                `;
-            }
-            
-            function escapeHtml(str) {
-                if (!str) return '';
-                return str.replace(/[&<>]/g, function(m) {
-                    if (m === '&') return '&amp;';
-                    if (m === '<') return '&lt;';
-                    if (m === '>') return '&gt;';
-                    return m;
-                });
-            }
-        })();
-    </script>
+</div>
 </body>
 </html>
