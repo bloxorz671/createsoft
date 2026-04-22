@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>积分排行榜 - 初二五班</title>
+    <title>积分公示 - 初二五班</title>
     <style>
         * {
             margin: 0;
@@ -23,22 +23,177 @@
             margin: 0 auto;
         }
         
-        h1 {
-            text-align: center;
-            font-size: 1.8rem;
-            color: #1e3c72;
+        /* 头部区域 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
             margin-bottom: 20px;
             padding-bottom: 12px;
             border-bottom: 2px solid #eef2f8;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
+        h1 {
+            font-size: 1.8rem;
+            color: #1e3c72;
+            margin: 0;
+        }
+        
+        .btn-records {
+            background: #2b4c8a;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .btn-records:hover {
+            background: #1e3c72;
+        }
+        
+        /* 记录弹窗遮罩 */
+        .modal-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.2s, opacity 0.2s;
+        }
+        
+        .modal-mask.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .modal-container {
+            background: white;
+            width: 90%;
+            max-width: 550px;
+            max-height: 80vh;
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: #1e3c72;
+            color: white;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0 8px;
+        }
+        
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: #f8f9fa;
+        }
+        
+        .records-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .record-item {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            border-left: 4px solid #2b4c8a;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            font-size: 0.85rem;
+        }
+        
+        .record-date {
+            color: #666;
+            font-size: 0.7rem;
+            margin-bottom: 6px;
+        }
+        
+        .record-detail {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 8px;
+        }
+        
+        .record-person {
+            font-weight: 600;
+            color: #1e3c72;
+        }
+        
+        .record-event {
+            color: #444;
+            flex: 1;
+        }
+        
+        .record-score {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        
+        .record-score.positive {
+            color: #2e7d32;
+        }
+        
+        .record-score.negative {
+            color: #c62828;
+        }
+        
+        .loading-records {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+        
+        .empty-records {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+        }
+        
+        /* 学生列表 */
         .student-list {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
         
-        /* 学生卡片 */
         .student-card {
             background: white;
             border-radius: 16px;
@@ -48,7 +203,6 @@
             gap: 16px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             transition: transform 0.2s, box-shadow 0.2s;
-            position: relative;
             border: 1px solid #eef2f8;
         }
         
@@ -57,26 +211,21 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         }
         
-        /* 名次徽章 */
-        .rank-badge {
+        /* 学号徽章 */
+        .id-badge {
             width: 48px;
             height: 48px;
             border-radius: 12px;
+            background: #f0f2f5;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            font-size: 0.9rem;
             font-weight: 700;
+            color: #2b4c8a;
             flex-shrink: 0;
         }
         
-        /* 金银铜牌背景 */
-        .rank-1 .rank-badge { background: linear-gradient(135deg, #ffd700, #ffb347); color: #8B6914; box-shadow: 0 2px 8px rgba(255,215,0,0.3); }
-        .rank-2 .rank-badge { background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #4a4a4a; box-shadow: 0 2px 8px rgba(192,192,192,0.3); }
-        .rank-3 .rank-badge { background: linear-gradient(135deg, #cd7f32, #b87333); color: #fff; box-shadow: 0 2px 8px rgba(205,127,50,0.3); }
-        .rank-other .rank-badge { background: #f0f2f5; color: #999; }
-        
-        /* 学生信息区 */
         .student-info {
             flex: 1;
         }
@@ -93,7 +242,6 @@
             color: #999;
         }
         
-        /* 右侧评级和分数 */
         .student-right {
             text-align: right;
             flex-shrink: 0;
@@ -109,12 +257,11 @@
             white-space: nowrap;
         }
         
-        /* 评级颜色 */
-        .rating-0 { background: #e74c3c; color: white; }      /* 夯爆了 */
-        .rating-1 { background: #f39c12; color: white; }      /* 顶级 */
-        .rating-2 { background: #f1c40f; color: #8B6914; }    /* 人上人 */
-        .rating-3 { background: #fdebd0; color: #c0392b; }    /* Npc */
-        .rating-4 { background: #95a5a6; color: white; }      /* 拉完了 */
+        .rating-0 { background: #e74c3c; color: white; }
+        .rating-1 { background: #f39c12; color: white; }
+        .rating-2 { background: #f1c40f; color: #8B6914; }
+        .rating-3 { background: #fdebd0; color: #c0392b; }
+        .rating-4 { background: #95a5a6; color: white; }
         
         .score {
             font-size: 1.5rem;
@@ -128,43 +275,48 @@
             color: #999;
         }
         
-        /* 加载状态 */
-        .loading {
+        .loading, .error, .empty {
             text-align: center;
             padding: 60px 20px;
-            color: #666;
         }
         
-        .error {
-            text-align: center;
-            padding: 60px 20px;
-            color: #c62828;
-            background: #fff5f5;
-            border-radius: 16px;
-        }
-        
-        /* 空状态 */
-        .empty {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
+        .loading { color: #666; }
+        .error { color: #c62828; background: #fff5f5; border-radius: 16px; }
+        .empty { color: #999; }
         
         @media (max-width: 480px) {
             body { padding: 12px; }
             .student-card { padding: 12px; gap: 12px; }
-            .rank-badge { width: 40px; height: 40px; font-size: 1.2rem; border-radius: 10px; }
+            .id-badge { width: 40px; height: 40px; font-size: 0.75rem; }
             .student-name { font-size: 0.95rem; }
             .score { font-size: 1.2rem; }
             .rating-badge { font-size: 0.7rem; padding: 3px 8px; }
+            .btn-records { padding: 6px 12px; font-size: 0.75rem; }
+            h1 { font-size: 1.5rem; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>积分排行榜</h1>
+    <div class="header">
+        <h1>积分公示</h1>
+        <button class="btn-records" id="viewRecordsBtn">📋 查看所有分数记录</button>
+    </div>
     <div id="studentList" class="student-list">
-        <div class="loading">加载排行榜数据中...</div>
+        <div class="loading">加载积分数据中...</div>
+    </div>
+</div>
+
+<!-- 记录弹窗 -->
+<div id="recordsModal" class="modal-mask">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3>📝 积分变动记录</h3>
+            <button class="modal-close" id="closeModalBtn">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <div class="loading-records">加载记录中...</div>
+        </div>
     </div>
 </div>
 
@@ -172,6 +324,8 @@
     // ========== 配置 ==========
     const NAME_FILE_URL = 'https://luckynum.top/5name.txt';
     const INTEGRAL_FILE_URL = 'https://ghproxy.net/https://raw.githubusercontent.com/bloxorz671/5class-system/main/student-integral.txt';
+    // 分数记录文件（通过代理）
+    const RECORDS_FILE_URL = 'https://ghproxy.net/https://raw.githubusercontent.com/bloxorz671/5class-system/main/jffi.txt';
     
     // 评级配置
     const RATING_CONFIG = [
@@ -249,35 +403,82 @@
         }
     }
     
-    // ========== 计算并列名次 ==========
-    function assignRanks(students) {
-        if (students.length === 0) return;
-        
-        let currentRank = 1;
-        let currentScore = students[0].integral;
-        
-        for (let i = 0; i < students.length; i++) {
-            if (students[i].integral < currentScore) {
-                currentRank = i + 1;
-                currentScore = students[i].integral;
+    // ========== 解析分数记录文件 ==========
+    // 格式: 2026/04/21 16:43 20534 自习课多次屡教不改，不服从班长管理，扰乱纪律 -2
+    async function fetchRecordsData() {
+        try {
+            const response = await fetch(RECORDS_FILE_URL);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
             }
-            students[i].rank = currentRank;
+            const text = await response.text();
+            const records = [];
+            const lines = text.split(/\r?\n/);
+            
+            for (let line of lines) {
+                line = line.trim();
+                if (line === '') continue;
+                
+                // 正则解析: 日期 时间 学号 事件内容 分数变化
+                // 格式示例: 2026/04/21 16:43 20534 自习课多次屡教不改，不服从班长管理，扰乱纪律 -2
+                const match = line.match(/^(\d{4}\/\d{2}\/\d{2})\s+(\d{2}:\d{2})\s+(\d+)\s+(.+?)\s+([+-]?\d+)$/);
+                if (match) {
+                    const [, date, time, studentId, event, scoreChange] = match;
+                    records.push({
+                        date: date,
+                        time: time,
+                        studentId: studentId,
+                        event: event.trim(),
+                        scoreChange: parseInt(scoreChange)
+                    });
+                } else {
+                    // 尝试另一种解析（可能事件中间有空格的情况，用更宽松的方式）
+                    const parts = line.split(/\s+/);
+                    if (parts.length >= 5) {
+                        const date = parts[0];
+                        const time = parts[1];
+                        const studentId = parts[2];
+                        const scoreChangeRaw = parts[parts.length - 1];
+                        const event = parts.slice(3, -1).join(' ');
+                        const scoreChange = parseInt(scoreChangeRaw);
+                        if (!isNaN(scoreChange)) {
+                            records.push({
+                                date: date,
+                                time: time,
+                                studentId: studentId,
+                                event: event,
+                                scoreChange: scoreChange
+                            });
+                        }
+                    }
+                }
+            }
+            
+            // 按日期时间倒序排列（最新的在前面）
+            records.sort((a, b) => {
+                const dateTimeA = `${a.date} ${a.time}`;
+                const dateTimeB = `${b.date} ${b.time}`;
+                return dateTimeB.localeCompare(dateTimeA);
+            });
+            
+            return records;
+        } catch (e) {
+            console.log('无法加载记录文件:', e);
+            throw e;
         }
     }
     
-    // ========== 构建学生列表 ==========
+    // ========== 构建学生列表（按学号排序） ==========
     async function loadStudentData() {
         const container = document.getElementById('studentList');
-        container.innerHTML = '<div class="loading">加载排行榜数据中...</div>';
+        container.innerHTML = '<div class="loading">加载积分数据中...</div>';
         
         try {
-            // 并行加载姓名和积分
             const [nameMapping, integralMap] = await Promise.all([
                 fetchNameMapping(),
                 fetchIntegralData()
             ]);
             
-            // 构建学生数组
             const students = [];
             for (const [id, name] of Object.entries(nameMapping)) {
                 const integral = integralMap[id] || 0;
@@ -290,18 +491,18 @@
                 });
             }
             
-            // 按积分降序排序
-            students.sort((a, b) => b.integral - a.integral);
-            
-            // 分配并列名次
-            assignRanks(students);
+            // 按学号升序排序（数字顺序）
+            students.sort((a, b) => {
+                const numA = parseInt(a.id);
+                const numB = parseInt(b.id);
+                return numA - numB;
+            });
             
             if (students.length === 0) {
                 container.innerHTML = '<div class="empty">暂无学生数据</div>';
                 return;
             }
             
-            // 渲染列表
             renderStudentList(students, container);
             
         } catch (e) {
@@ -315,26 +516,10 @@
         
         for (let i = 0; i < students.length; i++) {
             const student = students[i];
-            const rank = student.rank;
-            
-            // 确定名次样式（只有名次为1、2、3时才使用特殊样式）
-            let rankClass = 'rank-other';
-            let rankText = rank;
-            
-            if (rank === 1) {
-                rankClass = 'rank-1';
-                rankText = '🥇';
-            } else if (rank === 2) {
-                rankClass = 'rank-2';
-                rankText = '🥈';
-            } else if (rank === 3) {
-                rankClass = 'rank-3';
-                rankText = '🥉';
-            }
             
             html += `
-                <div class="student-card ${rankClass}">
-                    <div class="rank-badge">${rankText}</div>
+                <div class="student-card">
+                    <div class="id-badge">${escapeHtml(student.id)}</div>
                     <div class="student-info">
                         <div class="student-name">${escapeHtml(student.name)}</div>
                         <div class="student-id">学号: ${escapeHtml(student.id)}</div>
@@ -350,6 +535,55 @@
         container.innerHTML = html;
     }
     
+    // ========== 渲染记录弹窗内容 ==========
+    async function loadAndShowRecords() {
+        const modal = document.getElementById('recordsModal');
+        const modalBody = document.getElementById('modalBody');
+        
+        // 显示弹窗并展示加载状态
+        modal.classList.add('show');
+        modalBody.innerHTML = '<div class="loading-records">📡 正在读取分数记录...</div>';
+        
+        try {
+            // 先获取姓名映射，用于显示学生姓名
+            const nameMapping = await fetchNameMapping();
+            const records = await fetchRecordsData();
+            
+            if (records.length === 0) {
+                modalBody.innerHTML = '<div class="empty-records">暂无分数变动记录</div>';
+                return;
+            }
+            
+            let html = '<div class="records-list">';
+            for (const record of records) {
+                const studentName = nameMapping[record.studentId] || `学号${record.studentId}`;
+                const scoreClass = record.scoreChange >= 0 ? 'positive' : 'negative';
+                const scoreSymbol = record.scoreChange >= 0 ? `+${record.scoreChange}` : `${record.scoreChange}`;
+                
+                html += `
+                    <div class="record-item">
+                        <div class="record-date">${record.date} ${record.time}</div>
+                        <div class="record-detail">
+                            <span class="record-person">${escapeHtml(studentName)} (${record.studentId})</span>
+                            <span class="record-event">${escapeHtml(record.event)}</span>
+                            <span class="record-score ${scoreClass}">${scoreSymbol} 分</span>
+                        </div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            modalBody.innerHTML = html;
+            
+        } catch (e) {
+            console.error(e);
+            modalBody.innerHTML = `<div class="empty-records">加载失败: ${e.message}<br><button id="retryRecordsBtn" style="margin-top:12px; padding:6px 16px; background:#2b4c8a; color:white; border:none; border-radius:8px; cursor:pointer;">重试</button></div>`;
+            const retryBtn = document.getElementById('retryRecordsBtn');
+            if (retryBtn) {
+                retryBtn.addEventListener('click', () => loadAndShowRecords());
+            }
+        }
+    }
+    
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, function(m) {
@@ -360,7 +594,30 @@
         });
     }
     
+    // ========== 弹窗控制 ==========
+    function initModal() {
+        const modal = document.getElementById('recordsModal');
+        const viewBtn = document.getElementById('viewRecordsBtn');
+        const closeBtn = document.getElementById('closeModalBtn');
+        
+        viewBtn.addEventListener('click', () => {
+            loadAndShowRecords();
+        });
+        
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('show');
+        });
+        
+        // 点击遮罩层关闭
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('show');
+            }
+        });
+    }
+    
     // 启动
+    initModal();
     loadStudentData();
 </script>
 </body>
