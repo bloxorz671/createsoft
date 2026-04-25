@@ -9,6 +9,7 @@ group
 pic
 [p=41819min_1776179240356edit.jpg l=41819min_1776179240356edit.jpg]
 app
+[n=系统问题反馈 p=null.jpg l=https://wj.qq.com/s2/26464953/982d/ g=班级应用]
 [n=电子作业提交平台 p=homeworkapp.jpg l=homeworkapp g=班级应用]
 [n=电子值日码 p=ezr.jpg l=ezr g=班级应用]
 [n=【学生】2025学年第二学期八年级总复习生物学练习题.pdf p=pdf.jpg l=https://www.kdocs.cn/l/cld2xA02PFve g=生物（学科）资料]
