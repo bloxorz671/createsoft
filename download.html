@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>网页嵌套 · 链接提取器（增强版·解决跨域）</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #e2e8f0;
+    }
+    /* 控制栏 */
+    .toolbar {
+      background: #1e293b;
+      padding: 16px 20px;
+      border-bottom: 1px solid #334155;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+    .url-input-group {
+      display: flex;
+      flex: 2;
+      min-width: 260px;
+      background: #0f172a;
+      border-radius: 40px;
+      overflow: hidden;
+      border: 1px solid #475569;
+    }
+    .url-input-group input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 12px 18px;
+      font-size: 1rem;
+      color: #f1f5f9;
+      outline: none;
+    }
+    .url-input-group input::placeholder {
+      color: #64748b;
+      font-weight: 300;
+    }
+    .url-input-group button {
+      background: #3b82f6;
+      border: none;
+      color: white;
+      font-weight: 600;
+      padding: 0 22px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      letter-spacing: 0.3px;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .url-input-group button:hover {
+      background: #2563eb;
+    }
+    .refresh-btn {
+      background: #334155;
+      border: none;
+      color: #e2e8f0;
+      padding: 12px 20px;
+      border-radius: 30px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+      border: 1px solid #475569;
+      white-space: nowrap;
+    }
+    .refresh-btn:hover {
+      background: #475569;
+    }
+    .status {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-left: auto;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .mode-indicator {
+      background: #334155;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .mode-direct { background: #166534; color: #bbf7d0; }
+    .mode-proxy { background: #7e22ce; color: #e9d5ff; }
+    .mode-fallback { background: #854d0e; color: #fef3c7; }
+    
+    /* 链接列表 */
+    .links-panel {
+      background: #1e293b;
+      border-bottom: 2px solid #334155;
+      max-height: 220px;
+      overflow-y: auto;
+      padding: 8px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      scrollbar-width: thin;
+      scrollbar-color: #475569 #0f172a;
+    }
+    .links-panel::-webkit-scrollbar { width: 6px; }
+    .links-panel::-webkit-scrollbar-track { background: #0f172a; }
+    .links-panel::-webkit-scrollbar-thumb { background: #475569; border-radius: 8px; }
+    
+    .link-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: #0f172a;
+      border-radius: 10px;
+      border: 1px solid #2d3a4e;
+      font-size: 0.9rem;
+      word-break: break-all;
+      transition: background 0.15s;
+    }
+    .link-item:hover {
+      background: #1e293b;
+      border-color: #3b82f6;
+    }
+    .link-badge {
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      white-space: nowrap;
+    }
+    .badge-download { background: #166534; color: #bbf7d0; border: 1px solid #22c55e; }
+    .badge-blob { background: #7e22ce; color: #e9d5ff; }
+    .badge-regular { background: #1e3a5f; color: #bae6fd; }
+    
+    .link-url {
+      flex: 1;
+      color: #cbd5e1;
+      text-decoration: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .link-url:hover { color: #f8fafc; text-decoration: underline; }
+    
+    .copy-link-btn {
+      background: transparent;
+      border: 1px solid #475569;
+      color: #cbd5e1;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .copy-link-btn:hover { background: #334155; color: white; }
+    .no-links { color: #64748b; padding: 12px; text-align: center; font-style: italic; }
+    .section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #94a3b8;
+      margin: 4px 0 2px 0;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .iframe-container {
+      flex: 1;
+      background: #000;
+      position: relative;
+      overflow: hidden;
+      border-top: 1px solid #334155;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      background: white;
+    }
+    .iframe-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #475569;
+      font-size: 1.2rem;
+      gap: 10px;
+    }
+    .error-message {
+      color: #f87171;
+      background: #450a0a;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    .warning-banner {
+      background: #78350f;
+      color: #fef3c7;
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      border-bottom: 1px solid #92400e;
+      text-align: center;
+    }
+    @media (max-width: 700px) {
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .status { margin-left: 0; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div class="url-input-group">
+      <input type="text" id="urlInput" placeholder="输入完整网址，例如 https://example.com" value="https://example.com" />
+      <button id="loadBtn">↗ 加载页面</button>
+    </div>
+    <button id="refreshBtn" class="refresh-btn">
+      <span>🔄</span> 重新提取
+    </button>
+    <span class="status" id="statusText">
+      <span class="mode-indicator" id="modeIndicator">等待加载</span>
+    </span>
+  </div>
+  <div id="warningBanner" class="warning-banner" style="display:none;">
+    ⚠️ 检测到跨域限制，已启用备用提取方式（通过代理获取HTML源码解析链接）
+  </div>
+  <div class="links-panel" id="linksPanel">
+    <div class="no-links">📭 尚未提取链接，请输入网址并加载</div>
+  </div>
+  <div class="iframe-container" id="iframeContainer">
+    <div class="iframe-placeholder" id="placeholder">
+      <span>🌐</span>
+      <span>输入网址以嵌套页面</span>
+    </div>
+    <iframe id="nestedFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" style="display: none;"></iframe>
+  </div>
+
+  <script>
+    (function() {
+      const urlInput = document.getElementById('urlInput');
+      const loadBtn = document.getElementById('loadBtn');
+      const refreshBtn = document.getElementById('refreshBtn');
+      const linksPanel = document.getElementById('linksPanel');
+      const iframe = document.getElementById('nestedFrame');
+      const placeholder = document.getElementById('placeholder');
+      const statusText = document.getElementById('statusText');
+      const modeIndicator = document.getElementById('modeIndicator');
+      const warningBanner = document.getElementById('warningBanner');
+      
+      let currentLinks = [];
+      let currentSourceUrl = '';
+      let extractionMode = 'pending'; // 'direct' | 'proxy' | 'fallback'
+
+      // 判断下载链接
+      function isDownloadLink(url) {
+        if (!url) return false;
+        const lower = url.toLowerCase();
+        const downloadExtensions = [
+          '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz',
+          '.exe', '.msi', '.dmg', '.pkg', '.deb', '.rpm',
+          '.apk', '.ipa', '.pdf', '.doc', '.docx', '.xls', '.xlsx', 
+          '.ppt', '.pptx', '.mp4', '.mkv', '.avi', '.mov', '.wmv',
+          '.mp3', '.wav', '.flac', '.aac', '.ogg', '.iso', '.img', '.bin',
+          '.torrent', '.magnet', '.csv', '.json', '.xml', '.sql',
+          '.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.bmp'
+        ];
+        for (let ext of downloadExtensions) {
+          if (lower.endsWith(ext)) return true;
+        }
+        if (lower.includes('/download/') || lower.includes('/download?') || 
+            lower.includes('?download=1') || lower.includes('&download=1')) return true;
+        return false;
+      }
+
+      function isBlobLink(url) {
+        return url && url.startsWith('blob:');
+      }
+
+      function getLinkBadge(url) {
+        if (isBlobLink(url)) return { text: 'BLOB', class: 'badge-blob' };
+        if (isDownloadLink(url)) return { text: '下载', class: 'badge-download' };
+        return { text: '链接', class: 'badge-regular' };
+      }
+
+      function sortLinks(linksArray) {
+        const downloadLinks = [], blobLinks = [], otherLinks = [];
+        linksArray.forEach(link => {
+          if (isDownloadLink(link)) downloadLinks.push(link);
+          else if (isBlobLink(link)) blobLinks.push(link);
+          else otherLinks.push(link);
+        });
+        return [...downloadLinks, ...blobLinks, ...otherLinks];
+      }
+
+      function uniqueLinks(linksArray) {
+        const seen = new Set();
+        return linksArray.filter(link => {
+          const normalized = link.trim();
+          if (seen.has(normalized)) return false;
+          seen.add(normalized);
+          return true;
+        });
+      }
+
+      // 方法1：直接从iframe提取（可能被跨域阻止）
+      function extractLinksFromIframe() {
+        try {
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+          if (!iframeDoc) return null;
+          
+          const rawLinks = [];
+          const anchorElements = iframeDoc.querySelectorAll('a[href]');
+          
+          anchorElements.forEach(a => {
+            const href = a.getAttribute('href');
+            if (href && href.trim() !== '') {
+              try {
+                const absoluteUrl = new URL(href, iframeDoc.baseURI || currentSourceUrl).href;
+                rawLinks.push(absoluteUrl);
+              } catch (e) {
+                rawLinks.push(href);
+              }
+            }
+          });
+
+          // 提取所有元素的blob链接
+          const allElements = iframeDoc.querySelectorAll('*');
+          allElements.forEach(el => {
+            if (el.href && typeof el.href === 'string' && el.href.startsWith('blob:')) {
+              rawLinks.push(el.href);
+            }
+            if (el.src && typeof el.src === 'string' && el.src.startsWith('blob:')) {
+              rawLinks.push(el.src);
+            }
+            if (el.dataset) {
+              Object.values(el.dataset).forEach(val => {
+                if (typeof val === 'string' && val.startsWith('blob:')) rawLinks.push(val);
+              });
+            }
+          });
+
+          const objects = iframeDoc.querySelectorAll('object[data]');
+          objects.forEach(obj => {
+            const data = obj.getAttribute('data');
+            if (data && data.startsWith('blob:')) rawLinks.push(data);
+          });
+
+          const cleaned = rawLinks.map(link => link.trim()).filter(link => link.length > 0);
+          return uniqueLinks(cleaned);
+        } catch (err) {
+          console.warn('iframe提取失败:', err.message);
+          return null;
+        }
+      }
+
+      // 方法2：通过代理获取HTML源码并解析（绕过跨域）
+      async function extractLinksViaProxy(url) {
+        try {
+          // 使用多个CORS代理（按优先级尝试）
+          const proxyUrls = [
+            `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+            `https://corsproxy.io/?${encodeURIComponent(url)}`,
+            `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+          ];
+          
+          let html = null;
+          for (const proxyUrl of proxyUrls) {
+            try {
+              const response = await fetch(proxyUrl);
+              if (response.ok) {
+                html = await response.text();
+                break;
+              }
+            } catch (e) {
+              console.warn(`代理 ${proxyUrl} 失败:`, e.message);
+              continue;
+            }
+          }
+          
+          if (!html) {
+            throw new Error('所有代理均失败');
+          }
+          
+          // 解析HTML提取链接
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const rawLinks = [];
+          
+          // 提取所有a标签的href
+          doc.querySelectorAll('a[href]').forEach(a => {
+            const href = a.getAttribute('href');
+            if (href && href.trim() !== '') {
+              try {
+                const absoluteUrl = new URL(href, url).href;
+                rawLinks.push(absoluteUrl);
+              } catch (e) {
+                rawLinks.push(href);
+              }
+            }
+          });
+          
+          // 提取blob链接（通过正则匹配HTML中的blob:文本）
+          const blobMatches = html.match(/blob:[^\s"'<>]+/g);
+          if (blobMatches) {
+            blobMatches.forEach(match => rawLinks.push(match));
+          }
+          
+          // 提取link标签的href
+          doc.querySelectorAll('link[href]').forEach(link => {
+            const href = link.getAttribute('href');
+            if (href) {
+              try {
+                rawLinks.push(new URL(href, url).href);
+              } catch (e) {
+                rawLinks.push(href);
+              }
+            }
+          });
+          
+          // 提取script标签的src
+          doc.querySelectorAll('script[src]').forEach(script => {
+            const src = script.getAttribute('src');
+            if (src) {
+              try {
+                rawLinks.push(new URL(src, url).href);
+              } catch (e) {
+                rawLinks.push(src);
+              }
+            }
+          });
+          
+          const cleaned = rawLinks.map(link => link.trim()).filter(link => 
+            link.length > 0 && !link.startsWith('#') && !link.startsWith('javascript:')
+          );
+          return uniqueLinks(cleaned);
+        } catch (err) {
+          console.error('代理提取失败:', err.message);
+          return null;
+        }
+      }
+
+      // 方法3：仅提取iframe中可见的链接文本（不访问DOM）
+      function extractLinksFallback() {
+        // 这个方法是最后的备用，通过窗口名称等提示用户
+        return null;
+      }
+
+      // 渲染链接列表
+      function renderLinks(links, mode = 'unknown') {
+        linksPanel.innerHTML = '';
+        
+        if (!links || links.length === 0) {
+          linksPanel.innerHTML = '<div class="no-links">📭 当前页面未发现链接，或所有提取方式均失败</div>';
+          return;
+        }
+        
+        const sorted = sortLinks(links);
+        const downloadCount = sorted.filter(l => isDownloadLink(l)).length;
+        const blobCount = sorted.filter(l => isBlobLink(l)).length;
+        
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'section-title';
+        titleDiv.innerHTML = `🔗 共 ${sorted.length} 个链接 (下载 ${downloadCount} · Blob ${blobCount}) [${mode}]`;
+        linksPanel.appendChild(titleDiv);
+        
+        sorted.forEach(link => {
+          const badge = getLinkBadge(link);
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'link-item';
+          
+          const badgeSpan = document.createElement('span');
+          badgeSpan.className = `link-badge ${badge.class}`;
+          badgeSpan.textContent = badge.text;
+          
+          const linkAnchor = document.createElement('a');
+          linkAnchor.className = 'link-url';
+          linkAnchor.href = link;
+          linkAnchor.textContent = link;
+          linkAnchor.target = '_blank';
+          linkAnchor.title = link;
+          
+          if (isBlobLink(link)) {
+            linkAnchor.addEventListener('click', (e) => {
+              e.preventDefault();
+              alert('Blob链接是临时链接，仅在其创建的页面上下文中有效。');
+            });
+          }
+          
+          const copyBtn = document.createElement('button');
+          copyBtn.className = 'copy-link-btn';
+          copyBtn.textContent = '📋 复制';
+          copyBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navigator.clipboard.writeText(link).then(() => {
+              copyBtn.textContent = '✓';
+              setTimeout(() => { copyBtn.textContent = '📋 复制'; }, 1500);
+            }).catch(() => alert('复制失败'));
+          });
+          
+          itemDiv.appendChild(badgeSpan);
+          itemDiv.appendChild(linkAnchor);
+          itemDiv.appendChild(copyBtn);
+          linksPanel.appendChild(itemDiv);
+        });
+      }
+
+      function updateModeUI(mode) {
+        modeIndicator.className = 'mode-indicator';
+        warningBanner.style.display = 'none';
+        
+        switch(mode) {
+          case 'direct':
+            modeIndicator.classList.add('mode-direct');
+            modeIndicator.textContent = '直接提取';
+            break;
+          case 'proxy':
+            modeIndicator.classList.add('mode-proxy');
+            modeIndicator.textContent = '代理提取';
+            warningBanner.style.display = 'block';
+            break;
+          case 'fallback':
+            modeIndicator.classList.add('mode-fallback');
+            modeIndicator.textContent = '提取失败';
+            break;
+          default:
+            modeIndicator.textContent = '等待加载';
+        }
+      }
+
+      async function performExtraction() {
+        if (!currentSourceUrl) {
+          renderLinks([]);
+          updateModeUI('pending');
+          return;
+        }
+        
+        statusText.textContent = '🔍 正在提取链接...';
+        
+        // 先尝试直接提取
+        const directLinks = extractLinksFromIframe();
+        
+        if (directLinks !== null && directLinks.length > 0) {
+          // 直接提取成功
+          currentLinks = directLinks;
+          renderLinks(currentLinks, '直接提取');
+          updateModeUI('direct');
+          statusText.textContent = `✅ 成功提取 ${directLinks.length} 个链接（直接模式）`;
+          return;
+        }
+        
+        // 直接提取失败，尝试代理方式
+        console.log('直接提取失败，尝试代理方式...');
+        statusText.textContent = '🔍 直接提取失败，正在通过代理获取...';
+        
+        const proxyLinks = await extractLinksViaProxy(currentSourceUrl);
+        
+        if (proxyLinks !== null && proxyLinks.length > 0) {
+          currentLinks = proxyLinks;
+          renderLinks(currentLinks, '代理提取');
+          updateModeUI('proxy');
+          statusText.textContent = `✅ 通过代理提取到 ${proxyLinks.length} 个链接`;
+          return;
+        }
+        
+        // 所有方式都失败
+        currentLinks = [];
+        renderLinks([], '提取失败');
+        updateModeUI('fallback');
+        statusText.textContent = '❌ 所有提取方式均失败（页面可能屏蔽了所有外部访问）';
+        
+        // 如果直接提取返回null但可能链接为空，尝试显示空
+        if (directLinks !== null) {
+          renderLinks(directLinks, '直接提取（无链接）');
+        }
+      }
+
+      function loadUrl(url) {
+        if (!url) {
+          alert('请输入有效的网址');
+          return;
+        }
+        
+        let targetUrl = url.trim();
+        if (!/^https?:\/\//i.test(targetUrl)) {
+          targetUrl = 'https://' + targetUrl;
+          urlInput.value = targetUrl;
+        }
+        
+        try {
+          new URL(targetUrl);
+        } catch (e) {
+          alert('URL格式不正确');
+          return;
+        }
+        
+        currentSourceUrl = targetUrl;
+        placeholder.style.display = 'none';
+        iframe.style.display = 'block';
+        
+        updateModeUI('pending');
+        statusText.textContent = '⏳ 加载中...';
+        currentLinks = [];
+        renderLinks([]);
+        
+        iframe.src = targetUrl;
+        
+        iframe.onload = async function() {
+          statusText.textContent = '✔ 页面加载完成，正在提取链接...';
+          // 给iframe一些时间渲染
+          await new Promise(resolve => setTimeout(resolve, 300));
+          await performExtraction();
+        };
+        
+        iframe.onerror = function() {
+          statusText.textContent = '❌ 无法加载该页面';
+          updateModeUI('fallback');
+        };
+      }
+
+      refreshBtn.addEventListener('click', async () => {
+        if (!currentSourceUrl) {
+          alert('请先加载一个页面');
+          return;
+        }
+        if (iframe.style.display === 'none' || iframe.src !== currentSourceUrl) {
+          loadUrl(currentSourceUrl);
+        } else {
+          await performExtraction();
+        }
+      });
+
+      loadBtn.addEventListener('click', () => {
+        const url = urlInput.value.trim();
+        if (url) loadUrl(url);
+      });
+
+      urlInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') loadBtn.click();
+      });
+
+      // 初始加载示例
+      // setTimeout(() => { loadUrl('https://example.com'); }, 500);
+      
+      console.log('增强版链接提取器已启动。支持直接提取和代理提取两种模式。');
+    })();
+  </script>
+</body>
+</html>
