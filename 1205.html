@@ -24,6 +24,29 @@
     <meta name="description" content="欢迎使用初二五班智慧应用平台">
     
     <style>
+    /* ========== 针对 iOS 的优化 ========== */
+    * {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+        text-rendering: optimizeLegibility;
+    }
+
+    /* 如果是图片内容 */
+    img, .document-content, [class*="content"] {
+        max-width: 100%;
+        height: auto;
+        -webkit-backface-visibility: hidden;
+        transform: translateZ(0);
+    }
+    /* ========== 原有代码从这里开始 ========== */
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { background: #f5f7fc; font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; min-height: 100vh; padding-bottom: 70px; }
+    /* ... 其余代码不变 ... */
+
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #f5f7fc; font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; min-height: 100vh; padding-bottom: 70px; }
         .platform-container { max-width: 550px; margin: 0 auto; background: #ffffff; min-height: calc(100vh - 70px); }
