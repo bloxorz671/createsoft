@@ -383,6 +383,37 @@
             background: rgba(255,255,255,0.3);
             border-radius: 3px;
         }
+        
+        /* 设备兼容性提示弹窗样式 */
+        .device-warning-modal .modal-content {
+            text-align: center;
+            max-width: 400px;
+        }
+        .device-warning-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+        .device-warning-message {
+            font-size: 1rem;
+            color: #e67e22;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+        .device-warning-btn {
+            background: #2b4c8a;
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .device-warning-btn:hover {
+            background: #1e3c72;
+        }
     </style>
     <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 </head>
@@ -434,6 +465,15 @@
     <button class="add-btn" id="addGroupFab" title="添加分组" style="background:#9b59b6;">📂</button>
 </div>
 
+<!-- 设备兼容性提示弹窗 -->
+<div id="deviceWarningModal" class="modal-overlay device-warning-modal" style="z-index: 30000;">
+    <div class="modal-content">
+        <div class="device-warning-icon" id="deviceWarningIcon"></div>
+        <div class="device-warning-message" id="deviceWarningMessage"></div>
+        <button class="device-warning-btn" id="deviceWarningCloseBtn">我知道了</button>
+    </div>
+</div>
+
 <div id="scanModal" class="modal-overlay scan-modal" style="z-index: 10000;">
     <div class="modal-content" style="padding: 0; max-width: 100%; width: 100%; height: 100%; border-radius: 0; background: #000; display: flex; flex-direction: column;">
         <div class="scan-header"><h3>扫码登录</h3><button id="closeScanModal" class="scan-close">✕</button></div>
@@ -469,6 +509,43 @@
 </div>
 
 <script>
+    // ========== 设备兼容性检测 ==========
+    (function() {
+        const ua = navigator.userAgent;
+        const isIOS = /iPhone|iPad|iPod/i.test(ua);
+        const isMac = /Macintosh/i.test(ua) && !isIOS;
+        
+        const deviceWarningModal = document.getElementById('deviceWarningModal');
+        const deviceWarningIcon = document.getElementById('deviceWarningIcon');
+        const deviceWarningMessage = document.getElementById('deviceWarningMessage');
+        const deviceWarningCloseBtn = document.getElementById('deviceWarningCloseBtn');
+        
+        let warningMessage = null;
+        
+        if (isIOS) {
+            warningMessage = '当前设备访问本平台可能出现问题，建议更换安卓或鸿蒙设备访问';
+            deviceWarningIcon.textContent = '📱';
+        } else if (isMac) {
+            warningMessage = '当前设备访问本平台可能出现问题，建议更换Windows或Linux设备访问';
+            deviceWarningIcon.textContent = '💻';
+        }
+        
+        if (warningMessage && deviceWarningModal && deviceWarningMessage) {
+            deviceWarningMessage.textContent = warningMessage;
+            deviceWarningModal.classList.add('show');
+            
+            deviceWarningCloseBtn.addEventListener('click', function() {
+                deviceWarningModal.classList.remove('show');
+            });
+            
+            deviceWarningModal.addEventListener('click', function(e) {
+                if (e.target === deviceWarningModal) {
+                    deviceWarningModal.classList.remove('show');
+                }
+            });
+        }
+    })();
+    
     // ========== 配置 ==========
     const CONFIG_URL = 'https://luckynum.top/5app.txt';
     const GITHUB_OWNER = 'bloxorz671';
@@ -1195,7 +1272,7 @@
             showUnsupportedDialog(fullUrl, fileName);
             return;
         }
-        alert(`❌ 应用/文件不存在或已被删除\n\n“${appParam}”`);
+        alert(`❌ 应用/文件不存在或已被删除\n\n"${appParam}"`);
     }
     
     function parseAppTxt(raw) {
