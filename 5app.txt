@@ -7,7 +7,7 @@ group
 [g=生物（学科）资料]
 [g=美术（学科）资料]
 pic
-[p=课表变更通知.jpg l=1205?app=课表变更通知.jpg]
+[p=课表更新.jpg l=1205?app=新课表.jpg]
 app
 [n=新课表 p=新课表.jpg l=新课表.jpg g=班级应用]
 [n=三份期中考模拟试题(含答案).zip p=null.jpg l=https://www.kdocs.cn/l/cu8FT9ZtlQgF g=物理（学科）资料]
