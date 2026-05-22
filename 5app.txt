@@ -7,7 +7,7 @@ group
 [g=生物（学科）资料]
 [g=美术（学科）资料]
 pic
-[p=IMG_20260522_195958_1779451319835edit七上期末复习课件-2025-2026学年人教版.jpg l=https://www.kdocs.cn/l/cdjOM643677l]
+[p=IMG_20260522_195958_1779451319835edit七上期末复习课件-2025-2026学年人教版_1779452163246edit.jpg l=https://www.kdocs.cn/l/cdjOM643677l]
 app
 [n=初二五班登分表Excel下载 p=excel.jpg l=初二五班登分表.xlsx g=班级应用]
 [n=新课表 p=新课表.jpg l=新课表.jpg g=班级应用]
