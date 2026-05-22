@@ -82,31 +82,41 @@
     .custom-toast.active { display: block; }
     .custom-toast.success { background: #22c55e; }
 
-    /* 滚动数字选择器 */
-    .time-scroll { display: flex; gap: 0.5rem; align-items: center; justify-content: center; }
-    .scroll-col {
-      display: flex; flex-direction: column; align-items: center;
-      position: relative; height: 120px; overflow: hidden;
-      width: 50px; border-radius: 0.8rem; background: #f8fafc;
+    /* iOS风格滚动选择器 */
+    .time-picker-container {
+      display: flex; gap: 0.5rem; align-items: center; justify-content: center;
     }
-    .scroll-btn {
-      background: none; border: none; font-size: 1.2rem; cursor: pointer;
-      color: #64748b; padding: 0.2rem; z-index: 2; line-height: 1;
+    .picker-col {
+      position: relative; width: 55px; height: 130px; overflow: hidden;
+      border-radius: 0.8rem; background: #f8fafc;
     }
-    .scroll-btn:hover { color: #0f172a; }
-    .scroll-numbers {
-      flex: 1; overflow-y: scroll; scroll-snap-type: y mandatory;
-      -webkit-overflow-scrolling: touch; width: 100%;
+    .picker-highlight {
+      position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%);
+      height: 40px; background: rgba(99,102,241,0.1);
+      border-top: 1px solid #c7d2fe; border-bottom: 1px solid #c7d2fe;
+      pointer-events: none; z-index: 1;
+    }
+    .picker-scroll {
+      height: 100%; overflow-y: scroll; scroll-snap-type: y mandatory;
+      -webkit-overflow-scrolling: touch;
       scrollbar-width: none; -ms-overflow-style: none;
+      padding: 45px 0;
     }
-    .scroll-numbers::-webkit-scrollbar { display: none; }
-    .scroll-number {
-      height: 36px; display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem; font-weight: 600; color: #94a3b8; scroll-snap-align: center;
+    .picker-scroll::-webkit-scrollbar { display: none; }
+    .picker-item {
+      height: 40px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; font-weight: 500; color: #cbd5e1; scroll-snap-align: center;
       cursor: pointer; user-select: none; -webkit-user-select: none;
+      transition: all 0.15s;
     }
-    .scroll-number.active {
-      color: #0f172a; font-size: 1.5rem; font-weight: 700;
+    .picker-item.active {
+      color: #0f172a; font-size: 1.4rem; font-weight: 700;
+    }
+    .picker-colon {
+      font-size: 1.5rem; font-weight: 600; color: #64748b; width: 15px; text-align: center;
+    }
+    .picker-dash {
+      font-size: 1.5rem; font-weight: 300; color: #94a3b8; width: 20px; text-align: center;
     }
 
     .flash-overlay {
@@ -147,7 +157,7 @@
     .custom-modal.active { display: flex; }
     .modal-content {
       background: white; padding: 2rem; border-radius: 2rem;
-      min-width: 350px; box-shadow: 0 30px 50px rgba(0,0,0,0.3);
+      min-width: 380px; box-shadow: 0 30px 50px rgba(0,0,0,0.3);
     }
     .confirm-dialog {
       position: fixed; top:0; left:0; width:100%; height:100%;
@@ -252,43 +262,27 @@
 <div id="slotModal" class="custom-modal">
   <div class="modal-content">
     <h3>编辑时间段</h3>
-    <div class="time-scroll">
+    <div class="time-picker-container">
       <!-- 开始小时 -->
-      <div class="scroll-col">
-        <button class="scroll-btn" data-target="startHour" data-delta="-1">▲</button>
-        <div class="scroll-numbers" id="startHourScroll"></div>
-        <button class="scroll-btn" data-target="startHour" data-delta="1">▼</button>
-      </div>
-      <span>:</span>
+      <div class="picker-col" id="startHourPicker"></div>
+      <div class="picker-colon">:</div>
       <!-- 开始分钟 -->
-      <div class="scroll-col">
-        <button class="scroll-btn" data-target="startMin" data-delta="-1">▲</button>
-        <div class="scroll-numbers" id="startMinScroll"></div>
-        <button class="scroll-btn" data-target="startMin" data-delta="1">▼</button>
-      </div>
-      <span>-</span>
+      <div class="picker-col" id="startMinPicker"></div>
+      <div class="picker-dash">-</div>
       <!-- 结束小时 -->
-      <div class="scroll-col">
-        <button class="scroll-btn" data-target="endHour" data-delta="-1">▲</button>
-        <div class="scroll-numbers" id="endHourScroll"></div>
-        <button class="scroll-btn" data-target="endHour" data-delta="1">▼</button>
-      </div>
-      <span>:</span>
+      <div class="picker-col" id="endHourPicker"></div>
+      <div class="picker-colon">:</div>
       <!-- 结束分钟 -->
-      <div class="scroll-col">
-        <button class="scroll-btn" data-target="endMin" data-delta="-1">▲</button>
-        <div class="scroll-numbers" id="endMinScroll"></div>
-        <button class="scroll-btn" data-target="endMin" data-delta="1">▼</button>
-      </div>
+      <div class="picker-col" id="endMinPicker"></div>
     </div>
-    <button id="saveSlotBtn" class="primary" style="margin-top:1rem;">保存</button>
-    <button id="cancelSlotBtn">取消</button>
+    <button id="saveSlotBtn" class="primary" style="margin-top:1.5rem; width:100%;">保存</button>
+    <button id="cancelSlotBtn" style="width:100%; margin-top:0.5rem;">取消</button>
   </div>
 </div>
 
 <script>
   (() => {
-    const STORAGE = 'taskflow_v13';
+    const STORAGE = 'taskflow_v14';
     let tasks = [];
     let timeSlots = [];
     let nextId = 1;
@@ -510,64 +504,64 @@
 
     function deleteSlot(id) { timeSlots = timeSlots.filter(s=>s.id!==id); save(); renderAll(); }
 
-    // 滚动选择器相关
-    function buildScrollNumbers(containerId, max, currentVal) {
+    // iOS风格滚动选择器
+    function buildPicker(containerId, max, currentVal) {
       const container = document.getElementById(containerId);
       container.innerHTML = '';
+      
+      const highlight = document.createElement('div');
+      highlight.className = 'picker-highlight';
+      container.appendChild(highlight);
+      
+      const scroll = document.createElement('div');
+      scroll.className = 'picker-scroll';
+      
       for(let i = 0; i <= max; i++) {
-        const div = document.createElement('div');
-        div.className = 'scroll-number';
-        div.textContent = String(i).padStart(2,'0');
-        div.dataset.value = i;
-        div.addEventListener('click', () => {
-          scrollToValue(container, i);
-        });
-        container.appendChild(div);
+        const item = document.createElement('div');
+        item.className = 'picker-item';
+        item.textContent = String(i).padStart(2,'0');
+        item.dataset.value = i;
+        scroll.appendChild(item);
       }
-      scrollToValue(container, currentVal, false);
-    }
-
-    function scrollToValue(container, value, animate = true) {
-      const items = container.querySelectorAll('.scroll-number');
-      items.forEach(item => {
-        item.classList.toggle('active', parseInt(item.dataset.value) === value);
-      });
-      const target = container.querySelector(`[data-value="${value}"]`);
-      if(target) {
-        container.scrollTo({
-          top: target.offsetTop - container.offsetHeight/2 + target.offsetHeight/2,
-          behavior: animate ? 'smooth' : 'auto'
-        });
-      }
-    }
-
-    function getScrollValue(containerId) {
-      const container = document.getElementById(containerId);
-      const active = container.querySelector('.scroll-number.active');
-      return active ? parseInt(active.dataset.value) : 0;
-    }
-
-    function setupScrollSnap(containerId) {
-      const container = document.getElementById(containerId);
+      
+      container.appendChild(scroll);
+      
       let scrollTimeout;
-      container.addEventListener('scroll', () => {
+      scroll.addEventListener('scroll', () => {
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
-          const items = container.querySelectorAll('.scroll-number');
-          const containerCenter = container.scrollTop + container.offsetHeight/2;
-          let closest = items[0];
-          let minDist = Infinity;
-          items.forEach(item => {
-            const itemCenter = item.offsetTop + item.offsetHeight/2;
-            const dist = Math.abs(containerCenter - itemCenter);
-            if(dist < minDist) { minDist = dist; closest = item; }
-          });
-          if(closest) {
-            items.forEach(i => i.classList.remove('active'));
-            closest.classList.add('active');
-          }
-        }, 80);
+          updateActiveItem(scroll);
+        }, 60);
       });
+      
+      // 初始滚动到当前值
+      setTimeout(() => {
+        const targetItem = scroll.querySelector(`[data-value="${currentVal}"]`);
+        if(targetItem) {
+          scroll.scrollTop = targetItem.offsetTop - scroll.offsetHeight/2 + targetItem.offsetHeight/2;
+          updateActiveItem(scroll);
+        }
+      }, 100);
+    }
+
+    function updateActiveItem(scroll) {
+      const items = scroll.querySelectorAll('.picker-item');
+      const scrollCenter = scroll.scrollTop + scroll.offsetHeight/2;
+      let closest = items[0];
+      let minDist = Infinity;
+      items.forEach(item => {
+        const itemCenter = item.offsetTop + item.offsetHeight/2;
+        const dist = Math.abs(scrollCenter - itemCenter);
+        if(dist < minDist) { minDist = dist; closest = item; }
+      });
+      items.forEach(i => i.classList.remove('active'));
+      if(closest) closest.classList.add('active');
+    }
+
+    function getPickerValue(containerId) {
+      const container = document.getElementById(containerId);
+      const active = container.querySelector('.picker-item.active');
+      return active ? parseInt(active.dataset.value) : 0;
     }
 
     function openSlotEditor(slotId=null) {
@@ -583,25 +577,17 @@
         [endH, endM] = s.end.split(':').map(Number);
       }
       
-      buildScrollNumbers('startHourScroll', 23, startH);
-      buildScrollNumbers('startMinScroll', 59, startM);
-      buildScrollNumbers('endHourScroll', 23, endH);
-      buildScrollNumbers('endMinScroll', 59, endM);
+      buildPicker('startHourPicker', 23, startH);
+      buildPicker('startMinPicker', 59, startM);
+      buildPicker('endHourPicker', 23, endH);
+      buildPicker('endMinPicker', 59, endM);
       
       document.getElementById('slotModal').classList.add('active');
     }
 
-    function changeScrollValue(target, delta) {
-      const containerId = target + 'Scroll';
-      let current = getScrollValue(containerId);
-      let max = target.includes('Hour') ? 23 : 59;
-      let newVal = (current + delta + max + 1) % (max + 1);
-      scrollToValue(document.getElementById(containerId), newVal);
-    }
-
     function saveSlotFromEditor() {
-      const sh = getScrollValue('startHourScroll'), sm = getScrollValue('startMinScroll');
-      const eh = getScrollValue('endHourScroll'), em = getScrollValue('endMinScroll');
+      const sh = getPickerValue('startHourPicker'), sm = getPickerValue('startMinPicker');
+      const eh = getPickerValue('endHourPicker'), em = getPickerValue('endMinPicker');
       const start = `${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}`;
       const end = `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
       if(toMins(start)>=toMins(end)) { showToast('结束时间必须晚于开始'); return; }
@@ -859,18 +845,6 @@
     });
     document.getElementById('fileInput').addEventListener('change', (e) => {
       if(e.target.files[0]) { loadFromFile(e.target.files[0]); e.target.value = ''; }
-    });
-
-    // 滚动选择器按钮事件
-    document.querySelectorAll('.scroll-btn').forEach(b=>b.addEventListener('click', e=>{
-      const target = e.target.dataset.target;
-      const delta = parseInt(e.target.dataset.delta);
-      changeScrollValue(target, delta);
-    }));
-
-    // 初始化滚动选择器的滚动捕捉
-    ['startHourScroll','startMinScroll','endHourScroll','endMinScroll'].forEach(id => {
-      setupScrollSnap(id);
     });
 
     document.getElementById('addTaskBtn').addEventListener('click', ()=>document.getElementById('taskModal').classList.add('active'));
