@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -81,9 +81,34 @@
     }
     .custom-toast.active { display: block; }
     .custom-toast.success { background: #22c55e; }
+
+    /* 滚动数字选择器 */
     .time-scroll { display: flex; gap: 0.5rem; align-items: center; justify-content: center; }
-    .scroll-col { display: flex; flex-direction: column; align-items: center; }
-    .scroll-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #334155; }
+    .scroll-col {
+      display: flex; flex-direction: column; align-items: center;
+      position: relative; height: 120px; overflow: hidden;
+      width: 50px; border-radius: 0.8rem; background: #f8fafc;
+    }
+    .scroll-btn {
+      background: none; border: none; font-size: 1.2rem; cursor: pointer;
+      color: #64748b; padding: 0.2rem; z-index: 2; line-height: 1;
+    }
+    .scroll-btn:hover { color: #0f172a; }
+    .scroll-numbers {
+      flex: 1; overflow-y: scroll; scroll-snap-type: y mandatory;
+      -webkit-overflow-scrolling: touch; width: 100%;
+      scrollbar-width: none; -ms-overflow-style: none;
+    }
+    .scroll-numbers::-webkit-scrollbar { display: none; }
+    .scroll-number {
+      height: 36px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; font-weight: 600; color: #94a3b8; scroll-snap-align: center;
+      cursor: pointer; user-select: none; -webkit-user-select: none;
+    }
+    .scroll-number.active {
+      color: #0f172a; font-size: 1.5rem; font-weight: 700;
+    }
+
     .flash-overlay {
       position: fixed; top:0; left:0; width:100%; height:100%;
       z-index: 9999; pointer-events: none; opacity: 0;
@@ -122,7 +147,7 @@
     .custom-modal.active { display: flex; }
     .modal-content {
       background: white; padding: 2rem; border-radius: 2rem;
-      min-width: 320px; box-shadow: 0 30px 50px rgba(0,0,0,0.3);
+      min-width: 350px; box-shadow: 0 30px 50px rgba(0,0,0,0.3);
     }
     .confirm-dialog {
       position: fixed; top:0; left:0; width:100%; height:100%;
@@ -141,11 +166,9 @@
       border-radius: 1rem; font-weight: 600; font-size: 0.9rem;
       box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     }
-    .file-menu {
-      position: relative; display: inline-block;
-    }
+    .file-menu { position: relative; display: inline-block; }
     .file-dropdown {
-      display: none; position: fixed; 
+      display: none; position: fixed;
       background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
       z-index: 200; min-width: 180px; padding: 0.5rem; border: 1px solid #e2e8f0;
     }
@@ -230,13 +253,33 @@
   <div class="modal-content">
     <h3>编辑时间段</h3>
     <div class="time-scroll">
-      <div class="scroll-col"><button class="scroll-btn" data-target="startHourUp">▲</button><span id="startHour">09</span><button class="scroll-btn" data-target="startHourDown">▼</button></div>
+      <!-- 开始小时 -->
+      <div class="scroll-col">
+        <button class="scroll-btn" data-target="startHour" data-delta="-1">▲</button>
+        <div class="scroll-numbers" id="startHourScroll"></div>
+        <button class="scroll-btn" data-target="startHour" data-delta="1">▼</button>
+      </div>
       <span>:</span>
-      <div class="scroll-col"><button class="scroll-btn" data-target="startMinUp">▲</button><span id="startMin">00</span><button class="scroll-btn" data-target="startMinDown">▼</button></div>
-      <span> - </span>
-      <div class="scroll-col"><button class="scroll-btn" data-target="endHourUp">▲</button><span id="endHour">09</span><button class="scroll-btn" data-target="endHourDown">▼</button></div>
+      <!-- 开始分钟 -->
+      <div class="scroll-col">
+        <button class="scroll-btn" data-target="startMin" data-delta="-1">▲</button>
+        <div class="scroll-numbers" id="startMinScroll"></div>
+        <button class="scroll-btn" data-target="startMin" data-delta="1">▼</button>
+      </div>
+      <span>-</span>
+      <!-- 结束小时 -->
+      <div class="scroll-col">
+        <button class="scroll-btn" data-target="endHour" data-delta="-1">▲</button>
+        <div class="scroll-numbers" id="endHourScroll"></div>
+        <button class="scroll-btn" data-target="endHour" data-delta="1">▼</button>
+      </div>
       <span>:</span>
-      <div class="scroll-col"><button class="scroll-btn" data-target="endMinUp">▲</button><span id="endMin">30</span><button class="scroll-btn" data-target="endMinDown">▼</button></div>
+      <!-- 结束分钟 -->
+      <div class="scroll-col">
+        <button class="scroll-btn" data-target="endMin" data-delta="-1">▲</button>
+        <div class="scroll-numbers" id="endMinScroll"></div>
+        <button class="scroll-btn" data-target="endMin" data-delta="1">▼</button>
+      </div>
     </div>
     <button id="saveSlotBtn" class="primary" style="margin-top:1rem;">保存</button>
     <button id="cancelSlotBtn">取消</button>
@@ -245,7 +288,7 @@
 
 <script>
   (() => {
-    const STORAGE = 'taskflow_v12';
+    const STORAGE = 'taskflow_v13';
     let tasks = [];
     let timeSlots = [];
     let nextId = 1;
@@ -467,27 +510,100 @@
 
     function deleteSlot(id) { timeSlots = timeSlots.filter(s=>s.id!==id); save(); renderAll(); }
 
+    // 滚动选择器相关
+    function buildScrollNumbers(containerId, max, currentVal) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      for(let i = 0; i <= max; i++) {
+        const div = document.createElement('div');
+        div.className = 'scroll-number';
+        div.textContent = String(i).padStart(2,'0');
+        div.dataset.value = i;
+        div.addEventListener('click', () => {
+          scrollToValue(container, i);
+        });
+        container.appendChild(div);
+      }
+      scrollToValue(container, currentVal, false);
+    }
+
+    function scrollToValue(container, value, animate = true) {
+      const items = container.querySelectorAll('.scroll-number');
+      items.forEach(item => {
+        item.classList.toggle('active', parseInt(item.dataset.value) === value);
+      });
+      const target = container.querySelector(`[data-value="${value}"]`);
+      if(target) {
+        container.scrollTo({
+          top: target.offsetTop - container.offsetHeight/2 + target.offsetHeight/2,
+          behavior: animate ? 'smooth' : 'auto'
+        });
+      }
+    }
+
+    function getScrollValue(containerId) {
+      const container = document.getElementById(containerId);
+      const active = container.querySelector('.scroll-number.active');
+      return active ? parseInt(active.dataset.value) : 0;
+    }
+
+    function setupScrollSnap(containerId) {
+      const container = document.getElementById(containerId);
+      let scrollTimeout;
+      container.addEventListener('scroll', () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          const items = container.querySelectorAll('.scroll-number');
+          const containerCenter = container.scrollTop + container.offsetHeight/2;
+          let closest = items[0];
+          let minDist = Infinity;
+          items.forEach(item => {
+            const itemCenter = item.offsetTop + item.offsetHeight/2;
+            const dist = Math.abs(containerCenter - itemCenter);
+            if(dist < minDist) { minDist = dist; closest = item; }
+          });
+          if(closest) {
+            items.forEach(i => i.classList.remove('active'));
+            closest.classList.add('active');
+          }
+        }, 80);
+      });
+    }
+
     function openSlotEditor(slotId=null) {
       editingSlotId = slotId;
-      const now = new Date(); const h=String(now.getHours()).padStart(2,'0'); const m=String(now.getMinutes()).padStart(2,'0');
-      const end = new Date(now.getTime()+30*60000); const eh=String(end.getHours()).padStart(2,'0'); const em=String(end.getMinutes()).padStart(2,'0');
+      const now = new Date();
+      let startH = now.getHours(), startM = now.getMinutes();
+      let endDate = new Date(now.getTime()+30*60000);
+      let endH = endDate.getHours(), endM = endDate.getMinutes();
+      
       if(slotId) {
         const s = timeSlots.find(s=>s.id===slotId);
-        document.getElementById('startHour').textContent = s.start.split(':')[0];
-        document.getElementById('startMin').textContent = s.start.split(':')[1];
-        document.getElementById('endHour').textContent = s.end.split(':')[0];
-        document.getElementById('endMin').textContent = s.end.split(':')[1];
-      } else {
-        document.getElementById('startHour').textContent = h; document.getElementById('startMin').textContent = m;
-        document.getElementById('endHour').textContent = eh; document.getElementById('endMin').textContent = em;
+        [startH, startM] = s.start.split(':').map(Number);
+        [endH, endM] = s.end.split(':').map(Number);
       }
+      
+      buildScrollNumbers('startHourScroll', 23, startH);
+      buildScrollNumbers('startMinScroll', 59, startM);
+      buildScrollNumbers('endHourScroll', 23, endH);
+      buildScrollNumbers('endMinScroll', 59, endM);
+      
       document.getElementById('slotModal').classList.add('active');
     }
 
+    function changeScrollValue(target, delta) {
+      const containerId = target + 'Scroll';
+      let current = getScrollValue(containerId);
+      let max = target.includes('Hour') ? 23 : 59;
+      let newVal = (current + delta + max + 1) % (max + 1);
+      scrollToValue(document.getElementById(containerId), newVal);
+    }
+
     function saveSlotFromEditor() {
-      const sh=document.getElementById('startHour').textContent.padStart(2,'0'), sm=document.getElementById('startMin').textContent.padStart(2,'0');
-      const eh=document.getElementById('endHour').textContent.padStart(2,'0'), em=document.getElementById('endMin').textContent.padStart(2,'0');
-      const start=`${sh}:${sm}`, end=`${eh}:${em}`;
+      const sh = getScrollValue('startHourScroll'), sm = getScrollValue('startMinScroll');
+      const eh = getScrollValue('endHourScroll'), em = getScrollValue('endMinScroll');
+      const start = `${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}`;
+      const end = `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
       if(toMins(start)>=toMins(end)) { showToast('结束时间必须晚于开始'); return; }
       if(timeSlots.some(s=>s.id!==editingSlotId && toMins(s.start)<toMins(end) && toMins(s.end)>toMins(start))) { showToast('时间段冲突'); return; }
       if(editingSlotId) { const s=timeSlots.find(s=>s.id===editingSlotId); if(s){s.start=start; s.end=end;} }
@@ -514,9 +630,7 @@
       task.completed = true;
       task.completedTime = toTime(actualEnd);
       
-      if(slot) {
-        slot.end = toTime(actualEnd);
-      }
+      if(slot) { slot.end = toTime(actualEnd); }
       
       flashedSet.delete(taskId);
       compactAfterComplete(taskId, earlyMins);
@@ -606,14 +720,10 @@
           }
           
           msg = `你已超额完成"${task.name}"\n下一个任务："${nt?.name}" 开始时间 ${nextSlot.start}`;
-          if(restMinutes > 0) {
-            msg += `\n你现在有${restMinutes}分钟休息时间`;
-          }
+          if(restMinutes > 0) msg += `\n你现在有${restMinutes}分钟休息时间`;
         } else {
           msg = `"${task.name}" 已完成\n下一个任务："${nt?.name}" 开始时间 ${nextSlot.start}`;
-          if(gapToNext > 0 && gapToNext <= 10) {
-            msg += `\n你有${gapToNext}分钟休息时间`;
-          }
+          if(gapToNext > 0 && gapToNext <= 10) msg += `\n你有${gapToNext}分钟休息时间`;
         }
       }
       
@@ -716,23 +826,15 @@
         try {
           const data = JSON.parse(e.target.result);
           if(data.tasks && data.timeSlots && data.nextId !== undefined) {
-            tasks = data.tasks;
-            timeSlots = data.timeSlots;
-            nextId = data.nextId;
-            flashedSet.clear();
-            save();
-            renderAll();
-            showToast('设定已加载', true);
-          } else {
-            showToast('文件格式无效');
-          }
-        } catch(err) {
-          showToast('文件解析失败');
-        }
+            tasks = data.tasks; timeSlots = data.timeSlots; nextId = data.nextId;
+            flashedSet.clear(); save(); renderAll(); showToast('设定已加载', true);
+          } else { showToast('文件格式无效'); }
+        } catch(err) { showToast('文件解析失败'); }
       };
       reader.readAsText(file);
     }
 
+    // 文件菜单
     document.getElementById('fileBtn').addEventListener('click', (e) => {
       e.stopPropagation();
       const dropdown = document.getElementById('fileDropdown');
@@ -743,11 +845,8 @@
       dropdown.classList.toggle('active');
     });
     document.addEventListener('click', (e) => {
-      if(!e.target.closest('.file-menu')) {
-        document.getElementById('fileDropdown').classList.remove('active');
-      }
+      if(!e.target.closest('.file-menu')) document.getElementById('fileDropdown').classList.remove('active');
     });
-
     document.getElementById('saveFileBtn').addEventListener('click', (e) => {
       e.stopPropagation();
       document.getElementById('fileDropdown').classList.remove('active');
@@ -759,10 +858,19 @@
       document.getElementById('fileInput').click();
     });
     document.getElementById('fileInput').addEventListener('change', (e) => {
-      if(e.target.files[0]) {
-        loadFromFile(e.target.files[0]);
-        e.target.value = '';
-      }
+      if(e.target.files[0]) { loadFromFile(e.target.files[0]); e.target.value = ''; }
+    });
+
+    // 滚动选择器按钮事件
+    document.querySelectorAll('.scroll-btn').forEach(b=>b.addEventListener('click', e=>{
+      const target = e.target.dataset.target;
+      const delta = parseInt(e.target.dataset.delta);
+      changeScrollValue(target, delta);
+    }));
+
+    // 初始化滚动选择器的滚动捕捉
+    ['startHourScroll','startMinScroll','endHourScroll','endMinScroll'].forEach(id => {
+      setupScrollSnap(id);
     });
 
     document.getElementById('addTaskBtn').addEventListener('click', ()=>document.getElementById('taskModal').classList.add('active'));
@@ -779,12 +887,6 @@
     document.getElementById('addSlotBtn').addEventListener('click', ()=>openSlotEditor(null));
     document.getElementById('saveSlotBtn').addEventListener('click', saveSlotFromEditor);
     document.getElementById('cancelSlotBtn').addEventListener('click', ()=>document.getElementById('slotModal').classList.remove('active'));
-    document.querySelectorAll('.scroll-btn').forEach(b=>b.addEventListener('click', e=>{
-      const t=e.target.dataset.target; const m={startHourUp:['startHour',1],startHourDown:['startHour',-1],startMinUp:['startMin',1],startMinDown:['startMin',-1],endHourUp:['endHour',1],endHourDown:['endHour',-1],endMinUp:['endMin',1],endMinDown:['endMin',-1]};
-      const [id,d]=m[t]; const s=document.getElementById(id); let v=parseInt(s.textContent)+d;
-      if(id.includes('Hour')) v=(v+24)%24; else v=(v+60)%60;
-      s.textContent=String(v).padStart(2,'0');
-    }));
     document.getElementById('pauseBtn').addEventListener('click', togglePause);
     document.getElementById('resumeBtn').addEventListener('click', resume);
     document.getElementById('confirmYesBtn').addEventListener('click', ()=>{
