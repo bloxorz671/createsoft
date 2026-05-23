@@ -1,9 +1,10 @@
+<!-- version:1.0.2 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
-  <title>TaskFlow</title>
+  <title>TaskFlow任务规划工具</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -15,9 +16,6 @@
     .app-container {
       width: 100%; height: 100%; background: white;
       display: flex; flex-direction: column; overflow: hidden;
-    }
-    @media (min-width: 851px) and (orientation: landscape) {
-      .app-container { border-radius: 0; }
     }
     @media (max-width: 850px) or (orientation: portrait) {
       .main-layout { flex-direction: column !important; }
@@ -48,11 +46,12 @@
       min-width: 0;
     }
     .cards-panel {
-      width: clamp(200px, 25vw, 280px); padding: 1rem; background: white; overflow-y: auto;
+      width: clamp(220px, 28vw, 300px); padding: 1rem; background: white; overflow-y: auto;
       transition: all 0.3s; border-left: 1px solid #eef2f6; flex-shrink: 0;
+      display: flex; flex-direction: column;
     }
     .cards-panel.hidden { width: 0; padding: 0; overflow: hidden; border-left: none; }
-    .section-title { font-weight: 600; font-size: clamp(0.75rem, 1.5vw, 0.9rem); color: #64748b; margin-bottom: 0.4rem; }
+    .section-title { font-weight: 600; font-size: clamp(0.75rem, 1.5vw, 0.9rem); color: #64748b; margin-bottom: 0.4rem; flex-shrink: 0; }
     .time-slot-list { display: flex; flex-direction: column; gap: 0.6rem; }
     .time-slot-item {
       background: white; border-radius: 0.8rem; padding: 0.7rem;
@@ -67,11 +66,15 @@
       align-items: center; font-weight: 500; font-size: clamp(0.75rem, 1.5vw, 0.85rem);
     }
     .slot-task-card.locked-card { background: #fef3c7; }
-    .cards-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+    .cards-grid {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; align-content: flex-start;
+      flex: 1; overflow-y: auto;
+    }
     .task-card {
-      width: clamp(90px, 15vw, 120px); padding: 0.6rem; border-radius: 0.8rem; background: #f1f5f9;
-      border: 1px solid #e2e8f0; cursor: grab; font-weight: 500; font-size: clamp(0.7rem, 1.4vw, 0.85rem);
+      width: calc(50% - 0.25rem); min-width: 85px; padding: 0.5rem; border-radius: 0.7rem; background: #f1f5f9;
+      border: 1px solid #e2e8f0; cursor: grab; font-weight: 500; font-size: clamp(0.7rem, 1.3vw, 0.8rem);
       touch-action: none; user-select: none; -webkit-user-select: none;
+      text-align: center; word-break: break-word;
     }
     .task-card:active { cursor: grabbing; }
     .task-card.locked-card { background: #fef3c7; border-color: #f59e0b; }
@@ -184,12 +187,58 @@
       display: block; width: 100%; text-align: left; border: none;
       padding: 0.6rem 0.8rem; border-radius: 0.6rem; margin: 0.1rem 0;
     }
+
+    /* 更新提示样式 */
+    .update-overlay {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+      z-index: 10010; display: none;
+      align-items: center; justify-content: center;
+    }
+    .update-overlay.active { display: flex; }
+    .update-dialog {
+      background: white; border-radius: 2rem; padding: 2rem;
+      width: clamp(300px, 80vw, 400px); text-align: center;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+    }
+    .update-dialog h2 {
+      font-size: 1.5rem; margin-bottom: 1rem; color: #0f172a;
+    }
+    .update-dialog .version-info {
+      background: #f8fafc; border-radius: 1rem; padding: 1rem; margin: 1rem 0;
+      font-size: 1rem; color: #475569;
+    }
+    .update-dialog .version-info span {
+      font-weight: 700; color: #6366f1;
+    }
+    .update-dialog button {
+      width: 100%; padding: 0.8rem; margin: 0.4rem 0;
+    }
+    .update-arrow-hint {
+      position: fixed; bottom: 20px; right: 20px; z-index: 10011;
+      display: none; align-items: center; gap: 0.5rem;
+      color: white; font-weight: 600; font-size: 1rem;
+      animation: bounce 1s infinite;
+    }
+    .update-arrow-hint.active { display: flex; }
+    .update-arrow-hint .arrow {
+      font-size: 2rem;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .download-mask {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.5); z-index: 10009; display: none;
+    }
+    .download-mask.active { display: block; }
   </style>
 </head>
 <body>
 <div class="app-container">
   <div class="app-header">
-    <div class="app-title">taskflow</div>
+    <div class="app-title">TaskFlow任务规划工具</div>
     <div class="header-actions">
       <div class="file-menu">
         <button id="fileBtn">文件</button>
@@ -273,9 +322,30 @@
   </div>
 </div>
 
+<!-- 更新提示 -->
+<div class="download-mask" id="downloadMask"></div>
+<div class="update-overlay" id="updateOverlay">
+  <div class="update-dialog">
+    <h2>发现新版本</h2>
+    <div class="version-info">
+      <span id="currentVersion">1.0.0</span> → <span id="latestVersion">1.0.0</span>
+    </div>
+    <button id="updateNowBtn" class="primary">立即更新</button>
+    <button id="updateLaterBtn">下次再说</button>
+  </div>
+</div>
+<div class="update-arrow-hint" id="updateArrow">
+  <span>点击下载按钮开始下载最新版本</span>
+  <span class="arrow">↘</span>
+</div>
+
 <script>
   (() => {
-    const STORAGE = 'taskflow_v15';
+    const CURRENT_VERSION = '1.0.0';
+    const UPDATE_URL_HTML = 'https://luckynum.top/taskflow.html';
+    const UPDATE_URL_APK = 'https://luckynum.top/taskflow.apk';
+
+    const STORAGE = 'taskflow_v16';
     let tasks = [];
     let timeSlots = [];
     let nextId = 1;
@@ -298,6 +368,60 @@
 
     const toMins = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
     const toTime = m => `${String(Math.floor(m/60)%24).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+
+    // 版本检查
+    async function checkUpdate() {
+      try {
+        const response = await fetch(UPDATE_URL_HTML, { cache: 'no-cache' });
+        const text = await response.text();
+        const match = text.match(/<!--\s*version:([\d.]+)\s*-->/);
+        if (match) {
+          const latestVer = match[1];
+          if (compareVersions(latestVer, CURRENT_VERSION) > 0) {
+            document.getElementById('currentVersion').textContent = CURRENT_VERSION;
+            document.getElementById('latestVersion').textContent = latestVer;
+            document.getElementById('updateOverlay').classList.add('active');
+          }
+        }
+      } catch (e) {
+        // 网络错误静默处理
+      }
+    }
+
+    function compareVersions(v1, v2) {
+      const parts1 = v1.split('.').map(Number);
+      const parts2 = v2.split('.').map(Number);
+      for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+        const a = parts1[i] || 0;
+        const b = parts2[i] || 0;
+        if (a > b) return 1;
+        if (a < b) return -1;
+      }
+      return 0;
+    }
+
+    function triggerUpdate() {
+      document.getElementById('updateOverlay').classList.remove('active');
+      document.getElementById('downloadMask').classList.add('active');
+      document.getElementById('updateArrow').classList.add('active');
+      
+      // 触发APK下载
+      const a = document.createElement('a');
+      a.href = UPDATE_URL_APK;
+      a.download = 'taskflow.apk';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+      }, 300);
+      
+      // 5秒后隐藏提示箭头
+      setTimeout(() => {
+        document.getElementById('updateArrow').classList.remove('active');
+        document.getElementById('downloadMask').classList.remove('active');
+      }, 8000);
+    }
 
     function showToast(msg, isSuccess=false) {
       const t = document.getElementById('customToast');
@@ -737,14 +861,11 @@
         const task = tasks.find(t=>t.id===s.taskId);
         if(!task || task.completed) return;
         const end = toMins(s.end), start = toMins(s.start);
-        // 到时
         if(now >= end) { stopFlash(); currentCompleteIsManual = false; currentCompleteTaskId = s.taskId; showGreenComplete(s.taskId); return; }
-        // 开始时刻
         if(now === start && !flashedSet.has('started_'+s.taskId)) {
           startFlash(`"${task.name}" 开始`);
           flashedSet.add('started_'+s.taskId);
         }
-        // 结束前5分钟
         const fiveBeforeEnd = end-5;
         if(now >= fiveBeforeEnd && now < end && !flashedSet.has(s.taskId)) {
           startFlash(`"${task.name}" 即将结束`);
@@ -753,7 +874,6 @@
           timers.push(setTimeout(()=>{ startFlash(`"${task.name}" 即将结束`); flashedSet.add(s.taskId); }, (fiveBeforeEnd-now)*60000));
         }
         if(end > now) timers.push(setTimeout(()=>{ stopFlash(); currentCompleteIsManual = false; currentCompleteTaskId = s.taskId; showGreenComplete(s.taskId); }, (end-now)*60000));
-        // 开始前5分钟
         const fiveBeforeStart = start-5;
         if(now >= fiveBeforeStart && now < start && !flashedSet.has('start_'+s.taskId)) {
           startFlash(`"${task.name}" 还有5分钟开始`);
@@ -761,7 +881,6 @@
         } else if(fiveBeforeStart > now && !flashedSet.has('start_'+s.taskId)) {
           timers.push(setTimeout(()=>{ startFlash(`"${task.name}" 还有5分钟开始`); flashedSet.add('start_'+s.taskId); }, (fiveBeforeStart-now)*60000));
         }
-        // 开始时刻提醒
         if(start > now && !flashedSet.has('started_'+s.taskId)) {
           timers.push(setTimeout(()=>{ startFlash(`"${task.name}" 开始`); flashedSet.add('started_'+s.taskId); }, (start-now)*60000));
         }
@@ -786,10 +905,17 @@
       paused = false; clearInterval(pauseInterval);
       document.getElementById('pauseOverlay').classList.remove('active');
       const now = getNow();
-      for(let i=0; i<timeSlots.length; i++) {
-        let s = timeSlots[i];
-        if(!s.taskId || s.locked || tasks.find(t=>t.id===s.taskId)?.completed) continue;
-        if(toMins(s.start) >= now) { shiftAfter(i, pausedMins); break; }
+      let currentSlot = timeSlots.find(s => s.taskId && !tasks.find(t=>t.id===s.taskId)?.completed && toMins(s.start) <= now && toMins(s.end) > now);
+      if(currentSlot) {
+        currentSlot.end = toTime(toMins(currentSlot.end) + pausedMins);
+        const idx = timeSlots.indexOf(currentSlot);
+        shiftAfter(idx + 1, pausedMins);
+      } else {
+        for(let i=0; i<timeSlots.length; i++) {
+          let s = timeSlots[i];
+          if(!s.taskId || s.locked || tasks.find(t=>t.id===s.taskId)?.completed) continue;
+          if(toMins(s.start) >= now) { shiftAfter(i, pausedMins); break; }
+        }
       }
       save(); renderAll();
     }
@@ -802,10 +928,13 @@
       const a = document.createElement('a');
       a.href = url;
       a.download = 'taskflow_config.tfd';
+      a.style.display = 'none';
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 100);
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 300);
       showToast('设定已保存', true);
     }
 
@@ -823,6 +952,7 @@
       reader.readAsText(file);
     }
 
+    // 事件绑定
     document.getElementById('fileBtn').addEventListener('click', (e) => {
       e.stopPropagation();
       const dropdown = document.getElementById('fileDropdown');
@@ -873,17 +1003,28 @@
       showConfirm('确定要清除所有数据吗？', ()=>{ stopFlash(); reset(); });
     });
 
+    // 更新相关事件
+    document.getElementById('updateNowBtn').addEventListener('click', triggerUpdate);
+    document.getElementById('updateLaterBtn').addEventListener('click', ()=>{
+      document.getElementById('updateOverlay').classList.remove('active');
+    });
+    document.getElementById('downloadMask').addEventListener('click', ()=>{
+      document.getElementById('downloadMask').classList.remove('active');
+      document.getElementById('updateArrow').classList.remove('active');
+    });
+
     document.addEventListener('touchmove', function(e) {
       if(touchDragging) e.preventDefault();
     }, {passive: false});
 
-    // 窗口大小变化时更新界面
-    window.addEventListener('resize', () => {
-      updateCardsPanelVisibility();
-    });
+    window.addEventListener('resize', () => { updateCardsPanelVisibility(); });
 
     setInterval(scheduleReminders, 10000);
-    load(); renderAll();
+    load();
+    renderAll();
+    
+    // 启动时检查更新
+    setTimeout(checkUpdate, 1500);
   })();
 </script>
 </body>
