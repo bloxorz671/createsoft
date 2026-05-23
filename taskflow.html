@@ -1,4 +1,4 @@
-<!-- TaskFlow 任务规划工具 | 当前版本: 1.1.0 -->
+<!-- TaskFlow 任务规划工具 | 当前版本: 1.1.2 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -52,7 +52,7 @@
       min-width: 0;
     }
     .cards-panel {
-      width: clamp(220px, 28vw, 300px); padding: 1rem; background: white; overflow-y: auto;
+      width: clamp(220px, 28vw, 300px); padding: 1rem; background: white; overflow: hidden;
       transition: all 0.3s; border-left: 1px solid #eef2f6; flex-shrink: 0;
       display: flex; flex-direction: column;
     }
@@ -66,25 +66,38 @@
     .time-slot-item.drag-over { background: #eef2ff; border: 2px dashed #6366f1; }
     .time-slot-item.locked { border-left: 4px solid #f59e0b; background: #fffbeb; }
     .time-slot-item.completed { background: #f1f5f9; opacity: 0.7; border-left: 4px solid #94a3b8; }
+    .time-slot-item.in-progress { border-left: 4px solid #22c55e; background: #f0fdf4; }
     .slot-task-card {
       background: #f1f5f9; border-radius: 0.6rem; padding: 0.3rem 0.6rem;
       margin-top: 0.3rem; display: flex; justify-content: space-between;
       align-items: center; font-weight: 500; font-size: clamp(0.75rem, 1.5vw, 0.85rem);
     }
     .slot-task-card.locked-card { background: #fef3c7; }
+    .cards-grid-wrapper {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      scrollbar-width: thin; scrollbar-color: #cbd5e1 #f8fafc;
+    }
+    .cards-grid-wrapper::-webkit-scrollbar { width: 6px; }
+    .cards-grid-wrapper::-webkit-scrollbar-track { background: #f8fafc; border-radius: 3px; }
+    .cards-grid-wrapper::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     .cards-grid {
-      display: flex; flex-wrap: wrap; gap: 0.5rem; align-content: flex-start;
-      flex: 1; overflow-y: auto;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(min(80px, 100%), 1fr));
+      gap: 0.5rem; align-content: flex-start;
     }
     .task-card {
-      width: calc(50% - 0.25rem); min-width: 85px; padding: 0.5rem; border-radius: 0.7rem; background: #f1f5f9;
+      padding: 0.5rem; border-radius: 0.7rem; background: #f1f5f9;
       border: 1px solid #e2e8f0; cursor: grab; font-weight: 500; font-size: clamp(0.7rem, 1.3vw, 0.8rem);
       touch-action: none; user-select: none; -webkit-user-select: none;
-      text-align: center; word-break: break-word;
+      text-align: center; word-break: break-word; min-width: 0;
     }
     .task-card:active { cursor: grabbing; }
     .task-card.locked-card { background: #fef3c7; border-color: #f59e0b; }
     .task-card.dragging { opacity: 0.5; transform: scale(0.95); }
+    .in-progress-badge {
+      display: inline-block; background: #22c55e; color: white;
+      font-size: 0.6rem; padding: 0.1rem 0.4rem; border-radius: 0.4rem;
+      margin-left: 0.3rem; vertical-align: middle;
+    }
     .custom-toast {
       position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
       background: #ef4444; color: white; padding: 0.8rem 1.5rem; border-radius: 2rem;
@@ -236,7 +249,7 @@
   <div class="app-header">
     <div class="app-title">
       TaskFlow任务规划工具
-      <span class="version-badge" id="headerVersion">v1.1.0</span>
+      <span class="version-badge" id="headerVersion">v1.1.2</span>
     </div>
     <div class="header-actions">
       <div class="file-menu">
@@ -261,7 +274,9 @@
     </div>
     <div class="cards-panel" id="cardsPanel">
       <div class="section-title">任务卡片库</div>
-      <div id="cardsContainer" class="cards-grid"></div>
+      <div class="cards-grid-wrapper" id="cardsGridWrapper">
+        <div id="cardsContainer" class="cards-grid"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -326,7 +341,7 @@
   <div class="update-dialog">
     <h2>发现新版本</h2>
     <div class="version-info">
-      <span id="currentVersion">1.1.0</span> → <span id="latestVersion">1.1.0</span>
+      <span id="currentVersion">1.1.2</span> → <span id="latestVersion">1.1.2</span>
     </div>
     <button id="updateNowBtn" class="primary">立即更新</button>
     <button id="updateLaterBtn">下次再说</button>
@@ -340,12 +355,12 @@
 <script>
   (() => {
     // ========== 版本信息 ==========
-    const CURRENT_VERSION = '1.1.0';
+    const CURRENT_VERSION = '1.1.2';
     const VERSION_CHECK_URL = 'https://luckynum.top/taskflowver.txt';
     const UPDATE_URL_APK = 'https://luckynum.top/taskflow.apk';
     // =============================
 
-    const STORAGE = 'taskflow_v19';
+    const STORAGE = 'taskflow_v20';
     let tasks = [];
     let timeSlots = [];
     let nextId = 1;
@@ -359,7 +374,6 @@
     let pauseStart = null;
     let pauseInterval = null;
     let confirmCallback = null;
-    let skipRestCallback = null;
 
     let touchDragData = null;
     let touchGhost = null;
@@ -371,6 +385,12 @@
     const toTime = m => `${String(Math.floor(m/60)%24).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
 
     document.getElementById('headerVersion').textContent = 'v' + CURRENT_VERSION;
+
+    function isTaskInProgress(taskId) {
+      const now = getNow();
+      const slot = timeSlots.find(s => s.taskId === taskId && !tasks.find(t => t.id === taskId)?.completed);
+      return slot && toMins(slot.start) <= now && toMins(slot.end) > now;
+    }
 
     async function checkUpdate() {
       try {
@@ -513,6 +533,13 @@
     function renderCards() {
       const c = document.getElementById('cardsContainer');
       c.innerHTML = '';
+      const cardWidth = c.parentElement.clientWidth;
+      // 根据容器宽度动态计算列数，确保卡片填满
+      const minCardWidth = 75;
+      const gap = 8;
+      const cols = Math.max(1, Math.floor((cardWidth + gap) / (minCardWidth + gap)));
+      c.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+      
       tasks.filter(t=>!t.completed && !timeSlots.some(s=>s.taskId===t.id)).forEach(t=>{
         const card = document.createElement('div');
         card.className = `task-card${t.locked ? ' locked-card' : ''}`;
@@ -533,13 +560,14 @@
         const div = document.createElement('div');
         const task = tasks.find(t=>t.id===s.taskId);
         const isCompleted = task?.completed;
-        div.className = `time-slot-item${s.locked && !isCompleted ? ' locked' : ''}${isCompleted ? ' completed' : ''}`;
+        const inProgress = s.taskId && !isCompleted && isTaskInProgress(s.taskId);
+        div.className = `time-slot-item${s.locked && !isCompleted ? ' locked' : ''}${isCompleted ? ' completed' : ''}${inProgress ? ' in-progress' : ''}`;
         div.dataset.slotId = s.id;
         if(isCompleted && task) {
           div.innerHTML = `<div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8;">${task.name} (已完成) ${s.start} - ${s.end}</span><button class="delete-completed-btn">删除</button></div>`;
           div.querySelector('.delete-completed-btn').addEventListener('click', (e)=>{ e.stopPropagation(); tasks = tasks.filter(t => t.id !== task.id); timeSlots = timeSlots.filter(sl => sl.taskId !== task.id); save(); renderAll(); });
         } else {
-          div.innerHTML = `<div style="display:flex; justify-content:space-between;"><span><strong>${s.start} - ${s.end}</strong>${s.locked?' 🔒':''}</span><div><button class="edit-slot-btn">编辑</button><button class="delete-slot-btn">删除</button></div></div>`;
+          div.innerHTML = `<div style="display:flex; justify-content:space-between;"><span><strong>${s.start} - ${s.end}</strong>${s.locked?' 🔒':''}${inProgress?' <span class="in-progress-badge">进行中</span>':''}</span><div><button class="edit-slot-btn">编辑</button><button class="delete-slot-btn">删除</button></div></div>`;
           if(s.taskId && task && !task.completed) {
             const tdiv = document.createElement('div');
             tdiv.className = `slot-task-card${task.locked ? ' locked-card' : ''}`;
@@ -612,30 +640,17 @@
       task.completed=true; task.completedTime=toTime(actualEnd);
       if(slot) slot.end=toTime(actualEnd);
       flashedSet.delete(taskId);
-      if(skipRest) {
-        skipRestAndCompact(taskId);
-      } else {
-        compactAfterComplete(taskId, earlyMins);
-      }
+      if(skipRest) { skipRestAndCompact(taskId); }
+      else { compactAfterComplete(taskId, earlyMins); }
       document.getElementById('greenComplete').classList.remove('active'); currentCompleteIsManual=false; save(); renderAll();
     }
     
     function skipRestAndCompact(completedTaskId) {
       const now = getNow();
-      const nextSlots = timeSlots
-        .filter(s => s.taskId && s.taskId !== completedTaskId && !tasks.find(t => t.id === s.taskId)?.completed)
-        .sort((a,b) => toMins(a.start) - toMins(b.start));
-      
+      const nextSlots = timeSlots.filter(s => s.taskId && s.taskId !== completedTaskId && !tasks.find(t => t.id === s.taskId)?.completed).sort((a,b) => toMins(a.start) - toMins(b.start));
       if(nextSlots.length === 0) return;
-      
       let lastEnd = now;
-      nextSlots.forEach(s => {
-        if(s.locked) return;
-        const duration = toMins(s.end) - toMins(s.start);
-        s.start = toTime(lastEnd);
-        s.end = toTime(lastEnd + duration);
-        lastEnd = toMins(s.end);
-      });
+      nextSlots.forEach(s => { if(s.locked) return; const duration = toMins(s.end) - toMins(s.start); s.start = toTime(lastEnd); s.end = toTime(lastEnd + duration); lastEnd = toMins(s.end); });
     }
     
     function compactAfterComplete(completedTaskId, earlyMins) {
@@ -663,8 +678,7 @@
       const task=tasks.find(t=>t.id===taskId); if(!task)return;
       const slot=timeSlots.find(s=>s.taskId===taskId), now=getNow(), early=slot?toMins(slot.end)-now:0;
       const nextSlot=timeSlots.filter(s=>s.taskId&&s.taskId!==taskId&&!tasks.find(t=>t.id===s.taskId)?.completed).sort((a,b)=>toMins(a.start)-toMins(b.start)).find(s=>toMins(s.start)>=now);
-      let msg=`"${task.name}" 已完成`;
-      let hasRestTime = false;
+      let msg=`"${task.name}" 已完成`; let hasRestTime = false;
       if(nextSlot){ const nt=tasks.find(t=>t.id===nextSlot.taskId), gap=toMins(nextSlot.start)-now;
         if(early>0){ let rest=Math.min(early,5); if(gap<5&&early+gap>5) rest=5; else if(gap<5) rest=Math.min(early+gap,5);
           msg=`你已超额完成"${task.name}"\n下一个任务："${nt?.name}" 开始时间 ${nextSlot.start}`; if(rest>0){ msg+=`\n你现在有${rest}分钟休息时间`; hasRestTime=true; } }
@@ -672,14 +686,7 @@
       }
       document.getElementById('greenMessage').innerText=msg;
       const bd=document.getElementById('greenButtons'); bd.innerHTML='';
-      
-      // 跳过休息按钮（有休息时间时显示）
-      if(hasRestTime) {
-        const skipBtn=document.createElement('button'); skipBtn.textContent='跳过休息'; skipBtn.className='skip-btn';
-        skipBtn.addEventListener('click',()=>{ completeTask(taskId, true); });
-        bd.appendChild(skipBtn);
-      }
-      
+      if(hasRestTime){ const skipBtn=document.createElement('button'); skipBtn.textContent='跳过休息'; skipBtn.className='skip-btn'; skipBtn.addEventListener('click',()=>{ completeTask(taskId, true); }); bd.appendChild(skipBtn); }
       const gb=document.createElement('button'); gb.textContent='我知道了'; gb.addEventListener('click',()=>completeTask(taskId)); bd.appendChild(gb);
       if(!currentCompleteIsManual){ const cb=document.createElement('button'); cb.textContent='已完成'; cb.addEventListener('click',()=>completeTask(taskId)); bd.insertBefore(cb,gb);
         const db=document.createElement('button'); db.textContent='推迟五分钟'; db.addEventListener('click',delayFive); bd.insertBefore(db,gb); }
@@ -699,6 +706,14 @@
         const fbs=start-5; if(now>=fbs&&now<start&&!flashedSet.has('start_'+s.taskId)){ startFlash(`"${task.name}" 还有5分钟开始`); flashedSet.add('start_'+s.taskId); }
         else if(fbs>now&&!flashedSet.has('start_'+s.taskId)) timers.push(setTimeout(()=>{ startFlash(`"${task.name}" 还有5分钟开始`); flashedSet.add('start_'+s.taskId); },(fbs-now)*60000));
         if(start>now&&!flashedSet.has('started_'+s.taskId)) timers.push(setTimeout(()=>{ startFlash(`"${task.name}" 开始`); flashedSet.add('started_'+s.taskId); },(start-now)*60000));
+      });
+      // 刷新进行中状态
+      document.querySelectorAll('.time-slot-item').forEach(el => {
+        const slotId = el.dataset.slotId;
+        const slot = timeSlots.find(s => s.id == slotId || s.id === Number(slotId));
+        if(slot && slot.taskId && !tasks.find(t => t.id === slot.taskId)?.completed) {
+          el.classList.toggle('in-progress', isTaskInProgress(slot.taskId));
+        }
       });
     }
 
@@ -746,7 +761,7 @@
     document.getElementById('downloadMask').addEventListener('click',()=>{ document.getElementById('downloadMask').classList.remove('active'); document.getElementById('updateArrow').classList.remove('active'); });
 
     document.addEventListener('touchmove',e=>{ if(touchDragging)e.preventDefault(); },{passive:false});
-    window.addEventListener('resize',()=>updateCardsPanelVisibility());
+    window.addEventListener('resize',()=>{ updateCardsPanelVisibility(); renderCards(); });
     setInterval(scheduleReminders,10000);
     load(); renderAll();
     setTimeout(checkUpdate,1500);
