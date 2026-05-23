@@ -1,4 +1,4 @@
-<!-- TaskFlow 任务规划工具 | 当前版本: 1.0.0 -->
+<!-- TaskFlow 任务规划工具 | 当前版本: 1.1.0 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -44,6 +44,7 @@
     }
     button:hover { background: #f1f5f9; }
     button.primary { background: #0f172a; border-color: #0f172a; color: white; }
+    button.warning { background: #f59e0b; border-color: #f59e0b; color: white; }
     .main-layout { display: flex; flex: 1; overflow: hidden; min-height: 0; }
     .timeline-panel {
       flex: 1; background: #f9fafb; display: flex; flex-direction: column;
@@ -145,6 +146,9 @@
       background: white; color: #22c55e; border: none; padding: 0.8rem 2rem;
       border-radius: 3rem; font-size: clamp(1rem, 2.5vw, 1.2rem); font-weight: 600; cursor: pointer;
     }
+    .green-fullscreen button.skip-btn {
+      background: #f59e0b; color: white;
+    }
     .green-buttons { display: flex; flex-direction: column; gap: 0.8rem; align-items: center; }
     .pause-overlay {
       position: fixed; top:0; left:0; width:100%; height:100%;
@@ -205,20 +209,13 @@
       width: clamp(300px, 80vw, 400px); text-align: center;
       box-shadow: 0 30px 60px rgba(0,0,0,0.4);
     }
-    .update-dialog h2 {
-      font-size: 1.5rem; margin-bottom: 1rem; color: #0f172a;
-    }
+    .update-dialog h2 { font-size: 1.5rem; margin-bottom: 1rem; color: #0f172a; }
     .update-dialog .version-info {
       background: #f8fafc; border-radius: 1rem; padding: 1rem; margin: 1rem 0;
       font-size: 1rem; color: #475569;
     }
-    .update-dialog .version-info span {
-      font-weight: 700; color: #6366f1;
-    }
-    .update-dialog button {
-      width: 100%; padding: 0.8rem; margin: 0.4rem 0;
-    }
-    /* 更新提示箭头 - 静态不晃动，位置上移 */
+    .update-dialog .version-info span { font-weight: 700; color: #6366f1; }
+    .update-dialog button { width: 100%; padding: 0.8rem; margin: 0.4rem 0; }
     .update-arrow-hint {
       position: fixed; bottom: 80px; right: 24px; z-index: 10011;
       display: none; align-items: center; gap: 0.5rem;
@@ -226,9 +223,7 @@
       background: rgba(0,0,0,0.7); padding: 0.6rem 1rem; border-radius: 2rem;
     }
     .update-arrow-hint.active { display: flex; }
-    .update-arrow-hint .arrow {
-      font-size: 1.5rem;
-    }
+    .update-arrow-hint .arrow { font-size: 1.5rem; }
     .download-mask {
       position: fixed; top:0; left:0; width:100%; height:100%;
       background: rgba(0,0,0,0.5); z-index: 10009; display: none;
@@ -241,7 +236,7 @@
   <div class="app-header">
     <div class="app-title">
       TaskFlow任务规划工具
-      <span class="version-badge" id="headerVersion">v1.0.0</span>
+      <span class="version-badge" id="headerVersion">v1.1.0</span>
     </div>
     <div class="header-actions">
       <div class="file-menu">
@@ -331,7 +326,7 @@
   <div class="update-dialog">
     <h2>发现新版本</h2>
     <div class="version-info">
-      <span id="currentVersion">1.0.0</span> → <span id="latestVersion">1.0.0</span>
+      <span id="currentVersion">1.1.0</span> → <span id="latestVersion">1.1.0</span>
     </div>
     <button id="updateNowBtn" class="primary">立即更新</button>
     <button id="updateLaterBtn">下次再说</button>
@@ -345,12 +340,12 @@
 <script>
   (() => {
     // ========== 版本信息 ==========
-    const CURRENT_VERSION = '1.0.0';
+    const CURRENT_VERSION = '1.1.0';
     const VERSION_CHECK_URL = 'https://luckynum.top/taskflowver.txt';
     const UPDATE_URL_APK = 'https://luckynum.top/taskflow.apk';
     // =============================
 
-    const STORAGE = 'taskflow_v18';
+    const STORAGE = 'taskflow_v19';
     let tasks = [];
     let timeSlots = [];
     let nextId = 1;
@@ -364,6 +359,7 @@
     let pauseStart = null;
     let pauseInterval = null;
     let confirmCallback = null;
+    let skipRestCallback = null;
 
     let touchDragData = null;
     let touchGhost = null;
@@ -609,14 +605,39 @@
     }
 
     function handleManualComplete(taskId) { stopFlash(); currentCompleteTaskId=taskId; currentCompleteIsManual=true; showGreenComplete(taskId); }
-    function completeTask(taskId) {
+    
+    function completeTask(taskId, skipRest = false) {
       const task=tasks.find(t=>t.id===taskId); if(!task)return;
       const slot=timeSlots.find(s=>s.taskId===taskId), now=getNow(), actualEnd=now, earlyMins=slot?toMins(slot.end)-actualEnd:0;
       task.completed=true; task.completedTime=toTime(actualEnd);
       if(slot) slot.end=toTime(actualEnd);
-      flashedSet.delete(taskId); compactAfterComplete(taskId, earlyMins);
+      flashedSet.delete(taskId);
+      if(skipRest) {
+        skipRestAndCompact(taskId);
+      } else {
+        compactAfterComplete(taskId, earlyMins);
+      }
       document.getElementById('greenComplete').classList.remove('active'); currentCompleteIsManual=false; save(); renderAll();
     }
+    
+    function skipRestAndCompact(completedTaskId) {
+      const now = getNow();
+      const nextSlots = timeSlots
+        .filter(s => s.taskId && s.taskId !== completedTaskId && !tasks.find(t => t.id === s.taskId)?.completed)
+        .sort((a,b) => toMins(a.start) - toMins(b.start));
+      
+      if(nextSlots.length === 0) return;
+      
+      let lastEnd = now;
+      nextSlots.forEach(s => {
+        if(s.locked) return;
+        const duration = toMins(s.end) - toMins(s.start);
+        s.start = toTime(lastEnd);
+        s.end = toTime(lastEnd + duration);
+        lastEnd = toMins(s.end);
+      });
+    }
+    
     function compactAfterComplete(completedTaskId, earlyMins) {
       const now=getNow(), nextSlots=timeSlots.filter(s=>s.taskId&&s.taskId!==completedTaskId&&!tasks.find(t=>t.id===s.taskId)?.completed).sort((a,b)=>toMins(a.start)-toMins(b.start));
       if(!nextSlots.length)return;
@@ -643,13 +664,22 @@
       const slot=timeSlots.find(s=>s.taskId===taskId), now=getNow(), early=slot?toMins(slot.end)-now:0;
       const nextSlot=timeSlots.filter(s=>s.taskId&&s.taskId!==taskId&&!tasks.find(t=>t.id===s.taskId)?.completed).sort((a,b)=>toMins(a.start)-toMins(b.start)).find(s=>toMins(s.start)>=now);
       let msg=`"${task.name}" 已完成`;
+      let hasRestTime = false;
       if(nextSlot){ const nt=tasks.find(t=>t.id===nextSlot.taskId), gap=toMins(nextSlot.start)-now;
         if(early>0){ let rest=Math.min(early,5); if(gap<5&&early+gap>5) rest=5; else if(gap<5) rest=Math.min(early+gap,5);
-          msg=`你已超额完成"${task.name}"\n下一个任务："${nt?.name}" 开始时间 ${nextSlot.start}`; if(rest>0) msg+=`\n你现在有${rest}分钟休息时间`; }
-        else { msg=`"${task.name}" 已完成\n下一个任务："${nt?.name}" 开始时间 ${nextSlot.start}`; if(gap>0&&gap<=10) msg+=`\n你有${gap}分钟休息时间`; }
+          msg=`你已超额完成"${task.name}"\n下一个任务："${nt?.name}" 开始时间 ${nextSlot.start}`; if(rest>0){ msg+=`\n你现在有${rest}分钟休息时间`; hasRestTime=true; } }
+        else { msg=`"${task.name}" 已完成\n下一个任务："${nt?.name}" 开始时间 ${nextSlot.start}`; if(gap>0&&gap<=10){ msg+=`\n你有${gap}分钟休息时间`; hasRestTime=true; } }
       }
       document.getElementById('greenMessage').innerText=msg;
       const bd=document.getElementById('greenButtons'); bd.innerHTML='';
+      
+      // 跳过休息按钮（有休息时间时显示）
+      if(hasRestTime) {
+        const skipBtn=document.createElement('button'); skipBtn.textContent='跳过休息'; skipBtn.className='skip-btn';
+        skipBtn.addEventListener('click',()=>{ completeTask(taskId, true); });
+        bd.appendChild(skipBtn);
+      }
+      
       const gb=document.createElement('button'); gb.textContent='我知道了'; gb.addEventListener('click',()=>completeTask(taskId)); bd.appendChild(gb);
       if(!currentCompleteIsManual){ const cb=document.createElement('button'); cb.textContent='已完成'; cb.addEventListener('click',()=>completeTask(taskId)); bd.insertBefore(cb,gb);
         const db=document.createElement('button'); db.textContent='推迟五分钟'; db.addEventListener('click',delayFive); bd.insertBefore(db,gb); }
