@@ -8,6 +8,12 @@ icon=
 link=文本编码转换器
 introduction=将文本转换为类似_.（这不是摩斯密码）的密码
 """
+"""
+"""name=TaskFlow学习时间规划
+icon=taskflow.jpg
+link=taskflow
+introduction=将零散的学习任务做更加合理的规划，增强学习效率
+"""
 
 
 
