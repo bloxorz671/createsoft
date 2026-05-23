@@ -1,4 +1,4 @@
-<!-- TaskFlow 任务规划工具 | 当前版本: 1.1.3 -->
+<!-- TaskFlow 任务规划工具 | 当前版本: 1.1.4 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -74,7 +74,6 @@
     }
     .slot-task-card.locked-card { background: #fef3c7; }
 
-    /* 卡片库容器 - 隐藏原生滚动条 */
     .cards-grid-wrapper {
       flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0;
       width: 100%; position: relative;
@@ -82,12 +81,10 @@
     }
     .cards-grid-wrapper::-webkit-scrollbar { display: none; }
 
-    /* 自定义滑块轨道 */
     .custom-scrollbar-track {
       position: absolute; right: 4px; top: 4px; bottom: 4px;
       width: 24px; z-index: 10; pointer-events: auto;
     }
-    /* 自定义半圆滑块 */
     .custom-scrollbar-thumb {
       position: absolute; right: 0; width: 24px;
       background: #94a3b8; border-radius: 12px;
@@ -97,9 +94,7 @@
       touch-action: none;
     }
     .custom-scrollbar-thumb:active,
-    .custom-scrollbar-thumb.dragging {
-      background: #475569;
-    }
+    .custom-scrollbar-thumb.dragging { background: #475569; }
 
     .cards-grid {
       display: grid;
@@ -270,7 +265,7 @@
   <div class="app-header">
     <div class="app-title">
       TaskFlow任务规划工具
-      <span class="version-badge" id="headerVersion">v1.1.3</span>
+      <span class="version-badge" id="headerVersion">v1.1.4</span>
     </div>
     <div class="header-actions">
       <div class="file-menu">
@@ -365,7 +360,7 @@
   <div class="update-dialog">
     <h2>发现新版本</h2>
     <div class="version-info">
-      <span id="currentVersion">1.1.3</span> → <span id="latestVersion">1.1.3</span>
+      <span id="currentVersion">1.1.4</span> → <span id="latestVersion">1.1.4</span>
     </div>
     <button id="updateNowBtn" class="primary">立即更新</button>
     <button id="updateLaterBtn">下次再说</button>
@@ -378,11 +373,11 @@
 
 <script>
   (() => {
-    const CURRENT_VERSION = '1.1.3';
+    const CURRENT_VERSION = '1.1.4';
     const VERSION_CHECK_URL = 'https://luckynum.top/taskflowver.txt';
     const UPDATE_URL_APK = 'https://luckynum.top/taskflow.apk';
 
-    const STORAGE = 'taskflow_v22';
+    const STORAGE = 'taskflow_v23';
     let tasks = [];
     let timeSlots = [];
     let nextId = 1;
@@ -570,26 +565,17 @@
       updateCustomScrollbar();
     }
 
-    // 自定义滚动条逻辑
     function updateCustomScrollbar() {
       const wrapper = document.getElementById('cardsGridWrapper');
       const track = document.getElementById('scrollbarTrack');
       const thumb = document.getElementById('scrollbarThumb');
-      
       if (!wrapper || !track || !thumb) return;
-      
       const scrollHeight = wrapper.scrollHeight;
       const clientHeight = wrapper.clientHeight;
-      
-      if (scrollHeight <= clientHeight) {
-        thumb.style.display = 'none';
-        return;
-      }
-      
+      if (scrollHeight <= clientHeight) { thumb.style.display = 'none'; return; }
       thumb.style.display = 'block';
       const thumbHeight = Math.max(50, (clientHeight / scrollHeight) * track.offsetHeight);
       thumb.style.height = thumbHeight + 'px';
-      
       const scrollRatio = wrapper.scrollTop / (scrollHeight - clientHeight);
       const maxTop = track.offsetHeight - thumbHeight;
       thumb.style.top = (scrollRatio * maxTop) + 'px';
@@ -599,78 +585,16 @@
       const wrapper = document.getElementById('cardsGridWrapper');
       const track = document.getElementById('scrollbarTrack');
       const thumb = document.getElementById('scrollbarThumb');
-      
       if (!wrapper || !track || !thumb) return;
-      
       wrapper.addEventListener('scroll', updateCustomScrollbar);
-      
-      let isDragging = false;
-      let startY = 0;
-      let startScrollTop = 0;
-      
-      thumb.addEventListener('touchstart', (e) => {
-        isDragging = true;
-        startY = e.touches[0].clientY;
-        startScrollTop = wrapper.scrollTop;
-        thumb.classList.add('dragging');
-        e.preventDefault();
-      });
-      
-      thumb.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-        const dy = e.touches[0].clientY - startY;
-        const scrollHeight = wrapper.scrollHeight;
-        const clientHeight = wrapper.clientHeight;
-        const maxScrollTop = scrollHeight - clientHeight;
-        const trackHeight = track.offsetHeight;
-        const thumbHeight = thumb.offsetHeight;
-        const ratio = dy / (trackHeight - thumbHeight);
-        wrapper.scrollTop = Math.max(0, Math.min(maxScrollTop, startScrollTop + ratio * maxScrollTop));
-        e.preventDefault();
-      });
-      
-      thumb.addEventListener('touchend', () => {
-        isDragging = false;
-        thumb.classList.remove('dragging');
-      });
-      
-      thumb.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        startY = e.clientY;
-        startScrollTop = wrapper.scrollTop;
-        thumb.classList.add('dragging');
-        e.preventDefault();
-      });
-      
-      document.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        const dy = e.clientY - startY;
-        const scrollHeight = wrapper.scrollHeight;
-        const clientHeight = wrapper.clientHeight;
-        const maxScrollTop = scrollHeight - clientHeight;
-        const trackHeight = track.offsetHeight;
-        const thumbHeight = thumb.offsetHeight;
-        const ratio = dy / (trackHeight - thumbHeight);
-        wrapper.scrollTop = Math.max(0, Math.min(maxScrollTop, startScrollTop + ratio * maxScrollTop));
-      });
-      
-      document.addEventListener('mouseup', () => {
-        if (isDragging) {
-          isDragging = false;
-          thumb.classList.remove('dragging');
-        }
-      });
-      
-      // 点击轨道跳转
-      track.addEventListener('click', (e) => {
-        if (e.target === thumb) return;
-        const trackRect = track.getBoundingClientRect();
-        const clickY = e.clientY - trackRect.top;
-        const thumbHeight = thumb.offsetHeight;
-        const ratio = clickY / (track.offsetHeight - thumbHeight);
-        wrapper.scrollTop = ratio * (wrapper.scrollHeight - wrapper.clientHeight);
-      });
-      
+      let isDragging = false, startY = 0, startScrollTop = 0;
+      thumb.addEventListener('touchstart', (e) => { isDragging = true; startY = e.touches[0].clientY; startScrollTop = wrapper.scrollTop; thumb.classList.add('dragging'); e.preventDefault(); });
+      thumb.addEventListener('touchmove', (e) => { if (!isDragging) return; const dy = e.touches[0].clientY - startY; const maxST = wrapper.scrollHeight - wrapper.clientHeight; const ratio = dy / (track.offsetHeight - thumb.offsetHeight); wrapper.scrollTop = Math.max(0, Math.min(maxST, startScrollTop + ratio * maxST)); e.preventDefault(); });
+      thumb.addEventListener('touchend', () => { isDragging = false; thumb.classList.remove('dragging'); });
+      thumb.addEventListener('mousedown', (e) => { isDragging = true; startY = e.clientY; startScrollTop = wrapper.scrollTop; thumb.classList.add('dragging'); e.preventDefault(); });
+      document.addEventListener('mousemove', (e) => { if (!isDragging) return; const dy = e.clientY - startY; const maxST = wrapper.scrollHeight - wrapper.clientHeight; const ratio = dy / (track.offsetHeight - thumb.offsetHeight); wrapper.scrollTop = Math.max(0, Math.min(maxST, startScrollTop + ratio * maxST)); });
+      document.addEventListener('mouseup', () => { if (isDragging) { isDragging = false; thumb.classList.remove('dragging'); } });
+      track.addEventListener('click', (e) => { if (e.target === thumb) return; const rect = track.getBoundingClientRect(); const ratio = (e.clientY - rect.top) / (track.offsetHeight - thumb.offsetHeight); wrapper.scrollTop = ratio * (wrapper.scrollHeight - wrapper.clientHeight); });
       updateCustomScrollbar();
     }
 
@@ -757,15 +681,79 @@
 
     function handleManualComplete(taskId) { stopFlash(); currentCompleteTaskId=taskId; currentCompleteIsManual=true; showGreenComplete(taskId); }
     
-    function completeTask(taskId, skipRest = false) {
+    // 核心修复：showGreenComplete 现在接收提前完成的分钟数，先压缩再显示
+    function showGreenComplete(taskId, earlyMinsOverride = null) {
       const task=tasks.find(t=>t.id===taskId); if(!task)return;
-      const slot=timeSlots.find(s=>s.taskId===taskId), now=getNow(), actualEnd=now, earlyMins=slot?toMins(slot.end)-actualEnd:0;
-      task.completed=true; task.completedTime=toTime(actualEnd);
-      if(slot) slot.end=toTime(actualEnd);
+      const slot=timeSlots.find(s=>s.taskId===taskId);
+      const now=getNow();
+      const actualEnd = now;
+      const earlyMins = earlyMinsOverride !== null ? earlyMinsOverride : (slot ? toMins(slot.end) - actualEnd : 0);
+      
+      // 先标记任务完成并更新结束时间
+      task.completed = true;
+      task.completedTime = toTime(actualEnd);
+      if(slot) slot.end = toTime(actualEnd);
       flashedSet.delete(taskId);
-      if(skipRest) { skipRestAndCompact(taskId); }
-      else { compactAfterComplete(taskId, earlyMins); }
-      document.getElementById('greenComplete').classList.remove('active'); currentCompleteIsManual=false; save(); renderAll();
+      
+      // 先执行压缩
+      if (earlyMins > 0) {
+        compactAfterComplete(taskId, earlyMins);
+      }
+      
+      // 再读取更新后的 nextSlot
+      const nextSlot = timeSlots
+        .filter(s => s.taskId && s.taskId !== taskId && !tasks.find(t => t.id === s.taskId)?.completed)
+        .sort((a,b) => toMins(a.start) - toMins(b.start))
+        .find(s => toMins(s.start) >= now);
+      
+      let msg = `"${task.name}" 已完成`;
+      let hasRestTime = false;
+      
+      if(nextSlot) {
+        const nt = tasks.find(t=>t.id===nextSlot.taskId);
+        const gapToNext = toMins(nextSlot.start) - now;
+        
+        if(earlyMins > 0) {
+          let restMinutes = Math.min(earlyMins, 5);
+          if(gapToNext < 5 && earlyMins + gapToNext > 5) {
+            restMinutes = 5;
+          } else if(gapToNext < 5) {
+            restMinutes = Math.min(earlyMins + gapToNext, 5);
+          }
+          
+          msg = `你已超额完成"${task.name}"\n下一个任务："${nt?.name}" 开始时间 ${nextSlot.start}`;
+          if(restMinutes > 0) { msg += `\n你现在有${restMinutes}分钟休息时间`; hasRestTime = true; }
+        } else {
+          msg = `"${task.name}" 已完成\n下一个任务："${nt?.name}" 开始时间 ${nextSlot.start}`;
+          if(gapToNext > 0 && gapToNext <= 10) { msg += `\n你有${gapToNext}分钟休息时间`; hasRestTime = true; }
+        }
+      }
+      
+      document.getElementById('greenMessage').innerText = msg;
+      const bd = document.getElementById('greenButtons'); bd.innerHTML = '';
+      if(hasRestTime) {
+        const skipBtn = document.createElement('button'); skipBtn.textContent = '跳过休息'; skipBtn.className = 'skip-btn';
+        skipBtn.addEventListener('click', () => { skipRestAndCompact(taskId); document.getElementById('greenComplete').classList.remove('active'); currentCompleteIsManual = false; save(); renderAll(); });
+        bd.appendChild(skipBtn);
+      }
+      const gb = document.createElement('button'); gb.textContent = '我知道了';
+      gb.addEventListener('click', () => { document.getElementById('greenComplete').classList.remove('active'); currentCompleteIsManual = false; save(); renderAll(); });
+      bd.appendChild(gb);
+      if(!currentCompleteIsManual) {
+        const cb = document.createElement('button'); cb.textContent = '已完成';
+        cb.addEventListener('click', () => { document.getElementById('greenComplete').classList.remove('active'); currentCompleteIsManual = false; save(); renderAll(); });
+        bd.insertBefore(cb, gb);
+        const db = document.createElement('button'); db.textContent = '推迟五分钟';
+        db.addEventListener('click', () => {
+          const sl = timeSlots.find(s => s.taskId === taskId);
+          if(sl) { sl.end = toTime(toMins(sl.end) + 5); }
+          flashedSet.delete(taskId);
+          document.getElementById('greenComplete').classList.remove('active');
+          save(); renderAll();
+        });
+        bd.insertBefore(db, gb);
+      }
+      document.getElementById('greenComplete').classList.add('active');
     }
     
     function skipRestAndCompact(completedTaskId) {
@@ -777,44 +765,25 @@
     }
     
     function compactAfterComplete(completedTaskId, earlyMins) {
-      const now=getNow(), nextSlots=timeSlots.filter(s=>s.taskId&&s.taskId!==completedTaskId&&!tasks.find(t=>t.id===s.taskId)?.completed).sort((a,b)=>toMins(a.start)-toMins(b.start));
-      if(!nextSlots.length)return;
-      const gapToNext=toMins(nextSlots[0].start)-now;
-      let rest=Math.min(earlyMins,5);
-      if(gapToNext<5&&earlyMins>0) rest=Math.min(earlyMins+gapToNext,5);
-      const shift=earlyMins-rest;
-      if(shift>0){ let le=now+rest; nextSlots.forEach(s=>{ if(s.locked)return; const d=toMins(s.end)-toMins(s.start); s.start=toTime(le); s.end=toTime(le+d); le=toMins(s.end); }); }
+      const now = getNow();
+      const nextSlots = timeSlots.filter(s => s.taskId && s.taskId !== completedTaskId && !tasks.find(t => t.id === s.taskId)?.completed).sort((a,b) => toMins(a.start) - toMins(b.start));
+      if(!nextSlots.length) return;
+      const gapToNext = toMins(nextSlots[0].start) - now;
+      let rest = Math.min(earlyMins, 5);
+      if(gapToNext < 5 && earlyMins > 0) rest = Math.min(earlyMins + gapToNext, 5);
+      const shift = earlyMins - rest;
+      if(shift > 0) {
+        let lastEnd = now + rest;
+        nextSlots.forEach(s => { if(s.locked) return; const d = toMins(s.end) - toMins(s.start); s.start = toTime(lastEnd); s.end = toTime(lastEnd + d); lastEnd = toMins(s.end); });
+      }
     }
+    
     function shiftAfter(index, mins) {
       for(let i=index;i<timeSlots.length;i++){ let s=timeSlots[i]; if(s.locked||tasks.find(t=>t.id===s.taskId)?.completed)continue; let gap=i>0?toMins(s.start)-toMins(timeSlots[i-1].end):0; if(gap>=mins)return; s.start=toTime(toMins(s.start)+mins); s.end=toTime(toMins(s.end)+mins); }
     }
-    function delayFive() {
-      if(!currentCompleteTaskId||currentCompleteIsManual)return;
-      const slot=timeSlots.find(s=>s.taskId===currentCompleteTaskId); if(!slot)return;
-      slot.end=toTime(toMins(slot.end)+5); flashedSet.delete(currentCompleteTaskId);
-      document.getElementById('greenComplete').classList.remove('active'); save(); renderAll();
-    }
+    
     function stopFlash(){ const o=document.getElementById('flashOverlay'); o.classList.remove('active'); if(flashTimer){clearTimeout(flashTimer);flashTimer=null;} }
     function startFlash(msg){ stopFlash(); const o=document.getElementById('flashOverlay'); o.textContent=msg; o.classList.add('active'); flashTimer=setTimeout(stopFlash,5000); }
-
-    function showGreenComplete(taskId) {
-      const task=tasks.find(t=>t.id===taskId); if(!task)return;
-      const slot=timeSlots.find(s=>s.taskId===taskId), now=getNow(), early=slot?toMins(slot.end)-now:0;
-      const nextSlot=timeSlots.filter(s=>s.taskId&&s.taskId!==taskId&&!tasks.find(t=>t.id===s.taskId)?.completed).sort((a,b)=>toMins(a.start)-toMins(b.start)).find(s=>toMins(s.start)>=now);
-      let msg=`"${task.name}" 已完成`; let hasRestTime = false;
-      if(nextSlot){ const nt=tasks.find(t=>t.id===nextSlot.taskId), gap=toMins(nextSlot.start)-now;
-        if(early>0){ let rest=Math.min(early,5); if(gap<5&&early+gap>5) rest=5; else if(gap<5) rest=Math.min(early+gap,5);
-          msg=`你已超额完成"${task.name}"\n下一个任务："${nt?.name}" 开始时间 ${nextSlot.start}`; if(rest>0){ msg+=`\n你现在有${rest}分钟休息时间`; hasRestTime=true; } }
-        else { msg=`"${task.name}" 已完成\n下一个任务："${nt?.name}" 开始时间 ${nextSlot.start}`; if(gap>0&&gap<=10){ msg+=`\n你有${gap}分钟休息时间`; hasRestTime=true; } }
-      }
-      document.getElementById('greenMessage').innerText=msg;
-      const bd=document.getElementById('greenButtons'); bd.innerHTML='';
-      if(hasRestTime){ const skipBtn=document.createElement('button'); skipBtn.textContent='跳过休息'; skipBtn.className='skip-btn'; skipBtn.addEventListener('click',()=>{ completeTask(taskId, true); }); bd.appendChild(skipBtn); }
-      const gb=document.createElement('button'); gb.textContent='我知道了'; gb.addEventListener('click',()=>completeTask(taskId)); bd.appendChild(gb);
-      if(!currentCompleteIsManual){ const cb=document.createElement('button'); cb.textContent='已完成'; cb.addEventListener('click',()=>completeTask(taskId)); bd.insertBefore(cb,gb);
-        const db=document.createElement('button'); db.textContent='推迟五分钟'; db.addEventListener('click',delayFive); bd.insertBefore(db,gb); }
-      document.getElementById('greenComplete').classList.add('active');
-    }
 
     function scheduleReminders() {
       timers.forEach(t=>clearTimeout(t)); timers=[]; if(paused)return;
