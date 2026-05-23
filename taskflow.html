@@ -1,4 +1,4 @@
-<!-- version:1.0.2 -->
+<!-- TaskFlow 任务规划工具 | 当前版本: 1.0.0 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -31,6 +31,11 @@
       background: white; flex-wrap: wrap; gap: 0.5rem; flex-shrink: 0;
     }
     .app-title { font-weight: 600; font-size: clamp(1.2rem, 3vw, 1.8rem); color: #0f172a; }
+    .version-badge {
+      font-size: 0.7rem; color: #94a3b8; background: #f1f5f9;
+      padding: 0.2rem 0.6rem; border-radius: 1rem; margin-left: 0.5rem;
+      vertical-align: middle;
+    }
     button {
       background: white; border: 1px solid #e2e8f0; padding: 0.5rem 1rem;
       border-radius: 2.5rem; font-size: clamp(0.75rem, 1.5vw, 0.9rem); font-weight: 500; color: #334155;
@@ -188,7 +193,6 @@
       padding: 0.6rem 0.8rem; border-radius: 0.6rem; margin: 0.1rem 0;
     }
 
-    /* 更新提示样式 */
     .update-overlay {
       position: fixed; top:0; left:0; width:100%; height:100%;
       background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
@@ -214,19 +218,16 @@
     .update-dialog button {
       width: 100%; padding: 0.8rem; margin: 0.4rem 0;
     }
+    /* 更新提示箭头 - 静态不晃动，位置上移 */
     .update-arrow-hint {
-      position: fixed; bottom: 20px; right: 20px; z-index: 10011;
+      position: fixed; bottom: 80px; right: 24px; z-index: 10011;
       display: none; align-items: center; gap: 0.5rem;
       color: white; font-weight: 600; font-size: 1rem;
-      animation: bounce 1s infinite;
+      background: rgba(0,0,0,0.7); padding: 0.6rem 1rem; border-radius: 2rem;
     }
     .update-arrow-hint.active { display: flex; }
     .update-arrow-hint .arrow {
-      font-size: 2rem;
-    }
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+      font-size: 1.5rem;
     }
     .download-mask {
       position: fixed; top:0; left:0; width:100%; height:100%;
@@ -238,7 +239,10 @@
 <body>
 <div class="app-container">
   <div class="app-header">
-    <div class="app-title">TaskFlow任务规划工具</div>
+    <div class="app-title">
+      TaskFlow任务规划工具
+      <span class="version-badge" id="headerVersion">v1.0.0</span>
+    </div>
     <div class="header-actions">
       <div class="file-menu">
         <button id="fileBtn">文件</button>
@@ -322,7 +326,6 @@
   </div>
 </div>
 
-<!-- 更新提示 -->
 <div class="download-mask" id="downloadMask"></div>
 <div class="update-overlay" id="updateOverlay">
   <div class="update-dialog">
@@ -341,11 +344,13 @@
 
 <script>
   (() => {
+    // ========== 版本信息 ==========
     const CURRENT_VERSION = '1.0.0';
-    const UPDATE_URL_HTML = 'https://luckynum.top/taskflow.html';
+    const VERSION_CHECK_URL = 'https://luckynum.top/taskflowver.txt';
     const UPDATE_URL_APK = 'https://luckynum.top/taskflow.apk';
+    // =============================
 
-    const STORAGE = 'taskflow_v16';
+    const STORAGE = 'taskflow_v18';
     let tasks = [];
     let timeSlots = [];
     let nextId = 1;
@@ -369,33 +374,27 @@
     const toMins = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
     const toTime = m => `${String(Math.floor(m/60)%24).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
 
-    // 版本检查
+    document.getElementById('headerVersion').textContent = 'v' + CURRENT_VERSION;
+
     async function checkUpdate() {
       try {
-        const response = await fetch(UPDATE_URL_HTML, { cache: 'no-cache' });
+        const response = await fetch(VERSION_CHECK_URL + '?t=' + Date.now(), { cache: 'no-cache' });
+        if (!response.ok) return;
         const text = await response.text();
-        const match = text.match(/<!--\s*version:([\d.]+)\s*-->/);
-        if (match) {
-          const latestVer = match[1];
-          if (compareVersions(latestVer, CURRENT_VERSION) > 0) {
-            document.getElementById('currentVersion').textContent = CURRENT_VERSION;
-            document.getElementById('latestVersion').textContent = latestVer;
-            document.getElementById('updateOverlay').classList.add('active');
-          }
+        const latestVer = text.trim();
+        if (/^\d+\.\d+\.\d+$/.test(latestVer) && compareVersions(latestVer, CURRENT_VERSION) > 0) {
+          document.getElementById('currentVersion').textContent = CURRENT_VERSION;
+          document.getElementById('latestVersion').textContent = latestVer;
+          document.getElementById('updateOverlay').classList.add('active');
         }
-      } catch (e) {
-        // 网络错误静默处理
-      }
+      } catch (e) {}
     }
 
     function compareVersions(v1, v2) {
-      const parts1 = v1.split('.').map(Number);
-      const parts2 = v2.split('.').map(Number);
-      for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
-        const a = parts1[i] || 0;
-        const b = parts2[i] || 0;
-        if (a > b) return 1;
-        if (a < b) return -1;
+      const p1 = v1.split('.').map(Number), p2 = v2.split('.').map(Number);
+      for (let i=0; i<Math.max(p1.length, p2.length); i++) {
+        if ((p1[i]||0) > (p2[i]||0)) return 1;
+        if ((p1[i]||0) < (p2[i]||0)) return -1;
       }
       return 0;
     }
@@ -404,19 +403,13 @@
       document.getElementById('updateOverlay').classList.remove('active');
       document.getElementById('downloadMask').classList.add('active');
       document.getElementById('updateArrow').classList.add('active');
-      
-      // 触发APK下载
       const a = document.createElement('a');
       a.href = UPDATE_URL_APK;
       a.download = 'taskflow.apk';
       a.style.display = 'none';
       document.body.appendChild(a);
       a.click();
-      setTimeout(() => {
-        document.body.removeChild(a);
-      }, 300);
-      
-      // 5秒后隐藏提示箭头
+      setTimeout(() => document.body.removeChild(a), 300);
       setTimeout(() => {
         document.getElementById('updateArrow').classList.remove('active');
         document.getElementById('downloadMask').classList.remove('active');
@@ -449,8 +442,7 @@
 
     function updateCardsPanelVisibility() {
       const panel = document.getElementById('cardsPanel');
-      const hasCards = tasks.some(t => !t.completed && !timeSlots.some(s => s.taskId === t.id));
-      panel.classList.toggle('hidden', !hasCards);
+      panel.classList.toggle('hidden', !tasks.some(t => !t.completed && !timeSlots.some(s => s.taskId === t.id)));
     }
 
     function returnTaskToWarehouse(taskId) {
@@ -488,37 +480,28 @@
         touchStartY = e.touches[0].clientY;
         touchDragging = false;
       }, {passive: false});
-
       element.addEventListener('touchmove', function(e) {
         if(!touchDragData) return;
         e.preventDefault();
         const dx = e.touches[0].clientX - touchStartX;
         const dy = e.touches[0].clientY - touchStartY;
         if(!touchDragging && Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
-        if(!touchDragging) {
-          touchDragging = true;
-          createTouchGhost(taskName);
-          element.classList.add('dragging');
-        }
+        if(!touchDragging) { touchDragging = true; createTouchGhost(taskName); element.classList.add('dragging'); }
         moveTouchGhost(e.touches[0].clientX, e.touches[0].clientY);
         const target = getDropTarget(e.touches[0].clientX, e.touches[0].clientY);
         document.querySelectorAll('.time-slot-item.drag-over').forEach(el=>el.classList.remove('drag-over'));
-        if(target && target.classList.contains('time-slot-item')) {
-          target.classList.add('drag-over');
-        }
+        if(target) target.classList.add('drag-over');
       }, {passive: false});
-
       element.addEventListener('touchend', function(e) {
         if(!touchDragData) return;
         document.querySelectorAll('.time-slot-item.drag-over').forEach(el=>el.classList.remove('drag-over'));
         if(touchDragging) {
           const target = getDropTarget(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-          if(target && target.classList.contains('time-slot-item')) {
+          if(target) {
             const task = tasks.find(t=>t.id===touchDragData);
             if(task && !task.completed && !timeSlots.some(s=>s.taskId===touchDragData)) {
               timeSlots.forEach(s=>{ if(s.taskId===touchDragData) s.taskId=null; });
-              const slotId = target.dataset.slotId;
-              const slot = timeSlots.find(s=>s.id==slotId || s.id===Number(slotId));
+              const slot = timeSlots.find(s=>s.id==target.dataset.slotId || s.id===Number(target.dataset.slotId));
               if(slot) { slot.taskId = touchDragData; slot.locked = task.locked || false; }
               flashedSet.delete(touchDragData);
               save(); renderAll();
@@ -527,8 +510,7 @@
           element.classList.remove('dragging');
         }
         removeTouchGhost();
-        touchDragData = null;
-        touchDragging = false;
+        touchDragData = null; touchDragging = false;
       });
     }
 
@@ -538,8 +520,7 @@
       tasks.filter(t=>!t.completed && !timeSlots.some(s=>s.taskId===t.id)).forEach(t=>{
         const card = document.createElement('div');
         card.className = `task-card${t.locked ? ' locked-card' : ''}`;
-        card.draggable = true;
-        card.dataset.id = t.id;
+        card.draggable = true; card.dataset.id = t.id;
         card.innerHTML = `<strong>${t.name}</strong>${t.locked ? ' 🔒' : ''}`;
         card.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', t.id); });
         setupTouchDrag(card, t.id, t.name);
@@ -552,37 +533,23 @@
       container.innerHTML = '';
       const activeSlots = timeSlots.filter(s => !tasks.find(t => t.id === s.taskId)?.completed);
       const completedSlots = timeSlots.filter(s => tasks.find(t => t.id === s.taskId)?.completed);
-      const allSlots = [...activeSlots.sort((a,b)=>toMins(a.start)-toMins(b.start)), ...completedSlots];
-      
-      allSlots.forEach(s=>{
+      [...activeSlots.sort((a,b)=>toMins(a.start)-toMins(b.start)), ...completedSlots].forEach(s=>{
         const div = document.createElement('div');
         const task = tasks.find(t=>t.id===s.taskId);
         const isCompleted = task?.completed;
         div.className = `time-slot-item${s.locked && !isCompleted ? ' locked' : ''}${isCompleted ? ' completed' : ''}`;
         div.dataset.slotId = s.id;
-        
         if(isCompleted && task) {
           div.innerHTML = `<div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8;">${task.name} (已完成) ${s.start} - ${s.end}</span><button class="delete-completed-btn">删除</button></div>`;
-          div.querySelector('.delete-completed-btn').addEventListener('click', (e)=>{
-            e.stopPropagation();
-            tasks = tasks.filter(t => t.id !== task.id);
-            timeSlots = timeSlots.filter(sl => sl.taskId !== task.id);
-            save(); renderAll();
-          });
+          div.querySelector('.delete-completed-btn').addEventListener('click', (e)=>{ e.stopPropagation(); tasks = tasks.filter(t => t.id !== task.id); timeSlots = timeSlots.filter(sl => sl.taskId !== task.id); save(); renderAll(); });
         } else {
           div.innerHTML = `<div style="display:flex; justify-content:space-between;"><span><strong>${s.start} - ${s.end}</strong>${s.locked?' 🔒':''}</span><div><button class="edit-slot-btn">编辑</button><button class="delete-slot-btn">删除</button></div></div>`;
           if(s.taskId && task && !task.completed) {
             const tdiv = document.createElement('div');
             tdiv.className = `slot-task-card${task.locked ? ' locked-card' : ''}`;
             tdiv.innerHTML = `<span>${task.name}${task.locked?' 🔒':''}</span><div><button class="return-to-warehouse-btn">放回</button><button class="complete-in-slot">完成</button></div>`;
-            tdiv.querySelector('.return-to-warehouse-btn').addEventListener('click', e=>{
-              e.stopPropagation();
-              returnTaskToWarehouse(task.id);
-            });
-            tdiv.querySelector('.complete-in-slot').addEventListener('click', e=>{
-              e.stopPropagation();
-              showConfirm(`确认完成"${task.name}"吗？`, () => handleManualComplete(task.id));
-            });
+            tdiv.querySelector('.return-to-warehouse-btn').addEventListener('click', e=>{ e.stopPropagation(); returnTaskToWarehouse(task.id); });
+            tdiv.querySelector('.complete-in-slot').addEventListener('click', e=>{ e.stopPropagation(); showConfirm(`确认完成"${task.name}"吗？`, () => handleManualComplete(task.id)); });
             div.appendChild(tdiv);
           }
           div.addEventListener('dragover', e=>e.preventDefault());
@@ -590,441 +557,169 @@
             e.preventDefault();
             const tid = Number(e.dataTransfer.getData('text/plain'));
             if(!tid) return;
-            const draggedTask = tasks.find(t=>t.id===tid);
-            if(draggedTask?.completed) return;
-            if(timeSlots.some(sl=>sl.taskId===tid)) return;
+            const dt = tasks.find(t=>t.id===tid);
+            if(dt?.completed || timeSlots.some(sl=>sl.taskId===tid)) return;
             timeSlots.forEach(sl=>{ if(sl.taskId===tid) sl.taskId=null; });
-            s.taskId = tid;
-            s.locked = draggedTask?.locked || false;
-            flashedSet.delete(tid);
-            save(); renderAll();
+            s.taskId = tid; s.locked = dt?.locked || false;
+            flashedSet.delete(tid); save(); renderAll();
           });
           div.querySelector('.edit-slot-btn')?.addEventListener('click', ()=>openSlotEditor(s.id));
           div.querySelector('.delete-slot-btn')?.addEventListener('click', ()=>deleteSlot(s.id));
         }
         container.appendChild(div);
       });
-      
-      const cardsPanel = document.getElementById('cardsContainer');
-      cardsPanel.addEventListener('dragover', e=>e.preventDefault());
-      cardsPanel.addEventListener('drop', e=>{
-        e.preventDefault();
-        const tid = Number(e.dataTransfer.getData('text/plain'));
-        if(!tid) return;
-        const draggedTask = tasks.find(t=>t.id===tid);
-        if(draggedTask?.completed) return;
-        timeSlots.forEach(s=>{ if(s.taskId===tid) s.taskId=null; });
-        flashedSet.delete(tid);
-        save(); renderAll();
-      });
+      const cp = document.getElementById('cardsContainer');
+      cp.addEventListener('dragover', e=>e.preventDefault());
+      cp.addEventListener('drop', e=>{ e.preventDefault(); const tid=Number(e.dataTransfer.getData('text/plain')); if(tid){ timeSlots.forEach(s=>{ if(s.taskId===tid) s.taskId=null; }); flashedSet.delete(tid); save(); renderAll(); } });
     }
 
     function deleteSlot(id) { timeSlots = timeSlots.filter(s=>s.id!==id); save(); renderAll(); }
 
     function buildPicker(containerId, max, currentVal) {
       const container = document.getElementById(containerId);
-      container.innerHTML = '';
-      
-      const highlight = document.createElement('div');
-      highlight.className = 'picker-highlight';
-      container.appendChild(highlight);
-      
-      const scroll = document.createElement('div');
-      scroll.className = 'picker-scroll';
-      
-      for(let i = 0; i <= max; i++) {
-        const item = document.createElement('div');
-        item.className = 'picker-item';
-        item.textContent = String(i).padStart(2,'0');
-        item.dataset.value = i;
-        scroll.appendChild(item);
-      }
-      
-      container.appendChild(scroll);
-      
-      let scrollTimeout;
-      scroll.addEventListener('scroll', () => {
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-          updateActiveItem(scroll);
-        }, 60);
-      });
-      
-      setTimeout(() => {
-        const targetItem = scroll.querySelector(`[data-value="${currentVal}"]`);
-        if(targetItem) {
-          scroll.scrollTop = targetItem.offsetTop - scroll.offsetHeight/2 + targetItem.offsetHeight/2;
-          updateActiveItem(scroll);
-        }
-      }, 100);
+      container.innerHTML = `<div class="picker-highlight"></div><div class="picker-scroll">${Array.from({length:max+1}, (_,i)=>`<div class="picker-item" data-value="${i}">${String(i).padStart(2,'0')}</div>`).join('')}</div>`;
+      const scroll = container.querySelector('.picker-scroll');
+      let st;
+      scroll.addEventListener('scroll', ()=>{ clearTimeout(st); st=setTimeout(()=>updateActiveItem(scroll),60); });
+      setTimeout(()=>{ const t=scroll.querySelector(`[data-value="${currentVal}"]`); if(t){ scroll.scrollTop=t.offsetTop-scroll.offsetHeight/2+t.offsetHeight/2; updateActiveItem(scroll); } },100);
     }
-
     function updateActiveItem(scroll) {
-      const items = scroll.querySelectorAll('.picker-item');
-      const scrollCenter = scroll.scrollTop + scroll.offsetHeight/2;
-      let closest = items[0];
-      let minDist = Infinity;
-      items.forEach(item => {
-        const itemCenter = item.offsetTop + item.offsetHeight/2;
-        const dist = Math.abs(scrollCenter - itemCenter);
-        if(dist < minDist) { minDist = dist; closest = item; }
-      });
-      items.forEach(i => i.classList.remove('active'));
-      if(closest) closest.classList.add('active');
+      const items=scroll.querySelectorAll('.picker-item'), center=scroll.scrollTop+scroll.offsetHeight/2;
+      let closest=items[0], min=Infinity;
+      items.forEach(i=>{ const d=Math.abs(i.offsetTop+i.offsetHeight/2-center); if(d<min){ min=d; closest=i; } });
+      items.forEach(i=>i.classList.remove('active')); if(closest) closest.classList.add('active');
     }
-
-    function getPickerValue(containerId) {
-      const container = document.getElementById(containerId);
-      const active = container.querySelector('.picker-item.active');
-      return active ? parseInt(active.dataset.value) : 0;
-    }
+    function getPickerValue(id) { const a=document.getElementById(id).querySelector('.picker-item.active'); return a?parseInt(a.dataset.value):0; }
 
     function openSlotEditor(slotId=null) {
       editingSlotId = slotId;
-      const now = new Date();
-      let startH = now.getHours(), startM = now.getMinutes();
-      let endDate = new Date(now.getTime()+30*60000);
-      let endH = endDate.getHours(), endM = endDate.getMinutes();
-      
-      if(slotId) {
-        const s = timeSlots.find(s=>s.id===slotId);
-        [startH, startM] = s.start.split(':').map(Number);
-        [endH, endM] = s.end.split(':').map(Number);
-      }
-      
-      buildPicker('startHourPicker', 23, startH);
-      buildPicker('startMinPicker', 59, startM);
-      buildPicker('endHourPicker', 23, endH);
-      buildPicker('endMinPicker', 59, endM);
-      
+      const now=new Date(); let sh=now.getHours(), sm=now.getMinutes(), eh=(new Date(now.getTime()+30*60000)).getHours(), em=(new Date(now.getTime()+30*60000)).getMinutes();
+      if(slotId){ const s=timeSlots.find(s=>s.id===slotId); [sh,sm]=s.start.split(':').map(Number); [eh,em]=s.end.split(':').map(Number); }
+      buildPicker('startHourPicker',23,sh); buildPicker('startMinPicker',59,sm); buildPicker('endHourPicker',23,eh); buildPicker('endMinPicker',59,em);
       document.getElementById('slotModal').classList.add('active');
     }
-
     function saveSlotFromEditor() {
-      const sh = getPickerValue('startHourPicker'), sm = getPickerValue('startMinPicker');
-      const eh = getPickerValue('endHourPicker'), em = getPickerValue('endMinPicker');
-      const start = `${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}`;
-      const end = `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
-      if(toMins(start)>=toMins(end)) { showToast('结束时间必须晚于开始'); return; }
-      if(timeSlots.some(s=>s.id!==editingSlotId && toMins(s.start)<toMins(end) && toMins(s.end)>toMins(start))) { showToast('时间段冲突'); return; }
-      if(editingSlotId) { const s=timeSlots.find(s=>s.id===editingSlotId); if(s){s.start=start; s.end=end;} }
-      else timeSlots.push({id:nextId++, start, end, taskId:null, locked:false});
-      document.getElementById('slotModal').classList.remove('active');
-      save(); renderAll();
+      const sh=getPickerValue('startHourPicker'), sm=getPickerValue('startMinPicker'), eh=getPickerValue('endHourPicker'), em=getPickerValue('endMinPicker');
+      const start=`${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}`, end=`${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
+      if(toMins(start)>=toMins(end)){showToast('结束时间必须晚于开始');return;}
+      if(timeSlots.some(s=>s.id!==editingSlotId && toMins(s.start)<toMins(end) && toMins(s.end)>toMins(start))){showToast('时间段冲突');return;}
+      if(editingSlotId){const s=timeSlots.find(s=>s.id===editingSlotId); if(s){s.start=start;s.end=end;}}
+      else timeSlots.push({id:nextId++,start,end,taskId:null,locked:false});
+      document.getElementById('slotModal').classList.remove('active'); save(); renderAll();
     }
 
-    function handleManualComplete(taskId) {
-      stopFlash();
-      currentCompleteTaskId = taskId;
-      currentCompleteIsManual = true;
-      showGreenComplete(taskId);
-    }
-
+    function handleManualComplete(taskId) { stopFlash(); currentCompleteTaskId=taskId; currentCompleteIsManual=true; showGreenComplete(taskId); }
     function completeTask(taskId) {
-      const task = tasks.find(t=>t.id===taskId);
-      if(!task) return;
-      const slot = timeSlots.find(s=>s.taskId===taskId);
-      const now = getNow();
-      const actualEnd = now;
-      const earlyMins = slot ? toMins(slot.end) - actualEnd : 0;
-      
-      task.completed = true;
-      task.completedTime = toTime(actualEnd);
-      
-      if(slot) { slot.end = toTime(actualEnd); }
-      
-      flashedSet.delete(taskId);
-      compactAfterComplete(taskId, earlyMins);
-      document.getElementById('greenComplete').classList.remove('active');
-      currentCompleteIsManual = false;
-      save(); renderAll();
+      const task=tasks.find(t=>t.id===taskId); if(!task)return;
+      const slot=timeSlots.find(s=>s.taskId===taskId), now=getNow(), actualEnd=now, earlyMins=slot?toMins(slot.end)-actualEnd:0;
+      task.completed=true; task.completedTime=toTime(actualEnd);
+      if(slot) slot.end=toTime(actualEnd);
+      flashedSet.delete(taskId); compactAfterComplete(taskId, earlyMins);
+      document.getElementById('greenComplete').classList.remove('active'); currentCompleteIsManual=false; save(); renderAll();
     }
-
     function compactAfterComplete(completedTaskId, earlyMins) {
-      const now = getNow();
-      const nextSlots = timeSlots
-        .filter(s => s.taskId && s.taskId !== completedTaskId && !tasks.find(t => t.id === s.taskId)?.completed)
-        .sort((a,b) => toMins(a.start) - toMins(b.start));
-      
-      if(nextSlots.length === 0) return;
-      
-      const firstNext = nextSlots[0];
-      const gapToNext = toMins(firstNext.start) - now;
-      
-      let restMinutes = Math.min(earlyMins, 5);
-      if(gapToNext < 5 && earlyMins > 0) {
-        restMinutes = Math.min(earlyMins + gapToNext, 5);
-      }
-      
-      const shiftAmount = earlyMins - restMinutes;
-      
-      if(shiftAmount > 0) {
-        let lastEnd = now + restMinutes;
-        nextSlots.forEach(s => {
-          if(s.locked) return;
-          const duration = toMins(s.end) - toMins(s.start);
-          s.start = toTime(lastEnd);
-          s.end = toTime(lastEnd + duration);
-          lastEnd = toMins(s.end);
-        });
-      }
+      const now=getNow(), nextSlots=timeSlots.filter(s=>s.taskId&&s.taskId!==completedTaskId&&!tasks.find(t=>t.id===s.taskId)?.completed).sort((a,b)=>toMins(a.start)-toMins(b.start));
+      if(!nextSlots.length)return;
+      const gapToNext=toMins(nextSlots[0].start)-now;
+      let rest=Math.min(earlyMins,5);
+      if(gapToNext<5&&earlyMins>0) rest=Math.min(earlyMins+gapToNext,5);
+      const shift=earlyMins-rest;
+      if(shift>0){ let le=now+rest; nextSlots.forEach(s=>{ if(s.locked)return; const d=toMins(s.end)-toMins(s.start); s.start=toTime(le); s.end=toTime(le+d); le=toMins(s.end); }); }
     }
-
     function shiftAfter(index, mins) {
-      for(let i=index; i<timeSlots.length; i++) {
-        let s = timeSlots[i];
-        if(s.locked || tasks.find(t=>t.id===s.taskId)?.completed) continue;
-        let gap = i>0 ? toMins(s.start) - toMins(timeSlots[i-1].end) : 0;
-        if(gap >= mins) return;
-        s.start = toTime(toMins(s.start)+mins);
-        s.end = toTime(toMins(s.end)+mins);
-      }
+      for(let i=index;i<timeSlots.length;i++){ let s=timeSlots[i]; if(s.locked||tasks.find(t=>t.id===s.taskId)?.completed)continue; let gap=i>0?toMins(s.start)-toMins(timeSlots[i-1].end):0; if(gap>=mins)return; s.start=toTime(toMins(s.start)+mins); s.end=toTime(toMins(s.end)+mins); }
     }
-
     function delayFive() {
-      if(!currentCompleteTaskId || currentCompleteIsManual) return;
-      const slot = timeSlots.find(s=>s.taskId===currentCompleteTaskId);
-      if(!slot) return;
-      slot.end = toTime(toMins(slot.end)+5);
-      flashedSet.delete(currentCompleteTaskId);
-      document.getElementById('greenComplete').classList.remove('active');
-      save(); renderAll();
+      if(!currentCompleteTaskId||currentCompleteIsManual)return;
+      const slot=timeSlots.find(s=>s.taskId===currentCompleteTaskId); if(!slot)return;
+      slot.end=toTime(toMins(slot.end)+5); flashedSet.delete(currentCompleteTaskId);
+      document.getElementById('greenComplete').classList.remove('active'); save(); renderAll();
     }
-
-    function stopFlash() { const o=document.getElementById('flashOverlay'); o.classList.remove('active'); if(flashTimer){clearTimeout(flashTimer); flashTimer=null;} }
-    function startFlash(msg) { stopFlash(); const o=document.getElementById('flashOverlay'); o.textContent=msg; o.classList.add('active'); flashTimer=setTimeout(stopFlash,5000); }
+    function stopFlash(){ const o=document.getElementById('flashOverlay'); o.classList.remove('active'); if(flashTimer){clearTimeout(flashTimer);flashTimer=null;} }
+    function startFlash(msg){ stopFlash(); const o=document.getElementById('flashOverlay'); o.textContent=msg; o.classList.add('active'); flashTimer=setTimeout(stopFlash,5000); }
 
     function showGreenComplete(taskId) {
-      const task = tasks.find(t=>t.id===taskId);
-      if(!task) return;
-      const slot = timeSlots.find(s=>s.taskId===taskId);
-      const now = getNow();
-      const early = slot ? toMins(slot.end) - now : 0;
-      
-      const nextSlot = timeSlots
-        .filter(s => s.taskId && s.taskId !== taskId && !tasks.find(t => t.id === s.taskId)?.completed)
-        .sort((a,b) => toMins(a.start) - toMins(b.start))
-        .find(s => toMins(s.start) >= now);
-      
-      let msg = `"${task.name}" 已完成`;
-      
-      if(nextSlot) {
-        const nt = tasks.find(t=>t.id===nextSlot.taskId);
-        const gapToNext = toMins(nextSlot.start) - now;
-        
-        if(early > 0) {
-          let restMinutes = Math.min(early, 5);
-          if(gapToNext < 5 && early + gapToNext > 5) {
-            restMinutes = 5;
-          } else if(gapToNext < 5) {
-            restMinutes = Math.min(early + gapToNext, 5);
-          }
-          
-          msg = `你已超额完成"${task.name}"\n下一个任务："${nt?.name}" 开始时间 ${nextSlot.start}`;
-          if(restMinutes > 0) msg += `\n你现在有${restMinutes}分钟休息时间`;
-        } else {
-          msg = `"${task.name}" 已完成\n下一个任务："${nt?.name}" 开始时间 ${nextSlot.start}`;
-          if(gapToNext > 0 && gapToNext <= 10) msg += `\n你有${gapToNext}分钟休息时间`;
-        }
+      const task=tasks.find(t=>t.id===taskId); if(!task)return;
+      const slot=timeSlots.find(s=>s.taskId===taskId), now=getNow(), early=slot?toMins(slot.end)-now:0;
+      const nextSlot=timeSlots.filter(s=>s.taskId&&s.taskId!==taskId&&!tasks.find(t=>t.id===s.taskId)?.completed).sort((a,b)=>toMins(a.start)-toMins(b.start)).find(s=>toMins(s.start)>=now);
+      let msg=`"${task.name}" 已完成`;
+      if(nextSlot){ const nt=tasks.find(t=>t.id===nextSlot.taskId), gap=toMins(nextSlot.start)-now;
+        if(early>0){ let rest=Math.min(early,5); if(gap<5&&early+gap>5) rest=5; else if(gap<5) rest=Math.min(early+gap,5);
+          msg=`你已超额完成"${task.name}"\n下一个任务："${nt?.name}" 开始时间 ${nextSlot.start}`; if(rest>0) msg+=`\n你现在有${rest}分钟休息时间`; }
+        else { msg=`"${task.name}" 已完成\n下一个任务："${nt?.name}" 开始时间 ${nextSlot.start}`; if(gap>0&&gap<=10) msg+=`\n你有${gap}分钟休息时间`; }
       }
-      
-      document.getElementById('greenMessage').innerText = msg;
-      
-      const buttonsDiv = document.getElementById('greenButtons');
-      buttonsDiv.innerHTML = '';
-      const gotItBtn = document.createElement('button');
-      gotItBtn.textContent = '我知道了';
-      gotItBtn.addEventListener('click', ()=>{ completeTask(taskId); });
-      buttonsDiv.appendChild(gotItBtn);
-      
-      if(!currentCompleteIsManual) {
-        const completeBtn = document.createElement('button');
-        completeBtn.textContent = '已完成';
-        completeBtn.addEventListener('click', ()=>{ completeTask(taskId); });
-        buttonsDiv.insertBefore(completeBtn, gotItBtn);
-        
-        const delayBtn = document.createElement('button');
-        delayBtn.textContent = '推迟五分钟';
-        delayBtn.addEventListener('click', delayFive);
-        buttonsDiv.insertBefore(delayBtn, gotItBtn);
-      }
-      
+      document.getElementById('greenMessage').innerText=msg;
+      const bd=document.getElementById('greenButtons'); bd.innerHTML='';
+      const gb=document.createElement('button'); gb.textContent='我知道了'; gb.addEventListener('click',()=>completeTask(taskId)); bd.appendChild(gb);
+      if(!currentCompleteIsManual){ const cb=document.createElement('button'); cb.textContent='已完成'; cb.addEventListener('click',()=>completeTask(taskId)); bd.insertBefore(cb,gb);
+        const db=document.createElement('button'); db.textContent='推迟五分钟'; db.addEventListener('click',delayFive); bd.insertBefore(db,gb); }
       document.getElementById('greenComplete').classList.add('active');
     }
 
     function scheduleReminders() {
-      timers.forEach(t=>clearTimeout(t)); timers=[];
-      if(paused) return;
-      const now = getNow();
-      timeSlots.forEach(s=>{
-        if(!s.taskId) return;
-        const task = tasks.find(t=>t.id===s.taskId);
-        if(!task || task.completed) return;
-        const end = toMins(s.end), start = toMins(s.start);
-        if(now >= end) { stopFlash(); currentCompleteIsManual = false; currentCompleteTaskId = s.taskId; showGreenComplete(s.taskId); return; }
-        if(now === start && !flashedSet.has('started_'+s.taskId)) {
-          startFlash(`"${task.name}" 开始`);
-          flashedSet.add('started_'+s.taskId);
-        }
-        const fiveBeforeEnd = end-5;
-        if(now >= fiveBeforeEnd && now < end && !flashedSet.has(s.taskId)) {
-          startFlash(`"${task.name}" 即将结束`);
-          flashedSet.add(s.taskId);
-        } else if(fiveBeforeEnd > now && !flashedSet.has(s.taskId)) {
-          timers.push(setTimeout(()=>{ startFlash(`"${task.name}" 即将结束`); flashedSet.add(s.taskId); }, (fiveBeforeEnd-now)*60000));
-        }
-        if(end > now) timers.push(setTimeout(()=>{ stopFlash(); currentCompleteIsManual = false; currentCompleteTaskId = s.taskId; showGreenComplete(s.taskId); }, (end-now)*60000));
-        const fiveBeforeStart = start-5;
-        if(now >= fiveBeforeStart && now < start && !flashedSet.has('start_'+s.taskId)) {
-          startFlash(`"${task.name}" 还有5分钟开始`);
-          flashedSet.add('start_'+s.taskId);
-        } else if(fiveBeforeStart > now && !flashedSet.has('start_'+s.taskId)) {
-          timers.push(setTimeout(()=>{ startFlash(`"${task.name}" 还有5分钟开始`); flashedSet.add('start_'+s.taskId); }, (fiveBeforeStart-now)*60000));
-        }
-        if(start > now && !flashedSet.has('started_'+s.taskId)) {
-          timers.push(setTimeout(()=>{ startFlash(`"${task.name}" 开始`); flashedSet.add('started_'+s.taskId); }, (start-now)*60000));
-        }
+      timers.forEach(t=>clearTimeout(t)); timers=[]; if(paused)return;
+      const now=getNow();
+      timeSlots.forEach(s=>{ if(!s.taskId)return; const task=tasks.find(t=>t.id===s.taskId); if(!task||task.completed)return;
+        const end=toMins(s.end), start=toMins(s.start);
+        if(now>=end){ stopFlash(); currentCompleteIsManual=false; currentCompleteTaskId=s.taskId; showGreenComplete(s.taskId); return; }
+        if(now===start&&!flashedSet.has('started_'+s.taskId)){ startFlash(`"${task.name}" 开始`); flashedSet.add('started_'+s.taskId); }
+        const fbe=end-5; if(now>=fbe&&now<end&&!flashedSet.has(s.taskId)){ startFlash(`"${task.name}" 即将结束`); flashedSet.add(s.taskId); }
+        else if(fbe>now&&!flashedSet.has(s.taskId)) timers.push(setTimeout(()=>{ startFlash(`"${task.name}" 即将结束`); flashedSet.add(s.taskId); },(fbe-now)*60000));
+        if(end>now) timers.push(setTimeout(()=>{ stopFlash(); currentCompleteIsManual=false; currentCompleteTaskId=s.taskId; showGreenComplete(s.taskId); },(end-now)*60000));
+        const fbs=start-5; if(now>=fbs&&now<start&&!flashedSet.has('start_'+s.taskId)){ startFlash(`"${task.name}" 还有5分钟开始`); flashedSet.add('start_'+s.taskId); }
+        else if(fbs>now&&!flashedSet.has('start_'+s.taskId)) timers.push(setTimeout(()=>{ startFlash(`"${task.name}" 还有5分钟开始`); flashedSet.add('start_'+s.taskId); },(fbs-now)*60000));
+        if(start>now&&!flashedSet.has('started_'+s.taskId)) timers.push(setTimeout(()=>{ startFlash(`"${task.name}" 开始`); flashedSet.add('started_'+s.taskId); },(start-now)*60000));
       });
     }
 
     function togglePause() {
-      if(!paused) {
-        paused = true; pauseStart = Date.now();
-        document.getElementById('pauseOverlay').classList.add('active');
-        pauseInterval = setInterval(()=>{
-          const sec = Math.floor((Date.now()-pauseStart)/1000);
-          document.getElementById('pauseTimer').textContent = `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
-        },1000);
-        stopFlash();
-      }
+      if(!paused){ paused=true; pauseStart=Date.now(); document.getElementById('pauseOverlay').classList.add('active');
+        pauseInterval=setInterval(()=>{ const sec=Math.floor((Date.now()-pauseStart)/1000); document.getElementById('pauseTimer').textContent=`${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`; },1000); stopFlash(); }
     }
     function resume() {
-      if(!paused) return;
-      const pausedMs = Date.now()-pauseStart;
-      const pausedMins = Math.ceil(pausedMs/60000);
-      paused = false; clearInterval(pauseInterval);
-      document.getElementById('pauseOverlay').classList.remove('active');
-      const now = getNow();
-      let currentSlot = timeSlots.find(s => s.taskId && !tasks.find(t=>t.id===s.taskId)?.completed && toMins(s.start) <= now && toMins(s.end) > now);
-      if(currentSlot) {
-        currentSlot.end = toTime(toMins(currentSlot.end) + pausedMins);
-        const idx = timeSlots.indexOf(currentSlot);
-        shiftAfter(idx + 1, pausedMins);
-      } else {
-        for(let i=0; i<timeSlots.length; i++) {
-          let s = timeSlots[i];
-          if(!s.taskId || s.locked || tasks.find(t=>t.id===s.taskId)?.completed) continue;
-          if(toMins(s.start) >= now) { shiftAfter(i, pausedMins); break; }
-        }
-      }
+      if(!paused)return; const pausedMs=Date.now()-pauseStart, pausedMins=Math.ceil(pausedMs/60000); paused=false; clearInterval(pauseInterval);
+      document.getElementById('pauseOverlay').classList.remove('active'); const now=getNow();
+      let cs=timeSlots.find(s=>s.taskId&&!tasks.find(t=>t.id===s.taskId)?.completed&&toMins(s.start)<=now&&toMins(s.end)>now);
+      if(cs){ cs.end=toTime(toMins(cs.end)+pausedMins); shiftAfter(timeSlots.indexOf(cs)+1,pausedMins); }
+      else { for(let i=0;i<timeSlots.length;i++){ let s=timeSlots[i]; if(!s.taskId||s.locked||tasks.find(t=>t.id===s.taskId)?.completed)continue; if(toMins(s.start)>=now){shiftAfter(i,pausedMins);break;} } }
       save(); renderAll();
     }
 
     function saveToFile() {
-      const data = { tasks, timeSlots, nextId };
-      const json = JSON.stringify(data, null, 2);
-      const blob = new Blob([json], { type: 'application/octet-stream' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'taskflow_config.tfd';
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 300);
-      showToast('设定已保存', true);
+      const data={tasks,timeSlots,nextId}, json=JSON.stringify(data,null,2), blob=new Blob([json],{type:'application/octet-stream'});
+      const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download='taskflow_config.tfd'; a.style.display='none';
+      document.body.appendChild(a); a.click(); setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },300); showToast('设定已保存',true);
     }
-
     function loadFromFile(file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const data = JSON.parse(e.target.result);
-          if(data.tasks && data.timeSlots && data.nextId !== undefined) {
-            tasks = data.tasks; timeSlots = data.timeSlots; nextId = data.nextId;
-            flashedSet.clear(); save(); renderAll(); showToast('设定已加载', true);
-          } else { showToast('文件格式无效'); }
-        } catch(err) { showToast('文件解析失败'); }
-      };
-      reader.readAsText(file);
+      const reader=new FileReader(); reader.onload=function(e){ try{ const data=JSON.parse(e.target.result); if(data.tasks&&data.timeSlots&&data.nextId!==undefined){ tasks=data.tasks; timeSlots=data.timeSlots; nextId=data.nextId; flashedSet.clear(); save(); renderAll(); showToast('设定已加载',true); }else showToast('文件格式无效'); }catch(err){showToast('文件解析失败');} }; reader.readAsText(file);
     }
 
     // 事件绑定
-    document.getElementById('fileBtn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      const dropdown = document.getElementById('fileDropdown');
-      const btn = e.target;
-      const rect = btn.getBoundingClientRect();
-      dropdown.style.top = (rect.bottom + 5) + 'px';
-      dropdown.style.left = (rect.left) + 'px';
-      dropdown.classList.toggle('active');
-    });
-    document.addEventListener('click', (e) => {
-      if(!e.target.closest('.file-menu')) document.getElementById('fileDropdown').classList.remove('active');
-    });
-    document.getElementById('saveFileBtn').addEventListener('click', (e) => {
-      e.stopPropagation(); document.getElementById('fileDropdown').classList.remove('active'); saveToFile();
-    });
-    document.getElementById('loadFileBtn').addEventListener('click', (e) => {
-      e.stopPropagation(); document.getElementById('fileDropdown').classList.remove('active'); document.getElementById('fileInput').click();
-    });
-    document.getElementById('fileInput').addEventListener('change', (e) => {
-      if(e.target.files[0]) { loadFromFile(e.target.files[0]); e.target.value = ''; }
-    });
+    document.getElementById('fileBtn').addEventListener('click',e=>{ e.stopPropagation(); const d=document.getElementById('fileDropdown'),r=e.target.getBoundingClientRect(); d.style.top=(r.bottom+5)+'px'; d.style.left=r.left+'px'; d.classList.toggle('active'); });
+    document.addEventListener('click',e=>{ if(!e.target.closest('.file-menu')) document.getElementById('fileDropdown').classList.remove('active'); });
+    document.getElementById('saveFileBtn').addEventListener('click',e=>{ e.stopPropagation(); document.getElementById('fileDropdown').classList.remove('active'); saveToFile(); });
+    document.getElementById('loadFileBtn').addEventListener('click',e=>{ e.stopPropagation(); document.getElementById('fileDropdown').classList.remove('active'); document.getElementById('fileInput').click(); });
+    document.getElementById('fileInput').addEventListener('change',e=>{ if(e.target.files[0]){ loadFromFile(e.target.files[0]); e.target.value=''; } });
+    document.getElementById('addTaskBtn').addEventListener('click',()=>document.getElementById('taskModal').classList.add('active'));
+    document.getElementById('cancelTaskBtn').addEventListener('click',()=>document.getElementById('taskModal').classList.remove('active'));
+    document.getElementById('confirmTaskBtn').addEventListener('click',()=>{ const n=document.getElementById('taskNameInput').value.trim(); if(!n)return; const l=document.getElementById('taskLocked').checked; tasks.push({id:nextId++,name:n,type:'task',completed:false,locked:l}); document.getElementById('taskModal').classList.remove('active'); document.getElementById('taskNameInput').value=''; document.getElementById('taskLocked').checked=false; save(); renderAll(); });
+    document.getElementById('addSlotBtn').addEventListener('click',()=>openSlotEditor(null));
+    document.getElementById('saveSlotBtn').addEventListener('click',saveSlotFromEditor);
+    document.getElementById('cancelSlotBtn').addEventListener('click',()=>document.getElementById('slotModal').classList.remove('active'));
+    document.getElementById('pauseBtn').addEventListener('click',togglePause);
+    document.getElementById('resumeBtn').addEventListener('click',resume);
+    document.getElementById('confirmYesBtn').addEventListener('click',()=>{ document.getElementById('confirmDialog').classList.remove('active'); if(confirmCallback)confirmCallback(); });
+    document.getElementById('confirmNoBtn').addEventListener('click',()=>{ document.getElementById('confirmDialog').classList.remove('active'); confirmCallback=null; });
+    document.getElementById('resetBtn').addEventListener('click',()=>{ showConfirm('确定要清除所有数据吗？',()=>{ stopFlash(); reset(); }); });
+    document.getElementById('updateNowBtn').addEventListener('click',triggerUpdate);
+    document.getElementById('updateLaterBtn').addEventListener('click',()=>document.getElementById('updateOverlay').classList.remove('active'));
+    document.getElementById('downloadMask').addEventListener('click',()=>{ document.getElementById('downloadMask').classList.remove('active'); document.getElementById('updateArrow').classList.remove('active'); });
 
-    document.getElementById('addTaskBtn').addEventListener('click', ()=>document.getElementById('taskModal').classList.add('active'));
-    document.getElementById('cancelTaskBtn').addEventListener('click', ()=>document.getElementById('taskModal').classList.remove('active'));
-    document.getElementById('confirmTaskBtn').addEventListener('click', ()=>{
-      const name=document.getElementById('taskNameInput').value.trim();
-      if(!name) return;
-      const locked=document.getElementById('taskLocked').checked;
-      tasks.push({id:nextId++, name, type:'task', completed:false, locked});
-      document.getElementById('taskModal').classList.remove('active');
-      document.getElementById('taskNameInput').value=''; document.getElementById('taskLocked').checked=false;
-      save(); renderAll();
-    });
-    document.getElementById('addSlotBtn').addEventListener('click', ()=>openSlotEditor(null));
-    document.getElementById('saveSlotBtn').addEventListener('click', saveSlotFromEditor);
-    document.getElementById('cancelSlotBtn').addEventListener('click', ()=>document.getElementById('slotModal').classList.remove('active'));
-    document.getElementById('pauseBtn').addEventListener('click', togglePause);
-    document.getElementById('resumeBtn').addEventListener('click', resume);
-    document.getElementById('confirmYesBtn').addEventListener('click', ()=>{
-      document.getElementById('confirmDialog').classList.remove('active');
-      if(confirmCallback) confirmCallback();
-    });
-    document.getElementById('confirmNoBtn').addEventListener('click', ()=>{
-      document.getElementById('confirmDialog').classList.remove('active');
-      confirmCallback = null;
-    });
-    document.getElementById('resetBtn').addEventListener('click', ()=>{
-      showConfirm('确定要清除所有数据吗？', ()=>{ stopFlash(); reset(); });
-    });
-
-    // 更新相关事件
-    document.getElementById('updateNowBtn').addEventListener('click', triggerUpdate);
-    document.getElementById('updateLaterBtn').addEventListener('click', ()=>{
-      document.getElementById('updateOverlay').classList.remove('active');
-    });
-    document.getElementById('downloadMask').addEventListener('click', ()=>{
-      document.getElementById('downloadMask').classList.remove('active');
-      document.getElementById('updateArrow').classList.remove('active');
-    });
-
-    document.addEventListener('touchmove', function(e) {
-      if(touchDragging) e.preventDefault();
-    }, {passive: false});
-
-    window.addEventListener('resize', () => { updateCardsPanelVisibility(); });
-
-    setInterval(scheduleReminders, 10000);
-    load();
-    renderAll();
-    
-    // 启动时检查更新
-    setTimeout(checkUpdate, 1500);
+    document.addEventListener('touchmove',e=>{ if(touchDragging)e.preventDefault(); },{passive:false});
+    window.addEventListener('resize',()=>updateCardsPanelVisibility());
+    setInterval(scheduleReminders,10000);
+    load(); renderAll();
+    setTimeout(checkUpdate,1500);
   })();
 </script>
 </body>
