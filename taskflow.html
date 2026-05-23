@@ -1,4 +1,4 @@
-<!-- TaskFlow 任务规划工具 | 当前版本: 1.1.2 -->
+<!-- TaskFlow 任务规划工具 | 当前版本: 1.1.3 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -20,7 +20,7 @@
     @media (max-width: 850px) or (orientation: portrait) {
       .main-layout { flex-direction: column !important; }
       .timeline-panel { flex: 1 !important; border-right: none !important; border-bottom: 1px solid #eef2f6; }
-      .cards-panel { max-height: 30%; min-height: 120px; }
+      .cards-panel { max-height: 30%; min-height: 120px; width: 100% !important; }
       .cards-panel.hidden { max-height: 0; min-height: 0; padding: 0; }
       .header-actions { gap: 0.3rem; }
       .header-actions button { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
@@ -52,9 +52,9 @@
       min-width: 0;
     }
     .cards-panel {
-      width: clamp(220px, 28vw, 300px); padding: 1rem; background: white; overflow: hidden;
+      width: clamp(240px, 30vw, 340px); padding: 1rem; background: white;
       transition: all 0.3s; border-left: 1px solid #eef2f6; flex-shrink: 0;
-      display: flex; flex-direction: column;
+      display: flex; flex-direction: column; overflow: hidden; position: relative;
     }
     .cards-panel.hidden { width: 0; padding: 0; overflow: hidden; border-left: none; }
     .section-title { font-weight: 600; font-size: clamp(0.75rem, 1.5vw, 0.9rem); color: #64748b; margin-bottom: 0.4rem; flex-shrink: 0; }
@@ -73,16 +73,39 @@
       align-items: center; font-weight: 500; font-size: clamp(0.75rem, 1.5vw, 0.85rem);
     }
     .slot-task-card.locked-card { background: #fef3c7; }
+
+    /* 卡片库容器 - 隐藏原生滚动条 */
     .cards-grid-wrapper {
-      flex: 1; overflow-y: auto; overflow-x: hidden;
-      scrollbar-width: thin; scrollbar-color: #cbd5e1 #f8fafc;
+      flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0;
+      width: 100%; position: relative;
+      scrollbar-width: none; -ms-overflow-style: none;
     }
-    .cards-grid-wrapper::-webkit-scrollbar { width: 6px; }
-    .cards-grid-wrapper::-webkit-scrollbar-track { background: #f8fafc; border-radius: 3px; }
-    .cards-grid-wrapper::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    .cards-grid-wrapper::-webkit-scrollbar { display: none; }
+
+    /* 自定义滑块轨道 */
+    .custom-scrollbar-track {
+      position: absolute; right: 4px; top: 4px; bottom: 4px;
+      width: 24px; z-index: 10; pointer-events: auto;
+    }
+    /* 自定义半圆滑块 */
+    .custom-scrollbar-thumb {
+      position: absolute; right: 0; width: 24px;
+      background: #94a3b8; border-radius: 12px;
+      cursor: pointer; transition: background 0.15s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      min-height: 50px;
+      touch-action: none;
+    }
+    .custom-scrollbar-thumb:active,
+    .custom-scrollbar-thumb.dragging {
+      background: #475569;
+    }
+
     .cards-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(min(80px, 100%), 1fr));
-      gap: 0.5rem; align-content: flex-start;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 0.5rem; align-content: flex-start; width: 100%;
+      padding-right: 28px;
     }
     .task-card {
       padding: 0.5rem; border-radius: 0.7rem; background: #f1f5f9;
@@ -159,9 +182,7 @@
       background: white; color: #22c55e; border: none; padding: 0.8rem 2rem;
       border-radius: 3rem; font-size: clamp(1rem, 2.5vw, 1.2rem); font-weight: 600; cursor: pointer;
     }
-    .green-fullscreen button.skip-btn {
-      background: #f59e0b; color: white;
-    }
+    .green-fullscreen button.skip-btn { background: #f59e0b; color: white; }
     .green-buttons { display: flex; flex-direction: column; gap: 0.8rem; align-items: center; }
     .pause-overlay {
       position: fixed; top:0; left:0; width:100%; height:100%;
@@ -249,7 +270,7 @@
   <div class="app-header">
     <div class="app-title">
       TaskFlow任务规划工具
-      <span class="version-badge" id="headerVersion">v1.1.2</span>
+      <span class="version-badge" id="headerVersion">v1.1.3</span>
     </div>
     <div class="header-actions">
       <div class="file-menu">
@@ -276,6 +297,9 @@
       <div class="section-title">任务卡片库</div>
       <div class="cards-grid-wrapper" id="cardsGridWrapper">
         <div id="cardsContainer" class="cards-grid"></div>
+      </div>
+      <div class="custom-scrollbar-track" id="scrollbarTrack">
+        <div class="custom-scrollbar-thumb" id="scrollbarThumb"></div>
       </div>
     </div>
   </div>
@@ -341,7 +365,7 @@
   <div class="update-dialog">
     <h2>发现新版本</h2>
     <div class="version-info">
-      <span id="currentVersion">1.1.2</span> → <span id="latestVersion">1.1.2</span>
+      <span id="currentVersion">1.1.3</span> → <span id="latestVersion">1.1.3</span>
     </div>
     <button id="updateNowBtn" class="primary">立即更新</button>
     <button id="updateLaterBtn">下次再说</button>
@@ -354,13 +378,11 @@
 
 <script>
   (() => {
-    // ========== 版本信息 ==========
-    const CURRENT_VERSION = '1.1.2';
+    const CURRENT_VERSION = '1.1.3';
     const VERSION_CHECK_URL = 'https://luckynum.top/taskflowver.txt';
     const UPDATE_URL_APK = 'https://luckynum.top/taskflow.apk';
-    // =============================
 
-    const STORAGE = 'taskflow_v20';
+    const STORAGE = 'taskflow_v22';
     let tasks = [];
     let timeSlots = [];
     let nextId = 1;
@@ -533,12 +555,8 @@
     function renderCards() {
       const c = document.getElementById('cardsContainer');
       c.innerHTML = '';
-      const cardWidth = c.parentElement.clientWidth;
-      // 根据容器宽度动态计算列数，确保卡片填满
-      const minCardWidth = 75;
-      const gap = 8;
-      const cols = Math.max(1, Math.floor((cardWidth + gap) / (minCardWidth + gap)));
-      c.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+      c.style.gridTemplateColumns = 'repeat(auto-fill, minmax(90px, 1fr))';
+      c.style.width = '100%';
       
       tasks.filter(t=>!t.completed && !timeSlots.some(s=>s.taskId===t.id)).forEach(t=>{
         const card = document.createElement('div');
@@ -549,6 +567,111 @@
         setupTouchDrag(card, t.id, t.name);
         c.appendChild(card);
       });
+      updateCustomScrollbar();
+    }
+
+    // 自定义滚动条逻辑
+    function updateCustomScrollbar() {
+      const wrapper = document.getElementById('cardsGridWrapper');
+      const track = document.getElementById('scrollbarTrack');
+      const thumb = document.getElementById('scrollbarThumb');
+      
+      if (!wrapper || !track || !thumb) return;
+      
+      const scrollHeight = wrapper.scrollHeight;
+      const clientHeight = wrapper.clientHeight;
+      
+      if (scrollHeight <= clientHeight) {
+        thumb.style.display = 'none';
+        return;
+      }
+      
+      thumb.style.display = 'block';
+      const thumbHeight = Math.max(50, (clientHeight / scrollHeight) * track.offsetHeight);
+      thumb.style.height = thumbHeight + 'px';
+      
+      const scrollRatio = wrapper.scrollTop / (scrollHeight - clientHeight);
+      const maxTop = track.offsetHeight - thumbHeight;
+      thumb.style.top = (scrollRatio * maxTop) + 'px';
+    }
+
+    function initCustomScrollbar() {
+      const wrapper = document.getElementById('cardsGridWrapper');
+      const track = document.getElementById('scrollbarTrack');
+      const thumb = document.getElementById('scrollbarThumb');
+      
+      if (!wrapper || !track || !thumb) return;
+      
+      wrapper.addEventListener('scroll', updateCustomScrollbar);
+      
+      let isDragging = false;
+      let startY = 0;
+      let startScrollTop = 0;
+      
+      thumb.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        startY = e.touches[0].clientY;
+        startScrollTop = wrapper.scrollTop;
+        thumb.classList.add('dragging');
+        e.preventDefault();
+      });
+      
+      thumb.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const dy = e.touches[0].clientY - startY;
+        const scrollHeight = wrapper.scrollHeight;
+        const clientHeight = wrapper.clientHeight;
+        const maxScrollTop = scrollHeight - clientHeight;
+        const trackHeight = track.offsetHeight;
+        const thumbHeight = thumb.offsetHeight;
+        const ratio = dy / (trackHeight - thumbHeight);
+        wrapper.scrollTop = Math.max(0, Math.min(maxScrollTop, startScrollTop + ratio * maxScrollTop));
+        e.preventDefault();
+      });
+      
+      thumb.addEventListener('touchend', () => {
+        isDragging = false;
+        thumb.classList.remove('dragging');
+      });
+      
+      thumb.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startY = e.clientY;
+        startScrollTop = wrapper.scrollTop;
+        thumb.classList.add('dragging');
+        e.preventDefault();
+      });
+      
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dy = e.clientY - startY;
+        const scrollHeight = wrapper.scrollHeight;
+        const clientHeight = wrapper.clientHeight;
+        const maxScrollTop = scrollHeight - clientHeight;
+        const trackHeight = track.offsetHeight;
+        const thumbHeight = thumb.offsetHeight;
+        const ratio = dy / (trackHeight - thumbHeight);
+        wrapper.scrollTop = Math.max(0, Math.min(maxScrollTop, startScrollTop + ratio * maxScrollTop));
+      });
+      
+      document.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          thumb.classList.remove('dragging');
+        }
+      });
+      
+      // 点击轨道跳转
+      track.addEventListener('click', (e) => {
+        if (e.target === thumb) return;
+        const trackRect = track.getBoundingClientRect();
+        const clickY = e.clientY - trackRect.top;
+        const thumbHeight = thumb.offsetHeight;
+        const ratio = clickY / (track.offsetHeight - thumbHeight);
+        wrapper.scrollTop = ratio * (wrapper.scrollHeight - wrapper.clientHeight);
+      });
+      
+      updateCustomScrollbar();
     }
 
     function renderSlots() {
@@ -707,7 +830,6 @@
         else if(fbs>now&&!flashedSet.has('start_'+s.taskId)) timers.push(setTimeout(()=>{ startFlash(`"${task.name}" 还有5分钟开始`); flashedSet.add('start_'+s.taskId); },(fbs-now)*60000));
         if(start>now&&!flashedSet.has('started_'+s.taskId)) timers.push(setTimeout(()=>{ startFlash(`"${task.name}" 开始`); flashedSet.add('started_'+s.taskId); },(start-now)*60000));
       });
-      // 刷新进行中状态
       document.querySelectorAll('.time-slot-item').forEach(el => {
         const slotId = el.dataset.slotId;
         const slot = timeSlots.find(s => s.id == slotId || s.id === Number(slotId));
@@ -739,7 +861,6 @@
       const reader=new FileReader(); reader.onload=function(e){ try{ const data=JSON.parse(e.target.result); if(data.tasks&&data.timeSlots&&data.nextId!==undefined){ tasks=data.tasks; timeSlots=data.timeSlots; nextId=data.nextId; flashedSet.clear(); save(); renderAll(); showToast('设定已加载',true); }else showToast('文件格式无效'); }catch(err){showToast('文件解析失败');} }; reader.readAsText(file);
     }
 
-    // 事件绑定
     document.getElementById('fileBtn').addEventListener('click',e=>{ e.stopPropagation(); const d=document.getElementById('fileDropdown'),r=e.target.getBoundingClientRect(); d.style.top=(r.bottom+5)+'px'; d.style.left=r.left+'px'; d.classList.toggle('active'); });
     document.addEventListener('click',e=>{ if(!e.target.closest('.file-menu')) document.getElementById('fileDropdown').classList.remove('active'); });
     document.getElementById('saveFileBtn').addEventListener('click',e=>{ e.stopPropagation(); document.getElementById('fileDropdown').classList.remove('active'); saveToFile(); });
@@ -761,9 +882,10 @@
     document.getElementById('downloadMask').addEventListener('click',()=>{ document.getElementById('downloadMask').classList.remove('active'); document.getElementById('updateArrow').classList.remove('active'); });
 
     document.addEventListener('touchmove',e=>{ if(touchDragging)e.preventDefault(); },{passive:false});
-    window.addEventListener('resize',()=>{ updateCardsPanelVisibility(); renderCards(); });
+    window.addEventListener('resize',()=>{ updateCardsPanelVisibility(); });
     setInterval(scheduleReminders,10000);
     load(); renderAll();
+    initCustomScrollbar();
     setTimeout(checkUpdate,1500);
   })();
 </script>
