@@ -420,7 +420,7 @@
                 if (line === '') continue;
                 
                 // 正则解析: 日期 时间 学号 事件内容 分数变化
-                // 格式示例: 2026/04/21 16:43 20534 自习课多次屡教不改，不服从班长管理，扰乱纪律 -2
+                
                 const match = line.match(/^(\d{4}\/\d{2}\/\d{2})\s+(\d{2}:\d{2})\s+(\d+)\s+(.+?)\s+([+-]?\d+)$/);
                 if (match) {
                     const [, date, time, studentId, event, scoreChange] = match;
