@@ -1668,14 +1668,15 @@
     
     function closePointsModalFunc() { pointsModal.classList.remove('show'); }
     
-    // 设置头像图片（根据学号加载对应图片，失败则回退到41.jpg）
+    // 设置头像图片（根据学号加载对应图片，失败则回退到41.jpg，加时间戳强制刷新）
     function setAvatarImage(imgElement, studentId) {
         if (!imgElement || !studentId) return;
-        const customSrc = `${studentId}pic.jpg`;
+        const timestamp = Date.now();
+        const customSrc = `${studentId}pic.jpg?t=${timestamp}`;
         imgElement.src = customSrc;
         imgElement.onerror = function() {
             this.onerror = null;
-            this.src = '41.jpg';
+            this.src = `41.jpg?t=${timestamp}`;
         };
     }
     
@@ -1689,7 +1690,7 @@
         const currentTotal = integralMapping[currentStudentId] || 0;
         profileContent.innerHTML = `
             <div class="profile-card">
-                <img class="avatar" id="profileAvatar" src="41.jpg" alt="头像" onerror="this.src='41.jpg'">
+                <img class="avatar" id="profileAvatar" src="41.jpg" alt="头像">
                 <div class="profile-info">
                     <div class="profile-name">${escapeHtml(studentName)}</div>
                     <div class="profile-student-id">学号：${currentStudentId}</div>
@@ -1703,7 +1704,7 @@
             </div>
         `;
         
-        // 设置头像（根据学号加载对应图片）
+        // 设置头像（根据学号加载对应图片，加时间戳强制刷新）
         const avatarImg = document.getElementById('profileAvatar');
         if (avatarImg && currentStudentId) {
             setAvatarImage(avatarImg, currentStudentId);
