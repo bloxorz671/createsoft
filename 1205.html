@@ -571,6 +571,9 @@
         <div class="subscribe-buttons">
             <button id="subscribeBtn" class="subscribe-btn-primary">去订阅</button>
             <button id="cancelSubscribeBtn" class="subscribe-btn-secondary">取消</button>
+        </div>
+        <!-- 不再提示选项（默认隐藏，用户点击过"去订阅"后，下次弹窗显示） -->
+        <div id="noRemindContainer" style="display: none; margin-top: 16px;">
             <label class="subscribe-no-remind">
                 <input type="checkbox" id="noRemindCheckbox"> 我已订阅不再提示
             </label>
@@ -615,36 +618,58 @@
 <script>
     // ========== 订阅通知弹窗 ==========
     function checkAndShowSubscribeModal() {
+        // 检查是否已经保存了"不再提示"
         const noRemind = localStorage.getItem('subscribe_no_remind');
         if (noRemind === 'true') {
             return;
         }
+        
+        // 检查用户是否曾经点击过"去订阅"（使用 localStorage 记录）
+        const hasClickedSubscribe = localStorage.getItem('has_clicked_subscribe');
         
         const modal = document.getElementById('subscribeModal');
         if (!modal) return;
         
         const subscribeBtn = document.getElementById('subscribeBtn');
         const cancelBtn = document.getElementById('cancelSubscribeBtn');
+        const noRemindContainer = document.getElementById('noRemindContainer');
         const noRemindCheckbox = document.getElementById('noRemindCheckbox');
+        
+        // 重置复选框状态
+        if (noRemindCheckbox) noRemindCheckbox.checked = false;
+        
+        // 如果用户曾经点击过"去订阅"，则显示不再提示选项；否则隐藏
+        if (hasClickedSubscribe === 'true') {
+            if (noRemindContainer) noRemindContainer.style.display = 'block';
+        } else {
+            if (noRemindContainer) noRemindContainer.style.display = 'none';
+        }
         
         setTimeout(() => {
             modal.classList.add('show');
         }, 500);
         
+        // 去订阅 - 记录用户点击过，然后跳转
         subscribeBtn.onclick = () => {
+            // 记录用户点击过"去订阅"
+            localStorage.setItem('has_clicked_subscribe', 'true');
+            // 跳转到订阅页面
             window.location.href = 'notwec';
         };
         
+        // 取消 - 直接关闭弹窗
         cancelBtn.onclick = () => {
             modal.classList.remove('show');
         };
         
+        // 点击背景关闭
         modal.onclick = (e) => {
             if (e.target === modal) {
                 modal.classList.remove('show');
             }
         };
         
+        // 不再提示的复选框变化时保存
         if (noRemindCheckbox) {
             noRemindCheckbox.onchange = (e) => {
                 if (e.target.checked) {
