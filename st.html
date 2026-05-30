@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>微信扫一扫测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0c2e3b 0%, #0a1f2a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            padding: 1rem;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 48px;
+            padding: 2rem 1.5rem 2rem 1.5rem;
+            max-width: 320px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 35px -8px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.2);
+            backdrop-filter: blur(2px);
+            transition: transform 0.2s ease;
+        }
+
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        .icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            display: inline-block;
+            background: #07c160;
+            width: 96px;
+            height: 96px;
+            line-height: 106px;
+            text-align: center;
+            border-radius: 48px;
+            box-shadow: 0 8px 14px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #111;
+            letter-spacing: -0.3px;
+        }
+
+        .sub {
+            color: #5e6870;
+            font-size: 14px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #e9edf0;
+            display: inline-block;
+            padding-bottom: 6px;
+        }
+
+        .btn {
+            background: #07c160;
+            border: none;
+            width: 100%;
+            padding: 16px 12px;
+            border-radius: 60px;
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 5px 12px rgba(7,193,96,0.35);
+            margin-bottom: 20px;
+        }
+
+        .btn:active {
+            background: #06ae54;
+            transform: scale(0.96);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .btn span {
+            font-size: 24px;
+        }
+
+        .info {
+            background: #f0f2f5;
+            border-radius: 36px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #2c3e44;
+            text-align: left;
+            margin-top: 12px;
+        }
+
+        .info p {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 6px 0;
+        }
+
+        .info i {
+            font-style: normal;
+            font-weight: 600;
+            background: #d9e2e8;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-family: monospace;
+        }
+
+        .fail-tip {
+            font-size: 12px;
+            color: #e67e22;
+            margin-top: 18px;
+            background: #fff3e0;
+            padding: 8px 12px;
+            border-radius: 28px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #07c160;
+        }
+
+        footer {
+            font-size: 10px;
+            color: #8e9aa5;
+            margin-top: 22px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="icon">📷</div>
+    <h1>扫一扫 · 极速测</h1>
+    <div class="sub">微信唤起测试</div>
+
+    <button class="btn" id="scanBtn">
+        <span>🔘</span> 打开微信扫一扫
+    </button>
+
+    <div class="info">
+        <p>📱 <i>weixin://scanqrcode</i></p>
+        <p>✅ 点击按钮 → 唤起微信 → 扫码页面</p>
+        <p>⚠️ 仅限「微信内置浏览器」或已安装微信 + 已登录</p>
+    </div>
+
+    <div class="fail-tip" id="failMsg" style="display: none;">
+        ⚡ 未检测到跳转？请手动打开微信「扫一扫」或重试
+    </div>
+    <footer>
+        极简测试 | 失效请更新微信版本
+    </footer>
+</div>
+
+<script>
+    (function() {
+        // 极短轻量唤起逻辑：兼容移动端/微信内/外部浏览器
+        const btn = document.getElementById('scanBtn');
+        const failDiv = document.getElementById('failMsg');
+        let timer = null;
+        let hasLeft = false;
+
+        // 清除定时器辅助
+        function clearTimer() {
+            if (timer) {
+                clearTimeout(timer);
+                timer = null;
+            }
+        }
+
+        // 尝试唤起扫一扫
+        function invokeScan() {
+            // 隐藏之前的失败提示
+            if (failDiv) failDiv.style.display = 'none';
+            hasLeft = false;
+
+            // 关键: 最新的通用拉起协议 (根据目前微信开放能力 weixin://scanqrcode 最为稳定)
+            // 部分旧版本同时兼容 weixin://dl/scan ，但scanqrcode实测可用率更高。
+            const wechatScheme = 'weixin://scanqrcode';
+            
+            // 记录跳转前的当前页面可见性 (防止被浏览器拦截)
+            // 使用 location.href 触发 scheme
+            window.location.href = wechatScheme;
+            
+            // 监听窗口失焦 (blur) —— 代表微信被成功唤起，页面暂时失去焦点
+            function onBlur() {
+                hasLeft = true;
+                clearTimer();
+                window.removeEventListener('blur', onBlur);
+                window.removeEventListener('pageshow', onPageShow);
+                // 成功调起，不做额外操作
+            }
+            
+            // 如果跳转失败 (页面未失焦 且 1秒后还在原页面)，给用户友好提示
+            function onPageShow() {
+                // 某些浏览器返回页面也会触发pageshow，稍作延迟再判断
+                setTimeout(() => {
+                    if (!hasLeft && document.hasFocus && document.hasFocus()) {
+                        if (failDiv) failDiv.style.display = 'block';
+                    }
+                }, 100);
+            }
+            
+            window.addEventListener('blur', onBlur);
+            window.addEventListener('pageshow', onPageShow);
+            
+            // 兜底定时：如果1.2秒内没有离开页面（没唤起微信），显示备用提示
+            timer = setTimeout(() => {
+                if (!hasLeft) {
+                    if (failDiv) failDiv.style.display = 'block';
+                }
+                window.removeEventListener('blur', onBlur);
+                window.removeEventListener('pageshow', onPageShow);
+                clearTimer();
+            }, 1200);
+        }
+
+        // 绑定点击事件
+        if (btn) {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                invokeScan();
+            });
+        }
+
+        // 额外辅助: 在微信内置浏览器中也可以直接调用（同样逻辑）
+        // 如果用户是ios并且未安装微信？检测并不必要，主要让用户明白必须安装微信
+        // 极简风格下不做复杂ua判断，全部尝试唤起，提示友好即可
+    })();
+</script>
+</body>
+</html>
