@@ -440,22 +440,6 @@
         background: #1e3c72;
     }
     
-    /* 开发者指令输入弹窗 */
-    .dev-code-modal .modal-content {
-        text-align: center;
-        max-width: 360px;
-    }
-    .dev-code-modal input {
-        text-align: center;
-        font-size: 1rem;
-        letter-spacing: 1px;
-    }
-    .dev-code-modal .hint {
-        font-size: 0.75rem;
-        color: #888;
-        margin-top: 8px;
-    }
-    
     /* 订阅通知弹窗样式 */
     .subscribe-modal .modal-content {
         text-align: center;
@@ -576,20 +560,6 @@
     </div>
 </div>
 
-<!-- 开发者指令输入弹窗 -->
-<div id="devCodeModal" class="modal-overlay dev-code-modal" style="z-index: 30001;">
-    <div class="modal-content">
-        <h3>🔐 开发者模式</h3>
-        <p style="font-size: 0.85rem; color: #666; margin-bottom: 12px;">请输入验证码</p>
-        <input type="text" id="devCodeInput" placeholder="输入验证码" autocomplete="off" style="text-align: center; font-size: 1rem;">
-        <div class="hint" id="devCodeHint"></div>
-        <div class="modal-buttons" style="margin-top: 16px;">
-            <button class="confirm-btn" id="devCodeConfirmBtn">验证</button>
-            <button class="cancel-btn" id="devCodeCancelBtn">取消</button>
-        </div>
-    </div>
-</div>
-
 <!-- 订阅通知弹窗 -->
 <div id="subscribeModal" class="modal-overlay subscribe-modal" style="z-index: 30003;">
     <div class="modal-content">
@@ -645,7 +615,6 @@
 <script>
     // ========== 订阅通知弹窗 ==========
     function checkAndShowSubscribeModal() {
-        // 检查是否选择了"不再提示"
         const noRemind = localStorage.getItem('subscribe_no_remind');
         if (noRemind === 'true') {
             return;
@@ -687,163 +656,8 @@
         }
     }
     
-    // ========== 灰度测试配置 ==========
-    const GRAY_TEST_URL = 'https://cdn.jsdelivr.net/gh/bloxorz671/5class-system@main/5test.txt';
-    let grayTestUsers = [];
-    let isGrayUser = false;
-    let isDeveloperMode = false;
-    
-    async function loadGrayTestUsers() {
-        try {
-            const response = await fetch(GRAY_TEST_URL + '?t=' + Date.now());
-            if (response.ok) {
-                const text = await response.text();
-                grayTestUsers = text.split(/\r?\n/).filter(line => line.trim().length > 0).map(line => line.trim());
-                console.log('灰度测试用户列表:', grayTestUsers);
-            } else {
-                console.log('5test.txt 不存在或无法访问，无灰度测试用户');
-                grayTestUsers = [];
-            }
-        } catch (e) {
-            console.log('加载灰度测试列表失败:', e);
-            grayTestUsers = [];
-        }
-        if (currentStudentId && grayTestUsers.includes(currentStudentId)) {
-            isGrayUser = true;
-            console.log('当前用户是灰度测试用户');
-        }
-    }
-    
-    function checkDeveloperMode() {
-        try {
-            const saved = localStorage.getItem('developerMode');
-            if (saved === 'true') {
-                isDeveloperMode = true;
-                console.log('开发者模式已激活');
-            }
-        } catch(e) {}
-    }
-    
-    function saveDeveloperMode() {
-        try {
-            localStorage.setItem('developerMode', 'true');
-            isDeveloperMode = true;
-            console.log('开发者模式已保存');
-        } catch(e) {}
-    }
-    
-    function verifyDeveloperCode(inputCode) {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hour = String(now.getHours()).padStart(2, '0');
-        const minute = String(now.getMinutes()).padStart(2, '0');
-        const second = String(now.getSeconds()).padStart(2, '0');
-        
-        const timeNum = parseInt(`${year}${month}${day}${hour}${minute}${second}`);
-        const fiveHoursInSeconds = 5 * 3600;
-        const minTime = timeNum - fiveHoursInSeconds;
-        const maxTime = timeNum + fiveHoursInSeconds;
-        
-        const possibleTime = inputCode / 5;
-        if (Number.isInteger(possibleTime) && possibleTime > 202500000000 && possibleTime < 203000000000) {
-            const timeStr = String(possibleTime);
-            if (timeStr.length === 14) {
-                const y = parseInt(timeStr.substring(0, 4));
-                const m = parseInt(timeStr.substring(4, 6)) - 1;
-                const d = parseInt(timeStr.substring(6, 8));
-                const h = parseInt(timeStr.substring(8, 10));
-                const min = parseInt(timeStr.substring(10, 12));
-                const sec = parseInt(timeStr.substring(12, 14));
-                if (!isNaN(y) && !isNaN(m) && !isNaN(d) && !isNaN(h) && !isNaN(min) && !isNaN(sec)) {
-                    const targetDate = new Date(y, m, d, h, min, sec);
-                    const diffMs = Math.abs(now.getTime() - targetDate.getTime());
-                    const diffHours = diffMs / (1000 * 3600);
-                    if (diffHours <= 5) {
-                        return true;
-                    }
-                }
-            }
-        }
-        
-        const possibleStudentId = inputCode / 5;
-        if (Number.isInteger(possibleStudentId)) {
-            const studentIdStr = String(possibleStudentId);
-            if (studentIdStr.length === 5 && /^\d{5}$/.test(studentIdStr)) {
-                if (nameMapping[studentIdStr] || studentIdStr === currentStudentId) {
-                    return true;
-                }
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
-    function showDevCodeModal() {
-        const modal = document.getElementById('devCodeModal');
-        const input = document.getElementById('devCodeInput');
-        const confirmBtn = document.getElementById('devCodeConfirmBtn');
-        const cancelBtn = document.getElementById('devCodeCancelBtn');
-        const hint = document.getElementById('devCodeHint');
-        
-        if (!modal) return;
-        
-        if (input) input.value = '';
-        if (hint) hint.textContent = '';
-        
-        modal.classList.add('show');
-        
-        const handleConfirm = () => {
-            const code = input.value.trim();
-            if (!code) {
-                if (hint) hint.textContent = '请输入验证码';
-                return;
-            }
-            
-            if (verifyDeveloperCode(parseInt(code))) {
-                saveDeveloperMode();
-                modal.classList.remove('show');
-                alert('✅ 开发者模式已激活！\n页面将刷新以应用开发者模式。');
-                location.reload();
-            } else {
-                if (hint) hint.textContent = '❌ 验证码错误，请重试';
-                if (input) input.value = '';
-                input.focus();
-            }
-        };
-        
-        const handleCancel = () => {
-            modal.classList.remove('show');
-        };
-        
-        confirmBtn.onclick = handleConfirm;
-        cancelBtn.onclick = handleCancel;
-        
-        input.onkeypress = (e) => {
-            if (e.key === 'Enter') handleConfirm();
-        };
-        
-        modal.onclick = (e) => {
-            if (e.target === modal) handleCancel();
-        };
-        
-        input.focus();
-    }
-    
-    // ========== 设备兼容性检测（开发者模式下跳过） ==========
+    // ========== 设备兼容性检测 ==========
     (function() {
-        let devMode = false;
-        try {
-            devMode = localStorage.getItem('developerMode') === 'true';
-        } catch(e) {}
-        
-        if (devMode) {
-            console.log('开发者模式已激活，跳过设备兼容性警告');
-            return;
-        }
-        
         const ua = navigator.userAgent;
         const isIOS = /iPhone|iPad|iPod/i.test(ua);
         const isMac = /Macintosh/i.test(ua) && !isIOS;
@@ -1829,6 +1643,17 @@
     
     function closePointsModalFunc() { pointsModal.classList.remove('show'); }
     
+    // 设置头像图片（根据学号加载对应图片，失败则回退到41.jpg）
+    function setAvatarImage(imgElement, studentId) {
+        if (!imgElement || !studentId) return;
+        const customSrc = `${studentId}pic.jpg`;
+        imgElement.src = customSrc;
+        imgElement.onerror = function() {
+            this.onerror = null;
+            this.src = '41.jpg';
+        };
+    }
+    
     async function renderProfilePage() {
         if (!profileContent) return;
         if (!currentStudentId) {
@@ -1839,7 +1664,7 @@
         const currentTotal = integralMapping[currentStudentId] || 0;
         profileContent.innerHTML = `
             <div class="profile-card">
-                <img class="avatar" src="41.jpg" alt="头像" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%234a90e2\'/%3E%3Ctext x=\'50\' y=\'70\' text-anchor=\'middle\' fill=\'white\' font-size=\'40\'%3E👤%3C/text%3E%3C/svg%3E'">
+                <img class="avatar" id="profileAvatar" src="41.jpg" alt="头像" onerror="this.src='41.jpg'">
                 <div class="profile-info">
                     <div class="profile-name">${escapeHtml(studentName)}</div>
                     <div class="profile-student-id">学号：${currentStudentId}</div>
@@ -1852,29 +1677,23 @@
                 <div class="menu-item" id="rankMenuItem"><div class="menu-left"><span class="menu-icon">🏆</span><span class="menu-title">积分排行榜</span></div><span class="menu-arrow">›</span></div>
             </div>
         `;
+        
+        // 设置头像（根据学号加载对应图片）
+        const avatarImg = document.getElementById('profileAvatar');
+        if (avatarImg && currentStudentId) {
+            setAvatarImage(avatarImg, currentStudentId);
+            // 添加点击跳转事件
+            avatarImg.onclick = () => {
+                window.location.href = 'https://wj.qq.com/s2/26860993/0922/';
+            };
+        }
+        
         const profileLogoutBtn = document.getElementById('profileLogoutBtn');
         if (profileLogoutBtn) profileLogoutBtn.onclick = () => { clearStudentId(); window.location.href = window.location.pathname; };
         const pointsMenuItem = document.getElementById('pointsMenuItem');
         if (pointsMenuItem) pointsMenuItem.onclick = () => showPointsDetail();
         const rankMenuItem = document.getElementById('rankMenuItem');
         if (rankMenuItem) rankMenuItem.onclick = () => { window.location.href = '/5pm'; };
-        
-        const avatarImg = document.querySelector('.avatar');
-        if (avatarImg) {
-            let clickCount = 0;
-            let clickTimer = null;
-            avatarImg.style.cursor = 'pointer';
-            avatarImg.onclick = (e) => {
-                e.stopPropagation();
-                clickCount++;
-                if (clickTimer) clearTimeout(clickTimer);
-                clickTimer = setTimeout(() => { clickCount = 0; }, 1000);
-                if (clickCount === 5) {
-                    clickCount = 0;
-                    showDevCodeModal();
-                }
-            };
-        }
     }
     
     function showHome() { homePage.classList.add('active'); profilePage.classList.remove('active'); navHomeBtn.classList.add('active'); navProfileBtn.classList.remove('active'); }
@@ -2098,8 +1917,7 @@
     if (pointsModal) pointsModal.addEventListener('click', (e) => { if (e.target === pointsModal) closePointsModalFunc(); });
     
     async function init() {
-        await Promise.all([loadConfigFile(), loadNameMapping(), loadIntegralData(), loadGrayTestUsers()]);
-        checkDeveloperMode();
+        await Promise.all([loadConfigFile(), loadNameMapping(), loadIntegralData()]);
         if (isTargetDevice) { await checkUserAgentAndPrompt(); await showGreeting(); }
         else { await showGreeting(); }
         showHome();
