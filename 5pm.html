@@ -320,7 +320,6 @@
     // ========== 配置 ==========
     const NAME_FILE_URL = 'https://luckynum.top/5name.txt';
     const INTEGRAL_FILE_URL = 'https://cdn.jsdelivr.net/gh/bloxorz671/5class-system@main/student-integral.txt';
-    // 分数记录文件（通过代理）
     const RECORDS_FILE_URL = 'https://cdn.jsdelivr.net/gh/bloxorz671/5class-system@main/jffi.txt';
     
     // 评级配置
@@ -343,21 +342,22 @@
         return RATING_CONFIG[4];
     }
     
-    // 设置头像图片（根据学号加载对应图片，失败则回退到41.jpg）
+    // 设置头像图片（根据学号加载对应图片，失败则回退到41.jpg，加时间戳强制刷新）
     function setAvatarImage(imgElement, studentId) {
         if (!imgElement || !studentId) return;
-        const customSrc = `${studentId}pic.jpg`;
+        const timestamp = Date.now();
+        const customSrc = `${studentId}pic.jpg?t=${timestamp}`;
         imgElement.src = customSrc;
         imgElement.onerror = function() {
             this.onerror = null;
-            this.src = '41.jpg';
+            this.src = `41.jpg?t=${timestamp}`;
         };
     }
     
     // ========== 读取姓名映射 ==========
     async function fetchNameMapping() {
         try {
-            const response = await fetch(NAME_FILE_URL);
+            const response = await fetch(NAME_FILE_URL + '?t=' + Date.now());
             if (response.ok) {
                 const text = await response.text();
                 const mapping = {};
@@ -384,7 +384,7 @@
     // ========== 读取积分文件 ==========
     async function fetchIntegralData() {
         try {
-            const response = await fetch(INTEGRAL_FILE_URL);
+            const response = await fetch(INTEGRAL_FILE_URL + '?t=' + Date.now());
             if (response.ok) {
                 const text = await response.text();
                 const integralMap = {};
@@ -411,10 +411,9 @@
     }
     
     // ========== 解析分数记录文件 ==========
-    
     async function fetchRecordsData() {
         try {
-            const response = await fetch(RECORDS_FILE_URL);
+            const response = await fetch(RECORDS_FILE_URL + '?t=' + Date.now());
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
@@ -425,8 +424,6 @@
             for (let line of lines) {
                 line = line.trim();
                 if (line === '') continue;
-                
-                // 正则解析: 日期 时间 学号 事件内容 分数变化
                 
                 const match = line.match(/^(\d{4}\/\d{2}\/\d{2})\s+(\d{2}:\d{2})\s+(\d+)\s+(.+?)\s+([+-]?\d+)$/);
                 if (match) {
@@ -439,7 +436,6 @@
                         scoreChange: parseInt(scoreChange)
                     });
                 } else {
-                    // 尝试另一种解析（可能事件中间有空格的情况，用更宽松的方式）
                     const parts = line.split(/\s+/);
                     if (parts.length >= 5) {
                         const date = parts[0];
@@ -461,7 +457,6 @@
                 }
             }
             
-            // 按日期时间倒序排列（最新的在前面）
             records.sort((a, b) => {
                 const dateTimeA = `${a.date} ${a.time}`;
                 const dateTimeB = `${b.date} ${b.time}`;
@@ -498,7 +493,6 @@
                 });
             }
             
-            // 按学号升序排序（数字顺序）
             students.sort((a, b) => {
                 const numA = parseInt(a.id);
                 const numB = parseInt(b.id);
@@ -520,15 +514,16 @@
     
     function renderStudentList(students, container) {
         let html = '';
+        const timestamp = Date.now();
         
         for (let i = 0; i < students.length; i++) {
             const student = students[i];
-            // 生成头像的HTML，使用 onerror 实现回退
-            const avatarSrc = `${student.id}pic.jpg`;
+            const avatarSrc = `${student.id}pic.jpg?t=${timestamp}`;
+            const fallbackSrc = `41.jpg?t=${timestamp}`;
             
             html += `
                 <div class="student-card">
-                    <img class="avatar" src="${avatarSrc}" onerror="this.onerror=null; this.src='41.jpg';" alt="头像">
+                    <img class="avatar" src="${avatarSrc}" onerror="this.onerror=null; this.src='${fallbackSrc}';" alt="头像">
                     <div class="student-info">
                         <div class="student-name">${escapeHtml(student.name)}</div>
                         <div class="student-id">学号: ${escapeHtml(student.id)}</div>
@@ -549,12 +544,10 @@
         const modal = document.getElementById('recordsModal');
         const modalBody = document.getElementById('modalBody');
         
-        // 显示弹窗并展示加载状态
         modal.classList.add('show');
         modalBody.innerHTML = '<div class="loading-records">📡 正在读取分数记录...</div>';
         
         try {
-            // 先获取姓名映射，用于显示学生姓名
             const nameMapping = await fetchNameMapping();
             const records = await fetchRecordsData();
             
@@ -617,7 +610,6 @@
             modal.classList.remove('show');
         });
         
-        // 点击遮罩层关闭
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.classList.remove('show');
@@ -625,7 +617,6 @@
         });
     }
     
-    // 启动
     initModal();
     loadStudentData();
 </script>
