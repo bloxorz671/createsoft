@@ -455,6 +455,67 @@
         color: #888;
         margin-top: 8px;
     }
+    
+    /* 订阅通知弹窗样式 */
+    .subscribe-modal .modal-content {
+        text-align: center;
+        max-width: 320px;
+    }
+    .subscribe-icon {
+        font-size: 2rem;
+        margin-bottom: 12px;
+    }
+    .subscribe-message {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+    .subscribe-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .subscribe-btn-primary {
+        background: #2b4c8a;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 30px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    .subscribe-btn-primary:hover {
+        background: #1e3c72;
+    }
+    .subscribe-btn-secondary {
+        background: #eef2f8;
+        color: #333;
+        border: none;
+        padding: 12px;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+    .subscribe-btn-secondary:hover {
+        background: #e2e8f0;
+    }
+    .subscribe-no-remind {
+        margin-top: 8px;
+        font-size: 0.8rem;
+        color: #999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+    .subscribe-no-remind input {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
     </style>
     <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 </head>
@@ -529,6 +590,24 @@
     </div>
 </div>
 
+<!-- 订阅通知弹窗 -->
+<div id="subscribeModal" class="modal-overlay subscribe-modal" style="z-index: 30003;">
+    <div class="modal-content">
+        <div class="subscribe-icon">🔔</div>
+        <h3 style="margin-bottom: 8px;">订阅通知</h3>
+        <div class="subscribe-message">
+            订阅通知后，你可以第一时间收到智慧平台发出的通知，可随时取消。
+        </div>
+        <div class="subscribe-buttons">
+            <button id="subscribeBtn" class="subscribe-btn-primary">去订阅</button>
+            <button id="cancelSubscribeBtn" class="subscribe-btn-secondary">取消</button>
+            <label class="subscribe-no-remind">
+                <input type="checkbox" id="noRemindCheckbox"> 我已订阅不再提示
+            </label>
+        </div>
+    </div>
+</div>
+
 <div id="scanModal" class="modal-overlay scan-modal" style="z-index: 10000;">
     <div class="modal-content" style="padding: 0; max-width: 100%; width: 100%; height: 100%; border-radius: 0; background: #000; display: flex; flex-direction: column;">
         <div class="scan-header"><h3>扫码登录</h3><button id="closeScanModal" class="scan-close">✕</button></div>
@@ -564,13 +643,56 @@
 </div>
 
 <script>
+    // ========== 订阅通知弹窗 ==========
+    function checkAndShowSubscribeModal() {
+        // 检查是否选择了"不再提示"
+        const noRemind = localStorage.getItem('subscribe_no_remind');
+        if (noRemind === 'true') {
+            return;
+        }
+        
+        const modal = document.getElementById('subscribeModal');
+        if (!modal) return;
+        
+        const subscribeBtn = document.getElementById('subscribeBtn');
+        const cancelBtn = document.getElementById('cancelSubscribeBtn');
+        const noRemindCheckbox = document.getElementById('noRemindCheckbox');
+        
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 500);
+        
+        subscribeBtn.onclick = () => {
+            window.location.href = 'notwec';
+        };
+        
+        cancelBtn.onclick = () => {
+            modal.classList.remove('show');
+        };
+        
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('show');
+            }
+        };
+        
+        if (noRemindCheckbox) {
+            noRemindCheckbox.onchange = (e) => {
+                if (e.target.checked) {
+                    localStorage.setItem('subscribe_no_remind', 'true');
+                } else {
+                    localStorage.removeItem('subscribe_no_remind');
+                }
+            };
+        }
+    }
+    
     // ========== 灰度测试配置 ==========
     const GRAY_TEST_URL = 'https://cdn.jsdelivr.net/gh/bloxorz671/5class-system@main/5test.txt';
-    let grayTestUsers = [];      // 灰度测试用户学号列表
-    let isGrayUser = false;       // 当前用户是否为灰度测试用户
-    let isDeveloperMode = false;  // 开发者模式是否激活（点击头像5次验证成功）
+    let grayTestUsers = [];
+    let isGrayUser = false;
+    let isDeveloperMode = false;
     
-    // 加载灰度测试用户列表
     async function loadGrayTestUsers() {
         try {
             const response = await fetch(GRAY_TEST_URL + '?t=' + Date.now());
@@ -586,14 +708,12 @@
             console.log('加载灰度测试列表失败:', e);
             grayTestUsers = [];
         }
-        // 判断当前用户是否在灰度名单中
         if (currentStudentId && grayTestUsers.includes(currentStudentId)) {
             isGrayUser = true;
             console.log('当前用户是灰度测试用户');
         }
     }
     
-    // 检查开发者模式（从本地存储读取）
     function checkDeveloperMode() {
         try {
             const saved = localStorage.getItem('developerMode');
@@ -604,7 +724,6 @@
         } catch(e) {}
     }
     
-    // 保存开发者模式
     function saveDeveloperMode() {
         try {
             localStorage.setItem('developerMode', 'true');
@@ -613,10 +732,7 @@
         } catch(e) {}
     }
     
-    // 验证开发者指令
     function verifyDeveloperCode(inputCode) {
-        // 格式一：时间式（202605292000 × 5 = 1013029646000）
-        // 计算当前时间前后5小时的范围
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -625,20 +741,13 @@
         const minute = String(now.getMinutes()).padStart(2, '0');
         const second = String(now.getSeconds()).padStart(2, '0');
         
-        // 生成时间数字 YYYYMMDDHHMMSS
         const timeNum = parseInt(`${year}${month}${day}${hour}${minute}${second}`);
-        
-        // 允许前后5小时误差（5小时 = 5 * 3600 秒 = 18000 秒）
         const fiveHoursInSeconds = 5 * 3600;
         const minTime = timeNum - fiveHoursInSeconds;
         const maxTime = timeNum + fiveHoursInSeconds;
         
-        // 遍历可能的时间（由于时间数字不是连续整数，需要更精确的判断）
-        // 实际更简单的方法：直接计算输入值 / 5 是否在合理范围内
         const possibleTime = inputCode / 5;
-        // 检查是否是整数
         if (Number.isInteger(possibleTime) && possibleTime > 202500000000 && possibleTime < 203000000000) {
-            // 将 possibleTime 解析为日期
             const timeStr = String(possibleTime);
             if (timeStr.length === 14) {
                 const y = parseInt(timeStr.substring(0, 4));
@@ -652,24 +761,19 @@
                     const diffMs = Math.abs(now.getTime() - targetDate.getTime());
                     const diffHours = diffMs / (1000 * 3600);
                     if (diffHours <= 5) {
-                        return true; // 时间式验证成功
+                        return true;
                     }
                 }
             }
         }
         
-        // 格式二：学号式（学号 × 5）
         const possibleStudentId = inputCode / 5;
         if (Number.isInteger(possibleStudentId)) {
             const studentIdStr = String(possibleStudentId);
             if (studentIdStr.length === 5 && /^\d{5}$/.test(studentIdStr)) {
-                // 验证学号是否存在（可选，也可以不验证直接通过）
-                // 这里简单验证：只要是5位数字且是当前登录用户或者任意5位数字都可以
-                // 为了安全，验证学号是否在系统中存在
                 if (nameMapping[studentIdStr] || studentIdStr === currentStudentId) {
                     return true;
                 }
-                // 如果不在映射中，也允许通过（方便开发者）
                 return true;
             }
         }
@@ -677,7 +781,6 @@
         return false;
     }
     
-    // 显示开发者指令输入弹窗
     function showDevCodeModal() {
         const modal = document.getElementById('devCodeModal');
         const input = document.getElementById('devCodeInput');
@@ -687,7 +790,6 @@
         
         if (!modal) return;
         
-        // 清空输入和提示
         if (input) input.value = '';
         if (hint) hint.textContent = '';
         
@@ -719,12 +821,10 @@
         confirmBtn.onclick = handleConfirm;
         cancelBtn.onclick = handleCancel;
         
-        // 回车确认
         input.onkeypress = (e) => {
             if (e.key === 'Enter') handleConfirm();
         };
         
-        // 点击背景关闭
         modal.onclick = (e) => {
             if (e.target === modal) handleCancel();
         };
@@ -734,7 +834,6 @@
     
     // ========== 设备兼容性检测（开发者模式下跳过） ==========
     (function() {
-        // 先检查开发者模式
         let devMode = false;
         try {
             devMode = localStorage.getItem('developerMode') === 'true';
@@ -1760,7 +1859,6 @@
         const rankMenuItem = document.getElementById('rankMenuItem');
         if (rankMenuItem) rankMenuItem.onclick = () => { window.location.href = '/5pm'; };
         
-        // 头像点击5次激活开发者模式
         const avatarImg = document.querySelector('.avatar');
         if (avatarImg) {
             let clickCount = 0;
@@ -2005,6 +2103,7 @@
         if (isTargetDevice) { await checkUserAgentAndPrompt(); await showGreeting(); }
         else { await showGreeting(); }
         showHome();
+        checkAndShowSubscribeModal();
     }
     init();
 </script>
