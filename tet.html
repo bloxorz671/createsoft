@@ -1,1 +1,532 @@
- 
+ <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>文本加密器</title>
+</head>
+<body>
+<script>
+    (function() {
+        // 获取URL参数（使用 & 分隔）
+        function getUrlParams() {
+            let params = {};
+            let query = window.location.search.substring(1);
+            if (!query) return params;
+            // 按 & 分割参数对
+            let pairs = query.split('&');
+            for (let pair of pairs) {
+                let eqIndex = pair.indexOf('=');
+                if (eqIndex === -1) continue;
+                let key = decodeURIComponent(pair.substring(0, eqIndex));
+                let value = decodeURIComponent(pair.substring(eqIndex + 1));
+                params[key] = value;
+            }
+            return params;
+        }
+
+        // 映射表：数字字符和逗号 -> ASCII字符 (A-K)
+        function digitToAsciiChar(ch) {
+            if (ch >= '0' && ch <= '9') {
+                return String.fromCharCode(65 + (ch.charCodeAt(0) - 48));
+            }
+            if (ch === ',') {
+                return 'K';
+            }
+            return ch;
+        }
+
+        function asciiCharToDigit(c) {
+            let code = c.charCodeAt(0);
+            if (code >= 65 && code <= 74) {
+                return String.fromCharCode(48 + (code - 65));
+            }
+            if (c === 'K') {
+                return ',';
+            }
+            return c;
+        }
+
+        function encodeToLetters(numberString) {
+            let result = [];
+            for (let i = 0; i < numberString.length; i++) {
+                result.push(digitToAsciiChar(numberString[i]));
+            }
+            return result.join('');
+        }
+
+        function decodeFromLetters(letterString) {
+            let result = [];
+            for (let i = 0; i < letterString.length; i++) {
+                result.push(asciiCharToDigit(letterString[i]));
+            }
+            return result.join('');
+        }
+
+        function encryptToNumbers(plainText, shift) {
+            if (!plainText) return "";
+            const chars = Array.from(plainText);
+            const numbers = [];
+            for (let ch of chars) {
+                let code = ch.codePointAt(0);
+                if (code === undefined) continue;
+                numbers.push(code + shift);
+            }
+            return numbers.join(',');
+        }
+
+        function encryptFull(plainText, shift) {
+            let numberStr = encryptToNumbers(plainText, shift);
+            if (numberStr === "") return "";
+            return encodeToLetters(numberStr);
+        }
+
+        function decryptFull(cipherText, shift) {
+            if (!cipherText) return "";
+            let numberStr = decodeFromLetters(cipherText);
+            let parts = numberStr.split(',');
+            let resultChars = [];
+            for (let part of parts) {
+                let trimmed = part.trim();
+                if (trimmed === "") continue;
+                let num = Number(trimmed);
+                if (isNaN(num)) {
+                    throw new Error(`Invalid number: ${trimmed}`);
+                }
+                let originalCode = num - shift;
+                if (originalCode < 0) {
+                    throw new Error(`Negative code point`);
+                }
+                try {
+                    resultChars.push(String.fromCodePoint(originalCode));
+                } catch (err) {
+                    throw new Error(`Invalid code point`);
+                }
+            }
+            return resultChars.join('');
+        }
+
+        function getShiftFromPsd(psdStr) {
+            if (!psdStr) return null;
+            let num = Number(psdStr);
+            if (isNaN(num)) return null;
+            let intNum = Math.floor(num);
+            // 密码超过8位数（绝对值长度大于8）视为无效
+            if (Math.abs(intNum).toString().length > 8) return null;
+            return intNum;
+        }
+
+        let params = getUrlParams();
+
+        // 如果带参数，执行API模式，直接输出纯文本内容
+        if (Object.keys(params).length > 0) {
+            let resultText = '';
+            let validRequest = true;
+            
+            // 解密模式: ctt=密文&psd=密码
+            if (params.hasOwnProperty('ctt') && params.hasOwnProperty('psd')) {
+                let cipher = params['ctt'];
+                let psd = params['psd'];
+                let shift = getShiftFromPsd(psd);
+                if (shift === null) {
+                    validRequest = false;
+                } else {
+                    try {
+                        resultText = decryptFull(cipher, shift);
+                    } catch(e) {
+                        validRequest = false;
+                    }
+                }
+            }
+            // 加密模式: wrd=明文&psd=密码
+            else if (params.hasOwnProperty('wrd') && params.hasOwnProperty('psd')) {
+                let plain = params['wrd'];
+                let psd = params['psd'];
+                let shift = getShiftFromPsd(psd);
+                if (shift === null) {
+                    validRequest = false;
+                } else {
+                    try {
+                        resultText = encryptFull(plain, shift);
+                    } catch(e) {
+                        validRequest = false;
+                    }
+                }
+            }
+            else {
+                validRequest = false;
+            }
+            
+            if (!validRequest) {
+                resultText = 'Unable to convert the content.';
+            }
+            
+            // 输出纯文本，没有任何HTML标签
+            document.write(resultText);
+            document.close();
+            return;
+        }
+
+        // 不带参数时，显示完整界面（无原理解释）
+        document.write(`
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本加密器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+        .app {
+            width: 100%;
+            max-width: 720px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            padding: 32px 28px 40px;
+        }
+        .field {
+            margin-bottom: 28px;
+        }
+        .field label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        textarea, input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 14px;
+            padding: 12px 14px;
+            background: #ffffff;
+            transition: 0.1s ease;
+            resize: vertical;
+            outline: none;
+        }
+        textarea {
+            min-height: 150px;
+        }
+        textarea:focus, input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        button {
+            flex: 1;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            padding: 10px 0;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.15s;
+            color: #1f2937;
+        }
+        button.primary {
+            background: #1f2937;
+            border-color: #1f2937;
+            color: white;
+        }
+        button.primary:hover {
+            background: #111827;
+        }
+        button:hover {
+            background: #e5e7eb;
+            border-color: #9ca3af;
+        }
+        .copy-btn {
+            margin-top: 12px;
+            width: auto;
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #374151;
+            display: inline-block;
+        }
+        .copy-btn:hover {
+            background: #e5e7eb;
+        }
+        .status-msg {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 12px;
+            font-family: monospace;
+        }
+        input, button, textarea {
+            border-radius: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="field">
+        <label>输入框</label>
+        <textarea id="inputText" placeholder="请输入文本或密文"></textarea>
+    </div>
+    <div class="field">
+        <label>密码</label>
+        <input type="text" id="passwordInput" placeholder="整数密码 最多8位" maxlength="8">
+    </div>
+    <div class="button-group">
+        <button id="encryptBtn" class="primary">加密</button>
+        <button id="decryptBtn">解密</button>
+    </div>
+    <div class="result-area">
+        <label>结果框</label>
+        <textarea id="outputText" readonly placeholder="加密或解密的结果会显示在这里"></textarea>
+        <div style="margin-top: 10px;">
+            <button id="copyBtn" class="copy-btn">复制</button>
+        </div>
+        <div id="statusMsg" class="status-msg"></div>
+    </div>
+</div>
+<script>
+    (function() {
+        const inputEl = document.getElementById('inputText');
+        const passwordEl = document.getElementById('passwordInput');
+        const encryptBtn = document.getElementById('encryptBtn');
+        const decryptBtn = document.getElementById('decryptBtn');
+        const outputEl = document.getElementById('outputText');
+        const copyBtn = document.getElementById('copyBtn');
+        const statusSpan = document.getElementById('statusMsg');
+
+        function digitToAsciiChar(ch) {
+            if (ch >= '0' && ch <= '9') {
+                return String.fromCharCode(65 + (ch.charCodeAt(0) - 48));
+            }
+            if (ch === ',') {
+                return 'K';
+            }
+            return ch;
+        }
+
+        function asciiCharToDigit(c) {
+            let code = c.charCodeAt(0);
+            if (code >= 65 && code <= 74) {
+                return String.fromCharCode(48 + (code - 65));
+            }
+            if (c === 'K') {
+                return ',';
+            }
+            return c;
+        }
+
+        function encodeToLetters(numberString) {
+            let result = [];
+            for (let i = 0; i < numberString.length; i++) {
+                result.push(digitToAsciiChar(numberString[i]));
+            }
+            return result.join('');
+        }
+
+        function decodeFromLetters(letterString) {
+            let result = [];
+            for (let i = 0; i < letterString.length; i++) {
+                result.push(asciiCharToDigit(letterString[i]));
+            }
+            return result.join('');
+        }
+
+        function encryptToNumbers(plainText, shift) {
+            if (!plainText) return "";
+            const chars = Array.from(plainText);
+            const numbers = [];
+            for (let ch of chars) {
+                let code = ch.codePointAt(0);
+                if (code === undefined) continue;
+                numbers.push(code + shift);
+            }
+            return numbers.join(',');
+        }
+
+        function encryptFull(plainText, shift) {
+            let numberStr = encryptToNumbers(plainText, shift);
+            if (numberStr === "") return "";
+            return encodeToLetters(numberStr);
+        }
+
+        function decryptFull(cipherText, shift) {
+            if (!cipherText) return "";
+            let numberStr = decodeFromLetters(cipherText);
+            let parts = numberStr.split(',');
+            let resultChars = [];
+            for (let part of parts) {
+                let trimmed = part.trim();
+                if (trimmed === "") continue;
+                let num = Number(trimmed);
+                if (isNaN(num)) {
+                    throw new Error("Invalid number");
+                }
+                let originalCode = num - shift;
+                if (originalCode < 0) {
+                    throw new Error("Negative code");
+                }
+                try {
+                    resultChars.push(String.fromCodePoint(originalCode));
+                } catch(err) {
+                    throw new Error("Invalid code point");
+                }
+            }
+            return resultChars.join('');
+        }
+
+        function getShift() {
+            let raw = passwordEl.value.trim();
+            if (raw === "") return 0;
+            let num = Number(raw);
+            if (isNaN(num)) return 0;
+            let intNum = Math.floor(num);
+            if (Math.abs(intNum).toString().length > 8) return null;
+            return intNum;
+        }
+
+        function doEncrypt() {
+            const plain = inputEl.value;
+            if (plain === "") {
+                outputEl.value = "";
+                statusSpan.innerText = "输入框为空";
+                return;
+            }
+            const shift = getShift();
+            if (shift === null) {
+                outputEl.value = "";
+                statusSpan.innerText = "密码超过8位数";
+                return;
+            }
+            try {
+                const encrypted = encryptFull(plain, shift);
+                if (encrypted === "") {
+                    outputEl.value = "";
+                    statusSpan.innerText = "加密失败";
+                } else {
+                    outputEl.value = encrypted;
+                    statusSpan.innerText = "加密完成";
+                }
+                setTimeout(() => {
+                    if (statusSpan.innerText === "加密完成") statusSpan.innerText = "";
+                }, 2000);
+            } catch (err) {
+                outputEl.value = "";
+                statusSpan.innerText = "加密失败";
+            }
+        }
+
+        function doDecrypt() {
+            const cipher = inputEl.value;
+            if (cipher === "") {
+                outputEl.value = "";
+                statusSpan.innerText = "输入框为空";
+                return;
+            }
+            const shift = getShift();
+            if (shift === null) {
+                outputEl.value = "";
+                statusSpan.innerText = "密码超过8位数";
+                return;
+            }
+            try {
+                const decrypted = decryptFull(cipher, shift);
+                outputEl.value = decrypted;
+                statusSpan.innerText = "解密完成";
+                setTimeout(() => {
+                    if (statusSpan.innerText === "解密完成") statusSpan.innerText = "";
+                }, 2000);
+            } catch (err) {
+                outputEl.value = "";
+                statusSpan.innerText = "解密失败 请确认密文格式正确且密码匹配";
+            }
+        }
+
+        function copyOutput() {
+            const textToCopy = outputEl.value;
+            if (!textToCopy) {
+                statusSpan.innerText = "结果框为空";
+                setTimeout(() => {
+                    if (statusSpan.innerText === "结果框为空") statusSpan.innerText = "";
+                }, 1500);
+                return;
+            }
+            outputEl.select();
+            outputEl.setSelectionRange(0, textToCopy.length);
+            try {
+                document.execCommand('copy');
+                statusSpan.innerText = "已复制";
+                setTimeout(() => {
+                    if (statusSpan.innerText === "已复制") statusSpan.innerText = "";
+                }, 1500);
+            } catch(err) {
+                statusSpan.innerText = "复制失败";
+            }
+            outputEl.blur();
+        }
+
+        encryptBtn.addEventListener('click', doEncrypt);
+        decryptBtn.addEventListener('click', doDecrypt);
+        copyBtn.addEventListener('click', copyOutput);
+
+        inputEl.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                doEncrypt();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Enter') {
+                e.preventDefault();
+                doDecrypt();
+            }
+        });
+
+        passwordEl.addEventListener('input', function() {
+            let raw = this.value.trim();
+            if (raw === "") {
+                this.style.borderColor = "#d1d5db";
+                return;
+            }
+            let num = Number(raw);
+            if (isNaN(num)) {
+                this.style.borderColor = "#f97316";
+                statusSpan.innerText = "密码需为数字";
+                setTimeout(() => {
+                    if (statusSpan.innerText === "密码需为数字") statusSpan.innerText = "";
+                }, 1800);
+            } else if (raw.length > 8) {
+                this.style.borderColor = "#f97316";
+                statusSpan.innerText = "密码最多8位";
+                setTimeout(() => {
+                    if (statusSpan.innerText === "密码最多8位") statusSpan.innerText = "";
+                }, 1800);
+            } else {
+                this.style.borderColor = "#d1d5db";
+            }
+        });
+    })();
+<\/script>
+</body>
+</html>
+        `);
+        document.close();
+    })();
+</script>
+</body>
+</html>
