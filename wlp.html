@@ -109,7 +109,7 @@
         .answer-display { display: none; margin-left: 3px; color: #4caf50; font-weight: bold; font-size: 12px; }
         .answer-display.show { display: inline; }
 
-        /* ==================== 键盘（宽松间距） ==================== */
+        /* ==================== 键盘 ==================== */
         .custom-keyboard {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: #c8cad0; padding: 8px 6px;
@@ -150,8 +150,8 @@
         .kb-key.shift.active { background: #4a6cf7; color: #fff; }
         .kb-key.shift.active:active, .kb-key.shift.active.pressed { background: #2a4cd0 !important; }
         .kb-key.num-switch { background: #dcdfe5; font-size: 13px; }
+        .kb-key.symbol { background: #dcdfe5; font-size: 14px; }
 
-        /* 横屏：按键变小但间距保持 */
         @media (orientation: landscape) {
             .custom-keyboard { padding: 4px 10px; padding-bottom: max(5px, env(safe-area-inset-bottom)); }
             .kb-row { gap: 5px; margin-bottom: 4px; }
@@ -161,7 +161,6 @@
             .kb-key.shift { max-width: 46px; }
         }
 
-        /* 小屏竖屏：缩小但保持可点 */
         @media (max-width: 380px) and (orientation: portrait) {
             .custom-keyboard { padding: 6px 4px; }
             .kb-row { gap: 4px; margin-bottom: 4px; }
@@ -345,7 +344,7 @@
     (function(){
         let answerMap = new Map();
         let currentFileId = null, currentDocSize = null;
-        let activeInput = null, isShifted = false;
+        let activeInput = null, isShifted = false, isSymbolPage = false;
         let docLoaded = false;
         let confirmYesCallback = null;
         let deleteRepeatTimer = null;
@@ -565,7 +564,7 @@
             return 'text';
         }
 
-        // ==================== 键盘（宽松间距 + 倒梯形 + 长按删除） ====================
+        // ==================== 键盘 ====================
         function buildKeyboard(type){
             var kb = document.getElementById('customKeyboard');
             if(type==='text'){ kb.innerHTML=''; kb.classList.remove('show'); return; }
@@ -577,11 +576,21 @@
                     [{t:'space',l:'空格'},{t:'done',l:'完成'}]
                 ];
             } else if(type==='english'){
-                var l1=isShifted?['Q','W','E','R','T','Y','U','I','O','P']:['q','w','e','r','t','y','u','i','o','p'];
-                var l2=isShifted?['A','S','D','F','G','H','J','K','L']:['a','s','d','f','g','h','j','k','l'];
-                var l3=[{t:'shift',l:'⇧'}].concat(isShifted?['Z','X','C','V','B','N','M']:['z','x','c','v','b','n','m']).concat(['⌫']);
-                var l4=[{t:'num',l:'123'},'-','.',{t:'space',l:'空格'},',','!','?',{t:'done',l:'完成'}];
-                rows = [l1,l2,l3,l4];
+                if(isSymbolPage){
+                    // 符号页：单引号在第一行
+                    rows = [
+                        ["'",'"','!','?','-','_','.','@','#','$'],
+                        ['%','^','&','*','(',')','[',']','{','}'],
+                        [{t:'abc',l:'ABC'},':',';','<','>','/','\\','~','⌫'],
+                        [{t:'num',l:'123'},',','.',{t:'space',l:'空格'},'?','!',"'",{t:'done',l:'完成'}]
+                    ];
+                } else {
+                    var l1=isShifted?['Q','W','E','R','T','Y','U','I','O','P']:['q','w','e','r','t','y','u','i','o','p'];
+                    var l2=isShifted?['A','S','D','F','G','H','J','K','L']:['a','s','d','f','g','h','j','k','l'];
+                    var l3=[{t:'shift',l:'⇧'}].concat(isShifted?['Z','X','C','V','B','N','M']:['z','x','c','v','b','n','m']).concat(['⌫']);
+                    var l4=[{t:'num',l:'123'},{t:'sym',l:'#+='},'.',{t:'space',l:'空格'},',','!','?',{t:'done',l:'完成'}];
+                    rows = [l1,l2,l3,l4];
+                }
             } else if(type==='num_from_eng'){
                 rows = [
                     ['1','2','3','4','5','6','7','8','9','0'],
@@ -589,15 +598,15 @@
                     [{t:'abc',l:'ABC'},{t:'space',l:'空格'},{t:'done',l:'完成'}]
                 ];
             }
-            // 倒梯形：每行左右缩进递增
             kb.innerHTML = rows.map(function(r, ri){
-                var pad = ri * 8; // 第0行0px, 第1行8px, 第2行16px, 第3行24px
+                var pad = ri * 8;
                 return '<div class="kb-row" style="padding:0 '+pad+'px;">'+r.map(function(k){
                     if(typeof k==='object'){
-                        var cls = k.t==='space'?'space':k.t==='done'?'done':k.t==='delete'?'delete':k.t==='shift'?(isShifted?'shift active':'shift'):'num-switch';
+                        var cls = k.t==='space'?'space':k.t==='done'?'done':k.t==='delete'?'delete':k.t==='shift'?(isShifted?'shift active':'shift'):k.t==='sym'?'symbol':'num-switch';
                         return '<button class="kb-key '+cls+'" data-action="'+k.t+'">'+k.l+'</button>';
                     }
                     if(k==='⌫') return '<button class="kb-key delete" data-action="backspace">⌫</button>';
+                    if(k==="'") return '<button class="kb-key" data-key="\'">\'</button>';
                     return '<button class="kb-key" data-key="'+k+'">'+k+'</button>';
                 }).join('')+'</div>';
             }).join('');
@@ -607,7 +616,7 @@
         function hideKeyboard(){
             document.getElementById('customKeyboard').classList.remove('show');
             stopDeleteRepeat();
-            activeInput = null; isShifted = false;
+            activeInput = null; isShifted = false; isSymbolPage = false;
         }
 
         function stopDeleteRepeat(){
@@ -638,9 +647,10 @@
             vibrate(6);
             if(action==='done'){ hideKeyboard(); return; }
             if(action==='backspace'){ startDeleteRepeat(); return; }
-            if(action==='shift'){ isShifted=!isShifted; buildKeyboard('english'); return; }
-            if(action==='num'){ isShifted=false; buildKeyboard('num_from_eng'); return; }
-            if(action==='abc'){ isShifted=false; buildKeyboard('english'); return; }
+            if(action==='shift'){ isShifted=!isShifted; isSymbolPage=false; buildKeyboard('english'); return; }
+            if(action==='num'){ isShifted=false; isSymbolPage=false; buildKeyboard('num_from_eng'); return; }
+            if(action==='abc'){ isShifted=false; isSymbolPage=false; buildKeyboard('english'); return; }
+            if(action==='sym'){ isSymbolPage=!isSymbolPage; buildKeyboard('english'); return; }
             if(action==='space'){ activeInput.value+=' '; activeInput.dispatchEvent(new Event('input',{bubbles:true})); clearMarkOnEdit(activeInput); return; }
             if(key){ activeInput.value+=key; activeInput.dispatchEvent(new Event('input',{bubbles:true})); clearMarkOnEdit(activeInput); }
         }
@@ -677,8 +687,8 @@
                     if(isTouchDevice&&activeInput===i&&getAnswerType(i.dataset.ans||'')!=='text') e.preventDefault();
                     if(!isTouchDevice||getAnswerType(i.dataset.ans||'')==='text'){ if(e.key!=='Enter'&&e.key!=='Tab') clearMarkOnEdit(i); }
                 });
-                i.addEventListener('focus',function(){ if(!isTouchDevice) return; var t=getAnswerType(this.dataset.ans||''); if(t!=='text'){ activeInput=this; isShifted=false; buildKeyboard(t); } else hideKeyboard(); });
-                i.addEventListener('touchstart',function(e){ e.stopPropagation(); if(isTouchDevice){ var t=getAnswerType(this.dataset.ans||''); if(t!=='text'){ e.preventDefault(); if(activeInput!==this){ hideKeyboard(); activeInput=this; isShifted=false; buildKeyboard(t); this.focus(); } } } });
+                i.addEventListener('focus',function(){ if(!isTouchDevice) return; var t=getAnswerType(this.dataset.ans||''); if(t!=='text'){ activeInput=this; isShifted=false; isSymbolPage=false; buildKeyboard(t); } else hideKeyboard(); });
+                i.addEventListener('touchstart',function(e){ e.stopPropagation(); if(isTouchDevice){ var t=getAnswerType(this.dataset.ans||''); if(t!=='text'){ e.preventDefault(); if(activeInput!==this){ hideKeyboard(); activeInput=this; isShifted=false; isSymbolPage=false; buildKeyboard(t); this.focus(); } } } });
                 i.addEventListener('keypress',function(e){ if(e.key==='Enter'){ e.stopPropagation(); checkAnswer(this.dataset.q); } });
                 i.addEventListener('blur',function(){ setTimeout(function(){ if(document.querySelector('.kb-key.pressed')&&activeInput===i) i.focus(); },100); if(currentFileId) saveToHistory(); });
             });
@@ -799,29 +809,26 @@
 
         window.showGuide = function(){
             document.getElementById('guideContent').innerHTML =
-                '<h2>一、系统简介</h2>'+
-                '<p>本系统可将带有特殊标签的文档（.docx / .xlsx / .txt）转换为交互式填空练习。题目标签自动变成输入框，答案标签用于自动批改。</p>'+
+                '<h2>一、系统简介</h2><p>将文档转为交互式填空练习。支持 .docx / .xlsx / .txt。</p>'+
                 '<h2>二、快速上手</h2>'+
-                '<div class="step"><strong>第1步：</strong>点击 <b>文件 ▾ → 打开文件</b>，选择文档。</div>'+
+                '<div class="step"><strong>第1步：</strong>点击<b>文件▾→打开文件</b>选择文档。</div>'+
                 '<div class="step"><strong>第2步：</strong>在输入框中填写答案。</div>'+
-                '<div class="step"><strong>第3步：</strong>点击<b>检查</b>按钮或按回车键。</div>'+
+                '<div class="step"><strong>第3步：</strong>点击<b>检查</b>或按回车。</div>'+
                 '<h2>三、标签语法</h2>'+
-                '<p><b>题目：</b><code>Q1[]</code> 或 <code>Q1[提示]</code></p>'+
+                '<p><b>题目：</b><code>Q1[]</code>或<code>Q1[提示]</code></p>'+
                 '<p><b>答案：</b><code>A1[答案]</code>（<code>|</code>分隔多答案，忽略大小写空格）</p>'+
-                '<p><b>隐藏：</b><code>[dpstart]...[dpend]</code>之间不显示但答案仍读取</p>'+
-                '<p><b>尺寸：</b>文档开头加<code>[A4]</code><code>[A3]</code>等，不写默认A4</p>'+
-                '<h2>四、按钮说明</h2>'+
+                '<p><b>隐藏：</b><code>[dpstart]...[dpend]</code></p>'+
+                '<p><b>尺寸：</b><code>[A4]</code><code>[A3]</code>等</p>'+
+                '<h2>四、按钮</h2>'+
                 '<table><tr><th>按钮</th><th>功能</th></tr>'+
-                '<tr><td>文件▾→打开文件</td><td>选择文档</td></tr>'+
-                '<tr><td>文件▾→历史记录</td><td>查看过往记录</td></tr>'+
-                '<tr><td>文件▾→重置</td><td>清空答案和批改</td></tr>'+
-                '<tr><td>文件▾→清除数据</td><td>清空含错误计数</td></tr>'+
-                '<tr><td>答题▾→全部检查</td><td>一键批改全部</td></tr>'+
-                '<tr><td>答题▾→清除批改</td><td>清除对错标记</td></tr>'+
-                '<tr><td>答题▾→清除错误</td><td>清空错误项</td></tr>'+
-                '<tr><td>答题▾→统计</td><td>查看答题统计</td></tr></table>'+
-                '<h2>五、操作手势</h2>'+
-                '<p>双指缩放、单指拖动、Ctrl+滚轮。答错后编辑自动隐藏答案。触屏自动弹出对应键盘，长按删除键连删。</p>';
+                '<tr><td>文件→打开文件</td><td>选择文档</td></tr>'+
+                '<tr><td>文件→历史记录</td><td>查看过往</td></tr>'+
+                '<tr><td>文件→重置</td><td>清空答案</td></tr>'+
+                '<tr><td>文件→清除数据</td><td>清空含错误计数</td></tr>'+
+                '<tr><td>答题→全部检查</td><td>一键批改</td></tr>'+
+                '<tr><td>答题→清除批改</td><td>清除标记</td></tr>'+
+                '<tr><td>答题→清除错误</td><td>清空错误项</td></tr>'+
+                '<tr><td>答题→统计</td><td>答题统计</td></tr></table>';
             document.getElementById('guidePanel').classList.add('show'); document.getElementById('guideOverlay').classList.add('show');
         };
         window.hideGuide = function(){ document.getElementById('guidePanel').classList.remove('show'); document.getElementById('guideOverlay').classList.remove('show'); };
