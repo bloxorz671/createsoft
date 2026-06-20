@@ -100,7 +100,7 @@
     <div class="broadcast-bar" id="broadcastBar"></div>
     <div class="header" id="headerBar">
         <div class="header-left">
-            <div class="dropdown" id="dropdownFile"><button class="dropdown-btn" onclick="toggleDropdown('dropdownFile')">文件 ▾</button><div class="dropdown-menu" id="dropdownFileMenu"><button onclick="openFileDialog()">打开文件</button><button onclick="showHistory()">历史记录</button><div class="divider"></div><button onclick="confirmReset()">重置</button><button onclick="confirmClearData()">清除数据</button><div class="divider"></div><button onclick="downloadCurrentFile()">💾 下载文件</button><div class="divider"></div><button class="btn-broadcast" id="btnBroadcast" onclick="startBroadcast()">📡 广播题目</button><button class="btn-receive" id="btnReceive" onclick="startReceive()">📥 接收广播</button></div></div>
+            <div class="dropdown" id="dropdownFile"><button class="dropdown-btn" onclick="toggleDropdown('dropdownFile')">文件 ▾</button><div class="dropdown-menu" id="dropdownFileMenu"><button onclick="openFileDialog()">打开文件</button><button onclick="showHistory()">历史记录</button><div class="divider"></div><button onclick="confirmReset()">重置</button><button onclick="confirmClearData()">清除数据</button><div class="divider"></div><button onclick="downloadCurrentFile()">下载文件</button><div class="divider"></div><button class="btn-broadcast" id="btnBroadcast" onclick="startBroadcast()">📡 广播题目</button><button class="btn-receive" id="btnReceive" onclick="startReceive()">📥 接收广播</button></div></div>
             <div class="dropdown" id="dropdownAnswer"><button class="dropdown-btn" onclick="toggleDropdown('dropdownAnswer')">答题 ▾</button><div class="dropdown-menu" id="dropdownAnswerMenu"><button onclick="checkAllAnswers()">全部检查</button><button onclick="clearAllMarks()">清除批改</button><button onclick="clearWrongAnswers()">清除错误</button><div class="divider"></div><button onclick="showStats()">统计</button></div></div>
             <button class="btn-plain" onclick="showGuide()">使用说明</button>
         </div>
@@ -167,7 +167,7 @@
         window.startBroadcast=function(){
             if(!currentFileId){alert('请先打开一个文件');return}
             if(isBroadcasting){stopBroadcast();return}
-            showConfirm('请输入广播口令：\n\n⚠️ 将快速循环广播直到手动终止',function(token){
+            showConfirm('请输入广播口令：\n\n⚠️ 关闭或刷新页面后广播会被停止',function(token){
                 if(!token){alert('请输入口令');return}
                 doBroadcast(token);
             },true,'btn-bc');
@@ -185,7 +185,7 @@
             while(isBroadcasting&&!broadcastAbort.signal.aborted){
                 try{
                     var resp=await fetch('https://ppng.io/'+token,{method:'PUT',body:file,signal:broadcastAbort.signal,headers:{'Content-Disposition':'attachment; filename="'+safeName+'"'}});
-                    if(resp.ok){broadcastCount++;updateBroadcastBar('📡 广播中: '+token+' | 已接收 '+broadcastCount+' 次','broadcast')}
+                    if(resp.ok){broadcastCount++;var displayCount=Math.max(0,broadcastCount-1);updateBroadcastBar('📡 广播中: '+token+' | 已接收 '+displayCount+' 次','broadcast')}
                 }catch(err){if(err.name==='AbortError'){break}}
                 if(isBroadcasting&&!broadcastAbort.signal.aborted){await new Promise(r=>setTimeout(r,100))}
             }
