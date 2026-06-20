@@ -20,10 +20,14 @@
         .dropdown-menu.show{display:block}
         .dropdown-menu button{display:block;width:100%;padding:8px 12px;border:none;background:none;font-size:12px;cursor:pointer;text-align:left;border-radius:6px;color:#333}
         .dropdown-menu button:hover{background:#f0f0f0}.dropdown-menu .divider{height:1px;background:#eee;margin:3px 0}
+        .btn-broadcast{background:#ff9800!important;color:white!important}.btn-receive{background:#2196f3!important;color:white!important}
         .zoom-controls{display:flex;align-items:center;gap:3px;background:#f5f5f5;border-radius:16px;padding:2px}
         .zoom-btn{width:26px;height:26px;border-radius:50%;border:none;background:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#333;box-shadow:0 1px 2px rgba(0,0,0,0.08)}
         .zoom-btn:active{background:#e0e0e0}.zoom-btn:disabled{opacity:0.4;cursor:not-allowed}
         .zoom-text{font-size:10px;color:#666;min-width:32px;text-align:center;font-weight:500}
+        .broadcast-bar{position:fixed;top:0;left:0;right:0;background:#ff9800;color:white;padding:4px 10px;font-size:11px;text-align:center;z-index:101;display:none;font-weight:500;cursor:pointer}
+        .broadcast-bar.show{display:block}.broadcast-bar.receiving{background:#2196f3}
+        .broadcast-bar .stop-btn{background:rgba(255,255,255,0.3);color:white;border:1px solid rgba(255,255,255,0.5);padding:2px 8px;border-radius:10px;font-size:10px;cursor:pointer;margin-left:8px}
         .viewport{position:fixed;top:0;left:0;right:0;bottom:0;overflow:hidden;background:#e8e8e8}
         .viewport.interactive{touch-action:none}
         .doc-stage{position:absolute;top:0;left:0;transform-origin:0 0;transition:none}
@@ -31,7 +35,6 @@
         .docx-wrapper{background:white}
         .docx-wrapper,.docx-wrapper *{page-break-before:auto!important;page-break-after:auto!important;break-before:auto!important;break-after:auto!important}
         .docx-wrapper section,.docx-wrapper .docx-page,.docx-wrapper>div{border:none!important;outline:none!important;box-shadow:none!important;margin-top:0!important;margin-bottom:0!important}
-        .dp-hidden{display:none!important}
         .txt-content{padding:24px;font-family:'Courier New','Microsoft YaHei',monospace;font-size:14px;line-height:1.8;white-space:pre-wrap;word-wrap:break-word}
         .xlsx-content{padding:16px;overflow-x:auto}
         .xlsx-content table{border-collapse:collapse;width:auto;margin:0 auto;font-size:13px}
@@ -47,28 +50,27 @@
         .inline-check-btn.centered{display:block;margin:16px auto;text-align:center;width:fit-content;max-width:90%}
         .result-icon{display:inline-block;margin-left:2px;font-size:12px;vertical-align:baseline}
         .result-icon.correct{color:#4caf50}.result-icon.wrong{color:#f44336}
-        .answer-display{display:none;margin-left:2px;color:#4caf50;font-weight:bold;font-size:11px}
-        .answer-display.show{display:inline}
+        .answer-display{display:none;margin-left:2px;color:#4caf50;font-weight:bold;font-size:11px}.answer-display.show{display:inline}
         .custom-keyboard{position:fixed;bottom:0;left:0;right:0;background:#c8cad0;padding:8px 6px;padding-bottom:max(12px,env(safe-area-inset-bottom));z-index:200;display:none;box-shadow:0 -4px 16px rgba(0,0,0,0.18);user-select:none;-webkit-user-select:none;touch-action:manipulation}
         .custom-keyboard.show{display:block}
         .kb-row{display:flex;justify-content:center;gap:6px;margin-bottom:6px}
         .kb-key{flex:1;height:46px;max-width:48px;min-width:30px;background:#fff;border:none;border-radius:6px;font-size:16px;cursor:pointer;color:#222;box-shadow:0 1px 3px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background 0.03s,transform 0.03s}
         .kb-key:active,.kb-key.pressed{background:#a0a5ae!important;transform:scale(0.93)}
-        .kb-key.space{flex:3;max-width:none}
-        .kb-key.done{background:#4a6cf7;color:#fff;font-weight:bold;font-size:14px;max-width:64px}
-        .kb-key.delete{background:#dcdfe5;font-size:17px;max-width:54px}
-        .kb-key.shift{background:#dcdfe5;font-size:13px;max-width:46px}
-        .kb-key.shift.active{background:#4a6cf7;color:#fff}
-        .kb-key.num-switch,.kb-key.symbol{background:#dcdfe5;font-size:13px}
+        .kb-key.space{flex:3;max-width:none}.kb-key.done{background:#4a6cf7;color:#fff;font-weight:bold;font-size:14px;max-width:64px}
+        .kb-key.delete{background:#dcdfe5;font-size:17px;max-width:54px}.kb-key.shift{background:#dcdfe5;font-size:13px;max-width:46px}
+        .kb-key.shift.active{background:#4a6cf7;color:#fff}.kb-key.num-switch,.kb-key.symbol{background:#dcdfe5;font-size:13px}
         @media(orientation:landscape){.custom-keyboard{padding:4px 10px}.kb-row{gap:5px;margin-bottom:4px}.kb-key{height:34px;font-size:14px;max-width:50px;min-width:28px}}
         @media(max-width:380px) and (orientation:portrait){.custom-keyboard{padding:6px 4px}.kb-row{gap:4px;margin-bottom:4px}.kb-key{height:40px;font-size:14px;max-width:40px;min-width:28px}}
         .confirm-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:2000;display:none;justify-content:center;align-items:center}
         .confirm-overlay.show{display:flex}
-        .confirm-box{background:white;padding:24px 20px;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,0.3);min-width:250px;max-width:320px;text-align:center}
-        .confirm-box p{margin:0 0 18px 0;font-size:14px}
+        .confirm-box{background:white;padding:24px 20px;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,0.3);min-width:250px;max-width:360px;text-align:center}
+        .confirm-box p{margin:0 0 18px 0;font-size:14px;line-height:1.6}
+        .confirm-box input{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:16px;text-align:center;outline:none}
+        .confirm-box input:focus{border-color:#667eea}
         .confirm-box .btns{display:flex;gap:10px;justify-content:center}
         .confirm-box .btns button{padding:9px 24px;border:none;border-radius:20px;font-size:14px;cursor:pointer;font-weight:500}
         .confirm-box .btn-no{background:#e0e0e0;color:#555}.confirm-box .btn-yes{background:#e91e63;color:white}
+        .confirm-box .btn-bc{background:#ff9800;color:white}.confirm-box .btn-rc{background:#2196f3;color:white}
         .panel-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:999;display:none}
         .panel-overlay.show{display:block}
         .panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:22px;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,0.2);z-index:1000;display:none;min-width:260px;max-width:90vw;max-height:80vh;overflow-y:auto}
@@ -95,13 +97,18 @@
     </style>
 </head>
 <body>
+    <div class="broadcast-bar" id="broadcastBar"></div>
     <div class="header" id="headerBar">
-        <div class="header-left"><div class="dropdown" id="dropdownFile"><button class="dropdown-btn" onclick="toggleDropdown('dropdownFile')">文件 ▾</button><div class="dropdown-menu" id="dropdownFileMenu"><button onclick="openFileDialog()">打开文件</button><button onclick="showHistory()">历史记录</button><div class="divider"></div><button onclick="confirmReset()">重置</button><button onclick="confirmClearData()">清除数据</button></div></div><div class="dropdown" id="dropdownAnswer"><button class="dropdown-btn" onclick="toggleDropdown('dropdownAnswer')">答题 ▾</button><div class="dropdown-menu" id="dropdownAnswerMenu"><button onclick="checkAllAnswers()">全部检查</button><button onclick="clearAllMarks()">清除批改</button><button onclick="clearWrongAnswers()">清除错误</button><div class="divider"></div><button onclick="showStats()">统计</button></div></div><button class="btn-plain" onclick="showGuide()">使用说明</button></div>
+        <div class="header-left">
+            <div class="dropdown" id="dropdownFile"><button class="dropdown-btn" onclick="toggleDropdown('dropdownFile')">文件 ▾</button><div class="dropdown-menu" id="dropdownFileMenu"><button onclick="openFileDialog()">打开文件</button><button onclick="showHistory()">历史记录</button><div class="divider"></div><button onclick="confirmReset()">重置</button><button onclick="confirmClearData()">清除数据</button><div class="divider"></div><button class="btn-broadcast" id="btnBroadcast" onclick="startBroadcast()">📡 广播题目</button><button class="btn-receive" id="btnReceive" onclick="startReceive()">📥 接收广播</button></div></div>
+            <div class="dropdown" id="dropdownAnswer"><button class="dropdown-btn" onclick="toggleDropdown('dropdownAnswer')">答题 ▾</button><div class="dropdown-menu" id="dropdownAnswerMenu"><button onclick="checkAllAnswers()">全部检查</button><button onclick="clearAllMarks()">清除批改</button><button onclick="clearWrongAnswers()">清除错误</button><div class="divider"></div><button onclick="showStats()">统计</button></div></div>
+            <button class="btn-plain" onclick="showGuide()">使用说明</button>
+        </div>
         <div class="header-right"><div class="zoom-controls"><button class="zoom-btn" id="btnZoomOut" onclick="zoomOut()" disabled>−</button><span class="zoom-text" id="zoomLevel">100%</span><button class="zoom-btn" id="btnZoomIn" onclick="zoomIn()" disabled>+</button></div></div>
     </div>
     <div class="viewport" id="viewport"><div class="doc-stage" id="docStage"><div class="doc-viewer" id="docViewer"><div class="empty-state"><div class="icon">📃</div><p>选择文件开始练习</p><button class="btn-open" onclick="openFileDialog()">打开文件</button><p>支持 .docx / .xlsx / .txt</p></div></div></div></div>
     <div class="custom-keyboard" id="customKeyboard"></div>
-    <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><p id="confirmMsg"></p><div class="btns"><button class="btn-no" id="btnConfirmNo">取消</button><button class="btn-yes" id="btnConfirmYes">确定</button></div></div></div>
+    <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><p id="confirmMsg"></p><div id="confirmInput" style="display:none"><input type="text" id="confirmInputField" placeholder="请输入口令"></div><div class="btns"><button class="btn-no" id="btnConfirmNo">取消</button><button class="btn-yes" id="btnConfirmYes">确定</button></div></div></div>
     <div class="panel-overlay" id="guideOverlay" onclick="hideGuide()"></div><div class="panel" id="guidePanel" style="max-width:680px;"><h3>使用说明</h3><div class="guide-content" id="guideContent"></div><button class="panel-close" onclick="hideGuide()">关闭</button></div>
     <div class="panel-overlay" id="statsOverlay" onclick="hideStats()"></div><div class="panel" id="statsPanel"><h3>答题统计</h3><div id="statsContent"></div><button class="panel-close" onclick="hideStats()">关闭</button></div>
     <div class="panel-overlay" id="historyOverlay" onclick="hideHistory()"></div><div class="panel" id="historyPanel"><h3>历史记录</h3><div id="historyContent"></div><button class="panel-close" onclick="hideHistory()">关闭</button></div>
@@ -111,6 +118,7 @@
     <script>
     (function(){
         let answerMap=new Map(),currentFileId=null,currentDocSize=null,activeInput=null,isShifted=false,isSymbolPage=false,docLoaded=false,dynamicMinScale=0.5,confirmYesCallback=null,deleteRepeatTimer=null,deleteRepeatInterval=null,noIndividualCheck=false,isCheckingAll=false;
+        let broadcastAbort=null,broadcastToken='',isBroadcasting=false;
         const isTouchDevice='ontouchstart' in window||navigator.maxTouchPoints>0;
         function vibrate(ms){if(navigator.vibrate)navigator.vibrate(ms||6)}
         const PAGE_SIZES={'A4':{width:210,height:297},'A4横向':{width:297,height:210},'A4横':{width:297,height:210},'A3':{width:297,height:420},'A3横向':{width:420,height:297},'A3横':{width:420,height:297},'A5':{width:148,height:210},'A5横向':{width:210,height:148},'A5横':{width:210,height:148},'B4':{width:257,height:364},'B5':{width:182,height:257},'letter':{width:215.9,height:279.4},'legal':{width:215.9,height:355.6}};
@@ -121,12 +129,135 @@
         window.toggleDropdown=function(id){var m=document.getElementById(id+'Menu'),o=m.classList.contains('show');document.querySelectorAll('.dropdown-menu').forEach(function(x){x.classList.remove('show')});if(!o)m.classList.add('show')};
         document.addEventListener('click',function(e){if(!e.target.closest('.dropdown'))document.querySelectorAll('.dropdown-menu').forEach(function(m){m.classList.remove('show')})});
         window.openFileDialog=function(){document.getElementById('fileInput').click()};
-        function showConfirm(msg,onYes){document.getElementById('confirmMsg').innerHTML=msg.replace(/\n/g,'<br>');confirmYesCallback=onYes;document.getElementById('confirmOverlay').classList.add('show')}
-        document.getElementById('btnConfirmYes').onclick=function(){vibrate(8);var cb=confirmYesCallback;document.getElementById('confirmOverlay').classList.remove('show');confirmYesCallback=null;if(cb)cb()};
-        document.getElementById('btnConfirmNo').onclick=function(){vibrate(5);document.getElementById('confirmOverlay').classList.remove('show');confirmYesCallback=null};
+        function showConfirm(msg,onYes,showInput,btnClass){
+            document.getElementById('confirmMsg').innerHTML=msg.replace(/\n/g,'<br>');confirmYesCallback=onYes;
+            var inputDiv=document.getElementById('confirmInput'),yesBtn=document.getElementById('btnConfirmYes');
+            if(showInput){inputDiv.style.display='block';document.getElementById('confirmInputField').value=''}else{inputDiv.style.display='none'}
+            yesBtn.className=btnClass||'btn-yes';document.getElementById('confirmOverlay').classList.add('show');
+        }
+        document.getElementById('btnConfirmYes').onclick=function(){
+            var val=document.getElementById('confirmInputField').value.trim(),cb=confirmYesCallback;
+            document.getElementById('confirmOverlay').classList.remove('show');confirmYesCallback=null;if(cb)cb(val);
+        };
+        document.getElementById('btnConfirmNo').onclick=function(){document.getElementById('confirmOverlay').classList.remove('show');confirmYesCallback=null};
         window.confirmReset=function(){showConfirm('确定要重置吗？',function(){resetAllAnswers()})};
         window.confirmClearData=function(){showConfirm('确定要清除数据吗？',function(){clearExerciseData()})};
-        function updateViewportTop(){document.getElementById('viewport').style.top=document.getElementById('headerBar').offsetHeight+'px'}updateViewportTop();window.addEventListener('resize',updateViewportTop);
+
+        // ==================== 广播功能 ====================
+        function updateBroadcastBar(text,type,showStop){
+            var bar=document.getElementById('broadcastBar');
+            if(showStop){bar.innerHTML=text+' <button class="stop-btn" onclick="stopBroadcast()">终止广播</button>'}else{bar.textContent=text}
+            bar.className='broadcast-bar show';if(type==='receiving')bar.classList.add('receiving');else bar.classList.remove('receiving');
+            updateViewportTop();
+        }
+        function hideBroadcastBar(){document.getElementById('broadcastBar').classList.remove('show');updateViewportTop()}
+
+        window.stopBroadcast=function(){
+            if(broadcastAbort){broadcastAbort.abort();broadcastAbort=null}
+            isBroadcasting=false;hideBroadcastBar();
+            document.getElementById('btnBroadcast').textContent='📡 广播题目';
+            document.getElementById('btnReceive').style.display='';
+        };
+
+        window.startBroadcast=function(){
+            if(!currentFileId){alert('请先打开一个文件');return}
+            if(isBroadcasting){stopBroadcast();return}
+            showConfirm('请输入广播口令：\n\n⚠️ 将循环广播直到手动终止\n⚠️ 刷新或关闭页面也会中断',function(token){
+                if(!token){alert('请输入口令');return}
+                doBroadcast(token);
+            },true,'btn-bc');
+        };
+
+        async function doBroadcast(token){
+            if(broadcastAbort){broadcastAbort.abort();broadcastAbort=null}
+            broadcastAbort=new AbortController();broadcastToken=token;isBroadcasting=true;
+            document.getElementById('btnBroadcast').textContent='⏹ 终止广播';
+            document.getElementById('btnReceive').style.display='none';
+            var file=document.getElementById('fileInput').files[0];
+            if(!file){alert('请重新选择文件后再广播');stopBroadcast();return}
+            var ext=file.name.split('.').pop()||'docx';
+            var safeName='file.'+ext;var round=0;
+            updateBroadcastBar('📡 正在广播: '+token+' | 第1轮...','broadcast',true);
+            while(isBroadcasting&&!broadcastAbort.signal.aborted){
+                round++;
+                try{
+                    var resp=await fetch('https://ppng.io/'+token,{method:'PUT',body:file,signal:broadcastAbort.signal,headers:{'Content-Disposition':'attachment; filename="'+safeName+'"'}});
+                    if(resp.ok){updateBroadcastBar('📡 广播中: '+token+' | 第'+round+'轮完成，准备下一轮...','broadcast',true)}
+                    else{updateBroadcastBar('📡 广播中: '+token+' | 第'+round+'轮失败，重试中...','broadcast',true)}
+                }catch(err){if(err.name==='AbortError'){break}updateBroadcastBar('📡 广播中: '+token+' | 连接中断，重试中...','broadcast',true);await new Promise(r=>setTimeout(r,2000));}
+                if(isBroadcasting&&!broadcastAbort.signal.aborted){await new Promise(r=>setTimeout(r,1000))}
+            }
+            stopBroadcast();
+        }
+
+        window.startReceive=function(){
+            showConfirm('请输入接收口令：',function(token){if(!token){alert('请输入口令');return}doReceive(token);},true,'btn-rc');
+        };
+
+        // ==================== 智能重试加载 ====================
+        async function tryLoadWithFallback(blob,originalName){
+            var exts=['docx','xlsx','txt'];
+            var origExt=originalName.split('.').pop()?.toLowerCase();
+            // 把原始扩展名排在最前面
+            var tryExts=[origExt].concat(exts.filter(function(e){return e!==origExt}));
+            var lastErr=null;
+            for(var i=0;i<tryExts.length;i++){
+                var ext=tryExts[i];
+                if(!ext)continue;
+                var fn=originalName.replace(/\.[^.]+$/,'')+'.'+ext;
+                try{
+                    var file=new File([blob],fn,{type:'application/octet-stream'});
+                    var dt=new DataTransfer();dt.items.add(file);
+                    document.getElementById('fileInput').files=dt.files;
+                    await loadFile(file);
+                    // 加载成功
+                    if(i>0){updateBroadcastBar('✅ 接收完成（自动识别为 .'+ext+'）: '+fn,'receiving')}
+                    else{updateBroadcastBar('✅ 接收完成: '+fn,'receiving')}
+                    return true;
+                }catch(err){lastErr=err;console.log('尝试 .'+ext+' 失败:',err.message)}
+            }
+            throw lastErr||new Error('无法识别文件类型');
+        }
+
+        async function doReceive(token){
+            if(broadcastAbort){broadcastAbort.abort();broadcastAbort=null}
+            broadcastAbort=new AbortController();broadcastToken=token;
+            updateBroadcastBar('📥 等待接收广播: '+token+' ...','receiving');
+            document.getElementById('btnReceive').textContent='⏹ 停止接收';
+            document.getElementById('btnBroadcast').style.display='none';
+            var retryCount=0;
+            while(true){
+                if(broadcastAbort.signal.aborted)break;
+                try{
+                    var resp=await fetch('https://ppng.io/'+token,{method:'GET',signal:broadcastAbort.signal});
+                    if(!resp.ok){retryCount++;updateBroadcastBar('📥 等待中... (重试'+retryCount+'次)','receiving');await new Promise(r=>setTimeout(r,2000));continue}
+                    var cd=resp.headers.get('Content-Disposition')||'';
+                    var fn='received.docx';var m=cd.match(/filename="?([^"]+)"?/);if(m)fn=m[1];
+                    updateBroadcastBar('📥 正在下载: '+fn+' ...','receiving');
+                    var blob=await resp.blob();
+                    await tryLoadWithFallback(blob,fn);
+                    hideBroadcastBar();break;
+                }catch(err){
+                    if(err.name==='AbortError'){hideBroadcastBar();break}
+                    retryCount++;updateBroadcastBar('📥 连接失败，2秒后重试... ('+retryCount+'次)','receiving');
+                    await new Promise(r=>setTimeout(r,2000));
+                }
+            }
+            broadcastAbort=null;
+            document.getElementById('btnReceive').textContent='📥 接收广播';
+            document.getElementById('btnBroadcast').style.display='';
+            setTimeout(hideBroadcastBar,3000);
+        }
+
+        window.addEventListener('beforeunload',function(){if(broadcastAbort)broadcastAbort.abort();if(currentFileId)saveToHistory()});
+
+        function updateViewportTop(){
+            var top=document.getElementById('headerBar').offsetHeight;
+            var bb=document.getElementById('broadcastBar');if(bb.classList.contains('show'))top+=bb.offsetHeight;
+            document.getElementById('viewport').style.top=top+'px';
+        }
+        updateViewportTop();window.addEventListener('resize',updateViewportTop);
+
         function updateTransform(){document.getElementById('docStage').style.transform=`translate(${docTx}px,${docTy}px) scale(${docScale})`}
         function updateZoomDisplay(){document.getElementById('zoomLevel').textContent=Math.round(docScale*100)+'%'}
         function setDocScale(s){var c=Math.min(MAX_SCALE,Math.max(dynamicMinScale,Math.round(s*100)/100));if(c!==docScale){docScale=c;updateTransform();updateZoomDisplay()}}
@@ -146,7 +277,7 @@
         function centerDocument(respectUser){if(keyboardVisible)return;if(respectUser&&userScale){docScale=Math.max(dynamicMinScale,userScale);docTx=userTrans.x;docTy=userTrans.y;clampTranslate();updateTransform();updateZoomDisplay();return}var vp=document.getElementById('viewport'),v=document.getElementById('docViewer');if(!currentDocSize)currentDocSize=PAGE_SIZES['A4'];var mm=3.779527559,dw=currentDocSize.width*mm,dh=currentDocSize.height*mm,vw=vp.clientWidth,vh=vp.clientHeight,minW=Math.max(dw,vw);v.style.width=minW+'px';v.style.minHeight=dh+'px';var fitScale=vw/minW;dynamicMinScale=Math.round(fitScale*100)/100;if(dynamicMinScale>1.0)dynamicMinScale=1.0;docScale=dynamicMinScale;docTx=(vw-minW*docScale)/2;docTy=0;userScale=null;userTrans=null;clampTranslate();updateTransform();updateZoomDisplay()}
         function getUrlParam(name){return new URL(window.location.href).searchParams.get(name)}
 
-        async function loadFromUrl(fileUrl){if(!fileUrl.startsWith('http'))fileUrl=new URL(fileUrl,window.location.href).href;try{var r=await fetch(fileUrl);if(!r.ok)throw new Error('HTTP '+r.status);await loadFile(new File([await r.blob()],fileUrl.split('/').pop().split('?')[0]||'doc'))}catch(err){}}
+        async function loadFromUrl(fileUrl){if(!fileUrl.startsWith('http'))fileUrl=new URL(fileUrl,window.location.href).href;try{var r=await fetch(fileUrl);if(!r.ok)throw new Error('HTTP '+r.status);var blob=await r.blob();var fn=fileUrl.split('/').pop().split('?')[0]||'doc';await tryLoadWithFallback(blob,fn)}catch(err){}}
 
         async function loadFile(file){
             var ext=file.name.split('.').pop().toLowerCase();currentFileId='file_'+file.name+'_'+file.size+'_'+file.lastModified;
@@ -158,12 +289,11 @@
                 else if(ext==='txt'){rawText=await file.text();currentDocSize=parseDocSize(rawText);parseQATags(rawText);parseExtraTags(rawText);viewer.innerHTML='<div class="txt-content">'+processTextContent(rawText)+'</div>';finishLoad()}
                 else if(ext==='xlsx'){var ab2=await file.arrayBuffer(),wb=XLSX.read(ab2,{type:'array'});rawText='';wb.SheetNames.forEach(function(n){var s=wb.Sheets[n];if(!s||!s['!ref'])return;var rng=XLSX.utils.decode_range(s['!ref']);for(var r=rng.s.r;r<=rng.e.r;r++){var rt='';for(var c=rng.s.c;c<=rng.e.c;c++){var cr=XLSX.utils.encode_cell({r:r,c:c}),cell=s[cr];if(cell)rt+=(String(cell.w||cell.v||'').replace(/\n/g,' '))+' '}rawText+=rt.trim()+'\n'}});currentDocSize=parseDocSize(rawText);parseQATags(rawText);parseExtraTags(rawText);viewer.innerHTML='<div class="xlsx-content">'+xlsxToHTML(wb)+'</div>';handleCheancTagsInHTML(viewer);cleanupXlsxEmptyRowsCols(viewer);cleanupXlsxTagText(viewer);finishLoad()}
                 else{throw new Error('不支持: .'+ext)}
-            }catch(err){viewer.innerHTML='<div class="empty-state"><div class="icon">⚠️</div><div style="color:red;">加载失败</div></div>';docLoaded=false;setZoomEnabled(false)}
+            }catch(err){throw err}
         }
         function finishLoad(){centerDocument(false);bindEvents();docLoaded=true;setZoomEnabled(true);var h=getHistoryData(currentFileId);if(h.answers&&Object.keys(h.answers).length>0)setTimeout(function(){restoreHistory(currentFileId)},300);updateViewportTop()}
 
         function cleanupXlsxTagText(container){var w=document.createTreeWalker(container,NodeFilter.SHOW_TEXT,null,false),ns=[];while(w.nextNode())ns.push(w.currentNode);ns.forEach(function(n){var t=n.textContent;for(var k of Object.keys(PAGE_SIZES))t=t.replace(new RegExp('\\['+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\]','gi'),'');t=t.replace(/\[noet\]/gi,'').replace(/\[webpage\]/gi,'');if(t!==n.textContent)n.textContent=t})}
-
         function parseQATags(text){answerMap.clear();var sw=loadWrongCounts(currentFileId);for(var m of text.matchAll(/A(\d+)\[([\s\S]*?)\]/gi))answerMap.set('Q'+m[1],{answer:m[2].replace(/\n/g,''),checked:false,wrongCount:sw['Q'+m[1]]||0});for(var m of text.matchAll(/Q(\d+)\[([\s\S]*?)\]/gi)){var k='Q'+m[1];if(!answerMap.has(k))answerMap.set(k,{answer:'',checked:false,wrongCount:sw[k]||0})}}
         function parseExtraTags(text){if(/\[noet\]/i.test(text)){noIndividualCheck=true}}
         function parseCheancTag(match){var inner=match[1]||'',parts=inner.split(',');return{label:(parts[0]||'').trim()||'检查答案',size:Math.max(8,Math.min(200,parseInt(parts[1])||14)),centered:(parts[2]||'').trim().toLowerCase()==='middle'}}
@@ -171,88 +301,16 @@
 
         function processTextContent(text){text=text.replace(/\[dpstart\][\s\S]*?\[dpend\]/gi,'').replace(/\[dpstart\]/gi,'').replace(/\[dpend\]/gi,'').replace(/\[noet\]/gi,'');for(var n of Object.keys(PAGE_SIZES))text=text.replace(new RegExp('\\['+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\]','gi'),'');text=text.replace(/\[\d+\.?\d*\s*:\s*\d+\.?\d*\]/g,'');text=text.replace(/cheanc\[([\s\S]*?)\]/gi,function(m,inner){return renderCheancBtn(parseCheancTag([null,inner]))});text=text.replace(/Q(\d+)\[([\s\S]*?)\]/gi,function(m,num,content){var q='Q'+num,a=answerMap.get(q),isChinese=a?.answer&&/[\u4e00-\u9fff]/.test(a.answer);return'<span class="fill-blank-wrapper" data-q="'+q+'">'+(content.trim()?'<span style="color:#888;">'+escHtml(content)+'</span>':'')+'<input type="text" class="fill-blank-input'+(isChinese?' native-input':'')+'" data-q="'+q+'" data-ans="'+(a?.answer||'')+'" placeholder="'+(content.trim()||'答案')+'" style="min-width:80px;" '+(isChinese?'':'inputmode="none"')+' autocomplete="off">'+(noIndividualCheck?'':'<button class="check-btn" data-q="'+q+'">检查</button>')+'<span class="result-icon" data-q="'+q+'"></span><span class="answer-display" data-q="'+q+'"></span></span>'});return text.replace(/A\d+\[[\s\S]*?\]/gi,'')}
 
-        // ==================== xlsx：智能移除全空行和全空列 ====================
-        function xlsxToHTML(wb){
-            // 先收集所有数据到二维数组
-            var sheetsData=[];
-            wb.SheetNames.forEach(function(n){
-                var s=wb.Sheets[n];if(!s||!s['!ref'])return;
-                var rng=XLSX.utils.decode_range(s['!ref']);
-                var rows=[];
-                for(var r=rng.s.r;r<=rng.e.r;r++){
-                    var row=[];
-                    for(var c=rng.s.c;c<=rng.e.c;c++){
-                        var cr=XLSX.utils.encode_cell({r:r,c:c}),cell=s[cr],v='';
-                        if(cell){v=String(cell.w||cell.v||'').trim()}
-                        row.push(v);
-                    }
-                    rows.push(row);
-                }
-                sheetsData.push(rows);
-            });
-
-            // 分析哪些列完全为空（所有行该列都没内容）
-            var maxCols=0;
-            sheetsData.forEach(function(rows){rows.forEach(function(row){maxCols=Math.max(maxCols,row.length)})});
-            var emptyCols=new Set();
-            for(var c=0;c<maxCols;c++){
-                var allEmpty=true;
-                sheetsData.forEach(function(rows){
-                    rows.forEach(function(row){
-                        if(c<row.length&&row[c].trim()!=='')allEmpty=false;
-                    });
-                });
-                if(allEmpty)emptyCols.add(c);
-            }
-
-            // 生成HTML，跳过全空行和全空列
-            var h='',cbh='',hc=false;
-            sheetsData.forEach(function(rows){
-                h+='<table>';
-                rows.forEach(function(row){
-                    // 检查这行是否全空
-                    var rowHasContent=false;
-                    for(var c=0;c<row.length;c++){
-                        if(!emptyCols.has(c)&&row[c].trim()!==''){rowHasContent=true;break}
-                    }
-                    if(!rowHasContent)return; // 跳过全空行
-
-                    var rh='';
-                    for(var c=0;c<maxCols;c++){
-                        if(emptyCols.has(c))continue; // 跳过全空列
-                        var v=c<row.length?row[c]:'';
-                        // 处理标签
-                        if(/cheanc\[.*,.*middle.*\]/i.test(v)){hc=true;cbh=v.replace(/cheanc\[([\s\S]*?)\]/gi,function(m,inner){return renderCheancBtn(parseCheancTag([null,inner]))});v=v.replace(/cheanc\[[\s\S]*?\]/gi,'')}
-                        v=v.replace(/Q(\d+)\[([\s\S]*?)\]/gi,function(m,num,ct){var q='Q'+num,a=answerMap.get(q),isChinese=a?.answer&&/[\u4e00-\u9fff]/.test(a.answer);return'<span class="fill-blank-wrapper" data-q="'+q+'">'+(ct.trim()?'<span style="color:#888;">'+escHtml(ct)+'</span>':'')+'<input type="text" class="fill-blank-input'+(isChinese?' native-input':'')+'" data-q="'+q+'" data-ans="'+(a?.answer||'')+'" placeholder="'+(ct.trim()||'答案')+'" style="min-width:80px;" '+(isChinese?'':'inputmode="none"')+' autocomplete="off">'+(noIndividualCheck?'':'<button class="check-btn" data-q="'+q+'">检查</button>')+'<span class="result-icon" data-q="'+q+'"></span><span class="answer-display" data-q="'+q+'"></span></span>'});
-                        v=v.replace(/\[dpstart\]/gi,'').replace(/\[dpend\]/gi,'');
-                        for(var k of Object.keys(PAGE_SIZES))v=v.replace(new RegExp('\\['+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\]','gi'),'');
-                        v=v.replace(/\[noet\]/gi,'').replace(/\[webpage\]/gi,'');
-                        v=v.replace(/A\d+\[[\s\S]*?\]/gi,'');
-                        rh+='<td>'+v+'</td>';
-                    }
-                    h+='<tr>'+rh+'</tr>';
-                });
-                h+='</table><br>';
-            });
-            if(hc)h+=cbh;
-            return h;
-        }
-
-        // 简化版清理（作为兜底）
-        function cleanupXlsxEmptyRowsCols(container){
-            container.querySelectorAll('table').forEach(function(table){
-                var rows=table.querySelectorAll('tr');
-                rows.forEach(function(tr){
-                    var hasContent=false;
-                    tr.querySelectorAll('td').forEach(function(td){
-                        if((td.textContent||'').replace(/\s/g,'')!==''||td.querySelector('.fill-blank-input,.inline-check-btn'))hasContent=true;
-                    });
-                    if(!hasContent)tr.remove();
-                });
-                if(table.querySelectorAll('tr').length===0)table.remove();
-            });
-        }
-
+        function xlsxToHTML(wb){var sheetsData=[];wb.SheetNames.forEach(function(n){var s=wb.Sheets[n];if(!s||!s['!ref'])return;var rng=XLSX.utils.decode_range(s['!ref']);var rows=[];for(var r=rng.s.r;r<=rng.e.r;r++){var row=[];for(var c=rng.s.c;c<=rng.e.c;c++){var cr=XLSX.utils.encode_cell({r:r,c:c}),cell=s[cr],v='';if(cell){v=String(cell.w||cell.v||'').trim()}row.push(v)}rows.push(row)}sheetsData.push(rows)});
+            var maxCols=0;sheetsData.forEach(function(rows){rows.forEach(function(row){maxCols=Math.max(maxCols,row.length)})});
+            var emptyCols=new Set();for(var c=0;c<maxCols;c++){var allEmpty=true;sheetsData.forEach(function(rows){rows.forEach(function(row){if(c<row.length&&row[c].trim()!=='')allEmpty=false})});if(allEmpty)emptyCols.add(c)}
+            var h='',cbh='',hc=false;sheetsData.forEach(function(rows){h+='<table>';rows.forEach(function(row){var rowHasContent=false;for(var c=0;c<row.length;c++){if(!emptyCols.has(c)&&row[c].trim()!==''){rowHasContent=true;break}}if(!rowHasContent)return;
+                var rh='';for(var c=0;c<maxCols;c++){if(emptyCols.has(c))continue;var v=c<row.length?row[c]:'';
+                    if(/cheanc\[.*,.*middle.*\]/i.test(v)){hc=true;cbh=v.replace(/cheanc\[([\s\S]*?)\]/gi,function(m,inner){return renderCheancBtn(parseCheancTag([null,inner]))});v=v.replace(/cheanc\[[\s\S]*?\]/gi,'')}
+                    v=v.replace(/Q(\d+)\[([\s\S]*?)\]/gi,function(m,num,ct){var q='Q'+num,a=answerMap.get(q),isChinese=a?.answer&&/[\u4e00-\u9fff]/.test(a.answer);return'<span class="fill-blank-wrapper" data-q="'+q+'">'+(ct.trim()?'<span style="color:#888;">'+escHtml(ct)+'</span>':'')+'<input type="text" class="fill-blank-input'+(isChinese?' native-input':'')+'" data-q="'+q+'" data-ans="'+(a?.answer||'')+'" placeholder="'+(ct.trim()||'答案')+'" style="min-width:80px;" '+(isChinese?'':'inputmode="none"')+' autocomplete="off">'+(noIndividualCheck?'':'<button class="check-btn" data-q="'+q+'">检查</button>')+'<span class="result-icon" data-q="'+q+'"></span><span class="answer-display" data-q="'+q+'"></span></span>'});
+                    v=v.replace(/\[dpstart\]/gi,'').replace(/\[dpend\]/gi,'');for(var k of Object.keys(PAGE_SIZES))v=v.replace(new RegExp('\\['+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\]','gi'),'');v=v.replace(/\[noet\]/gi,'').replace(/\[webpage\]/gi,'');v=v.replace(/A\d+\[[\s\S]*?\]/gi,'');
+                    rh+='<td>'+v+'</td>';}h+='<tr>'+rh+'</tr>'});h+='</table><br>'});if(hc)h+=cbh;return h}
+        function cleanupXlsxEmptyRowsCols(container){container.querySelectorAll('table').forEach(function(table){var rows=table.querySelectorAll('tr');rows.forEach(function(tr){var hasContent=false;tr.querySelectorAll('td').forEach(function(td){if((td.textContent||'').replace(/\s/g,'')!==''||td.querySelector('.fill-blank-input,.inline-check-btn'))hasContent=true});if(!hasContent)tr.remove()});if(table.querySelectorAll('tr').length===0)table.remove()})}
         function handleCheancTagsInHTML(container){var w=document.createTreeWalker(container,NodeFilter.SHOW_TEXT,null,false),ns=[];while(w.nextNode())ns.push(w.currentNode);ns.forEach(function(n){if(/cheanc\[/i.test(n.textContent)){var s=document.createElement('span');s.innerHTML=n.textContent.replace(/cheanc\[([\s\S]*?)\]/gi,function(m,inner){return renderCheancBtn(parseCheancTag([null,inner]))});n.parentElement.replaceChild(s,n)}})}
 
         document.getElementById('fileInput').addEventListener('change',async function(e){if(e.target.files[0])await loadFile(e.target.files[0])});
@@ -273,8 +331,7 @@
         function startDeleteRepeat(){doDelete();vibrate(5);deleteRepeatTimer=setTimeout(function(){deleteRepeatInterval=setInterval(function(){doDelete();vibrate(3)},50)},400)}
         function handleKeyAction(action,key){if(!activeInput)return;vibrate(6);if(action==='done'){hideKeyboard();return}if(action==='backspace'){startDeleteRepeat();return}if(action==='shift'){isShifted=!isShifted;isSymbolPage=false;buildKeyboard('english');return}if(action==='num'){isShifted=false;isSymbolPage=false;buildKeyboard('num_from_eng');return}if(action==='abc'){isShifted=false;isSymbolPage=false;buildKeyboard('english');return}if(action==='sym'){isSymbolPage=!isSymbolPage;buildKeyboard('english');return}if(action==='space'){activeInput.value+=' ';activeInput.dispatchEvent(new Event('input',{bubbles:true}));clearMarkOnEdit(activeInput);return}if(key){activeInput.value+=key;activeInput.dispatchEvent(new Event('input',{bubbles:true}));clearMarkOnEdit(activeInput)}}
         document.getElementById('customKeyboard').addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();var btn=e.target.closest('.kb-key');if(!btn||!activeInput)return;btn.classList.add('pressed');setTimeout(function(){btn.classList.remove('pressed')},40);handleKeyAction(btn.dataset.action,btn.dataset.key)});
-        document.getElementById('customKeyboard').addEventListener('pointerup',stopDeleteRepeat);
-        document.getElementById('customKeyboard').addEventListener('pointerleave',stopDeleteRepeat);
+        document.getElementById('customKeyboard').addEventListener('pointerup',stopDeleteRepeat);document.getElementById('customKeyboard').addEventListener('pointerleave',stopDeleteRepeat);
         document.getElementById('customKeyboard').addEventListener('touchstart',function(e){e.preventDefault();e.stopPropagation()});
 
         function clearMarkOnEdit(input){var q=input.dataset.q,ic=document.querySelector('.result-icon[data-q="'+q+'"]'),dp=document.querySelector('.answer-display[data-q="'+q+'"]');if(ic&&(ic.classList.contains('wrong')||ic.classList.contains('correct'))){ic.className='result-icon';ic.textContent='';input.style.borderBottomColor='#667eea';input.style.color='inherit';if(dp){dp.classList.remove('show');dp.textContent=''}var a=answerMap.get(q);if(a){a.checked=false;answerMap.set(q,a)}}}
@@ -302,7 +359,6 @@
         function deleteHistory(fid){localStorage.removeItem('quiz_'+fid);localStorage.removeItem('wrong_'+fid)}
         function restoreHistory(fid){var h=getHistoryData(fid);Object.keys(h.answers).forEach(function(k){var i=document.querySelector('.fill-blank-input[data-q="'+k+'"]');if(i){i.value=h.answers[k];if(h.checked[k])checkAnswerSilent(k,h.answers[k])}})}
         function checkAnswerSilent(qKey,ua){var a=answerMap.get(qKey);if(!a||!a.answer)return;var i=document.querySelector('.fill-blank-input[data-q="'+qKey+'"]'),ic=document.querySelector('.result-icon[data-q="'+qKey+'"]'),dp=document.querySelector('.answer-display[data-q="'+qKey+'"]');if(!i)return;a.checked=true;var ok=false,nu=ua.replace(/\s+/g,' ').trim(),pa=a.answer.split('|').map(function(x){return x.replace(/\s+/g,' ').trim()});for(var j=0;j<pa.length;j++){if(nu===pa[j]||nu.toLowerCase()===pa[j].toLowerCase()||nu.replace(/\s+/g,'').toLowerCase()===pa[j].replace(/\s+/g,'').toLowerCase()){ok=true;break}}if(!ok){a.wrongCount=(a.wrongCount||0)+1;a.lastWrongAnswer=ua;saveWrongCounts(currentFileId)}answerMap.set(qKey,a);if(ic){ic.className='result-icon '+(ok?'correct':'wrong');ic.textContent=ok?'✓':'✗'}i.style.borderBottomColor=ok?'#4caf50':'#f44336';i.style.color=ok?'#4caf50':'#f44336';if(dp&&!ok){dp.textContent='答案: '+a.answer;dp.classList.add('show')}}
-        window.addEventListener('beforeunload',function(){if(currentFileId)saveToHistory()});
         setInterval(function(){if(currentFileId&&answerMap.size>0)saveToHistory()},30000);
 
         window.checkAllAnswers=function(){if(isCheckingAll)return;isCheckingAll=true;var t=0,c=0,w=0,na=0,e=0;answerMap.forEach(function(a,k){t++;if(!a.answer){na++;return}var i=document.querySelector('.fill-blank-input[data-q="'+k+'"]');if(!i||i.value.trim()===''){e++;return}if(checkAnswer(k)==='correct')c++;else w++});if(currentFileId)saveToHistory();alert('共'+t+'题\n已填'+(t-e-na)+'题\n正确'+c+'题\n错误'+w+'题');isCheckingAll=false};
@@ -321,7 +377,7 @@
         function saveAnswersMap(fid){var a={};answerMap.forEach(function(d,k){if(d.answer)a[k]=d.answer});localStorage.setItem('answers_'+fid,JSON.stringify(a))}
         var origSave=saveToHistory;saveToHistory=function(){origSave();if(currentFileId)saveAnswersMap(currentFileId)};
 
-        window.showGuide=function(){document.getElementById('guideContent').innerHTML='<h2>一、这是什么？</h2><p>把Word/Excel/文本变成<strong>自动批改的填空练习</strong>。</p><div class="note">手机电脑都能用。手机支持双指缩放、单指拖动，自动弹出英文/数字键盘。</div><h2>二、怎么用？（三步）</h2><div class="step"><strong>第1步：打开文件</strong><br>点<b>文件→打开文件</b>选文档。</div><div class="step"><strong>第2步：填写答案</strong><br>在输入框打字。</div><div class="step"><strong>第3步：检查对错</strong><br>点<b>检查</b>或按回车。</div><h2>三、怎么准备文档？</h2><p><b>题目：</b><code>Q1[]</code>或<code>Q1[提示]</code> <b>答案：</b><code>A1[答案]</code>（<code>|</code>分隔多答案）</p><p><b>隐藏答案：</b><code>[dpstart]...[dpend]</code>包裹</p><p><b>其他：</b><code>[A4]</code>尺寸 <code>[noet]</code>隐藏逐题检查 <code>cheanc[提交,100,middle]</code>自定义按钮</p><h2>四、按钮说明</h2><table><tr><th>按钮</th><th>功能</th></tr><tr><td>文件→打开文件</td><td>选.docx/.xlsx/.txt</td></tr><tr><td>文件→历史记录</td><td>查看/恢复/删除</td></tr><tr><td>文件→重置</td><td>清空答案和批改</td></tr><tr><td>文件→清除数据</td><td>清空含错误计数</td></tr><tr><td>答题→全部检查</td><td>一键批改</td></tr><tr><td>答题→清除批改</td><td>只清标记</td></tr><tr><td>答题→清除错误</td><td>清空做错的题</td></tr><tr><td>答题→统计</td><td>正确/错误/未检查</td></tr></table>';document.getElementById('guidePanel').classList.add('show');document.getElementById('guideOverlay').classList.add('show')};
+        window.showGuide=function(){document.getElementById('guideContent').innerHTML='<h2>一、这是什么？</h2><p>把Word/Excel/文本变成<strong>自动批改的填空练习</strong>。</p><div class="note">手机电脑都能用。手机支持双指缩放、单指拖动，自动弹出英文/数字键盘。</div><h2>二、怎么用？</h2><div class="step"><strong>第1步：打开文件</strong><br>点<b>文件→打开文件</b>选文档。</div><div class="step"><strong>第2步：填写答案</strong><br>在输入框打字。</div><div class="step"><strong>第3步：检查对错</strong><br>点<b>检查</b>或按回车。</div><h2>三、广播功能</h2><p><b>📡 广播题目：</b>打开文件后，点<b>文件→广播题目</b>，输入口令即开始循环广播。</p><p><b>📥 接收广播：</b>点<b>文件→接收广播</b>，输入相同口令自动接收。打不开时自动尝试其他格式。</p><h2>四、标签语法</h2><p><b>题目：</b><code>Q1[]</code> <b>答案：</b><code>A1[答案]</code> <b>隐藏：</b><code>[dpstart]...[dpend]</code> <b>尺寸：</b><code>[A4]</code>等 <b>无逐题检查：</b><code>[noet]</code></p>';document.getElementById('guidePanel').classList.add('show');document.getElementById('guideOverlay').classList.add('show')};
         window.hideGuide=function(){document.getElementById('guidePanel').classList.remove('show');document.getElementById('guideOverlay').classList.remove('show')};
 
         updateTransform();updateZoomDisplay();
