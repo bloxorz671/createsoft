@@ -12,17 +12,14 @@
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;background:#f0f0f0;overscroll-behavior:none;height:100vh;height:100dvh;overflow:hidden;position:fixed;width:100%;-webkit-user-select:none;user-select:none}
         .header{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:6px 10px;box-shadow:0 2px 12px rgba(0,0,0,0.08);z-index:100;display:flex;align-items:center;gap:8px}
-        .header-left{display:flex;align-items:center;gap:6px}
-        .header-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+        .header-left{display:flex;align-items:center;gap:6px}.header-right{margin-left:auto;display:flex;align-items:center;gap:6px}
         .dropdown{position:relative;display:inline-block}
         .dropdown-btn,.btn-plain{padding:7px 12px;border:none;border-radius:16px;font-size:12px;cursor:pointer;font-weight:500;background:#f5f5f5;color:#333;white-space:nowrap;display:flex;align-items:center;gap:4px}
-        .dropdown-btn:active,.btn-plain:active{background:#e0e0e0}
-        .dropdown-btn .arrow{font-size:9px;margin-left:2px}
+        .dropdown-btn:active,.btn-plain:active{background:#e0e0e0}.dropdown-btn .arrow{font-size:9px;margin-left:2px}
         .dropdown-menu{position:absolute;top:100%;left:0;margin-top:4px;background:white;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);min-width:140px;padding:5px;display:none;z-index:150}
         .dropdown-menu.show{display:block}
         .dropdown-menu button{display:block;width:100%;padding:8px 12px;border:none;background:none;font-size:12px;cursor:pointer;text-align:left;border-radius:6px;color:#333}
-        .dropdown-menu button:hover{background:#f0f0f0}
-        .dropdown-menu .divider{height:1px;background:#eee;margin:3px 0}
+        .dropdown-menu button:hover{background:#f0f0f0}.dropdown-menu .divider{height:1px;background:#eee;margin:3px 0}
         .zoom-controls{display:flex;align-items:center;gap:3px;background:#f5f5f5;border-radius:16px;padding:2px}
         .zoom-btn{width:26px;height:26px;border-radius:50%;border:none;background:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#333;box-shadow:0 1px 2px rgba(0,0,0,0.08)}
         .zoom-btn:active{background:#e0e0e0}.zoom-btn:disabled{opacity:0.4;cursor:not-allowed}
@@ -32,13 +29,9 @@
         .doc-stage{position:absolute;top:0;left:0;transform-origin:0 0;transition:none}
         .doc-viewer{background:white;box-shadow:0 4px 24px rgba(0,0,0,0.12);overflow:hidden;position:relative}
         .docx-wrapper{background:white}
-
-        /* ===== 全局消除分页线 ===== */
         .docx-wrapper,.docx-wrapper *{page-break-before:auto!important;page-break-after:auto!important;break-before:auto!important;break-after:auto!important}
         .docx-wrapper section,.docx-wrapper .docx-page,.docx-wrapper>div{border:none!important;outline:none!important;box-shadow:none!important;margin-top:0!important;margin-bottom:0!important}
-        /* 隐藏dp区域的CSS类 */
         .dp-hidden{display:none!important}
-
         .txt-content{padding:24px;font-family:'Courier New','Microsoft YaHei',monospace;font-size:14px;line-height:1.8;white-space:pre-wrap;word-wrap:break-word}
         .xlsx-content{padding:16px;overflow-x:auto}
         .xlsx-content table{border-collapse:collapse;width:auto;margin:0 auto;font-size:13px}
@@ -163,7 +156,7 @@
             try{var rawText='';
                 if(ext==='docx'){var ab=await file.arrayBuffer(),mr=await mammoth.extractRawText({arrayBuffer:ab});rawText=mr.value;currentDocSize=parseDocSize(rawText);parseQATags(rawText);parseExtraTags(rawText);viewer.innerHTML='';var wrapper=document.createElement('div');wrapper.className='docx-wrapper';viewer.appendChild(wrapper);await docx.renderAsync(ab,wrapper,null,{className:'docx-content',inWrapper:true,ignoreWidth:false,ignoreHeight:false,ignoreFonts:false,breakPages:true,ignoreLastRenderedPageBreak:true,experimental:false});processRenderedDOM(viewer);finishLoad()}
                 else if(ext==='txt'){rawText=await file.text();currentDocSize=parseDocSize(rawText);parseQATags(rawText);parseExtraTags(rawText);viewer.innerHTML='<div class="txt-content">'+processTextContent(rawText)+'</div>';finishLoad()}
-                else if(ext==='xlsx'){var ab2=await file.arrayBuffer(),wb=XLSX.read(ab2,{type:'array'});rawText='';wb.SheetNames.forEach(function(n){var s=wb.Sheets[n];if(!s||!s['!ref'])return;var rng=XLSX.utils.decode_range(s['!ref']);for(var r=rng.s.r;r<=rng.e.r;r++){var rt='';for(var c=rng.s.c;c<=rng.e.c;c++){var cr=XLSX.utils.encode_cell({r:r,c:c}),cell=s[cr];if(cell)rt+=(String(cell.w||cell.v||'').replace(/\n/g,' '))+' '}rawText+=rt.trim()+'\n'}});currentDocSize=parseDocSize(rawText);parseQATags(rawText);parseExtraTags(rawText);viewer.innerHTML='<div class="xlsx-content">'+xlsxToHTML(wb)+'</div>';handleCheancTagsInHTML(viewer);cleanupXlsxEmptyRows(viewer);cleanupXlsxTagText(viewer);finishLoad()}
+                else if(ext==='xlsx'){var ab2=await file.arrayBuffer(),wb=XLSX.read(ab2,{type:'array'});rawText='';wb.SheetNames.forEach(function(n){var s=wb.Sheets[n];if(!s||!s['!ref'])return;var rng=XLSX.utils.decode_range(s['!ref']);for(var r=rng.s.r;r<=rng.e.r;r++){var rt='';for(var c=rng.s.c;c<=rng.e.c;c++){var cr=XLSX.utils.encode_cell({r:r,c:c}),cell=s[cr];if(cell)rt+=(String(cell.w||cell.v||'').replace(/\n/g,' '))+' '}rawText+=rt.trim()+'\n'}});currentDocSize=parseDocSize(rawText);parseQATags(rawText);parseExtraTags(rawText);viewer.innerHTML='<div class="xlsx-content">'+xlsxToHTML(wb)+'</div>';handleCheancTagsInHTML(viewer);cleanupXlsxEmptyRowsCols(viewer);cleanupXlsxTagText(viewer);finishLoad()}
                 else{throw new Error('不支持: .'+ext)}
             }catch(err){viewer.innerHTML='<div class="empty-state"><div class="icon">⚠️</div><div style="color:red;">加载失败</div></div>';docLoaded=false;setZoomEnabled(false)}
         }
@@ -177,41 +170,95 @@
         function renderCheancBtn(cfg){return'<button class="inline-check-btn'+(cfg.centered?' centered':'')+'" style="font-size:'+cfg.size+'px;">'+escHtml(cfg.label)+'</button>'}
 
         function processTextContent(text){text=text.replace(/\[dpstart\][\s\S]*?\[dpend\]/gi,'').replace(/\[dpstart\]/gi,'').replace(/\[dpend\]/gi,'').replace(/\[noet\]/gi,'');for(var n of Object.keys(PAGE_SIZES))text=text.replace(new RegExp('\\['+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\]','gi'),'');text=text.replace(/\[\d+\.?\d*\s*:\s*\d+\.?\d*\]/g,'');text=text.replace(/cheanc\[([\s\S]*?)\]/gi,function(m,inner){return renderCheancBtn(parseCheancTag([null,inner]))});text=text.replace(/Q(\d+)\[([\s\S]*?)\]/gi,function(m,num,content){var q='Q'+num,a=answerMap.get(q),isChinese=a?.answer&&/[\u4e00-\u9fff]/.test(a.answer);return'<span class="fill-blank-wrapper" data-q="'+q+'">'+(content.trim()?'<span style="color:#888;">'+escHtml(content)+'</span>':'')+'<input type="text" class="fill-blank-input'+(isChinese?' native-input':'')+'" data-q="'+q+'" data-ans="'+(a?.answer||'')+'" placeholder="'+(content.trim()||'答案')+'" style="min-width:80px;" '+(isChinese?'':'inputmode="none"')+' autocomplete="off">'+(noIndividualCheck?'':'<button class="check-btn" data-q="'+q+'">检查</button>')+'<span class="result-icon" data-q="'+q+'"></span><span class="answer-display" data-q="'+q+'"></span></span>'});return text.replace(/A\d+\[[\s\S]*?\]/gi,'')}
-        function xlsxToHTML(wb){var h='',cbh='',hc=false;wb.SheetNames.forEach(function(n){var s=wb.Sheets[n];if(!s||!s['!ref'])return;var rng=XLSX.utils.decode_range(s['!ref']);h+='<table>';for(var r=rng.s.r;r<=rng.e.r;r++){var rh='',rhc=false;for(var c=rng.s.c;c<=rng.e.c;c++){var cr=XLSX.utils.encode_cell({r:r,c:c}),cell=s[cr],v='';if(cell){v=cell.w||cell.v||'';v=String(v).trim()}if(/cheanc\[.*,.*middle.*\]/i.test(v)){hc=true;cbh=v.replace(/cheanc\[([\s\S]*?)\]/gi,function(m,inner){return renderCheancBtn(parseCheancTag([null,inner]))});v=v.replace(/cheanc\[[\s\S]*?\]/gi,'')}v=v.replace(/Q(\d+)\[([\s\S]*?)\]/gi,function(m,num,ct){var q='Q'+num,a=answerMap.get(q),isChinese=a?.answer&&/[\u4e00-\u9fff]/.test(a.answer);return'<span class="fill-blank-wrapper" data-q="'+q+'">'+(ct.trim()?'<span style="color:#888;">'+escHtml(ct)+'</span>':'')+'<input type="text" class="fill-blank-input'+(isChinese?' native-input':'')+'" data-q="'+q+'" data-ans="'+(a?.answer||'')+'" placeholder="'+(ct.trim()||'答案')+'" style="min-width:80px;" '+(isChinese?'':'inputmode="none"')+' autocomplete="off">'+(noIndividualCheck?'':'<button class="check-btn" data-q="'+q+'">检查</button>')+'<span class="result-icon" data-q="'+q+'"></span><span class="answer-display" data-q="'+q+'"></span></span>'});v=v.replace(/\[dpstart\]/gi,'').replace(/\[dpend\]/gi,'');for(var k of Object.keys(PAGE_SIZES))v=v.replace(new RegExp('\\['+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\]','gi'),'');v=v.replace(/\[noet\]/gi,'').replace(/\[webpage\]/gi,'');v=v.replace(/A\d+\[[\s\S]*?\]/gi,'');if(v.trim())rhc=true;rh+='<td>'+v+'</td>'}if(rhc)h+='<tr>'+rh+'</tr>'}h+='</table><br>'});if(hc)h+=cbh;return h}
-        function cleanupXlsxEmptyRows(container){container.querySelectorAll('table tr').forEach(function(tr){var hc=false;tr.querySelectorAll('td').forEach(function(td){if((td.textContent||'').replace(/\s/g,'')!==''||td.querySelector('.fill-blank-input,.inline-check-btn'))hc=true});if(!hc)tr.remove()});container.querySelectorAll('table').forEach(function(t){if(t.querySelectorAll('tr').length===0)t.remove()})}
+
+        // ==================== xlsx：智能移除全空行和全空列 ====================
+        function xlsxToHTML(wb){
+            // 先收集所有数据到二维数组
+            var sheetsData=[];
+            wb.SheetNames.forEach(function(n){
+                var s=wb.Sheets[n];if(!s||!s['!ref'])return;
+                var rng=XLSX.utils.decode_range(s['!ref']);
+                var rows=[];
+                for(var r=rng.s.r;r<=rng.e.r;r++){
+                    var row=[];
+                    for(var c=rng.s.c;c<=rng.e.c;c++){
+                        var cr=XLSX.utils.encode_cell({r:r,c:c}),cell=s[cr],v='';
+                        if(cell){v=String(cell.w||cell.v||'').trim()}
+                        row.push(v);
+                    }
+                    rows.push(row);
+                }
+                sheetsData.push(rows);
+            });
+
+            // 分析哪些列完全为空（所有行该列都没内容）
+            var maxCols=0;
+            sheetsData.forEach(function(rows){rows.forEach(function(row){maxCols=Math.max(maxCols,row.length)})});
+            var emptyCols=new Set();
+            for(var c=0;c<maxCols;c++){
+                var allEmpty=true;
+                sheetsData.forEach(function(rows){
+                    rows.forEach(function(row){
+                        if(c<row.length&&row[c].trim()!=='')allEmpty=false;
+                    });
+                });
+                if(allEmpty)emptyCols.add(c);
+            }
+
+            // 生成HTML，跳过全空行和全空列
+            var h='',cbh='',hc=false;
+            sheetsData.forEach(function(rows){
+                h+='<table>';
+                rows.forEach(function(row){
+                    // 检查这行是否全空
+                    var rowHasContent=false;
+                    for(var c=0;c<row.length;c++){
+                        if(!emptyCols.has(c)&&row[c].trim()!==''){rowHasContent=true;break}
+                    }
+                    if(!rowHasContent)return; // 跳过全空行
+
+                    var rh='';
+                    for(var c=0;c<maxCols;c++){
+                        if(emptyCols.has(c))continue; // 跳过全空列
+                        var v=c<row.length?row[c]:'';
+                        // 处理标签
+                        if(/cheanc\[.*,.*middle.*\]/i.test(v)){hc=true;cbh=v.replace(/cheanc\[([\s\S]*?)\]/gi,function(m,inner){return renderCheancBtn(parseCheancTag([null,inner]))});v=v.replace(/cheanc\[[\s\S]*?\]/gi,'')}
+                        v=v.replace(/Q(\d+)\[([\s\S]*?)\]/gi,function(m,num,ct){var q='Q'+num,a=answerMap.get(q),isChinese=a?.answer&&/[\u4e00-\u9fff]/.test(a.answer);return'<span class="fill-blank-wrapper" data-q="'+q+'">'+(ct.trim()?'<span style="color:#888;">'+escHtml(ct)+'</span>':'')+'<input type="text" class="fill-blank-input'+(isChinese?' native-input':'')+'" data-q="'+q+'" data-ans="'+(a?.answer||'')+'" placeholder="'+(ct.trim()||'答案')+'" style="min-width:80px;" '+(isChinese?'':'inputmode="none"')+' autocomplete="off">'+(noIndividualCheck?'':'<button class="check-btn" data-q="'+q+'">检查</button>')+'<span class="result-icon" data-q="'+q+'"></span><span class="answer-display" data-q="'+q+'"></span></span>'});
+                        v=v.replace(/\[dpstart\]/gi,'').replace(/\[dpend\]/gi,'');
+                        for(var k of Object.keys(PAGE_SIZES))v=v.replace(new RegExp('\\['+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\]','gi'),'');
+                        v=v.replace(/\[noet\]/gi,'').replace(/\[webpage\]/gi,'');
+                        v=v.replace(/A\d+\[[\s\S]*?\]/gi,'');
+                        rh+='<td>'+v+'</td>';
+                    }
+                    h+='<tr>'+rh+'</tr>';
+                });
+                h+='</table><br>';
+            });
+            if(hc)h+=cbh;
+            return h;
+        }
+
+        // 简化版清理（作为兜底）
+        function cleanupXlsxEmptyRowsCols(container){
+            container.querySelectorAll('table').forEach(function(table){
+                var rows=table.querySelectorAll('tr');
+                rows.forEach(function(tr){
+                    var hasContent=false;
+                    tr.querySelectorAll('td').forEach(function(td){
+                        if((td.textContent||'').replace(/\s/g,'')!==''||td.querySelector('.fill-blank-input,.inline-check-btn'))hasContent=true;
+                    });
+                    if(!hasContent)tr.remove();
+                });
+                if(table.querySelectorAll('tr').length===0)table.remove();
+            });
+        }
+
         function handleCheancTagsInHTML(container){var w=document.createTreeWalker(container,NodeFilter.SHOW_TEXT,null,false),ns=[];while(w.nextNode())ns.push(w.currentNode);ns.forEach(function(n){if(/cheanc\[/i.test(n.textContent)){var s=document.createElement('span');s.innerHTML=n.textContent.replace(/cheanc\[([\s\S]*?)\]/gi,function(m,inner){return renderCheancBtn(parseCheancTag([null,inner]))});n.parentElement.replaceChild(s,n)}})}
 
         document.getElementById('fileInput').addEventListener('change',async function(e){if(e.target.files[0])await loadFile(e.target.files[0])});
 
-        // ==================== 核心：不删节点，只替换文本 ====================
-        function processRenderedDOM(c){
-            // 先处理隐藏区域：在文本节点层面把dp区域的内容清空
-            markDpRegionsInText(c);
-            // 再替换Q标签为输入框（此时dp区域文本已清空，不会被替换）
-            replaceQTags(c);
-            // 清理A标签和其他标签
-            removeATags(c);
-            removeSizeTags(c);
-            handleCheancTags(c);
-        }
-
-        function markDpRegionsInText(container){
-            var walker=document.createTreeWalker(container,NodeFilter.SHOW_TEXT,null,false),allNodes=[];
-            while(walker.nextNode())allNodes.push(walker.currentNode);
-            var dpRanges=[],startIdx=-1;
-            for(var i=0;i<allNodes.length;i++){var t=allNodes[i].textContent;if(/\[dpstart\]/i.test(t)&&startIdx<0)startIdx=i;if(/\[dpend\]/i.test(t)&&startIdx>=0){dpRanges.push({start:startIdx,end:i});startIdx=-1}}
-            if(startIdx>=0)dpRanges.push({start:startIdx,end:allNodes.length-1});
-            // 清空dp区域内的文本，但保留标签文本
-            dpRanges.forEach(function(range){
-                for(var i=range.start;i<=range.end;i++){
-                    var node=allNodes[i],text=node.textContent;
-                    text=text.replace(/\[dpstart\]/gi,'').replace(/\[dpend\]/gi,'');
-                    if(i>range.start&&i<range.end)text='';
-                    node.textContent=text;
-                }
-            });
-        }
-
+        function processRenderedDOM(c){markDpRegionsInText(c);replaceQTags(c);removeATags(c);removeSizeTags(c);handleCheancTags(c)}
+        function markDpRegionsInText(container){var w=document.createTreeWalker(container,NodeFilter.SHOW_TEXT,null,false),allNodes=[];while(w.nextNode())allNodes.push(w.currentNode);var dpRanges=[],startIdx=-1;for(var i=0;i<allNodes.length;i++){var t=allNodes[i].textContent;if(/\[dpstart\]/i.test(t)&&startIdx<0)startIdx=i;if(/\[dpend\]/i.test(t)&&startIdx>=0){dpRanges.push({start:startIdx,end:i});startIdx=-1}}if(startIdx>=0)dpRanges.push({start:startIdx,end:allNodes.length-1});dpRanges.forEach(function(range){for(var i=range.start;i<=range.end;i++){var node=allNodes[i],text=node.textContent;text=text.replace(/\[dpstart\]/gi,'').replace(/\[dpend\]/gi,'');if(i>range.start&&i<range.end)text='';node.textContent=text}})}
         function handleCheancTags(c){var w=document.createTreeWalker(c,NodeFilter.SHOW_TEXT,null,false),ns=[];while(w.nextNode())ns.push(w.currentNode);ns.forEach(function(n){if(/cheanc\[/i.test(n.textContent)){var s=document.createElement('span');s.innerHTML=n.textContent.replace(/cheanc\[([\s\S]*?)\]/gi,function(m,inner){return renderCheancBtn(parseCheancTag([null,inner]))});n.parentElement.replaceChild(s,n)}})}
         function replaceQTags(c){var w=document.createTreeWalker(c,NodeFilter.SHOW_TEXT,null,false),ns=[];while(w.nextNode())ns.push(w.currentNode);ns.forEach(function(n){if(!n.parentElement||n.parentElement.closest('.fill-blank-wrapper'))return;if(/\[noet\]/i.test(n.textContent)){n.textContent=n.textContent.replace(/\[noet\]/gi,'');return}if(!/Q\d+\[/i.test(n.textContent))return;var h=n.textContent.replace(/Q(\d+)\[([\s\S]*?)\]/gi,function(m,num,content){var q='Q'+num,a=answerMap.get(q),isChinese=a?.answer&&/[\u4e00-\u9fff]/.test(a.answer);return'<span class="fill-blank-wrapper" data-q="'+q+'">'+(content.trim()?'<span style="color:#888;">'+escHtml(content)+'</span>':'')+'<input type="text" class="fill-blank-input'+(isChinese?' native-input':'')+'" data-q="'+q+'" data-ans="'+(a?.answer||'')+'" placeholder="'+(content.trim()||'答案')+'" style="min-width:'+(content.trim()?'60px':'80px')+';" '+(isChinese?'':'inputmode="none"')+' autocomplete="off">'+(noIndividualCheck?'':'<button class="check-btn" data-q="'+q+'">检查</button>')+'<span class="result-icon" data-q="'+q+'"></span><span class="answer-display" data-q="'+q+'"></span></span>'});if(h!==n.textContent){var s=document.createElement('span');s.innerHTML=h;n.parentElement.replaceChild(s,n)}})}
         function removeATags(c){var w=document.createTreeWalker(c,NodeFilter.SHOW_TEXT,null,false),ns=[];while(w.nextNode())ns.push(w.currentNode);ns.forEach(function(n){if(!n.parentElement?.closest('.fill-blank-wrapper'))n.textContent=n.textContent.replace(/A\d+\[[\s\S]*?\]/gi,'')})}
