@@ -1283,96 +1283,83 @@
                 a.click();
                 URL.revokeObjectURL(url);
             }
-
             function showSecurityConfirm(callback) {
-                var overlay = document.getElementById('confirmOverlay');
-                var msgP = document.getElementById('confirmMsg');
-                var yesBtn = document.getElementById('btnConfirmYes');
-                var noBtn = document.getElementById('btnConfirmNo');
+    var overlay = document.getElementById('confirmOverlay');
+    var msgP = document.getElementById('confirmMsg');
+    var yesBtn = document.getElementById('btnConfirmYes');
+    var noBtn = document.getElementById('btnConfirmNo');
 
-                document.getElementById('confirmInput').style.display = 'none';
+    document.getElementById('confirmInput').style.display = 'none';
 
-                msgP.innerHTML = basicSanitize(
-                    '<div style="text-align:left;font-size:13px;line-height:1.7;">' +
-                    '<div style="text-align:center;font-size:18px;margin-bottom:8px;">⚠️ 安全提示</div>' +
-                    '<p>本文件由发送端上传，同一口令下可能存在多人传输导致文件串台。</p>' +
-                    '<p>本服务仅提供文件传输通道，不进行任何安全检测。</p>' +
-                    '<p style="color:#e91e63;font-weight:500;">请在确认文件来源可靠后再下载，因下载文件造成的任何问题本站概不负责。</p>' +
-                    '</div>' +
-                    '<div class="security-checkbox-wrapper" id="securityCheckboxWrapper">' +
-                    '<input type="checkbox" id="securityCheckbox" disabled>' +
-                    '<label for="securityCheckbox">我已阅读并确认下载</label>' +
-                    '</div>'
-                );
+    msgP.innerHTML = basicSanitize(
+        '<div style="text-align:left;font-size:13px;line-height:1.7;">' +
+        '<div style="text-align:center;font-size:18px;margin-bottom:8px;">⚠️ 安全提示</div>' +
+        '<p>本文件由发送端上传，同一口令下可能存在多人传输导致文件串台。</p>' +
+        '<p>本服务仅提供文件传输通道，不进行任何安全检测。</p>' +
+        '<p style="color:#e91e63;font-weight:500;">请在确认文件来源可靠后再下载，因下载文件造成的任何问题本站概不负责。</p>' +
+        '</div>' +
+        '<div class="security-checkbox-wrapper" id="securityCheckboxWrapper">' +
+        '<input type="checkbox" id="securityCheckbox">' +
+        '<label for="securityCheckbox">我已阅读并确认下载</label>' +
+        '</div>'
+    );
 
-                var checkbox = document.getElementById('securityCheckbox');
+    var checkbox = document.getElementById('securityCheckbox');
 
-                yesBtn.className = 'btn-yes btn-yes-disabled';
-                yesBtn.textContent = '请等待 3 秒';
-                yesBtn.disabled = true;
-                checkbox.disabled = true;
-                checkbox.checked = false;
+    // 初始状态：按钮禁用
+    yesBtn.className = 'btn-yes btn-yes-disabled';
+    yesBtn.textContent = '确认下载';
+    yesBtn.disabled = true;
+    checkbox.checked = false;
 
-                noBtn.textContent = '取消下载';
-                noBtn.className = 'btn-no';
+    noBtn.textContent = '取消下载';
+    noBtn.className = 'btn-no';
 
-                overlay.classList.add('show');
+    overlay.classList.add('show');
 
-                var countdown = 3;
+    // 监听复选框变化
+    checkbox.addEventListener('change', function() {
+        if (checkbox.checked) {
+            yesBtn.disabled = false;
+            yesBtn.className = 'btn-yes btn-yes-ready';
+        } else {
+            yesBtn.disabled = true;
+            yesBtn.className = 'btn-yes btn-yes-disabled';
+        }
+    });
 
-                function updateCountdown() {
-                    if (countdown > 0) {
-                        yesBtn.textContent = '请等待 ' + countdown + ' 秒';
-                        countdown--;
-                        setTimeout(updateCountdown, 1000);
-                    } else {
-                        checkbox.disabled = false;
-                        yesBtn.textContent = '确认下载';
-                        yesBtn.className = 'btn-yes btn-yes-ready';
-                        yesBtn.disabled = true;
+    // 点击整个wrapper也可以切换复选框
+    var wrapper = document.getElementById('securityCheckboxWrapper');
+    wrapper.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'INPUT') {
+            checkbox.checked = !checkbox.checked;
+            var event = new Event('change');
+            checkbox.dispatchEvent(event);
+        }
+    });
 
-                        checkbox.addEventListener('change', function() {
-                            if (checkbox.checked) {
-                                yesBtn.disabled = false;
-                                yesBtn.className = 'btn-yes btn-yes-ready';
-                            } else {
-                                yesBtn.disabled = true;
-                                yesBtn.className = 'btn-yes btn-yes-disabled';
-                            }
-                        });
+    // 替换按钮，清除旧的事件监听
+    var newYesBtn = yesBtn.cloneNode(true);
+    yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+    var newNoBtn = noBtn.cloneNode(true);
+    noBtn.parentNode.replaceChild(newNoBtn, noBtn);
 
-                        var wrapper = document.getElementById('securityCheckboxWrapper');
-                        wrapper.addEventListener('click', function(e) {
-                            if (e.target.tagName !== 'INPUT') {
-                                checkbox.checked = !checkbox.checked;
-                                var event = new Event('change');
-                                checkbox.dispatchEvent(event);
-                            }
-                        });
-                    }
-                }
-                updateCountdown();
+    newYesBtn.addEventListener('click', function() {
+        if (newYesBtn.disabled) return;
+        if (!checkbox.checked) {
+            alert('请先勾选"我已阅读并确认下载"');
+            return;
+        }
+        overlay.classList.remove('show');
+        if (callback) callback(true);
+    });
 
-                var newYesBtn = yesBtn.cloneNode(true);
-                yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
-                var newNoBtn = noBtn.cloneNode(true);
-                noBtn.parentNode.replaceChild(newNoBtn, noBtn);
-
-                newYesBtn.addEventListener('click', function() {
-                    if (newYesBtn.disabled) return;
-                    if (!checkbox.checked) {
-                        alert('请先勾选"我已阅读并确认下载"');
-                        return;
-                    }
-                    overlay.classList.remove('show');
-                    if (callback) callback(true);
-                });
-
-                newNoBtn.addEventListener('click', function() {
-                    overlay.classList.remove('show');
-                    if (callback) callback(false);
-                });
-            }
+    newNoBtn.addEventListener('click', function() {
+        overlay.classList.remove('show');
+        if (callback) callback(false);
+    });
+}
+            
 
             function showConfirm(msg, onYes, showInput, btnClass) {
                 document.getElementById('confirmMsg').innerHTML = basicSanitize(msg.replace(/\n/g, '<br>'));
