@@ -30,8 +30,6 @@
             -webkit-user-select: none;
             user-select: none;
         }
-        
-        /* ========== 顶栏 - 简化版本 ========== */
         .header {
             position: fixed;
             top: 0;
@@ -59,8 +57,6 @@
             align-items: center;
             gap: 6px;
         }
-        
-        /* ========== 下拉菜单 ========== */
         .dropdown {
             position: relative;
             display: inline-block;
@@ -140,8 +136,6 @@
         .btn-receive:hover {
             background: #0b7ad1 !important;
         }
-        
-        /* ========== 缩放控件 ========== */
         .zoom-controls {
             display: flex;
             align-items: center;
@@ -182,8 +176,6 @@
             text-align: center;
             font-weight: 500;
         }
-        
-        /* ========== 广播条 ========== */
         .broadcast-bar {
             position: fixed;
             top: 0;
@@ -204,8 +196,6 @@
         .broadcast-bar.receiving {
             background: #2196f3;
         }
-        
-        /* ========== 视图区 ========== */
         .viewport {
             position: fixed;
             top: 44px;
@@ -578,18 +568,19 @@
             background: #0b7ad1;
         }
         .confirm-box .btn-yes-disabled {
-            background: #bdbdbd;
-            color: #888;
-            cursor: not-allowed;
-            pointer-events: none;
+            background: #bdbdbd !important;
+            color: #888 !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
         }
         .confirm-box .btn-yes-ready {
-            background: #e91e63;
-            color: white;
-            cursor: pointer;
+            background: #e91e63 !important;
+            color: white !important;
+            cursor: pointer !important;
+            pointer-events: auto !important;
         }
         .confirm-box .btn-yes-ready:hover {
-            background: #d01554;
+            background: #d01554 !important;
         }
         .confirm-box .countdown-text {
             color: #e91e63;
@@ -968,9 +959,6 @@
     <input type="file" id="fileInput" accept=".docx,.xlsx,.txt" hidden>
 
     <script>
-        // ============================================================
-        //  安全防护：基础HTML净化函数
-        // ============================================================
         function basicSanitize(html) {
             if (typeof html !== 'string') return '';
             return html
@@ -979,7 +967,6 @@
                 .replace(/javascript\s*:/gi, '');
         }
 
-        // ========== 关键：toggleDropdown 必须挂到 window 上 ==========
         window.toggleDropdown = function(id) {
             var menu = document.getElementById(id + 'Menu');
             if (!menu) return;
@@ -993,7 +980,6 @@
             }
         };
 
-        // 点击页面其他位置关闭下拉菜单
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.dropdown')) {
                 var allMenus = document.querySelectorAll('.dropdown-menu');
@@ -1003,13 +989,9 @@
             }
         });
 
-        // ============================================================
-        //  主程序：立即执行函数
-        // ============================================================
         (function() {
             'use strict';
 
-            // ========== 状态变量 ==========
             var answerMap = new Map();
             var currentFileId = null;
             var currentDocSize = null;
@@ -1053,7 +1035,6 @@
                 'legal': { width: 215.9, height: 355.6 }
             };
 
-            // ========== 缩放与拖拽 ==========
             var docScale = 1,
                 docTx = 0,
                 docTy = 0;
@@ -1244,13 +1225,16 @@
             updateViewportTop();
             window.addEventListener('resize', updateViewportTop);
 
-            // ========== 文件操作 ==========
             window.openFileDialog = function() {
                 isReceivedFile = false;
                 document.getElementById('fileInput').click();
             };
 
             window.downloadCurrentFile = function() {
+                if (!currentFileId) {
+                    alert('⚠️ 请先打开一个文件再下载');
+                    return;
+                }
                 var file = document.getElementById('fileInput').files[0];
                 if (isReceivedFile || !file) {
                     showSecurityConfirm(function(confirmed) {
@@ -1283,95 +1267,87 @@
                 a.click();
                 URL.revokeObjectURL(url);
             }
+
+            // ========== 安全确认弹窗（修复版） ==========
             function showSecurityConfirm(callback) {
-    var overlay = document.getElementById('confirmOverlay');
-    var msgP = document.getElementById('confirmMsg');
-    var yesBtn = document.getElementById('btnConfirmYes');
-    var noBtn = document.getElementById('btnConfirmNo');
+                var overlay = document.getElementById('confirmOverlay');
+                var msgP = document.getElementById('confirmMsg');
+                var yesBtn = document.getElementById('btnConfirmYes');
+                var noBtn = document.getElementById('btnConfirmNo');
 
-    document.getElementById('confirmInput').style.display = 'none';
+                document.getElementById('confirmInput').style.display = 'none';
 
-    // 先设置内容
-    msgP.innerHTML = 
-        '<div style="text-align:left;font-size:13px;line-height:1.7;">' +
-        '<div style="text-align:center;font-size:18px;margin-bottom:8px;">⚠️ 安全提示</div>' +
-        '<p>本文件由发送端上传，同一口令下可能存在多人传输导致文件串台。</p>' +
-        '<p>本服务仅提供文件传输通道，不进行任何安全检测。</p>' +
-        '<p style="color:#e91e63;font-weight:500;">请在确认文件来源可靠后再下载，因下载文件造成的任何问题本站概不负责。</p>' +
-        '</div>' +
-        '<div class="security-checkbox-wrapper" id="securityCheckboxWrapper">' +
-        '<input type="checkbox" id="securityCheckbox">' +
-        '<label for="securityCheckbox">我已阅读并确认下载</label>' +
-        '</div>';
+                msgP.innerHTML =
+                    '<div style="text-align:left;font-size:13px;line-height:1.7;">' +
+                    '<div style="text-align:center;font-size:18px;margin-bottom:8px;">⚠️ 安全提示</div>' +
+                    '<p>本文件由发送端上传，同一口令下可能存在多人传输导致文件串台。</p>' +
+                    '<p>本服务仅提供文件传输通道，不进行任何安全检测。</p>' +
+                    '<p style="color:#e91e63;font-weight:500;">请在确认文件来源可靠后再下载，因下载文件造成的任何问题本站概不负责。</p>' +
+                    '</div>' +
+                    '<div class="security-checkbox-wrapper" id="securityCheckboxWrapper">' +
+                    '<input type="checkbox" id="securityCheckbox" onchange="window._onSecurityCheckboxChange()">' +
+                    '<label for="securityCheckbox">我已阅读并确认下载</label>' +
+                    '</div>';
 
-    // 初始状态：按钮禁用
-    yesBtn.className = 'btn-yes btn-yes-disabled';
-    yesBtn.textContent = '确认下载';
-    yesBtn.disabled = true;
-
-    noBtn.textContent = '取消下载';
-    noBtn.className = 'btn-no';
-
-    overlay.classList.add('show');
-
-    // 重要：等 DOM 更新后再绑定事件
-    setTimeout(function() {
-        var checkbox = document.getElementById('securityCheckbox');
-        var wrapper = document.getElementById('securityCheckboxWrapper');
-
-        // 确保复选框未选中
-        checkbox.checked = false;
-        yesBtn.disabled = true;
-        yesBtn.className = 'btn-yes btn-yes-disabled';
-
-        // 移除旧事件（通过克隆）
-        var newCheckbox = checkbox.cloneNode(true);
-        checkbox.parentNode.replaceChild(newCheckbox, checkbox);
-        checkbox = newCheckbox;
-
-        // 监听复选框变化
-        checkbox.onchange = function() {
-            if (checkbox.checked) {
-                yesBtn.disabled = false;
-                yesBtn.className = 'btn-yes btn-yes-ready';
-            } else {
-                yesBtn.disabled = true;
                 yesBtn.className = 'btn-yes btn-yes-disabled';
+                yesBtn.textContent = '确认下载';
+                yesBtn.disabled = true;
+
+                noBtn.textContent = '取消下载';
+                noBtn.className = 'btn-no';
+
+                overlay.classList.add('show');
+
+                // 用全局函数处理复选框变化
+                window._onSecurityCheckboxChange = function() {
+                    var cb = document.getElementById('securityCheckbox');
+                    var yb = document.getElementById('btnConfirmYes');
+                    if (cb && yb) {
+                        if (cb.checked) {
+                            yb.disabled = false;
+                            yb.className = 'btn-yes btn-yes-ready';
+                        } else {
+                            yb.disabled = true;
+                            yb.className = 'btn-yes btn-yes-disabled';
+                        }
+                    }
+                };
+
+                // 点击wrapper切换复选框
+                var wrapper = document.getElementById('securityCheckboxWrapper');
+                if (wrapper) {
+                    wrapper.onclick = function(e) {
+                        if (e.target.tagName !== 'INPUT') {
+                            var cb = document.getElementById('securityCheckbox');
+                            if (cb) {
+                                cb.checked = !cb.checked;
+                                window._onSecurityCheckboxChange();
+                            }
+                        }
+                    };
+                }
+
+                // 确认按钮
+                var newYesBtn = yesBtn.cloneNode(true);
+                yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+                var newNoBtn = noBtn.cloneNode(true);
+                noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+
+                newYesBtn.onclick = function() {
+                    var cb = document.getElementById('securityCheckbox');
+                    if (!cb || !cb.checked) {
+                        alert('请先勾选"我已阅读并确认下载"');
+                        return;
+                    }
+                    overlay.classList.remove('show');
+                    if (callback) callback(true);
+                };
+
+                newNoBtn.onclick = function() {
+                    overlay.classList.remove('show');
+                    if (callback) callback(false);
+                };
             }
-        };
-
-        // 点击 wrapper 也可以切换
-        wrapper.onclick = function(e) {
-            if (e.target.tagName !== 'INPUT') {
-                checkbox.checked = !checkbox.checked;
-                checkbox.onchange();
-            }
-        };
-
-        // 替换按钮
-        var newYesBtn = yesBtn.cloneNode(true);
-        yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
-        var newNoBtn = noBtn.cloneNode(true);
-        noBtn.parentNode.replaceChild(newNoBtn, noBtn);
-
-        newYesBtn.onclick = function() {
-            if (newYesBtn.disabled) return;
-            if (!checkbox.checked) {
-                alert('请先勾选"我已阅读并确认下载"');
-                return;
-            }
-            overlay.classList.remove('show');
-            if (callback) callback(true);
-        };
-
-        newNoBtn.onclick = function() {
-            overlay.classList.remove('show');
-            if (callback) callback(false);
-        };
-    }, 50);
-}
-
-            
 
             function showConfirm(msg, onYes, showInput, btnClass) {
                 document.getElementById('confirmMsg').innerHTML = basicSanitize(msg.replace(/\n/g, '<br>'));
@@ -1413,7 +1389,6 @@
                 });
             };
 
-            // ========== 广播功能 ==========
             function updateBroadcastBar(text, type) {
                 var bar = document.getElementById('broadcastBar');
                 bar.textContent = text;
@@ -1618,7 +1593,6 @@
                 if (currentFileId) saveToHistory();
             });
 
-            // ========== 文档尺寸解析 ==========
             function parseDocSize(text) {
                 for (var key in PAGE_SIZES) {
                     if (PAGE_SIZES.hasOwnProperty(key)) {
@@ -1690,7 +1664,6 @@
                 } catch (err) {}
             }
 
-            // ========== 文件加载 ==========
             async function loadFile(file) {
                 var ext = file.name.split('.').pop().toLowerCase();
                 currentFileId = 'file_' + file.name + '_' + file.size + '_' + file.lastModified;
@@ -1802,7 +1775,6 @@
                 }
             }
 
-            // ========== 解析标签 ==========
             function cleanupXlsxTagText(container) {
                 var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
                 var nodes = [];
@@ -2161,7 +2133,6 @@
                 return d.innerHTML;
             }
 
-            // ========== 自定义键盘 ==========
             function getAnswerType(ans) {
                 if (!ans) return 'text';
                 if (/[\u4e00-\u9fff]/.test(ans)) return 'text';
@@ -2234,8 +2205,10 @@
             }
 
             function stopDeleteRepeat() {
-                if (deleteRepeatTimer) { clearTimeout(deleteRepeatTimer); deleteRepeatTimer = null; }
-                if (deleteRepeatInterval) { clearInterval(deleteRepeatInterval); deleteRepeatInterval = null; }
+                if (deleteRepeatTimer) { clearTimeout(deleteRepeatTimer);
+                    deleteRepeatTimer = null; }
+                if (deleteRepeatInterval) { clearInterval(deleteRepeatInterval);
+                    deleteRepeatInterval = null; }
             }
 
             function doDelete() {
@@ -2249,7 +2222,8 @@
                 doDelete();
                 vibrate(5);
                 deleteRepeatTimer = setTimeout(function() {
-                    deleteRepeatInterval = setInterval(function() { doDelete(); vibrate(3); }, 50);
+                    deleteRepeatInterval = setInterval(function() { doDelete();
+                        vibrate(3); }, 50);
                 }, 400);
             }
 
@@ -2258,12 +2232,23 @@
                 vibrate(6);
                 if (action === 'done') { hideKeyboard(); return; }
                 if (action === 'backspace') { startDeleteRepeat(); return; }
-                if (action === 'shift') { isShifted = !isShifted; isSymbolPage = false; buildKeyboard('english'); return; }
-                if (action === 'num') { isShifted = false; isSymbolPage = false; buildKeyboard('num_from_eng'); return; }
-                if (action === 'abc') { isShifted = false; isSymbolPage = false; buildKeyboard('english'); return; }
-                if (action === 'sym') { isSymbolPage = !isSymbolPage; buildKeyboard('english'); return; }
-                if (action === 'space') { activeInput.value += ' '; activeInput.dispatchEvent(new Event('input', { bubbles: true })); clearMarkOnEdit(activeInput); return; }
-                if (key) { activeInput.value += key; activeInput.dispatchEvent(new Event('input', { bubbles: true })); clearMarkOnEdit(activeInput); }
+                if (action === 'shift') { isShifted = !isShifted;
+                    isSymbolPage = false;
+                    buildKeyboard('english'); return; }
+                if (action === 'num') { isShifted = false;
+                    isSymbolPage = false;
+                    buildKeyboard('num_from_eng'); return; }
+                if (action === 'abc') { isShifted = false;
+                    isSymbolPage = false;
+                    buildKeyboard('english'); return; }
+                if (action === 'sym') { isSymbolPage = !isSymbolPage;
+                    buildKeyboard('english'); return; }
+                if (action === 'space') { activeInput.value += ' ';
+                    activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    clearMarkOnEdit(activeInput); return; }
+                if (key) { activeInput.value += key;
+                    activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    clearMarkOnEdit(activeInput); }
             }
 
             document.getElementById('customKeyboard').addEventListener('pointerdown', function(e) {
@@ -2292,9 +2277,11 @@
                     ic.textContent = '';
                     input.style.borderBottomColor = '#667eea';
                     input.style.color = 'inherit';
-                    if (dp) { dp.classList.remove('show'); dp.textContent = ''; }
+                    if (dp) { dp.classList.remove('show');
+                        dp.textContent = ''; }
                     var a = answerMap.get(q);
-                    if (a) { a.checked = false; answerMap.set(q, a); }
+                    if (a) { a.checked = false;
+                        answerMap.set(q, a); }
                 }
             }
 
@@ -2302,14 +2289,16 @@
                 var checkBtns = document.querySelectorAll('.check-btn');
                 for (var i = 0; i < checkBtns.length; i++) {
                     (function(btn) {
-                        btn.addEventListener('click', function(e) { e.stopPropagation(); checkAnswer(this.dataset.q); });
+                        btn.addEventListener('click', function(e) { e.stopPropagation();
+                            checkAnswer(this.dataset.q); });
                     })(checkBtns[i]);
                 }
 
                 var inlineBtns = document.querySelectorAll('.inline-check-btn');
                 for (var i = 0; i < inlineBtns.length; i++) {
                     (function(btn) {
-                        btn.onclick = function(e) { e.stopPropagation(); checkAllAnswers(); };
+                        btn.onclick = function(e) { e.stopPropagation();
+                            checkAllAnswers(); };
                     })(inlineBtns[i]);
                 }
 
@@ -2319,15 +2308,18 @@
                         var isNative = input.classList.contains('native-input');
                         input.addEventListener('keydown', function(e) {
                             if (e.key !== 'Enter' && e.key !== 'Tab') clearMarkOnEdit(input);
-                            if (!isNative && isTouchDevice && activeInput === input && getAnswerType(input.dataset.ans || '') !== 'text') {
+                            if (!isNative && isTouchDevice && activeInput === input && getAnswerType(input.dataset.ans || '') !==
+                                'text') {
                                 e.preventDefault();
                             }
                         });
                         input.addEventListener('focus', function() {
                             if (!isTouchDevice) return;
                             var t = getAnswerType(this.dataset.ans || '');
-                            if (t === 'text') { hideKeyboard(); }
-                            else { activeInput = this; isShifted = false; isSymbolPage = false; buildKeyboard(t); }
+                            if (t === 'text') { hideKeyboard(); } else { activeInput = this;
+                                isShifted = false;
+                                isSymbolPage = false;
+                                buildKeyboard(t); }
                         });
                         input.addEventListener('touchstart', function(e) {
                             e.stopPropagation();
@@ -2335,13 +2327,20 @@
                                 var t = getAnswerType(this.dataset.ans || '');
                                 if (t !== 'text') {
                                     e.preventDefault();
-                                    if (activeInput !== this) { hideKeyboard(); activeInput = this; isShifted = false; isSymbolPage = false; buildKeyboard(t); this.focus(); }
+                                    if (activeInput !== this) { hideKeyboard();
+                                        activeInput = this;
+                                        isShifted = false;
+                                        isSymbolPage = false;
+                                        buildKeyboard(t);
+                                        this.focus(); }
                                 }
                             }
                         });
-                        input.addEventListener('keypress', function(e) { if (e.key === 'Enter') { e.stopPropagation(); checkAnswer(this.dataset.q); } });
+                        input.addEventListener('keypress', function(e) { if (e.key === 'Enter') { e.stopPropagation();
+                                checkAnswer(this.dataset.q); } });
                         input.addEventListener('blur', function() {
-                            setTimeout(function() { if (document.querySelector('.kb-key.pressed') && activeInput === input) input.focus(); }, 100);
+                            setTimeout(function() { if (document.querySelector('.kb-key.pressed') && activeInput === input)
+                                    input.focus(); }, 100);
                             if (currentFileId) saveToHistory();
                         });
                     })(inputs[i]);
@@ -2355,9 +2354,12 @@
                 });
             }
 
-            // ========== 答题核心逻辑 ==========
             function loadWrongCounts(fid) { var s = localStorage.getItem('wrong_' + fid); return s ? (JSON.parse(s) || {}) : {}; }
-            function saveWrongCounts(fid) { var c = {}; answerMap.forEach(function(a, k) { if (a.wrongCount > 0) c[k] = a.wrongCount; }); localStorage.setItem('wrong_' + fid, JSON.stringify(c)); }
+
+            function saveWrongCounts(fid) { var c = {};
+                answerMap.forEach(function(a, k) { if (a.wrongCount > 0) c[k] = a.wrongCount; });
+                localStorage.setItem('wrong_' + fid, JSON.stringify(c)); }
+
             function clearWrongCounts(fid) { localStorage.removeItem('wrong_' + fid); }
 
             function checkAnswer(qKey) {
@@ -2373,16 +2375,22 @@
                 var nu = u.replace(/\s+/g, ' ').trim();
                 var pa = a.answer.split('|').map(function(x) { return x.replace(/\s+/g, ' ').trim(); });
                 for (var j = 0; j < pa.length; j++) {
-                    if (nu === pa[j] || nu.toLowerCase() === pa[j].toLowerCase() || nu.replace(/\s+/g, '').toLowerCase() === pa[j].replace(/\s+/g, '').toLowerCase()) {
-                        ok = true; break;
+                    if (nu === pa[j] || nu.toLowerCase() === pa[j].toLowerCase() || nu.replace(/\s+/g, '').toLowerCase() === pa[j]
+                        .replace(/\s+/g, '').toLowerCase()) {
+                        ok = true;
+                        break;
                     }
                 }
-                if (!ok) { a.wrongCount = (a.wrongCount || 0) + 1; a.lastWrongAnswer = u; saveWrongCounts(currentFileId); }
+                if (!ok) { a.wrongCount = (a.wrongCount || 0) + 1;
+                    a.lastWrongAnswer = u;
+                    saveWrongCounts(currentFileId); }
                 answerMap.set(qKey, a);
-                if (ic) { ic.className = 'result-icon ' + (ok ? 'correct' : 'wrong'); ic.textContent = ok ? '✓' : '✗'; }
+                if (ic) { ic.className = 'result-icon ' + (ok ? 'correct' : 'wrong');
+                    ic.textContent = ok ? '✓' : '✗'; }
                 i.style.borderBottomColor = ok ? '#4caf50' : '#f44336';
                 i.style.color = ok ? '#4caf50' : '#f44336';
-                if (dp && !ok) { dp.textContent = '答案: ' + a.answer; dp.classList.add('show'); }
+                if (dp && !ok) { dp.textContent = '答案: ' + a.answer;
+                    dp.classList.add('show'); }
                 if (currentFileId) saveToHistory();
                 return ok ? 'correct' : 'wrong';
             }
@@ -2390,7 +2398,9 @@
             function saveToHistory() {
                 if (!currentFileId) return;
                 var h = getHistoryData(currentFileId);
-                var ans = {}, chk = {}, wa = {};
+                var ans = {},
+                    chk = {},
+                    wa = {};
                 answerMap.forEach(function(a, k) {
                     var i = document.querySelector('.fill-blank-input[data-q="' + k + '"]');
                     if (i && i.value.trim()) ans[k] = i.value;
@@ -2415,13 +2425,16 @@
                 for (var i = 0; i < localStorage.length; i++) {
                     var k = localStorage.key(i);
                     if (k.startsWith('quiz_')) {
-                        try { var d = JSON.parse(localStorage.getItem(k)); d.fileId = k.replace('quiz_', ''); h.push(d); } catch (e) {}
+                        try { var d = JSON.parse(localStorage.getItem(k));
+                            d.fileId = k.replace('quiz_', '');
+                            h.push(d); } catch (e) {}
                     }
                 }
                 return h.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
             }
 
-            function deleteHistory(fid) { localStorage.removeItem('quiz_' + fid); localStorage.removeItem('wrong_' + fid); }
+            function deleteHistory(fid) { localStorage.removeItem('quiz_' + fid);
+                localStorage.removeItem('wrong_' + fid); }
 
             function restoreHistory(fid) {
                 var h = getHistoryData(fid);
@@ -2445,31 +2458,41 @@
                 var nu = ua.replace(/\s+/g, ' ').trim();
                 var pa = a.answer.split('|').map(function(x) { return x.replace(/\s+/g, ' ').trim(); });
                 for (var j = 0; j < pa.length; j++) {
-                    if (nu === pa[j] || nu.toLowerCase() === pa[j].toLowerCase() || nu.replace(/\s+/g, '').toLowerCase() === pa[j].replace(/\s+/g, '').toLowerCase()) {
-                        ok = true; break;
+                    if (nu === pa[j] || nu.toLowerCase() === pa[j].toLowerCase() || nu.replace(/\s+/g, '').toLowerCase() === pa[j]
+                        .replace(/\s+/g, '').toLowerCase()) {
+                        ok = true;
+                        break;
                     }
                 }
-                if (!ok) { a.wrongCount = (a.wrongCount || 0) + 1; a.lastWrongAnswer = ua; saveWrongCounts(currentFileId); }
+                if (!ok) { a.wrongCount = (a.wrongCount || 0) + 1;
+                    a.lastWrongAnswer = ua;
+                    saveWrongCounts(currentFileId); }
                 answerMap.set(qKey, a);
-                if (ic) { ic.className = 'result-icon ' + (ok ? 'correct' : 'wrong'); ic.textContent = ok ? '✓' : '✗'; }
+                if (ic) { ic.className = 'result-icon ' + (ok ? 'correct' : 'wrong');
+                    ic.textContent = ok ? '✓' : '✗'; }
                 i.style.borderBottomColor = ok ? '#4caf50' : '#f44336';
                 i.style.color = ok ? '#4caf50' : '#f44336';
-                if (dp && !ok) { dp.textContent = '答案: ' + a.answer; dp.classList.add('show'); }
+                if (dp && !ok) { dp.textContent = '答案: ' + a.answer;
+                    dp.classList.add('show'); }
             }
 
             setInterval(function() { if (currentFileId && answerMap.size > 0) saveToHistory(); }, 30000);
 
-            // ========== 批量操作 ==========
             window.checkAllAnswers = function() {
                 if (isCheckingAll) return;
                 isCheckingAll = true;
-                var t = 0, c = 0, w = 0, na = 0, e = 0;
+                var t = 0,
+                    c = 0,
+                    w = 0,
+                    na = 0,
+                    e = 0;
                 answerMap.forEach(function(a, k) {
                     t++;
                     if (!a.answer) { na++; return; }
                     var i = document.querySelector('.fill-blank-input[data-q="' + k + '"]');
                     if (!i || i.value.trim() === '') { e++; return; }
-                    if (checkAnswer(k) === 'correct') c++; else w++;
+                    if (checkAnswer(k) === 'correct') c++;
+                    else w++;
                 });
                 if (currentFileId) saveToHistory();
                 alert('共' + t + '题\n已填' + (t - e - na) + '题\n正确' + c + '题\n错误' + w + '题');
@@ -2477,10 +2500,15 @@
             };
 
             window.clearAllMarks = function() {
-                document.querySelectorAll('.result-icon').forEach(function(el) { el.className = 'result-icon'; el.textContent = ''; });
-                document.querySelectorAll('.answer-display').forEach(function(el) { el.classList.remove('show'); el.textContent = ''; });
-                document.querySelectorAll('.fill-blank-input').forEach(function(el) { el.style.borderBottomColor = '#667eea'; el.style.color = 'inherit'; });
-                answerMap.forEach(function(a, k) { a.checked = false; answerMap.set(k, a); });
+                document.querySelectorAll('.result-icon').forEach(function(el) { el.className = 'result-icon';
+                    el.textContent = ''; });
+                document.querySelectorAll('.answer-display').forEach(function(el) { el.classList.remove('show');
+                    el.textContent = ''; });
+                document.querySelectorAll('.fill-blank-input').forEach(function(el) { el.style.borderBottomColor =
+                        '#667eea';
+                    el.style.color = 'inherit'; });
+                answerMap.forEach(function(a, k) { a.checked = false;
+                    answerMap.set(k, a); });
                 if (currentFileId) saveToHistory();
             };
 
@@ -2495,33 +2523,50 @@
                         ic.className = 'result-icon';
                         ic.textContent = '';
                         var dp = document.querySelector('.answer-display[data-q="' + q + '"]');
-                        if (dp) { dp.classList.remove('show'); dp.textContent = ''; }
+                        if (dp) { dp.classList.remove('show');
+                            dp.textContent = ''; }
                         var a = answerMap.get(q);
-                        if (a) { a.checked = false; answerMap.set(q, a); }
+                        if (a) { a.checked = false;
+                            answerMap.set(q, a); }
                     }
                 });
                 if (currentFileId) saveToHistory();
             };
 
             function resetAllAnswers() {
-                document.querySelectorAll('.fill-blank-input').forEach(function(el) { el.value = ''; el.style.borderBottomColor = '#667eea'; el.style.color = 'inherit'; });
-                document.querySelectorAll('.result-icon').forEach(function(el) { el.className = 'result-icon'; el.textContent = ''; });
-                document.querySelectorAll('.answer-display').forEach(function(el) { el.classList.remove('show'); el.textContent = ''; });
-                answerMap.forEach(function(a, k) { a.checked = false; answerMap.set(k, a); });
+                document.querySelectorAll('.fill-blank-input').forEach(function(el) { el.value = '';
+                    el.style.borderBottomColor = '#667eea';
+                    el.style.color = 'inherit'; });
+                document.querySelectorAll('.result-icon').forEach(function(el) { el.className = 'result-icon';
+                    el.textContent = ''; });
+                document.querySelectorAll('.answer-display').forEach(function(el) { el.classList.remove('show');
+                    el.textContent = ''; });
+                answerMap.forEach(function(a, k) { a.checked = false;
+                    answerMap.set(k, a); });
                 if (currentFileId) saveToHistory();
             }
 
             function clearExerciseData() {
-                document.querySelectorAll('.fill-blank-input').forEach(function(el) { el.value = ''; el.style.borderBottomColor = '#667eea'; el.style.color = 'inherit'; });
-                document.querySelectorAll('.result-icon').forEach(function(el) { el.className = 'result-icon'; el.textContent = ''; });
-                document.querySelectorAll('.answer-display').forEach(function(el) { el.classList.remove('show'); el.textContent = ''; });
-                answerMap.forEach(function(a, k) { a.checked = false; a.wrongCount = 0; a.lastWrongAnswer = null; answerMap.set(k, a); });
-                if (currentFileId) { saveToHistory(); clearWrongCounts(currentFileId); }
+                document.querySelectorAll('.fill-blank-input').forEach(function(el) { el.value = '';
+                    el.style.borderBottomColor = '#667eea';
+                    el.style.color = 'inherit'; });
+                document.querySelectorAll('.result-icon').forEach(function(el) { el.className = 'result-icon';
+                    el.textContent = ''; });
+                document.querySelectorAll('.answer-display').forEach(function(el) { el.classList.remove('show');
+                    el.textContent = ''; });
+                answerMap.forEach(function(a, k) { a.checked = false;
+                    a.wrongCount = 0;
+                    a.lastWrongAnswer = null;
+                    answerMap.set(k, a); });
+                if (currentFileId) { saveToHistory();
+                    clearWrongCounts(currentFileId); }
             }
 
-            // ========== 统计面板 ==========
             window.showStats = function() {
-                var t = answerMap.size, c = 0, ok = 0, na = 0;
+                var t = answerMap.size,
+                    c = 0,
+                    ok = 0,
+                    na = 0;
                 answerMap.forEach(function(a, k) {
                     if (!a.answer) na++;
                     if (a.checked) {
@@ -2531,8 +2576,10 @@
                             var u = i.value.replace(/\s+/g, ' ').trim();
                             var pa = a.answer.split('|').map(function(x) { return x.replace(/\s+/g, ' ').trim(); });
                             for (var j = 0; j < pa.length; j++) {
-                                if (u === pa[j] || u.toLowerCase() === pa[j].toLowerCase() || u.replace(/\s+/g, '').toLowerCase() === pa[j].replace(/\s+/g, '').toLowerCase()) {
-                                    ok++; break;
+                                if (u === pa[j] || u.toLowerCase() === pa[j].toLowerCase() || u.replace(/\s+/g, '').toLowerCase() ===
+                                    pa[j].replace(/\s+/g, '').toLowerCase()) {
+                                    ok++;
+                                    break;
                                 }
                             }
                         }
@@ -2554,7 +2601,6 @@
                 document.getElementById('statsOverlay').classList.remove('show');
             };
 
-            // ========== 历史记录面板 ==========
             window.showHistory = function() {
                 var hs = getAllHistory();
                 var ct = document.getElementById('historyContent');
@@ -2568,11 +2614,13 @@
                         html += '<div class="history-item">' +
                             '<div class="history-item-info" onclick="loadHistoryFile(\'' + h.fileId + '\')">' +
                             '<div class="history-item-name">' + (h.fileName || '未命名') + '</div>' +
-                            '<div class="history-item-meta">' + (d.getMonth()+1) + '/' + d.getDate() + ' ' +
-                            String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') +
+                            '<div class="history-item-meta">' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' +
+                            String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') +
                             ' · ' + Object.keys(h.answers || {}).length + '题已填</div></div>' +
-                            '<button class="history-item-detail" onclick="event.stopPropagation();showWrongDetail(\'' + h.fileId + '\')">详情</button>' +
-                            '<button class="history-item-delete" onclick="event.stopPropagation();deleteHistoryItem(\'' + h.fileId + '\')">删除</button></div>';
+                            '<button class="history-item-detail" onclick="event.stopPropagation();showWrongDetail(\'' + h.fileId +
+                            '\')">详情</button>' +
+                            '<button class="history-item-delete" onclick="event.stopPropagation();deleteHistoryItem(\'' + h.fileId +
+                            '\')">删除</button></div>';
                     }
                     ct.innerHTML = html;
                 }
@@ -2585,11 +2633,13 @@
                 document.getElementById('historyOverlay').classList.remove('show');
             };
 
-            window.deleteHistoryItem = function(fid) { deleteHistory(fid); showHistory(); };
+            window.deleteHistoryItem = function(fid) { deleteHistory(fid);
+                showHistory(); };
 
-            window.loadHistoryFile = function(fid) { currentFileId = fid; restoreHistory(fid); hideHistory(); };
+            window.loadHistoryFile = function(fid) { currentFileId = fid;
+                restoreHistory(fid);
+                hideHistory(); };
 
-            // ========== 错误详情面板 ==========
             window.showWrongDetail = function(fid) {
                 var ws = loadWrongCounts(fid);
                 var h = getHistoryData(fid);
@@ -2600,11 +2650,17 @@
                     ht = '<div style="text-align:center;color:#999;padding:20px;">暂无错误记录</div>';
                 } else {
                     for (var i = 0; i < es.length; i++) {
-                        var e = es[i], q = e[0], wc = e[1], qn = q.replace('Q', ''), ca = '', wr = wa[q] || '';
+                        var e = es[i],
+                            q = e[0],
+                            wc = e[1],
+                            qn = q.replace('Q', ''),
+                            ca = '',
+                            wr = wa[q] || '';
                         if (currentFileId === fid && answerMap.has(q)) ca = answerMap.get(q).answer;
                         if (!ca) {
                             var sa = localStorage.getItem('answers_' + fid);
-                            if (sa) { try { var am = JSON.parse(sa); ca = am[q] || ''; } catch (ex) {} }
+                            if (sa) { try { var am = JSON.parse(sa);
+                                    ca = am[q] || ''; } catch (ex) {} }
                         }
                         ht += '<div class="wrong-detail-item"><div class="q-label">Q' + qn + '（错误 ' + wc + ' 次）</div>' +
                             '<div>正确答案：<span class="correct-ans">' + (ca || '未知') + '</span></div>' +
@@ -2630,7 +2686,6 @@
             var origSave = saveToHistory;
             saveToHistory = function() { origSave(); if (currentFileId) saveAnswersMap(currentFileId); };
 
-            // ========== 使用说明 ==========
             window.showGuide = function() {
                 var content =
                     '<h2>📚 快速入门</h2>' +
@@ -2660,7 +2715,6 @@
                 document.getElementById('guideOverlay').classList.remove('show');
             };
 
-            // ========== 初始化 ==========
             updateTransform();
             updateZoomDisplay();
 
