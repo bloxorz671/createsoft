@@ -13,6 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
     </script>
     <style>
+        /* ========== 全局重置 ========== */
         * {
             margin: 0;
             padding: 0;
@@ -30,6 +31,8 @@
             -webkit-user-select: none;
             user-select: none;
         }
+
+        /* ========== 顶部导航栏 ========== */
         .header {
             position: fixed;
             top: 0;
@@ -44,17 +47,21 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
         }
         .header-left {
             display: flex;
             align-items: center;
             gap: 6px;
+            flex-shrink: 0;
         }
         .header-right {
             margin-left: auto;
             display: flex;
             align-items: center;
             gap: 6px;
+            flex-shrink: 0;
         }
         .dropdown {
             position: relative;
@@ -74,10 +81,15 @@
             display: flex;
             align-items: center;
             gap: 4px;
+            transition: background 0.2s;
+        }
+        .dropdown-btn:hover,
+        .btn-plain:hover {
+            background: #e8e8e8;
         }
         .dropdown-btn:active,
         .btn-plain:active {
-            background: #e0e0e0;
+            background: #d5d5d5;
         }
         .dropdown-btn .arrow {
             font-size: 9px;
@@ -110,6 +122,7 @@
             text-align: left;
             border-radius: 6px;
             color: #333;
+            transition: background 0.15s;
         }
         .dropdown-menu button:hover {
             background: #f0f0f0;
@@ -123,10 +136,18 @@
             background: #ff9800 !important;
             color: white !important;
         }
+        .btn-broadcast:hover {
+            background: #e68900 !important;
+        }
         .btn-receive {
             background: #2196f3 !important;
             color: white !important;
         }
+        .btn-receive:hover {
+            background: #0b7ad1 !important;
+        }
+
+        /* ========== 缩放控制 ========== */
         .zoom-controls {
             display: flex;
             align-items: center;
@@ -148,9 +169,13 @@
             justify-content: center;
             color: #333;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+            transition: background 0.15s;
+        }
+        .zoom-btn:hover {
+            background: #e8e8e8;
         }
         .zoom-btn:active {
-            background: #e0e0e0;
+            background: #d0d0d0;
         }
         .zoom-btn:disabled {
             opacity: 0.4;
@@ -163,6 +188,8 @@
             text-align: center;
             font-weight: 500;
         }
+
+        /* ========== 广播状态栏 ========== */
         .broadcast-bar {
             position: fixed;
             top: 0;
@@ -183,6 +210,8 @@
         .broadcast-bar.receiving {
             background: #2196f3;
         }
+
+        /* ========== 文档视图 ========== */
         .viewport {
             position: fixed;
             top: 0;
@@ -208,6 +237,8 @@
             overflow: hidden;
             position: relative;
         }
+
+        /* ========== 文档内容样式 ========== */
         .docx-wrapper {
             background: white;
         }
@@ -251,6 +282,8 @@
             padding: 5px 10px;
             min-width: 50px;
         }
+
+        /* ========== 填空题交互组件 ========== */
         .fill-blank-wrapper {
             display: inline;
         }
@@ -271,6 +304,7 @@
             cursor: text;
             -webkit-user-select: text;
             user-select: text;
+            transition: border-color 0.2s, background 0.2s;
         }
         .fill-blank-input:focus {
             border-bottom-color: #764ba2;
@@ -292,9 +326,13 @@
             cursor: pointer;
             vertical-align: baseline;
             white-space: nowrap;
+            transition: background 0.15s;
+        }
+        .check-btn:hover {
+            background: #5a6fd6;
         }
         .check-btn:active {
-            background: #764ba2;
+            background: #4a5fc0;
         }
         .inline-check-btn {
             display: inline-block;
@@ -307,9 +345,13 @@
             cursor: pointer;
             white-space: nowrap;
             font-family: inherit;
+            transition: background 0.15s;
+        }
+        .inline-check-btn:hover {
+            background: #5a6fd6;
         }
         .inline-check-btn:active {
-            background: #764ba2;
+            background: #4a5fc0;
         }
         .inline-check-btn.centered {
             display: block;
@@ -340,6 +382,8 @@
         .answer-display.show {
             display: inline;
         }
+
+        /* ========== 自定义键盘 ========== */
         .custom-keyboard {
             position: fixed;
             bottom: 0;
@@ -399,6 +443,9 @@
             font-size: 14px;
             max-width: 64px;
         }
+        .kb-key.done:hover {
+            background: #3a5ce7;
+        }
         .kb-key.delete {
             background: #dcdfe5;
             font-size: 17px;
@@ -448,6 +495,8 @@
                 min-width: 28px;
             }
         }
+
+        /* ========== 弹窗和面板 ========== */
         .confirm-overlay {
             position: fixed;
             top: 0;
@@ -459,9 +508,18 @@
             display: none;
             justify-content: center;
             align-items: center;
+            animation: fadeIn 0.2s ease;
         }
         .confirm-overlay.show {
             display: flex;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
         .confirm-box {
             background: white;
@@ -471,6 +529,17 @@
             min-width: 250px;
             max-width: 360px;
             text-align: center;
+            animation: slideUp 0.25s ease;
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
         .confirm-box p {
             margin: 0 0 18px 0;
@@ -502,23 +571,82 @@
             font-size: 14px;
             cursor: pointer;
             font-weight: 500;
+            transition: background 0.15s;
         }
         .confirm-box .btn-no {
             background: #e0e0e0;
             color: #555;
         }
+        .confirm-box .btn-no:hover {
+            background: #d0d0d0;
+        }
         .confirm-box .btn-yes {
             background: #e91e63;
             color: white;
+        }
+        .confirm-box .btn-yes:hover {
+            background: #d01554;
         }
         .confirm-box .btn-bc {
             background: #ff9800;
             color: white;
         }
+        .confirm-box .btn-bc:hover {
+            background: #e68900;
+        }
         .confirm-box .btn-rc {
             background: #2196f3;
             color: white;
         }
+        .confirm-box .btn-rc:hover {
+            background: #0b7ad1;
+        }
+        /* 安全确认弹窗专用 */
+        .confirm-box .btn-yes-disabled {
+            background: #bdbdbd;
+            color: #888;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .confirm-box .btn-yes-ready {
+            background: #e91e63;
+            color: white;
+            cursor: pointer;
+        }
+        .confirm-box .btn-yes-ready:hover {
+            background: #d01554;
+        }
+        .confirm-box .countdown-text {
+            color: #e91e63;
+            font-weight: bold;
+        }
+        /* 安全确认弹窗-复选框样式 */
+        .security-checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 12px 0 16px 0;
+            cursor: pointer;
+        }
+        .security-checkbox-wrapper input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #e91e63;
+        }
+        .security-checkbox-wrapper label {
+            font-size: 13px;
+            color: #333;
+            cursor: pointer;
+            user-select: none;
+        }
+        .security-checkbox-wrapper label .highlight {
+            color: #e91e63;
+            font-weight: 600;
+        }
+
+        /* ========== 侧边面板 ========== */
         .panel-overlay {
             position: fixed;
             top: 0;
@@ -547,6 +675,7 @@
             max-width: 90vw;
             max-height: 80vh;
             overflow-y: auto;
+            animation: slideUp 0.25s ease;
         }
         .panel.show {
             display: block;
@@ -567,13 +696,22 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 13px;
+            transition: background 0.15s;
         }
+        .panel-close:hover {
+            background: #e0e0e0;
+        }
+
+        /* ========== 历史记录 ========== */
         .history-item {
             display: flex;
             align-items: center;
             padding: 10px;
             border-bottom: 1px solid #eee;
             gap: 5px;
+        }
+        .history-item:hover {
+            background: #f8f8f8;
         }
         .history-item-info {
             flex: 1;
@@ -597,6 +735,10 @@
             font-size: 10px;
             cursor: pointer;
             flex-shrink: 0;
+            transition: background 0.15s;
+        }
+        .history-item-delete:hover {
+            background: #d32f2f;
         }
         .history-item-detail {
             padding: 3px 7px;
@@ -607,7 +749,37 @@
             font-size: 10px;
             cursor: pointer;
             flex-shrink: 0;
+            transition: background 0.15s;
         }
+        .history-item-detail:hover {
+            background: #0b7ad1;
+        }
+        .history-empty {
+            text-align: center;
+            color: #999;
+            padding: 30px 0;
+        }
+
+        /* ========== 错误详情 ========== */
+        .wrong-detail-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .wrong-detail-item .q-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .wrong-detail-item .correct-ans {
+            color: #4caf50;
+            font-weight: 500;
+        }
+        .wrong-detail-item .wrong-ans {
+            color: #f44336;
+            font-weight: 500;
+        }
+
+        /* ========== 使用说明 ========== */
         .guide-content {
             font-size: 13px;
             line-height: 1.8;
@@ -639,39 +811,21 @@
             font-family: 'Courier New', monospace;
             white-space: nowrap;
         }
-        .guide-content pre {
-            background: #f8f8f8;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 12px;
-            overflow-x: auto;
-            margin: 8px 0;
-            border: 1px solid #e0e0e0;
-            line-height: 1.6;
-        }
-        .guide-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
-            font-size: 13px;
-        }
-        .guide-content td,
-        .guide-content th {
-            border: 1px solid #ddd;
-            padding: 8px 12px;
-            text-align: left;
-        }
-        .guide-content th {
-            background: #f5f5f5;
-            font-weight: 600;
-        }
         .guide-content .note {
-            background: #e8f5e9;
+            background: #e3f2fd;
             padding: 12px 16px;
             border-radius: 8px;
             margin: 12px 0;
             font-size: 13px;
-            border-left: 4px solid #4caf50;
+            border-left: 4px solid #2196f3;
+        }
+        .guide-content .warning {
+            background: #fff3e0;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-size: 13px;
+            border-left: 4px solid #ff9800;
         }
         .guide-content .step {
             background: #f5f5f5;
@@ -682,6 +836,15 @@
         .guide-content .step strong {
             color: #667eea;
         }
+        .guide-content ul {
+            padding-left: 20px;
+            margin: 6px 0;
+        }
+        .guide-content li {
+            margin: 4px 0;
+        }
+
+        /* ========== 空状态 ========== */
         .empty-state {
             text-align: center;
             padding: 50px 16px;
@@ -701,6 +864,10 @@
             font-size: 15px;
             font-weight: 500;
             cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .empty-state .btn-open:hover {
+            transform: scale(1.02);
         }
         .empty-state .btn-receive-big {
             display: inline-block;
@@ -713,52 +880,158 @@
             font-weight: 500;
             cursor: pointer;
             margin-top: 10px;
+            transition: transform 0.15s;
         }
+        .empty-state .btn-receive-big:hover {
+            transform: scale(1.02);
+        }
+
+        /* ========== 响应式 ========== */
         @media (min-width:768px) {
             .custom-keyboard {
                 display: none !important;
             }
         }
-        .confirm-box .btn-yes-disabled {
-            background: #bdbdbd;
-            color: #888;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-        .confirm-box .btn-yes-ready {
-            background: #e91e63;
-            color: white;
-            cursor: pointer;
-        }
-        .confirm-box .countdown-text {
-            color: #e91e63;
-            font-weight: bold;
+        @media (max-width:480px) {
+            .header {
+                padding: 4px 6px;
+                gap: 4px;
+            }
+            .dropdown-btn,
+            .btn-plain {
+                padding: 5px 8px;
+                font-size: 11px;
+            }
+            .zoom-btn {
+                width: 22px;
+                height: 22px;
+                font-size: 12px;
+            }
+            .zoom-text {
+                font-size: 9px;
+                min-width: 28px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- ===== 广播状态栏 ===== -->
     <div class="broadcast-bar" id="broadcastBar"></div>
+
+    <!-- ===== 顶部导航栏 ===== -->
     <div class="header" id="headerBar">
         <div class="header-left">
-            <div class="dropdown" id="dropdownFile"><button class="dropdown-btn" onclick="toggleDropdown('dropdownFile')">文件 ▾</button><div class="dropdown-menu" id="dropdownFileMenu"><button onclick="openFileDialog()">打开文件</button><button onclick="showHistory()">历史记录</button><div class="divider"></div><button onclick="confirmReset()">重置</button><button onclick="confirmClearData()">清除数据</button><div class="divider"></div><button onclick="downloadCurrentFile()">下载文件</button><div class="divider"></div><button class="btn-broadcast" id="btnBroadcast" onclick="startBroadcast()">📡 广播题目</button><button class="btn-receive" id="btnReceive" onclick="startReceive()">📥 接收广播</button></div></div>
-            <div class="dropdown" id="dropdownAnswer"><button class="dropdown-btn" onclick="toggleDropdown('dropdownAnswer')">答题 ▾</button><div class="dropdown-menu" id="dropdownAnswerMenu"><button onclick="checkAllAnswers()">全部检查</button><button onclick="clearAllMarks()">清除批改</button><button onclick="clearWrongAnswers()">清除错误</button><div class="divider"></div><button onclick="showStats()">统计</button></div></div>
-            <button class="btn-plain" onclick="showGuide()">使用说明</button>
+            <!-- 文件菜单 -->
+            <div class="dropdown" id="dropdownFile">
+                <button class="dropdown-btn" onclick="toggleDropdown('dropdownFile')">📁 文件 ▾</button>
+                <div class="dropdown-menu" id="dropdownFileMenu">
+                    <button onclick="openFileDialog()">📂 打开文件</button>
+                    <button onclick="showHistory()">📜 历史记录</button>
+                    <div class="divider"></div>
+                    <button onclick="confirmReset()">🔄 重置答案</button>
+                    <button onclick="confirmClearData()">🗑️ 清除数据</button>
+                    <div class="divider"></div>
+                    <button onclick="downloadCurrentFile()">💾 下载文件</button>
+                    <div class="divider"></div>
+                    <button class="btn-broadcast" id="btnBroadcast" onclick="startBroadcast()">📡 广播题目</button>
+                    <button class="btn-receive" id="btnReceive" onclick="startReceive()">📥 接收广播</button>
+                </div>
+            </div>
+            <!-- 答题菜单 -->
+            <div class="dropdown" id="dropdownAnswer">
+                <button class="dropdown-btn" onclick="toggleDropdown('dropdownAnswer')">✏️ 答题 ▾</button>
+                <div class="dropdown-menu" id="dropdownAnswerMenu">
+                    <button onclick="checkAllAnswers()">✅ 全部检查</button>
+                    <button onclick="clearAllMarks()">🧹 清除批改</button>
+                    <button onclick="clearWrongAnswers()">❌ 清除错误</button>
+                    <div class="divider"></div>
+                    <button onclick="showStats()">📊 统计</button>
+                </div>
+            </div>
+            <button class="btn-plain" onclick="showGuide()">❓ 使用说明</button>
         </div>
-        <div class="header-right"><div class="zoom-controls"><button class="zoom-btn" id="btnZoomOut" onclick="zoomOut()" disabled>−</button><span class="zoom-text" id="zoomLevel">100%</span><button class="zoom-btn" id="btnZoomIn" onclick="zoomIn()" disabled>+</button></div></div>
+        <div class="header-right">
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="btnZoomOut" onclick="zoomOut()" disabled>−</button>
+                <span class="zoom-text" id="zoomLevel">100%</span>
+                <button class="zoom-btn" id="btnZoomIn" onclick="zoomIn()" disabled>+</button>
+            </div>
+        </div>
     </div>
-    <div class="viewport" id="viewport"><div class="doc-stage" id="docStage"><div class="doc-viewer" id="docViewer"><div class="empty-state"><div class="icon">📃</div><p>选择文件开始练习</p><button class="btn-open" onclick="openFileDialog()">打开文件</button><button class="btn-receive-big" onclick="startReceive()">📥 接收广播文件</button><p style="margin-top:8px;font-size:11px">支持 .docx / .xlsx / .txt</p></div></div></div></div>
+
+    <!-- ===== 文档视图 ===== -->
+    <div class="viewport" id="viewport">
+        <div class="doc-stage" id="docStage">
+            <div class="doc-viewer" id="docViewer">
+                <div class="empty-state">
+                    <div class="icon">📃</div>
+                    <p>选择文件开始练习</p>
+                    <button class="btn-open" onclick="openFileDialog()">📂 打开文件</button>
+                    <button class="btn-receive-big" onclick="startReceive()">📥 接收广播文件</button>
+                    <p style="margin-top:8px;font-size:11px">支持 .docx / .xlsx / .txt</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 自定义键盘 ===== -->
     <div class="custom-keyboard" id="customKeyboard"></div>
-    <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><p id="confirmMsg"></p><div id="confirmInput" style="display:none"><input type="text" id="confirmInputField" placeholder="请输入口令"></div><div class="btns"><button class="btn-no" id="btnConfirmNo">取消</button><button class="btn-yes" id="btnConfirmYes">确定</button></div></div></div>
-    <div class="panel-overlay" id="guideOverlay" onclick="hideGuide()"></div><div class="panel" id="guidePanel" style="max-width:680px;"><h3>使用说明</h3><div class="guide-content" id="guideContent"></div><button class="panel-close" onclick="hideGuide()">关闭</button></div>
-    <div class="panel-overlay" id="statsOverlay" onclick="hideStats()"></div><div class="panel" id="statsPanel"><h3>答题统计</h3><div id="statsContent"></div><button class="panel-close" onclick="hideStats()">关闭</button></div>
-    <div class="panel-overlay" id="historyOverlay" onclick="hideHistory()"></div><div class="panel" id="historyPanel"><h3>历史记录</h3><div id="historyContent"></div><button class="panel-close" onclick="hideHistory()">关闭</button></div>
-    <div class="panel-overlay" id="wrongDetailOverlay" onclick="hideWrongDetail()"></div><div class="panel" id="wrongDetailPanel"><h3>错误详情</h3><div id="wrongDetailContent"></div><button class="panel-close" onclick="hideWrongDetail()">关闭</button></div>
+
+    <!-- ===== 确认弹窗 ===== -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-box">
+            <p id="confirmMsg"></p>
+            <div id="confirmInput" style="display:none">
+                <input type="text" id="confirmInputField" placeholder="请输入口令">
+            </div>
+            <div class="btns">
+                <button class="btn-no" id="btnConfirmNo">取消</button>
+                <button class="btn-yes" id="btnConfirmYes">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 使用说明面板 ===== -->
+    <div class="panel-overlay" id="guideOverlay" onclick="hideGuide()"></div>
+    <div class="panel" id="guidePanel" style="max-width:680px;">
+        <h3>📖 完整使用说明</h3>
+        <div class="guide-content" id="guideContent"></div>
+        <button class="panel-close" onclick="hideGuide()">关闭</button>
+    </div>
+
+    <!-- ===== 统计面板 ===== -->
+    <div class="panel-overlay" id="statsOverlay" onclick="hideStats()"></div>
+    <div class="panel" id="statsPanel">
+        <h3>📊 答题统计</h3>
+        <div id="statsContent"></div>
+        <button class="panel-close" onclick="hideStats()">关闭</button>
+    </div>
+
+    <!-- ===== 历史记录面板 ===== -->
+    <div class="panel-overlay" id="historyOverlay" onclick="hideHistory()"></div>
+    <div class="panel" id="historyPanel">
+        <h3>📜 历史记录</h3>
+        <div id="historyContent"></div>
+        <button class="panel-close" onclick="hideHistory()">关闭</button>
+    </div>
+
+    <!-- ===== 错误详情面板 ===== -->
+    <div class="panel-overlay" id="wrongDetailOverlay" onclick="hideWrongDetail()"></div>
+    <div class="panel" id="wrongDetailPanel">
+        <h3>📝 错误详情</h3>
+        <div id="wrongDetailContent"></div>
+        <button class="panel-close" onclick="hideWrongDetail()">关闭</button>
+    </div>
+
+    <!-- ===== 文件选择器 ===== -->
     <input type="file" id="fileInput" accept=".docx,.xlsx,.txt" hidden>
 
     <script>
         /**
-         * 基础HTML净化函数 - 防止XSS攻击
-         * 移除script标签、内联事件处理器和javascript:伪协议
+         * ============================================================
+         *  🔒 安全防护：基础HTML净化函数
+         *  防止通过文件内容注入恶意脚本（XSS攻击）
+         * ============================================================
          */
         function basicSanitize(html) {
             if (typeof html !== 'string') return '';
@@ -768,29 +1041,46 @@
                 .replace(/javascript\s*:/gi, '');
         }
 
+        /**
+         * ============================================================
+         *  主程序：立即执行函数
+         * ============================================================
+         */
         (function() {
-            let answerMap = new Map(),
-                currentFileId = null,
-                currentDocSize = null,
-                activeInput = null,
-                isShifted = false,
-                isSymbolPage = false,
-                docLoaded = false,
-                dynamicMinScale = 0.5,
-                confirmYesCallback = null,
-                deleteRepeatTimer = null,
-                deleteRepeatInterval = null,
-                noIndividualCheck = false,
-                isCheckingAll = false;
-            let broadcastAbort = null,
-                broadcastToken = '',
-                isBroadcasting = false,
-                broadcastCount = 0,
-                isReceiving = false;
+            'use strict';
+
+            // ==================== 状态变量 ====================
+            let answerMap = new Map();
+            let currentFileId = null;
+            let currentDocSize = null;
+            let activeInput = null;
+            let isShifted = false;
+            let isSymbolPage = false;
+            let docLoaded = false;
+            let dynamicMinScale = 0.5;
+            let confirmYesCallback = null;
+            let deleteRepeatTimer = null;
+            let deleteRepeatInterval = null;
+            let noIndividualCheck = false;
+            let isCheckingAll = false;
             let isReceivedFile = false;
+
+            // 广播相关
+            let broadcastAbort = null;
+            let broadcastToken = '';
+            let isBroadcasting = false;
+            let broadcastCount = 0;
+            let isReceiving = false;
+
+            // 触摸设备检测
             const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-            function vibrate(ms) { if (navigator.vibrate) navigator.vibrate(ms || 6) }
+            // ==================== 工具函数 ====================
+            function vibrate(ms) {
+                if (navigator.vibrate) navigator.vibrate(ms || 6);
+            }
+
+            // ==================== 页面尺寸配置 ====================
             const PAGE_SIZES = {
                 'A4': { width: 210, height: 297 },
                 'A4横向': { width: 297, height: 210 },
@@ -806,6 +1096,8 @@
                 'letter': { width: 215.9, height: 279.4 },
                 'legal': { width: 215.9, height: 355.6 }
             };
+
+            // ==================== 缩放与拖拽 ====================
             let docScale = 1,
                 docTx = 0,
                 docTy = 0;
@@ -813,37 +1105,216 @@
                 SCALE_STEP = 0.1;
             let dragging = false,
                 dragStart = { x: 0, y: 0 },
-                dragStartTrans = { x: 0, y: 0 },
-                lastDist = 0,
-                lastCtr = { x: 0, y: 0, sx: 0, sy: 0 },
-                userScale = null,
-                userTrans = null,
-                keyboardVisible = false,
+                dragStartTrans = { x: 0, y: 0 };
+            let lastDist = 0,
+                lastCtr = { x: 0, y: 0, sx: 0, sy: 0 };
+            let userScale = null,
+                userTrans = null;
+            let keyboardVisible = false,
                 lastKnownH = window.innerHeight;
 
-            function setZoomEnabled(e) {
-                document.getElementById('btnZoomIn').disabled = !e;
-                document.getElementById('btnZoomOut').disabled = !e;
-                document.getElementById('viewport').classList.toggle('interactive', e)
+            function setZoomEnabled(enabled) {
+                document.getElementById('btnZoomIn').disabled = !enabled;
+                document.getElementById('btnZoomOut').disabled = !enabled;
+                document.getElementById('viewport').classList.toggle('interactive', enabled);
             }
             setZoomEnabled(false);
 
-            window.toggleDropdown = function(id) {
-                var m = document.getElementById(id + 'Menu'),
-                    o = m.classList.contains('show');
-                document.querySelectorAll('.dropdown-menu').forEach(function(x) { x.classList.remove('show') });
-                if (!o) m.classList.add('show')
+            function updateTransform() {
+                document.getElementById('docStage').style.transform =
+                    `translate(${docTx}px,${docTy}px) scale(${docScale})`;
+            }
+
+            function updateZoomDisplay() {
+                document.getElementById('zoomLevel').textContent = Math.round(docScale * 100) + '%';
+            }
+
+            function setDocScale(s) {
+                var c = Math.min(MAX_SCALE, Math.max(dynamicMinScale, Math.round(s * 100) / 100));
+                if (c !== docScale) {
+                    docScale = c;
+                    updateTransform();
+                    updateZoomDisplay();
+                }
+            }
+
+            function saveUserTransform() {
+                userScale = docScale;
+                userTrans = { x: docTx, y: docTy };
+            }
+
+            function clampTranslate() {
+                var vp = document.getElementById('viewport');
+                var vw = vp.clientWidth,
+                    vh = vp.clientHeight;
+                var docEl = document.getElementById('docViewer');
+                var dw = docEl.offsetWidth * docScale;
+                var dh = docEl.offsetHeight * docScale;
+                if (dw <= vw) docTx = (vw - dw) / 2;
+                else docTx = Math.min(0, Math.max(vw - dw, docTx));
+                if (dh <= vh) docTy = 0;
+                else docTy = Math.min(0, Math.max(vh - dh, docTy));
+            }
+
+            window.zoomIn = function() {
+                if (!docLoaded) return;
+                var ns = docScale + SCALE_STEP;
+                if (ns > MAX_SCALE) return;
+                setDocScale(ns);
+                clampTranslate();
+                saveUserTransform();
+                updateTransform();
             };
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.dropdown')) document.querySelectorAll('.dropdown-menu').forEach(function(m) { m
-                        .classList.remove('show') })
+
+            window.zoomOut = function() {
+                if (!docLoaded) return;
+                var ns = docScale - SCALE_STEP;
+                if (ns < dynamicMinScale) return;
+                setDocScale(ns);
+                clampTranslate();
+                saveUserTransform();
+                updateTransform();
+            };
+
+            // ==================== 触摸和滚轮事件 ====================
+            var viewportEl = document.getElementById('viewport');
+
+            function getDist(a, b) {
+                return Math.sqrt((a.clientX - b.clientX) ** 2 + (a.clientY - b.clientY) ** 2);
+            }
+
+            function getCtr(a, b) {
+                return { x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 };
+            }
+
+            viewportEl.addEventListener('touchstart', function(e) {
+                if (!docLoaded) return;
+                if (e.target.closest('.fill-blank-input,.check-btn,.inline-check-btn,.kb-key,.custom-keyboard'))
+                    return;
+                var t = e.touches;
+                if (t.length === 1) {
+                    dragging = true;
+                    dragStart.x = t[0].clientX;
+                    dragStart.y = t[0].clientY;
+                    dragStartTrans.x = docTx;
+                    dragStartTrans.y = docTy;
+                } else if (t.length === 2) {
+                    dragging = false;
+                    lastDist = getDist(t[0], t[1]);
+                    lastCtr = getCtr(t[0], t[1]);
+                    lastCtr.sx = (lastCtr.x - docTx) / docScale;
+                    lastCtr.sy = (lastCtr.y - docTy) / docScale;
+                }
+            }, { passive: false });
+
+            viewportEl.addEventListener('touchmove', function(e) {
+                if (!docLoaded) return;
+                e.preventDefault();
+                var t = e.touches;
+                if (t.length === 1 && dragging) {
+                    docTx = dragStartTrans.x + (t[0].clientX - dragStart.x);
+                    docTy = dragStartTrans.y + (t[0].clientY - dragStart.y);
+                    clampTranslate();
+                    updateTransform();
+                    saveUserTransform();
+                } else if (t.length === 2) {
+                    var nd = getDist(t[0], t[1]);
+                    var nc = getCtr(t[0], t[1]);
+                    if (lastDist > 0) {
+                        var ns = Math.min(MAX_SCALE, Math.max(dynamicMinScale, docScale * (nd / lastDist)));
+                        docTx = nc.x - lastCtr.sx * ns;
+                        docTy = nc.y - lastCtr.sy * ns;
+                        docScale = Math.round(ns * 100) / 100;
+                        clampTranslate();
+                        updateTransform();
+                        updateZoomDisplay();
+                        saveUserTransform();
+                    }
+                    lastDist = nd;
+                    lastCtr = nc;
+                    lastCtr.sx = (nc.x - docTx) / docScale;
+                    lastCtr.sy = (nc.y - docTy) / docScale;
+                }
+            }, { passive: false });
+
+            viewportEl.addEventListener('touchend', function(e) {
+                if (e.touches.length === 0) {
+                    dragging = false;
+                    lastDist = 0;
+                }
             });
 
-            window.openFileDialog = function() {
-                isReceivedFile = false;
-                document.getElementById('fileInput').click()
+            viewportEl.addEventListener('wheel', function(e) {
+                if (!docLoaded) return;
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    var d = e.deltaY > 0 ? -SCALE_STEP : SCALE_STEP;
+                    var ns = docScale + d;
+                    if (ns < dynamicMinScale || ns > MAX_SCALE) return;
+                    var r = viewportEl.getBoundingClientRect();
+                    var mx = e.clientX - r.left;
+                    var my = e.clientY - r.top;
+                    var sx = (mx - docTx) / docScale;
+                    var sy = (my - docTy) / docScale;
+                    var cns = Math.min(MAX_SCALE, Math.max(dynamicMinScale, ns));
+                    docTx = mx - sx * cns;
+                    docTy = my - sy * cns;
+                    docScale = Math.round(cns * 100) / 100;
+                    clampTranslate();
+                    updateTransform();
+                    updateZoomDisplay();
+                    saveUserTransform();
+                }
+            }, { passive: false });
+
+            // ==================== 键盘可见性检测 ====================
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', function() {
+                    var h = window.visualViewport.height;
+                    if (h < lastKnownH - 80) keyboardVisible = true;
+                    else if (h >= lastKnownH - 30) {
+                        keyboardVisible = false;
+                        lastKnownH = h;
+                    }
+                    if (!keyboardVisible) lastKnownH = Math.max(lastKnownH, h);
+                });
+            }
+
+            // ==================== 顶部栏高度适配 ====================
+            function updateViewportTop() {
+                var top = document.getElementById('headerBar').offsetHeight;
+                var bb = document.getElementById('broadcastBar');
+                if (bb.classList.contains('show')) top += bb.offsetHeight;
+                document.getElementById('viewport').style.top = top + 'px';
+            }
+            updateViewportTop();
+            window.addEventListener('resize', updateViewportTop);
+
+            // ==================== 下拉菜单 ====================
+            window.toggleDropdown = function(id) {
+                var menu = document.getElementById(id + 'Menu');
+                var isOpen = menu.classList.contains('show');
+                document.querySelectorAll('.dropdown-menu').forEach(function(m) {
+                    m.classList.remove('show');
+                });
+                if (!isOpen) menu.classList.add('show');
             };
 
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.dropdown')) {
+                    document.querySelectorAll('.dropdown-menu').forEach(function(m) {
+                        m.classList.remove('show');
+                    });
+                }
+            });
+
+            // ==================== 文件操作 ====================
+            window.openFileDialog = function() {
+                isReceivedFile = false;
+                document.getElementById('fileInput').click();
+            };
+
+            // ==================== 下载文件（含安全确认） ====================
             window.downloadCurrentFile = function() {
                 var file = document.getElementById('fileInput').files[0];
                 if (isReceivedFile || !file) {
@@ -878,92 +1349,153 @@
                 URL.revokeObjectURL(url);
             }
 
+            // ==================== 安全确认弹窗（带复选框 + 3秒倒计时） ====================
             function showSecurityConfirm(callback) {
                 var overlay = document.getElementById('confirmOverlay');
                 var msgP = document.getElementById('confirmMsg');
                 var yesBtn = document.getElementById('btnConfirmYes');
                 var noBtn = document.getElementById('btnConfirmNo');
 
+                // 隐藏输入框
                 document.getElementById('confirmInput').style.display = 'none';
 
+                // 构建弹窗内容：安全提示 + 复选框 + 倒计时按钮
                 msgP.innerHTML = basicSanitize(`
-                    ⚠️ 安全提示<br><br>
-                    本文件由发送端上传，同一口令下可能存在多人传输导致文件串台。<br>
-                    本服务仅提供文件传输通道，不进行任何安全检测。<br><br>
-                    请在确认文件来源可靠后再下载，因下载文件造成的任何问题本站概不负责。<br><br>
-                    <span class="countdown-text" id="countdownDisplay">[3]</span> 我已阅读并确认下载<br>
+                    <div style="text-align:left;font-size:13px;line-height:1.7;">
+                        <div style="text-align:center;font-size:18px;margin-bottom:8px;">⚠️ 安全提示</div>
+                        <p>本文件由发送端上传，同一口令下可能存在多人传输导致文件串台。</p>
+                        <p>本服务仅提供文件传输通道，不进行任何安全检测。</p>
+                        <p style="color:#e91e63;font-weight:500;">请在确认文件来源可靠后再下载，因下载文件造成的任何问题本站概不负责。</p>
+                    </div>
+                    <div class="security-checkbox-wrapper" id="securityCheckboxWrapper">
+                        <input type="checkbox" id="securityCheckbox" disabled>
+                        <label for="securityCheckbox">
+                            我已阅读并确认下载
+                        </label>
+                    </div>
                 `);
 
+                // 获取复选框
+                var checkbox = document.getElementById('securityCheckbox');
+
+                // 初始状态：按钮禁用，复选框禁用
                 yesBtn.className = 'btn-yes btn-yes-disabled';
-                yesBtn.textContent = '等待 3 秒';
+                yesBtn.textContent = '请等待 3 秒';
                 yesBtn.disabled = true;
+                checkbox.disabled = true;
+                checkbox.checked = false;
 
                 noBtn.textContent = '取消下载';
                 noBtn.className = 'btn-no';
 
                 overlay.classList.add('show');
 
+                // 倒计时逻辑
                 var countdown = 3;
-                var countdownEl = document.getElementById('countdownDisplay');
 
                 function updateCountdown() {
                     if (countdown > 0) {
-                        countdownEl.textContent = '[' + countdown + ']';
-                        yesBtn.textContent = '等待 ' + countdown + ' 秒';
+                        yesBtn.textContent = '请等待 ' + countdown + ' 秒';
                         countdown--;
                         setTimeout(updateCountdown, 1000);
                     } else {
-                        countdownEl.textContent = '[✓]';
-                        yesBtn.textContent = '我已阅读并确认下载';
+                        // 倒计时结束：启用复选框和按钮
+                        checkbox.disabled = false;
+                        yesBtn.textContent = '确认下载';
                         yesBtn.className = 'btn-yes btn-yes-ready';
-                        yesBtn.disabled = false;
+                        yesBtn.disabled = true; // 仍然禁用，直到勾选复选框
+
+                        // 监听复选框变化
+                        checkbox.addEventListener('change', function() {
+                            if (checkbox.checked) {
+                                yesBtn.disabled = false;
+                                yesBtn.className = 'btn-yes btn-yes-ready';
+                            } else {
+                                yesBtn.disabled = true;
+                                yesBtn.className = 'btn-yes btn-yes-disabled';
+                            }
+                        });
+
+                        // 点击label也可以切换复选框
+                        var wrapper = document.getElementById('securityCheckboxWrapper');
+                        wrapper.addEventListener('click', function(e) {
+                            // 防止点击checkbox本身触发两次
+                            if (e.target.tagName !== 'INPUT') {
+                                checkbox.checked = !checkbox.checked;
+                                var event = new Event('change');
+                                checkbox.dispatchEvent(event);
+                            }
+                        });
                     }
                 }
                 updateCountdown();
 
+                // 替换按钮以清除旧事件
                 var newYesBtn = yesBtn.cloneNode(true);
                 yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
                 var newNoBtn = noBtn.cloneNode(true);
                 noBtn.parentNode.replaceChild(newNoBtn, noBtn);
 
+                // 确认按钮点击
                 newYesBtn.addEventListener('click', function() {
                     if (newYesBtn.disabled) return;
+                    if (!checkbox.checked) {
+                        alert('请先勾选"我已阅读并确认下载"');
+                        return;
+                    }
                     overlay.classList.remove('show');
                     if (callback) callback(true);
                 });
 
+                // 取消按钮点击
                 newNoBtn.addEventListener('click', function() {
                     overlay.classList.remove('show');
                     if (callback) callback(false);
                 });
             }
 
+            // ==================== 通用确认弹窗 ====================
             function showConfirm(msg, onYes, showInput, btnClass) {
                 document.getElementById('confirmMsg').innerHTML = basicSanitize(msg.replace(/\n/g, '<br>'));
                 confirmYesCallback = onYes;
-                var inputDiv = document.getElementById('confirmInput'),
-                    yesBtn = document.getElementById('btnConfirmYes');
-                if (showInput) { inputDiv.style.display = 'block';
-                    document.getElementById('confirmInputField').value = '' } else { inputDiv.style.display = 'none' }
+                var inputDiv = document.getElementById('confirmInput');
+                var yesBtn = document.getElementById('btnConfirmYes');
+                if (showInput) {
+                    inputDiv.style.display = 'block';
+                    document.getElementById('confirmInputField').value = '';
+                } else {
+                    inputDiv.style.display = 'none';
+                }
                 yesBtn.className = btnClass || 'btn-yes';
                 document.getElementById('confirmOverlay').classList.add('show');
             }
 
             document.getElementById('btnConfirmYes').onclick = function() {
-                var val = document.getElementById('confirmInputField').value.trim(),
-                    cb = confirmYesCallback;
+                var val = document.getElementById('confirmInputField').value.trim();
+                var cb = confirmYesCallback;
                 document.getElementById('confirmOverlay').classList.remove('show');
                 confirmYesCallback = null;
                 if (cb) cb(val);
             };
+
             document.getElementById('btnConfirmNo').onclick = function() {
                 document.getElementById('confirmOverlay').classList.remove('show');
-                confirmYesCallback = null
+                confirmYesCallback = null;
             };
 
-            window.confirmReset = function() { showConfirm('确定要重置吗？', function() { resetAllAnswers() }) };
-            window.confirmClearData = function() { showConfirm('确定要清除数据吗？', function() { clearExerciseData() }) };
+            window.confirmReset = function() {
+                showConfirm('🔄 确定要重置所有答案吗？\n（已填写的答案将被清空）', function() {
+                    resetAllAnswers();
+                });
+            };
 
+            window.confirmClearData = function() {
+                showConfirm('🗑️ 确定要清除所有数据吗？\n（包括答案、错误记录和统计数据）', function() {
+                    clearExerciseData();
+                });
+            };
+
+            // ==================== 广播功能 ====================
             function updateBroadcastBar(text, type) {
                 var bar = document.getElementById('broadcastBar');
                 bar.textContent = text;
@@ -973,12 +1505,16 @@
                 updateViewportTop();
             }
 
-            function hideBroadcastBar() { document.getElementById('broadcastBar').classList.remove('show');
-                updateViewportTop() }
+            function hideBroadcastBar() {
+                document.getElementById('broadcastBar').classList.remove('show');
+                updateViewportTop();
+            }
 
             window.stopBroadcast = function() {
-                if (broadcastAbort) { broadcastAbort.abort();
-                    broadcastAbort = null }
+                if (broadcastAbort) {
+                    broadcastAbort.abort();
+                    broadcastAbort = null;
+                }
                 isBroadcasting = false;
                 hideBroadcastBar();
                 document.getElementById('btnBroadcast').textContent = '📡 广播题目';
@@ -986,8 +1522,10 @@
             };
 
             window.stopReceive = function() {
-                if (broadcastAbort) { broadcastAbort.abort();
-                    broadcastAbort = null }
+                if (broadcastAbort) {
+                    broadcastAbort.abort();
+                    broadcastAbort = null;
+                }
                 isReceiving = false;
                 hideBroadcastBar();
                 document.getElementById('btnReceive').textContent = '📥 接收广播';
@@ -995,46 +1533,79 @@
             };
 
             window.startBroadcast = function() {
-                if (!currentFileId) { alert('请先打开一个文件'); return }
-                if (isBroadcasting) { stopBroadcast(); return }
-                showConfirm('请输入广播口令：\n\n⚠️ 关闭或刷新页面后广播会被停止', function(token) {
-                    if (!token) { alert('请输入口令'); return }
+                if (!currentFileId) {
+                    alert('⚠️ 请先打开一个文件再进行广播');
+                    return;
+                }
+                if (isBroadcasting) {
+                    stopBroadcast();
+                    return;
+                }
+                showConfirm('📡 请输入广播口令：\n\n⚠️ 关闭或刷新页面后广播会被停止', function(token) {
+                    if (!token) {
+                        alert('请输入口令');
+                        return;
+                    }
                     doBroadcast(token);
                 }, true, 'btn-bc');
             };
 
             async function doBroadcast(token) {
-                if (broadcastAbort) { broadcastAbort.abort();
-                    broadcastAbort = null }
+                if (broadcastAbort) {
+                    broadcastAbort.abort();
+                    broadcastAbort = null;
+                }
                 broadcastAbort = new AbortController();
                 broadcastToken = token;
                 isBroadcasting = true;
                 broadcastCount = 0;
+
                 document.getElementById('btnBroadcast').textContent = '⏹ 终止广播';
                 document.getElementById('btnReceive').style.display = 'none';
+
                 var file = document.getElementById('fileInput').files[0];
-                if (!file) { alert('请重新选择文件后再广播');
-                    stopBroadcast(); return }
+                if (!file) {
+                    alert('请重新选择文件后再广播');
+                    stopBroadcast();
+                    return;
+                }
+
                 var ext = file.name.split('.').pop() || 'docx';
                 var safeName = 'file.' + ext;
+
                 updateBroadcastBar('📡 广播中: ' + token + ' | 已接收 0 次', 'broadcast');
+
                 while (isBroadcasting && !broadcastAbort.signal.aborted) {
                     try {
-                        var resp = await fetch('https://ppng.io/' + token, { method: 'PUT', body: file, signal: broadcastAbort
-                                .signal, headers: { 'Content-Disposition': 'attachment; filename="' + safeName +
-                                    '"' } });
-                        if (resp.ok) { broadcastCount++;
+                        var resp = await fetch('https://ppng.io/' + token, {
+                            method: 'PUT',
+                            body: file,
+                            signal: broadcastAbort.signal,
+                            headers: {
+                                'Content-Disposition': 'attachment; filename="' + safeName + '"'
+                            }
+                        });
+                        if (resp.ok) {
+                            broadcastCount++;
                             var displayCount = Math.max(0, broadcastCount - 1);
-                            updateBroadcastBar('📡 广播中: ' + token + ' | 已接收 ' + displayCount + ' 次', 'broadcast') }
-                    } catch (err) { if (err.name === 'AbortError') { break } }
-                    if (isBroadcasting && !broadcastAbort.signal.aborted) { await new Promise(r => setTimeout(r, 100)) }
+                            updateBroadcastBar('📡 广播中: ' + token + ' | 已接收 ' + displayCount + ' 次', 'broadcast');
+                        }
+                    } catch (err) {
+                        if (err.name === 'AbortError') break;
+                    }
+                    if (isBroadcasting && !broadcastAbort.signal.aborted) {
+                        await new Promise(function(r) { setTimeout(r, 100); });
+                    }
                 }
                 stopBroadcast();
             }
 
             window.startReceive = function() {
-                showConfirm('请输入接收口令：', function(token) {
-                    if (!token) { alert('请输入口令'); return }
+                showConfirm('📥 请输入接收口令：', function(token) {
+                    if (!token) {
+                        alert('请输入口令');
+                        return;
+                    }
                     doReceive(token);
                 }, true, 'btn-rc');
             };
@@ -1042,7 +1613,7 @@
             async function tryLoadWithFallback(blob, originalName) {
                 var exts = ['docx', 'xlsx', 'txt'];
                 var origExt = originalName.split('.').pop()?.toLowerCase();
-                var tryExts = [origExt].concat(exts.filter(function(e) { return e !== origExt }));
+                var tryExts = [origExt].concat(exts.filter(function(e) { return e !== origExt; }));
                 var lastErr = null;
                 for (var i = 0; i < tryExts.length; i++) {
                     var ext = tryExts[i];
@@ -1056,38 +1627,48 @@
                         isReceivedFile = true;
                         await loadFile(file);
                         return true;
-                    } catch (err) { lastErr = err }
+                    } catch (err) {
+                        lastErr = err;
+                    }
                 }
                 throw lastErr || new Error('无法识别文件类型');
             }
 
             async function doReceive(token) {
-                if (broadcastAbort) { broadcastAbort.abort();
-                    broadcastAbort = null }
+                if (broadcastAbort) {
+                    broadcastAbort.abort();
+                    broadcastAbort = null;
+                }
                 broadcastAbort = new AbortController();
                 broadcastToken = token;
                 isReceiving = true;
+
                 updateBroadcastBar('📥 正在接收广播: ' + token + ' ...', 'receiving');
                 document.getElementById('btnReceive').textContent = '⏹ 停止接收';
                 document.getElementById('btnBroadcast').style.display = 'none';
 
-                let fileReceived = false;
+                var fileReceived = false;
+
                 while (isReceiving && !broadcastAbort.signal.aborted && !fileReceived) {
                     try {
-                        var resp = await fetch('https://ppng.io/' + token, { method: 'GET', signal: broadcastAbort
-                                .signal });
+                        var resp = await fetch('https://ppng.io/' + token, {
+                            method: 'GET',
+                            signal: broadcastAbort.signal
+                        });
                         if (!resp.ok) {
                             updateBroadcastBar('📥 等待广播: ' + token + ' ...', 'receiving');
-                            await new Promise(r => setTimeout(r, 1000));
+                            await new Promise(function(r) { setTimeout(r, 1000); });
                             continue;
                         }
                         var cd = resp.headers.get('Content-Disposition') || '';
                         var fn = 'received.docx';
                         var m = cd.match(/filename="?([^"]+)"?/);
                         if (m) fn = m[1];
+
                         updateBroadcastBar('📥 正在下载: ' + fn + ' ...', 'receiving');
                         var blob = await resp.blob();
                         await tryLoadWithFallback(blob, fn);
+
                         fileReceived = true;
                         isReceiving = false;
                         document.getElementById('btnReceive').textContent = '📥 接收广播';
@@ -1102,177 +1683,42 @@
                             break;
                         }
                         updateBroadcastBar('📥 连接失败，1秒后重试...', 'receiving');
-                        await new Promise(r => setTimeout(r, 1000));
+                        await new Promise(function(r) { setTimeout(r, 1000); });
                     }
                 }
+
                 if (!fileReceived) {
                     stopReceive();
                 }
             }
 
+            // ==================== 页面关闭时保存 ====================
             window.addEventListener('beforeunload', function() {
                 if (broadcastAbort) broadcastAbort.abort();
-                if (currentFileId) saveToHistory()
+                if (currentFileId) saveToHistory();
             });
 
-            function updateViewportTop() {
-                var top = document.getElementById('headerBar').offsetHeight;
-                var bb = document.getElementById('broadcastBar');
-                if (bb.classList.contains('show')) top += bb.offsetHeight;
-                document.getElementById('viewport').style.top = top + 'px'
-            }
-            updateViewportTop();
-            window.addEventListener('resize', updateViewportTop);
-
-            function updateTransform() { document.getElementById('docStage').style.transform =
-                    `translate(${docTx}px,${docTy}px) scale(${docScale})` }
-
-            function updateZoomDisplay() { document.getElementById('zoomLevel').textContent = Math.round(docScale * 100) +
-                '%' }
-
-            function setDocScale(s) {
-                var c = Math.min(MAX_SCALE, Math.max(dynamicMinScale, Math.round(s * 100) / 100));
-                if (c !== docScale) { docScale = c;
-                    updateTransform();
-                    updateZoomDisplay() }
-            }
-
-            function saveUserTransform() { userScale = docScale;
-                userTrans = { x: docTx, y: docTy } }
-
-            function clampTranslate() {
-                var vp = document.getElementById('viewport'),
-                    vw = vp.clientWidth,
-                    vh = vp.clientHeight,
-                    docEl = document.getElementById('docViewer'),
-                    dw = docEl.offsetWidth * docScale,
-                    dh = docEl.offsetHeight * docScale;
-                if (dw <= vw) docTx = (vw - dw) / 2;
-                else docTx = Math.min(0, Math.max(vw - dw, docTx));
-                if (dh <= vh) docTy = 0;
-                else docTy = Math.min(0, Math.max(vh - dh, docTy))
-            }
-
-            window.zoomIn = function() {
-                if (!docLoaded) return;
-                var ns = docScale + SCALE_STEP;
-                if (ns > MAX_SCALE) return;
-                setDocScale(ns);
-                clampTranslate();
-                saveUserTransform();
-                updateTransform()
-            };
-            window.zoomOut = function() {
-                if (!docLoaded) return;
-                var ns = docScale - SCALE_STEP;
-                if (ns < dynamicMinScale) return;
-                setDocScale(ns);
-                clampTranslate();
-                saveUserTransform();
-                updateTransform()
-            };
-
-            const viewportEl = document.getElementById('viewport');
-            viewportEl.addEventListener('touchstart', function(e) {
-                if (!docLoaded) return;
-                if (e.target.closest('.fill-blank-input,.check-btn,.inline-check-btn,.kb-key,.custom-keyboard'))
-                return;
-                var t = e.touches;
-                if (t.length === 1) {
-                    dragging = true;
-                    dragStart.x = t[0].clientX;
-                    dragStart.y = t[0].clientY;
-                    dragStartTrans.x = docTx;
-                    dragStartTrans.y = docTy
-                } else if (t.length === 2) {
-                    dragging = false;
-                    lastDist = getDist(t[0], t[1]);
-                    lastCtr = getCtr(t[0], t[1]);
-                    lastCtr.sx = (lastCtr.x - docTx) / docScale;
-                    lastCtr.sy = (lastCtr.y - docTy) / docScale
-                }
-            }, { passive: false });
-            viewportEl.addEventListener('touchmove', function(e) {
-                if (!docLoaded) return;
-                e.preventDefault();
-                var t = e.touches;
-                if (t.length === 1 && dragging) {
-                    docTx = dragStartTrans.x + (t[0].clientX - dragStart.x);
-                    docTy = dragStartTrans.y + (t[0].clientY - dragStart.y);
-                    clampTranslate();
-                    updateTransform();
-                    saveUserTransform()
-                } else if (t.length === 2) {
-                    var nd = getDist(t[0], t[1]),
-                        nc = getCtr(t[0], t[1]);
-                    if (lastDist > 0) {
-                        var ns = Math.min(MAX_SCALE, Math.max(dynamicMinScale, docScale * (nd / lastDist)));
-                        docTx = nc.x - lastCtr.sx * ns;
-                        docTy = nc.y - lastCtr.sy * ns;
-                        docScale = Math.round(ns * 100) / 100;
-                        clampTranslate();
-                        updateTransform();
-                        updateZoomDisplay();
-                        saveUserTransform()
-                    }
-                    lastDist = nd;
-                    lastCtr = nc;
-                    lastCtr.sx = (nc.x - docTx) / docScale;
-                    lastCtr.sy = (nc.y - docTy) / docScale
-                }
-            }, { passive: false });
-            viewportEl.addEventListener('touchend', function(e) {
-                if (e.touches.length === 0) { dragging = false;
-                    lastDist = 0 }
-            });
-            viewportEl.addEventListener('wheel', function(e) {
-                if (!docLoaded) return;
-                if (e.ctrlKey || e.metaKey) {
-                    e.preventDefault();
-                    var d = e.deltaY > 0 ? -SCALE_STEP : SCALE_STEP,
-                        ns = docScale + d;
-                    if (ns < dynamicMinScale || ns > MAX_SCALE) return;
-                    var r = viewportEl.getBoundingClientRect(),
-                        mx = e.clientX - r.left,
-                        my = e.clientY - r.top,
-                        sx = (mx - docTx) / docScale,
-                        sy = (my - docTy) / docScale,
-                        cns = Math.min(MAX_SCALE, Math.max(dynamicMinScale, ns));
-                    docTx = mx - sx * cns;
-                    docTy = my - sy * cns;
-                    docScale = Math.round(cns * 100) / 100;
-                    clampTranslate();
-                    updateTransform();
-                    updateZoomDisplay();
-                    saveUserTransform()
-                }
-            }, { passive: false });
-
-            function getDist(a, b) { return Math.sqrt((a.clientX - b.clientX) ** 2 + (a.clientY - b.clientY) ** 2) }
-
-            function getCtr(a, b) { return { x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 } }
-
-            if (window.visualViewport) {
-                window.visualViewport.addEventListener('resize', function() {
-                    var h = window.visualViewport.height;
-                    if (h < lastKnownH - 80) keyboardVisible = true;
-                    else if (h >= lastKnownH - 30) { keyboardVisible = false;
-                        lastKnownH = h }
-                    if (!keyboardVisible) lastKnownH = Math.max(lastKnownH, h)
-                })
-            }
-
+            // ==================== 文档尺寸解析 ====================
             function parseDocSize(text) {
-                for (const [n, s] of Object.entries(PAGE_SIZES)) {
-                    if (new RegExp('\\[' + n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]', 'i').test(text)) return s
+                for (var key in PAGE_SIZES) {
+                    if (PAGE_SIZES.hasOwnProperty(key)) {
+                        var regex = new RegExp('\\[' + key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]', 'i');
+                        if (regex.test(text)) return PAGE_SIZES[key];
+                    }
                 }
                 var cm = text.match(/\[(\d+\.?\d*)\s*:\s*(\d+\.?\d*)\]/);
-                if (cm) { var w = parseFloat(cm[1]),
-                        h = parseFloat(cm[2]); return (w < 50 && h < 50) ? { width: 210, height: 210 * (h / w) } : { width: w,
-                            height: h } }
-                return PAGE_SIZES['A4']
+                if (cm) {
+                    var w = parseFloat(cm[1]);
+                    var h = parseFloat(cm[2]);
+                    if (w < 50 && h < 50) {
+                        return { width: 210, height: 210 * (h / w) };
+                    }
+                    return { width: w, height: h };
+                }
+                return PAGE_SIZES['A4'];
             }
 
+            // ==================== 文档居中 ====================
             function centerDocument(respectUser) {
                 if (keyboardVisible) return;
                 if (respectUser && userScale) {
@@ -1282,17 +1728,17 @@
                     clampTranslate();
                     updateTransform();
                     updateZoomDisplay();
-                    return
+                    return;
                 }
-                var vp = document.getElementById('viewport'),
-                    v = document.getElementById('docViewer');
+                var vp = document.getElementById('viewport');
+                var v = document.getElementById('docViewer');
                 if (!currentDocSize) currentDocSize = PAGE_SIZES['A4'];
-                var mm = 3.779527559,
-                    dw = currentDocSize.width * mm,
-                    dh = currentDocSize.height * mm,
-                    vw = vp.clientWidth,
-                    vh = vp.clientHeight,
-                    minW = Math.max(dw, vw);
+                var mm = 3.779527559;
+                var dw = currentDocSize.width * mm;
+                var dh = currentDocSize.height * mm;
+                var vw = vp.clientWidth;
+                var vh = vp.clientHeight;
+                var minW = Math.max(dw, vw);
                 v.style.width = minW + 'px';
                 v.style.minHeight = dh + 'px';
                 var fitScale = vw / minW;
@@ -1305,22 +1751,30 @@
                 userTrans = null;
                 clampTranslate();
                 updateTransform();
-                updateZoomDisplay()
+                updateZoomDisplay();
             }
 
-            function getUrlParam(name) { return new URL(window.location.href).searchParams.get(name) }
+            // ==================== URL参数加载 ====================
+            function getUrlParam(name) {
+                return new URL(window.location.href).searchParams.get(name);
+            }
 
             async function loadFromUrl(fileUrl) {
-                if (!fileUrl.startsWith('http')) fileUrl = new URL(fileUrl, window.location.href).href;
+                if (!fileUrl.startsWith('http')) {
+                    fileUrl = new URL(fileUrl, window.location.href).href;
+                }
                 try {
                     var r = await fetch(fileUrl);
                     if (!r.ok) throw new Error('HTTP ' + r.status);
                     var blob = await r.blob();
                     var fn = fileUrl.split('/').pop().split('?')[0] || 'doc';
-                    await tryLoadWithFallback(blob, fn)
-                } catch (err) {}
+                    await tryLoadWithFallback(blob, fn);
+                } catch (err) {
+                    // 静默失败
+                }
             }
 
+            // ==================== 核心：文件加载 ====================
             async function loadFile(file) {
                 var ext = file.name.split('.').pop().toLowerCase();
                 currentFileId = 'file_' + file.name + '_' + file.size + '_' + file.lastModified;
@@ -1333,13 +1787,18 @@
                 noIndividualCheck = false;
                 isCheckingAll = false;
                 dynamicMinScale = 0.5;
+
                 var viewer = document.getElementById('docViewer');
-                viewer.innerHTML = basicSanitize('<div class="empty-state"><div class="icon">⏳</div><div>加载中...</div></div>');
+                viewer.innerHTML = basicSanitize(
+                    '<div class="empty-state"><div class="icon">⏳</div><div>加载中...</div></div>'
+                );
+
                 try {
                     var rawText = '';
+
                     if (ext === 'docx') {
-                        var ab = await file.arrayBuffer(),
-                            mr = await mammoth.extractRawText({ arrayBuffer: ab });
+                        var ab = await file.arrayBuffer();
+                        var mr = await mammoth.extractRawText({ arrayBuffer: ab });
                         rawText = mr.value;
                         currentDocSize = parseDocSize(rawText);
                         parseQATags(rawText);
@@ -1348,21 +1807,32 @@
                         var wrapper = document.createElement('div');
                         wrapper.className = 'docx-wrapper';
                         viewer.appendChild(wrapper);
-                        await docx.renderAsync(ab, wrapper, null, { className: 'docx-content', inWrapper: true,
-                            ignoreWidth: false, ignoreHeight: false, ignoreFonts: false, breakPages: true,
-                            ignoreLastRenderedPageBreak: true, experimental: false });
+                        await docx.renderAsync(ab, wrapper, null, {
+                            className: 'docx-content',
+                            inWrapper: true,
+                            ignoreWidth: false,
+                            ignoreHeight: false,
+                            ignoreFonts: false,
+                            breakPages: true,
+                            ignoreLastRenderedPageBreak: true,
+                            experimental: false
+                        });
                         processRenderedDOM(viewer);
-                        finishLoad()
+                        finishLoad();
+
                     } else if (ext === 'txt') {
                         rawText = await file.text();
                         currentDocSize = parseDocSize(rawText);
                         parseQATags(rawText);
                         parseExtraTags(rawText);
-                        viewer.innerHTML = basicSanitize('<div class="txt-content">' + processTextContent(rawText) + '</div>');
-                        finishLoad()
+                        viewer.innerHTML = basicSanitize(
+                            '<div class="txt-content">' + processTextContent(rawText) + '</div>'
+                        );
+                        finishLoad();
+
                     } else if (ext === 'xlsx') {
-                        var ab2 = await file.arrayBuffer(),
-                            wb = XLSX.read(ab2, { type: 'array' });
+                        var ab2 = await file.arrayBuffer();
+                        var wb = XLSX.read(ab2, { type: 'array' });
                         rawText = '';
                         wb.SheetNames.forEach(function(n) {
                             var s = wb.Sheets[n];
@@ -1371,188 +1841,288 @@
                             for (var r = rng.s.r; r <= rng.e.r; r++) {
                                 var rt = '';
                                 for (var c = rng.s.c; c <= rng.e.c; c++) {
-                                    var cr = XLSX.utils.encode_cell({ r: r, c: c }),
-                                        cell = s[cr];
-                                    if (cell) rt += (String(cell.w || cell.v || '').replace(/\n/g, ' ')) + ' '
+                                    var cr = XLSX.utils.encode_cell({ r: r, c: c });
+                                    var cell = s[cr];
+                                    if (cell) {
+                                        rt += (String(cell.w || cell.v || '').replace(/\n/g, ' ')) + ' ';
+                                    }
                                 }
-                                rawText += rt.trim() + '\n'
+                                rawText += rt.trim() + '\n';
                             }
                         });
                         currentDocSize = parseDocSize(rawText);
                         parseQATags(rawText);
                         parseExtraTags(rawText);
-                        viewer.innerHTML = basicSanitize('<div class="xlsx-content">' + xlsxToHTML(wb) + '</div>');
+                        viewer.innerHTML = basicSanitize(
+                            '<div class="xlsx-content">' + xlsxToHTML(wb) + '</div>'
+                        );
                         handleCheancTagsInHTML(viewer);
                         cleanupXlsxEmptyRowsCols(viewer);
                         cleanupXlsxTagText(viewer);
-                        finishLoad()
-                    } else { throw new Error('不支持: .' + ext) }
-                } catch (err) { throw err }
+                        finishLoad();
+
+                    } else {
+                        throw new Error('不支持的文件格式: .' + ext);
+                    }
+
+                } catch (err) {
+                    viewer.innerHTML = basicSanitize(
+                        '<div class="empty-state"><div class="icon">❌</div><p>加载失败: ' +
+                        escHtml(err.message) + '</p></div>'
+                    );
+                    throw err;
+                }
             }
 
+            // ==================== 加载完成 ====================
             function finishLoad() {
                 centerDocument(false);
                 bindEvents();
                 docLoaded = true;
                 setZoomEnabled(true);
+
                 var h = getHistoryData(currentFileId);
-                if (h.answers && Object.keys(h.answers).length > 0) setTimeout(function() { restoreHistory(
-                    currentFileId) }, 300);
-                updateViewportTop()
+                if (h.answers && Object.keys(h.answers).length > 0) {
+                    setTimeout(function() {
+                        restoreHistory(currentFileId);
+                    }, 300);
+                }
+                updateViewportTop();
+
+                var file = document.getElementById('fileInput').files[0];
+                if (file) {
+                    document.title = file.name + ' - 交互式填空题';
+                }
             }
 
+            // ==================== XLSX辅助清理 ====================
             function cleanupXlsxTagText(container) {
-                var w = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false),
-                    ns = [];
-                while (w.nextNode()) ns.push(w.currentNode);
-                ns.forEach(function(n) {
+                var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+                var nodes = [];
+                while (walker.nextNode()) nodes.push(walker.currentNode);
+                nodes.forEach(function(n) {
                     var t = n.textContent;
-                    for (var k of Object.keys(PAGE_SIZES)) t = t.replace(new RegExp('\\[' + k.replace(
-                        /[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]', 'gi'), '');
+                    for (var k in PAGE_SIZES) {
+                        if (PAGE_SIZES.hasOwnProperty(k)) {
+                            t = t.replace(new RegExp('\\[' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]', 'gi'),
+                            '');
+                        }
+                    }
                     t = t.replace(/\[noet\]/gi, '').replace(/\[webpage\]/gi, '');
-                    if (t !== n.textContent) n.textContent = t
-                })
+                    if (t !== n.textContent) n.textContent = t;
+                });
             }
 
+            // ==================== 解析题目标签 ====================
             function parseQATags(text) {
                 answerMap.clear();
                 var sw = loadWrongCounts(currentFileId);
-                for (var m of text.matchAll(/A(\d+)\[([\s\S]*?)\]/gi)) answerMap.set('Q' + m[1], { answer: m[2].replace(
-                        /\n/g, ''), checked: false, wrongCount: sw['Q' + m[1]] || 0 });
-                for (var m of text.matchAll(/Q(\d+)\[([\s\S]*?)\]/gi)) { var k = 'Q' + m[1]; if (!answerMap.has(k))
-                        answerMap.set(k, { answer: '', checked: false, wrongCount: sw[k] || 0 }) }
+
+                var matches = text.matchAll(/A(\d+)\[([\s\S]*?)\]/gi);
+                for (var m of matches) {
+                    var qKey = 'Q' + m[1];
+                    answerMap.set(qKey, {
+                        answer: m[2].replace(/\n/g, '').trim(),
+                        checked: false,
+                        wrongCount: sw[qKey] || 0
+                    });
+                }
+
+                var matches2 = text.matchAll(/Q(\d+)\[([\s\S]*?)\]/gi);
+                for (var m2 of matches2) {
+                    var key = 'Q' + m2[1];
+                    if (!answerMap.has(key)) {
+                        answerMap.set(key, {
+                            answer: '',
+                            checked: false,
+                            wrongCount: sw[key] || 0
+                        });
+                    }
+                }
             }
 
-            function parseExtraTags(text) { if (/\[noet\]/i.test(text)) { noIndividualCheck = true } }
+            function parseExtraTags(text) {
+                if (/\[noet\]/i.test(text)) {
+                    noIndividualCheck = true;
+                }
+            }
 
-            function parseCheancTag(match) { var inner = match[1] || '',
-                    parts = inner.split(','); return { label: (parts[0] || '').trim() || '检查答案', size: Math.max(8, Math
-                        .min(200, parseInt(parts[1]) || 14)), centered: (parts[2] || '').trim().toLowerCase() ===
-                        'middle' } }
+            // ==================== 解析 cheanc 标签 ====================
+            function parseCheancTag(match) {
+                var inner = match[1] || '';
+                var parts = inner.split(',');
+                return {
+                    label: (parts[0] || '').trim() || '检查答案',
+                    size: Math.max(8, Math.min(200, parseInt(parts[1]) || 14)),
+                    centered: (parts[2] || '').trim().toLowerCase() === 'middle'
+                };
+            }
 
             function renderCheancBtn(cfg) {
-                return basicSanitize('<button class="inline-check-btn' + (cfg.centered ? ' centered' :
-                    '') + '" style="font-size:' + cfg.size + 'px;">' + escHtml(cfg.label) + '</button>');
+                return basicSanitize(
+                    '<button class="inline-check-btn' + (cfg.centered ? ' centered' : '') +
+                    '" style="font-size:' + cfg.size + 'px;">' +
+                    escHtml(cfg.label) +
+                    '</button>'
+                );
             }
 
+            // ==================== 处理文本内容 ====================
             function processTextContent(text) {
-                text = text.replace(/\[dpstart\][\s\S]*?\[dpend\]/gi, '').replace(/\[dpstart\]/gi, '').replace(
-                    /\[dpend\]/gi, '').replace(/\[noet\]/gi, '');
-                for (var n of Object.keys(PAGE_SIZES)) text = text.replace(new RegExp('\\[' + n.replace(
-                    /[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]', 'gi'), '');
+                text = text.replace(/\[dpstart\][\s\S]*?\[dpend\]/gi, '')
+                    .replace(/\[dpstart\]/gi, '')
+                    .replace(/\[dpend\]/gi, '')
+                    .replace(/\[noet\]/gi, '');
+
+                for (var k in PAGE_SIZES) {
+                    if (PAGE_SIZES.hasOwnProperty(k)) {
+                        text = text.replace(new RegExp('\\[' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]', 'gi'), '');
+                    }
+                }
                 text = text.replace(/\[\d+\.?\d*\s*:\s*\d+\.?\d*\]/g, '');
+
                 text = text.replace(/cheanc\[([\s\S]*?)\]/gi, function(m, inner) {
                     var cfg = parseCheancTag([null, inner]);
                     return renderCheancBtn(cfg);
                 });
+
                 text = text.replace(/Q(\d+)\[([\s\S]*?)\]/gi, function(m, num, content) {
-                    var q = 'Q' + num,
-                        a = answerMap.get(q),
-                        isChinese = a?.answer && /[\u4e00-\u9fff]/.test(a.answer);
-                    var html = '<span class="fill-blank-wrapper" data-q="' + q + '">' + (content.trim() ?
-                        '<span style="color:#888;">' + escHtml(content) + '</span>' : '') +
-                        '<input type="text" class="fill-blank-input' + (isChinese ? ' native-input' :
-                        '') + '" data-q="' + q + '" data-ans="' + (a?.answer || '') +
+                    var q = 'Q' + num;
+                    var a = answerMap.get(q);
+                    var isChinese = a && a.answer && /[\u4e00-\u9fff]/.test(a.answer);
+                    var html = '<span class="fill-blank-wrapper" data-q="' + q + '">' +
+                        (content.trim() ? '<span style="color:#888;">' + escHtml(content) + '</span>' : '') +
+                        '<input type="text" class="fill-blank-input' + (isChinese ? ' native-input' : '') +
+                        '" data-q="' + q + '" data-ans="' + (a ? a.answer : '') +
                         '" placeholder="' + (content.trim() || '答案') +
                         '" style="min-width:80px;" ' + (isChinese ? '' : 'inputmode="none"') +
-                        ' autocomplete="off">' + (noIndividualCheck ? '' :
-                        '<button class="check-btn" data-q="' + q + '">检查</button>') +
-                        '<span class="result-icon" data-q="' + q + '"></span><span class="answer-display" data-q="' +
-                        q + '"></span></span>';
+                        ' autocomplete="off">' +
+                        (noIndividualCheck ? '' : '<button class="check-btn" data-q="' + q + '">检查</button>') +
+                        '<span class="result-icon" data-q="' + q + '"></span>' +
+                        '<span class="answer-display" data-q="' + q + '"></span>' +
+                        '</span>';
                     return basicSanitize(html);
                 });
-                return text.replace(/A\d+\[[\s\S]*?\]/gi, '')
+
+                return text.replace(/A\d+\[[\s\S]*?\]/gi, '');
             }
 
+            // ==================== XLSX 转 HTML ====================
             function xlsxToHTML(wb) {
                 var sheetsData = [];
-                wb.SheetNames.forEach(function(n) {
-                    var s = wb.Sheets[n];
+                wb.SheetNames.forEach(function(name) {
+                    var s = wb.Sheets[name];
                     if (!s || !s['!ref']) return;
                     var rng = XLSX.utils.decode_range(s['!ref']);
                     var rows = [];
                     for (var r = rng.s.r; r <= rng.e.r; r++) {
                         var row = [];
                         for (var c = rng.s.c; c <= rng.e.c; c++) {
-                            var cr = XLSX.utils.encode_cell({ r: r, c: c }),
-                                cell = s[cr],
-                                v = '';
-                            if (cell) { v = String(cell.w || cell.v || '').trim() }
-                            row.push(v)
+                            var cr = XLSX.utils.encode_cell({ r: r, c: c });
+                            var cell = s[cr];
+                            var v = '';
+                            if (cell) {
+                                v = String(cell.w || cell.v || '').trim();
+                            }
+                            row.push(v);
                         }
-                        rows.push(row)
+                        rows.push(row);
                     }
-                    sheetsData.push(rows)
+                    sheetsData.push(rows);
                 });
+
                 var maxCols = 0;
-                sheetsData.forEach(function(rows) { rows.forEach(function(row) { maxCols = Math.max(maxCols, row
-                        .length) }) });
+                sheetsData.forEach(function(rows) {
+                    rows.forEach(function(row) {
+                        maxCols = Math.max(maxCols, row.length);
+                    });
+                });
+
                 var emptyCols = new Set();
                 for (var c = 0; c < maxCols; c++) {
                     var allEmpty = true;
-                    sheetsData.forEach(function(rows) { rows.forEach(function(row) { if (c < row.length && row[c]
-                                .trim() !== '') allEmpty = false }) });
-                    if (allEmpty) emptyCols.add(c)
+                    sheetsData.forEach(function(rows) {
+                        rows.forEach(function(row) {
+                            if (c < row.length && row[c].trim() !== '') allEmpty = false;
+                        });
+                    });
+                    if (allEmpty) emptyCols.add(c);
                 }
-                var h = '',
-                    cbh = '',
-                    hc = false;
+
+                var h = '';
+                var cbh = '';
+                var hc = false;
+
                 sheetsData.forEach(function(rows) {
                     h += '<table>';
                     rows.forEach(function(row) {
                         var rowHasContent = false;
-                        for (var c = 0; c < row.length; c++) { if (!emptyCols.has(c) && row[c].trim() !==
-                                '') { rowHasContent = true;
-                                break } }
+                        for (var c = 0; c < row.length; c++) {
+                            if (!emptyCols.has(c) && row[c].trim() !== '') {
+                                rowHasContent = true;
+                                break;
+                            }
+                        }
                         if (!rowHasContent) return;
+
                         var rh = '';
                         for (var c = 0; c < maxCols; c++) {
                             if (emptyCols.has(c)) continue;
                             var v = c < row.length ? row[c] : '';
+
                             if (/cheanc\[.*,.*middle.*\]/i.test(v)) {
                                 hc = true;
                                 cbh = v.replace(/cheanc\[([\s\S]*?)\]/gi, function(m, inner) {
                                     var cfg = parseCheancTag([null, inner]);
                                     return renderCheancBtn(cfg);
                                 });
-                                v = v.replace(/cheanc\[[\s\S]*?\]/gi, '')
+                                v = v.replace(/cheanc\[[\s\S]*?\]/gi, '');
                             }
+
                             v = v.replace(/Q(\d+)\[([\s\S]*?)\]/gi, function(m, num, ct) {
-                                var q = 'Q' + num,
-                                    a = answerMap.get(q),
-                                    isChinese = a?.answer && /[\u4e00-\u9fff]/.test(a.answer);
-                                var html = '<span class="fill-blank-wrapper" data-q="' + q + '">' + (
-                                    ct.trim() ? '<span style="color:#888;">' + escHtml(ct) +
+                                var q = 'Q' + num;
+                                var a = answerMap.get(q);
+                                var isChinese = a && a.answer && /[\u4e00-\u9fff]/.test(a.answer);
+                                var html = '<span class="fill-blank-wrapper" data-q="' + q + '">' +
+                                    (ct.trim() ? '<span style="color:#888;">' + escHtml(ct) +
                                     '</span>' : '') +
                                     '<input type="text" class="fill-blank-input' + (isChinese ?
                                         ' native-input' : '') + '" data-q="' + q +
-                                    '" data-ans="' + (a?.answer || '') +
+                                    '" data-ans="' + (a ? a.answer : '') +
                                     '" placeholder="' + (ct.trim() || '答案') +
                                     '" style="min-width:80px;" ' + (isChinese ? '' :
-                                        'inputmode="none"') + ' autocomplete="off">' + (
-                                        noIndividualCheck ? '' :
+                                        'inputmode="none"') + ' autocomplete="off">' +
+                                    (noIndividualCheck ? '' :
                                         '<button class="check-btn" data-q="' + q +
                                         '">检查</button>') +
                                     '<span class="result-icon" data-q="' + q +
-                                    '"></span><span class="answer-display" data-q="' + q +
+                                    '"></span>' +
+                                    '<span class="answer-display" data-q="' + q +
                                     '"></span></span>';
                                 return basicSanitize(html);
                             });
+
                             v = v.replace(/\[dpstart\]/gi, '').replace(/\[dpend\]/gi, '');
-                            for (var k of Object.keys(PAGE_SIZES)) v = v.replace(new RegExp('\\[' + k
-                                .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]', 'gi'), '');
+                            for (var k in PAGE_SIZES) {
+                                if (PAGE_SIZES.hasOwnProperty(k)) {
+                                    v = v.replace(new RegExp('\\[' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
+                                        '\\]', 'gi'), '');
+                                }
+                            }
                             v = v.replace(/\[noet\]/gi, '').replace(/\[webpage\]/gi, '');
                             v = v.replace(/A\d+\[[\s\S]*?\]/gi, '');
                             rh += '<td>' + v + '</td>';
                         }
-                        h += '<tr>' + rh + '</tr>'
+                        h += '<tr>' + rh + '</tr>';
                     });
-                    h += '</table><br>'
+                    h += '</table><br>';
                 });
+
                 if (hc) h += cbh;
                 return basicSanitize(h);
             }
 
+            // ==================== XLSX 清理空行空列 ====================
             function cleanupXlsxEmptyRowsCols(container) {
                 container.querySelectorAll('table').forEach(function(table) {
                     var rows = table.querySelectorAll('tr');
@@ -1560,19 +2130,20 @@
                         var hasContent = false;
                         tr.querySelectorAll('td').forEach(function(td) {
                             if ((td.textContent || '').replace(/\s/g, '') !== '' || td.querySelector(
-                                    '.fill-blank-input,.inline-check-btn')) hasContent = true
+                                    '.fill-blank-input,.inline-check-btn')) hasContent = true;
                         });
-                        if (!hasContent) tr.remove()
+                        if (!hasContent) tr.remove();
                     });
-                    if (table.querySelectorAll('tr').length === 0) table.remove()
-                })
+                    if (table.querySelectorAll('tr').length === 0) table.remove();
+                });
             }
 
+            // ==================== 处理 cheanc 标签（HTML中） ====================
             function handleCheancTagsInHTML(container) {
-                var w = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false),
-                    ns = [];
-                while (w.nextNode()) ns.push(w.currentNode);
-                ns.forEach(function(n) {
+                var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+                var nodes = [];
+                while (walker.nextNode()) nodes.push(walker.currentNode);
+                nodes.forEach(function(n) {
                     if (/cheanc\[/i.test(n.textContent)) {
                         var s = document.createElement('span');
                         s.innerHTML = basicSanitize(n.textContent.replace(/cheanc\[([\s\S]*?)\]/gi, function(m,
@@ -1580,53 +2151,61 @@
                             var cfg = parseCheancTag([null, inner]);
                             return renderCheancBtn(cfg);
                         }));
-                        n.parentElement.replaceChild(s, n)
+                        n.parentElement.replaceChild(s, n);
                     }
-                })
+                });
             }
 
+            // ==================== 文件输入事件 ====================
             document.getElementById('fileInput').addEventListener('change', async function(e) {
                 if (e.target.files[0]) {
                     isReceivedFile = false;
-                    await loadFile(e.target.files[0])
+                    await loadFile(e.target.files[0]);
                 }
             });
 
-            function processRenderedDOM(c) { markDpRegionsInText(c);
-                replaceQTags(c);
-                removeATags(c);
-                removeSizeTags(c);
-                handleCheancTags(c) }
+            // ==================== 渲染后处理 ====================
+            function processRenderedDOM(container) {
+                markDpRegionsInText(container);
+                replaceQTags(container);
+                removeATags(container);
+                removeSizeTags(container);
+                handleCheancTags(container);
+            }
 
             function markDpRegionsInText(container) {
-                var w = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false),
-                    allNodes = [];
-                while (w.nextNode()) allNodes.push(w.currentNode);
-                var dpRanges = [],
-                    startIdx = -1;
+                var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+                var allNodes = [];
+                while (walker.nextNode()) allNodes.push(walker.currentNode);
+
+                var dpRanges = [];
+                var startIdx = -1;
                 for (var i = 0; i < allNodes.length; i++) {
                     var t = allNodes[i].textContent;
                     if (/\[dpstart\]/i.test(t) && startIdx < 0) startIdx = i;
-                    if (/\[dpend\]/i.test(t) && startIdx >= 0) { dpRanges.push({ start: startIdx, end: i });
-                        startIdx = -1 }
+                    if (/\[dpend\]/i.test(t) && startIdx >= 0) {
+                        dpRanges.push({ start: startIdx, end: i });
+                        startIdx = -1;
+                    }
                 }
                 if (startIdx >= 0) dpRanges.push({ start: startIdx, end: allNodes.length - 1 });
+
                 dpRanges.forEach(function(range) {
                     for (var i = range.start; i <= range.end; i++) {
-                        var node = allNodes[i],
-                            text = node.textContent;
+                        var node = allNodes[i];
+                        var text = node.textContent;
                         text = text.replace(/\[dpstart\]/gi, '').replace(/\[dpend\]/gi, '');
                         if (i > range.start && i < range.end) text = '';
-                        node.textContent = text
+                        node.textContent = text;
                     }
-                })
+                });
             }
 
-            function handleCheancTags(c) {
-                var w = document.createTreeWalker(c, NodeFilter.SHOW_TEXT, null, false),
-                    ns = [];
-                while (w.nextNode()) ns.push(w.currentNode);
-                ns.forEach(function(n) {
+            function handleCheancTags(container) {
+                var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+                var nodes = [];
+                while (walker.nextNode()) nodes.push(walker.currentNode);
+                nodes.forEach(function(n) {
                     if (/cheanc\[/i.test(n.textContent)) {
                         var s = document.createElement('span');
                         s.innerHTML = basicSanitize(n.textContent.replace(/cheanc\[([\s\S]*?)\]/gi, function(m,
@@ -1634,70 +2213,87 @@
                             var cfg = parseCheancTag([null, inner]);
                             return renderCheancBtn(cfg);
                         }));
-                        n.parentElement.replaceChild(s, n)
+                        n.parentElement.replaceChild(s, n);
                     }
-                })
+                });
             }
 
-            function replaceQTags(c) {
-                var w = document.createTreeWalker(c, NodeFilter.SHOW_TEXT, null, false),
-                    ns = [];
-                while (w.nextNode()) ns.push(w.currentNode);
-                ns.forEach(function(n) {
+            function replaceQTags(container) {
+                var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+                var nodes = [];
+                while (walker.nextNode()) nodes.push(walker.currentNode);
+                nodes.forEach(function(n) {
                     if (!n.parentElement || n.parentElement.closest('.fill-blank-wrapper')) return;
-                    if (/\[noet\]/i.test(n.textContent)) { n.textContent = n.textContent.replace(/\[noet\]/gi,
-                        ''); return }
+                    if (/\[noet\]/i.test(n.textContent)) {
+                        n.textContent = n.textContent.replace(/\[noet\]/gi, '');
+                        return;
+                    }
                     if (!/Q\d+\[/i.test(n.textContent)) return;
-                    var h = n.textContent.replace(/Q(\d+)\[([\s\S]*?)\]/gi, function(m, num, content) {
-                        var q = 'Q' + num,
-                            a = answerMap.get(q),
-                            isChinese = a?.answer && /[\u4e00-\u9fff]/.test(a.answer);
-                        var html = '<span class="fill-blank-wrapper" data-q="' + q + '">' + (content.trim() ?
-                            '<span style="color:#888;">' + escHtml(content) + '</span>' : '') +
+
+                    var html = n.textContent.replace(/Q(\d+)\[([\s\S]*?)\]/gi, function(m, num, content) {
+                        var q = 'Q' + num;
+                        var a = answerMap.get(q);
+                        var isChinese = a && a.answer && /[\u4e00-\u9fff]/.test(a.answer);
+                        var h = '<span class="fill-blank-wrapper" data-q="' + q + '">' +
+                            (content.trim() ? '<span style="color:#888;">' + escHtml(content) +
+                            '</span>' : '') +
                             '<input type="text" class="fill-blank-input' + (isChinese ? ' native-input' :
-                                '') + '" data-q="' + q + '" data-ans="' + (a?.answer || '') +
-                            '" placeholder="' + (content.trim() || '答案') + '" style="min-width:' + (
-                                content.trim() ? '60px' : '80px') + ';" ' + (isChinese ? '' :
-                                'inputmode="none"') + ' autocomplete="off">' + (noIndividualCheck ?
-                                '' : '<button class="check-btn" data-q="' + q +
+                                '') + '" data-q="' + q + '" data-ans="' + (a ? a.answer : '') +
+                            '" placeholder="' + (content.trim() || '答案') + '" style="min-width:' +
+                            (content.trim() ? '60px' : '80px') + ';" ' + (isChinese ? '' :
+                                'inputmode="none"') + ' autocomplete="off">' +
+                            (noIndividualCheck ? '' : '<button class="check-btn" data-q="' + q +
                                 '">检查</button>') +
-                            '<span class="result-icon" data-q="' + q +
-                            '"></span><span class="answer-display" data-q="' + q +
-                            '"></span></span>';
-                        return basicSanitize(html);
+                            '<span class="result-icon" data-q="' + q + '"></span>' +
+                            '<span class="answer-display" data-q="' + q + '"></span>' +
+                            '</span>';
+                        return basicSanitize(h);
                     });
-                    if (h !== n.textContent) { var s = document.createElement('span');
-                        s.innerHTML = h;
-                        n.parentElement.replaceChild(s, n) }
-                })
+
+                    if (html !== n.textContent) {
+                        var s = document.createElement('span');
+                        s.innerHTML = html;
+                        n.parentElement.replaceChild(s, n);
+                    }
+                });
             }
 
-            function removeATags(c) {
-                var w = document.createTreeWalker(c, NodeFilter.SHOW_TEXT, null, false),
-                    ns = [];
-                while (w.nextNode()) ns.push(w.currentNode);
-                ns.forEach(function(n) {
-                    if (!n.parentElement?.closest('.fill-blank-wrapper')) n.textContent = n.textContent.replace(
-                        /A\d+\[[\s\S]*?\]/gi, '')
-                })
+            function removeATags(container) {
+                var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+                var nodes = [];
+                while (walker.nextNode()) nodes.push(walker.currentNode);
+                nodes.forEach(function(n) {
+                    if (!n.parentElement || !n.parentElement.closest('.fill-blank-wrapper')) {
+                        n.textContent = n.textContent.replace(/A\d+\[[\s\S]*?\]/gi, '');
+                    }
+                });
             }
 
-            function removeSizeTags(c) {
-                var w = document.createTreeWalker(c, NodeFilter.SHOW_TEXT, null, false),
-                    ns = [];
-                while (w.nextNode()) ns.push(w.currentNode);
-                ns.forEach(function(n) {
+            function removeSizeTags(container) {
+                var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+                var nodes = [];
+                while (walker.nextNode()) nodes.push(walker.currentNode);
+                nodes.forEach(function(n) {
                     var t = n.textContent;
-                    for (var k of Object.keys(PAGE_SIZES)) t = t.replace(new RegExp('\\[' + k.replace(
-                        /[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]', 'gi'), '');
+                    for (var k in PAGE_SIZES) {
+                        if (PAGE_SIZES.hasOwnProperty(k)) {
+                            t = t.replace(new RegExp('\\[' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]', 'gi'),
+                            '');
+                        }
+                    }
                     t = t.replace(/\[noet\]/gi, '').replace(/\[webpage\]/gi, '');
-                    n.textContent = t.replace(/\[\d+\.?\d*\s*:\s*\d+\.?\d*\]/g, '')
-                })
+                    n.textContent = t.replace(/\[\d+\.?\d*\s*:\s*\d+\.?\d*\]/g, '');
+                });
             }
 
-            function escHtml(s) { var d = document.createElement('div');
-                d.textContent = s; return d.innerHTML }
+            // ==================== HTML 转义 ====================
+            function escHtml(str) {
+                var d = document.createElement('div');
+                d.textContent = str;
+                return d.innerHTML;
+            }
 
+            // ==================== 键盘类型判断 ====================
             function getAnswerType(ans) {
                 if (!ans) return 'text';
                 if (/[\u4e00-\u9fff]/.test(ans)) return 'text';
@@ -1706,17 +2302,22 @@
                 return 'text';
             }
 
+            // ==================== 自定义键盘 ====================
             function buildKeyboard(type) {
                 var kb = document.getElementById('customKeyboard');
-                if (type === 'text') { kb.innerHTML = '';
-                    kb.classList.remove('show'); return }
+                if (type === 'text') {
+                    kb.innerHTML = '';
+                    kb.classList.remove('show');
+                    return;
+                }
+
                 var rows = [];
                 if (type === 'number') {
                     rows = [
                         ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
                         ['-', '+', '*', '/', '=', '.', ',', '(', ')', '⌫'],
                         [{ t: 'space', l: '空格' }, { t: 'done', l: '完成' }]
-                    ]
+                    ];
                 } else if (type === 'english') {
                     if (isSymbolPage) {
                         rows = [
@@ -1725,7 +2326,7 @@
                             [{ t: 'abc', l: 'ABC' }, ':', ';', '<', '>', '/', '\\', '~', '⌫'],
                             [{ t: 'num', l: '123' }, ',', '.', { t: 'space', l: '空格' }, '?', '!', "'", { t: 'done',
                                 l: '完成' }]
-                        ]
+                        ];
                     } else {
                         var l1 = isShifted ? ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'] : ['q', 'w', 'e', 'r',
                             't', 'y', 'u', 'i', 'o', 'p'
@@ -1739,262 +2340,424 @@
                         var l4 = [{ t: 'num', l: '123' }, { t: 'sym', l: '#+=' }, '.', { t: 'space', l: '空格' }, ',',
                             '!', '?', { t: 'done', l: '完成' }
                         ];
-                        rows = [l1, l2, l3, l4]
+                        rows = [l1, l2, l3, l4];
                     }
                 } else if (type === 'num_from_eng') {
                     rows = [
                         ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
                         ['-', '+', '*', '/', '=', '.', ',', '(', ')', '⌫'],
                         [{ t: 'abc', l: 'ABC' }, { t: 'space', l: '空格' }, { t: 'done', l: '完成' }]
-                    ]
+                    ];
                 }
+
                 kb.innerHTML = rows.map(function(r, ri) {
                     var pad = ri * 8;
-                    return '<div class="kb-row" style="padding:0 ' + pad + 'px;">' + r.map(function(k) {
-                        if (typeof k === 'object') {
-                            var cls = k.t === 'space' ? 'space' : k.t === 'done' ? 'done' : k.t ===
-                                'delete' ? 'delete' : k.t === 'shift' ? (isShifted ?
-                                'shift active' : 'shift') : k.t === 'sym' ? 'symbol' :
-                                'num-switch';
-                            return '<button class="kb-key ' + cls + '" data-action="' + k.t +
-                                '">' + k.l + '</button>'
-                        }
-                        if (k === '⌫') return '<button class="kb-key delete" data-action="backspace">⌫</button>';
-                        if (k === "'") return '<button class="kb-key" data-key="\'">\'</button>';
-                        return '<button class="kb-key" data-key="' + k + '">' + k + '</button>'
-                    }).join('') + '</div>'
+                    return '<div class="kb-row" style="padding:0 ' + pad + 'px;">' +
+                        r.map(function(k) {
+                            if (typeof k === 'object') {
+                                var cls = k.t === 'space' ? 'space' :
+                                    k.t === 'done' ? 'done' :
+                                    k.t === 'delete' ? 'delete' :
+                                    k.t === 'shift' ? (isShifted ? 'shift active' : 'shift') :
+                                    k.t === 'sym' ? 'symbol' : 'num-switch';
+                                return '<button class="kb-key ' + cls + '" data-action="' + k.t +
+                                    '">' + k.l + '</button>';
+                            }
+                            if (k === '⌫') return '<button class="kb-key delete" data-action="backspace">⌫</button>';
+                            if (k === "'") return '<button class="kb-key" data-key="\'">\'</button>';
+                            return '<button class="kb-key" data-key="' + k + '">' + k + '</button>';
+                        }).join('') +
+                        '</div>';
                 }).join('');
-                kb.classList.add('show')
+                kb.classList.add('show');
             }
 
-            function hideKeyboard() { document.getElementById('customKeyboard').classList.remove('show');
+            function hideKeyboard() {
+                document.getElementById('customKeyboard').classList.remove('show');
                 stopDeleteRepeat();
                 activeInput = null;
                 isShifted = false;
-                isSymbolPage = false }
+                isSymbolPage = false;
+            }
 
-            function stopDeleteRepeat() { if (deleteRepeatTimer) { clearTimeout(deleteRepeatTimer) } if (
-                deleteRepeatInterval) { clearInterval(deleteRepeatInterval) } }
+            function stopDeleteRepeat() {
+                if (deleteRepeatTimer) {
+                    clearTimeout(deleteRepeatTimer);
+                    deleteRepeatTimer = null;
+                }
+                if (deleteRepeatInterval) {
+                    clearInterval(deleteRepeatInterval);
+                    deleteRepeatInterval = null;
+                }
+            }
 
-            function doDelete() { if (!activeInput) return;
+            function doDelete() {
+                if (!activeInput) return;
                 activeInput.value = activeInput.value.slice(0, -1);
                 activeInput.dispatchEvent(new Event('input', { bubbles: true }));
-                clearMarkOnEdit(activeInput) }
+                clearMarkOnEdit(activeInput);
+            }
 
-            function startDeleteRepeat() { doDelete();
+            function startDeleteRepeat() {
+                doDelete();
                 vibrate(5);
                 deleteRepeatTimer = setTimeout(function() {
-                    deleteRepeatInterval = setInterval(function() { doDelete();
-                        vibrate(3) }, 50)
-                }, 400) }
+                    deleteRepeatInterval = setInterval(function() {
+                        doDelete();
+                        vibrate(3);
+                    }, 50);
+                }, 400);
+            }
 
-            function handleKeyAction(action, key) { if (!activeInput) return;
-                vibrate(6); if (action === 'done') { hideKeyboard(); return } if (action === 'backspace') {
-                    startDeleteRepeat(); return } if (action === 'shift') { isShifted = !isShifted;
-                    isSymbolPage = false;
-                    buildKeyboard('english'); return } if (action === 'num') { isShifted = false;
-                    isSymbolPage = false;
-                    buildKeyboard('num_from_eng'); return } if (action === 'abc') { isShifted = false;
-                    isSymbolPage = false;
-                    buildKeyboard('english'); return } if (action === 'sym') { isSymbolPage = !isSymbolPage;
-                    buildKeyboard('english'); return } if (action === 'space') { activeInput.value += ' ';
-                    activeInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    clearMarkOnEdit(activeInput); return } if (key) { activeInput.value += key;
-                    activeInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    clearMarkOnEdit(activeInput) } }
+            function handleKeyAction(action, key) {
+                if (!activeInput) return;
+                vibrate(6);
 
+                if (action === 'done') {
+                    hideKeyboard();
+                    return;
+                }
+                if (action === 'backspace') {
+                    startDeleteRepeat();
+                    return;
+                }
+                if (action === 'shift') {
+                    isShifted = !isShifted;
+                    isSymbolPage = false;
+                    buildKeyboard('english');
+                    return;
+                }
+                if (action === 'num') {
+                    isShifted = false;
+                    isSymbolPage = false;
+                    buildKeyboard('num_from_eng');
+                    return;
+                }
+                if (action === 'abc') {
+                    isShifted = false;
+                    isSymbolPage = false;
+                    buildKeyboard('english');
+                    return;
+                }
+                if (action === 'sym') {
+                    isSymbolPage = !isSymbolPage;
+                    buildKeyboard('english');
+                    return;
+                }
+                if (action === 'space') {
+                    activeInput.value += ' ';
+                    activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    clearMarkOnEdit(activeInput);
+                    return;
+                }
+                if (key) {
+                    activeInput.value += key;
+                    activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    clearMarkOnEdit(activeInput);
+                }
+            }
+
+            // ==================== 键盘事件 ====================
             document.getElementById('customKeyboard').addEventListener('pointerdown', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 var btn = e.target.closest('.kb-key');
                 if (!btn || !activeInput) return;
                 btn.classList.add('pressed');
-                setTimeout(function() { btn.classList.remove('pressed') }, 40);
-                handleKeyAction(btn.dataset.action, btn.dataset.key)
+                setTimeout(function() { btn.classList.remove('pressed'); }, 40);
+                handleKeyAction(btn.dataset.action, btn.dataset.key);
             });
+
             document.getElementById('customKeyboard').addEventListener('pointerup', stopDeleteRepeat);
             document.getElementById('customKeyboard').addEventListener('pointerleave', stopDeleteRepeat);
             document.getElementById('customKeyboard').addEventListener('touchstart', function(e) {
                 e.preventDefault();
-                e.stopPropagation()
+                e.stopPropagation();
             });
 
-            function clearMarkOnEdit(input) { var q = input.dataset.q,
-                    ic = document.querySelector('.result-icon[data-q="' + q + '"]'),
-                    dp = document.querySelector('.answer-display[data-q="' + q + '"]'); if (ic && (ic.classList
-                    .contains('wrong') || ic.classList.contains('correct'))) { ic.className = 'result-icon';
+            // ==================== 清除编辑标记 ====================
+            function clearMarkOnEdit(input) {
+                var q = input.dataset.q;
+                var ic = document.querySelector('.result-icon[data-q="' + q + '"]');
+                var dp = document.querySelector('.answer-display[data-q="' + q + '"]');
+                if (ic && (ic.classList.contains('wrong') || ic.classList.contains('correct'))) {
+                    ic.className = 'result-icon';
                     ic.textContent = '';
                     input.style.borderBottomColor = '#667eea';
-                    input.style.color = 'inherit'; if (dp) { dp.classList.remove('show');
-                        dp.textContent = '' } var a = answerMap.get(q); if (a) { a.checked = false;
-                        answerMap.set(q, a) } } }
+                    input.style.color = 'inherit';
+                    if (dp) {
+                        dp.classList.remove('show');
+                        dp.textContent = '';
+                    }
+                    var a = answerMap.get(q);
+                    if (a) {
+                        a.checked = false;
+                        answerMap.set(q, a);
+                    }
+                }
+            }
 
+            // ==================== 绑定事件 ====================
             function bindEvents() {
                 document.querySelectorAll('.check-btn').forEach(function(b) {
-                    b.addEventListener('click', function(e) { e.stopPropagation();
-                        checkAnswer(this.dataset.q) })
+                    b.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        checkAnswer(this.dataset.q);
+                    });
                 });
+
                 document.querySelectorAll('.inline-check-btn').forEach(function(b) {
-                    b.onclick = function(e) { e.stopPropagation();
-                        checkAllAnswers() }
+                    b.onclick = function(e) {
+                        e.stopPropagation();
+                        checkAllAnswers();
+                    };
                 });
+
                 document.querySelectorAll('.fill-blank-input').forEach(function(i) {
                     var isNative = i.classList.contains('native-input');
+
                     i.addEventListener('keydown', function(e) {
                         if (e.key !== 'Enter' && e.key !== 'Tab') clearMarkOnEdit(i);
-                        if (!isNative && isTouchDevice && activeInput === i && getAnswerType(i
-                                .dataset.ans || '') !== 'text') e.preventDefault()
+                        if (!isNative && isTouchDevice && activeInput === i && getAnswerType(i.dataset
+                                .ans || '') !== 'text') {
+                            e.preventDefault();
+                        }
                     });
+
                     i.addEventListener('focus', function() {
                         if (!isTouchDevice) return;
                         var t = getAnswerType(this.dataset.ans || '');
-                        if (t === 'text') { hideKeyboard() } else { activeInput = this;
+                        if (t === 'text') {
+                            hideKeyboard();
+                        } else {
+                            activeInput = this;
                             isShifted = false;
                             isSymbolPage = false;
-                            buildKeyboard(t) }
+                            buildKeyboard(t);
+                        }
                     });
+
                     i.addEventListener('touchstart', function(e) {
                         e.stopPropagation();
                         if (isTouchDevice) {
                             var t = getAnswerType(this.dataset.ans || '');
                             if (t !== 'text') {
                                 e.preventDefault();
-                                if (activeInput !== this) { hideKeyboard();
+                                if (activeInput !== this) {
+                                    hideKeyboard();
                                     activeInput = this;
                                     isShifted = false;
                                     isSymbolPage = false;
                                     buildKeyboard(t);
-                                    this.focus() }
+                                    this.focus();
+                                }
                             }
                         }
                     });
+
                     i.addEventListener('keypress', function(e) {
-                        if (e.key === 'Enter') { e.stopPropagation();
-                            checkAnswer(this.dataset.q) }
+                        if (e.key === 'Enter') {
+                            e.stopPropagation();
+                            checkAnswer(this.dataset.q);
+                        }
                     });
+
                     i.addEventListener('blur', function() {
                         setTimeout(function() {
-                            if (document.querySelector('.kb-key.pressed') && activeInput === i)
-                                i.focus()
+                            if (document.querySelector('.kb-key.pressed') && activeInput === i) {
+                                i.focus();
+                            }
                         }, 100);
-                        if (currentFileId) saveToHistory()
+                        if (currentFileId) saveToHistory();
                     });
                 });
+
                 document.getElementById('docViewer').addEventListener('pointerdown', function(e) {
-                    if (!e.target.closest('.fill-blank-input') && !e.target.closest(
-                            '.custom-keyboard') && !e.target.closest('.check-btn') && !e.target
-                        .closest('.inline-check-btn')) hideKeyboard()
+                    if (!e.target.closest('.fill-blank-input') &&
+                        !e.target.closest('.custom-keyboard') &&
+                        !e.target.closest('.check-btn') &&
+                        !e.target.closest('.inline-check-btn')) {
+                        hideKeyboard();
+                    }
                 });
             }
 
-            function loadWrongCounts(fid) { var s = localStorage.getItem('wrong_' + fid); return s ? (JSON.parse(s) ||
-                {}) : {} }
+            // ==================== 错题统计 ====================
+            function loadWrongCounts(fid) {
+                var s = localStorage.getItem('wrong_' + fid);
+                return s ? (JSON.parse(s) || {}) : {};
+            }
 
-            function saveWrongCounts(fid) { var c = {};
-                answerMap.forEach(function(a, k) { if (a.wrongCount > 0) c[k] = a.wrongCount });
-                localStorage.setItem('wrong_' + fid, JSON.stringify(c)) }
+            function saveWrongCounts(fid) {
+                var c = {};
+                answerMap.forEach(function(a, k) {
+                    if (a.wrongCount > 0) c[k] = a.wrongCount;
+                });
+                localStorage.setItem('wrong_' + fid, JSON.stringify(c));
+            }
 
-            function clearWrongCounts(fid) { localStorage.removeItem('wrong_' + fid) }
+            function clearWrongCounts(fid) {
+                localStorage.removeItem('wrong_' + fid);
+            }
 
+            // ==================== 检查单个答案 ====================
             function checkAnswer(qKey) {
                 var a = answerMap.get(qKey);
                 if (!a || !a.answer) return 'noanswer';
-                var i = document.querySelector('.fill-blank-input[data-q="' + qKey + '"]'),
-                    ic = document.querySelector('.result-icon[data-q="' + qKey + '"]'),
-                    dp = document.querySelector('.answer-display[data-q="' + qKey + '"]');
+
+                var i = document.querySelector('.fill-blank-input[data-q="' + qKey + '"]');
+                var ic = document.querySelector('.result-icon[data-q="' + qKey + '"]');
+                var dp = document.querySelector('.answer-display[data-q="' + qKey + '"]');
                 if (!i) return 'noinput';
+
                 var u = i.value.trim();
                 a.checked = true;
-                var ok = false,
-                    nu = u.replace(/\s+/g, ' ').trim(),
-                    pa = a.answer.split('|').map(function(x) { return x.replace(/\s+/g, ' ').trim() });
+
+                var ok = false;
+                var nu = u.replace(/\s+/g, ' ').trim();
+                var pa = a.answer.split('|').map(function(x) { return x.replace(/\s+/g, ' ').trim(); });
+
                 for (var j = 0; j < pa.length; j++) {
-                    if (nu === pa[j] || nu.toLowerCase() === pa[j].toLowerCase() || nu.replace(/\s+/g, '')
-                        .toLowerCase() === pa[j].replace(/\s+/g, '').toLowerCase()) { ok = true; break }
+                    if (nu === pa[j] ||
+                        nu.toLowerCase() === pa[j].toLowerCase() ||
+                        nu.replace(/\s+/g, '').toLowerCase() === pa[j].replace(/\s+/g, '').toLowerCase()) {
+                        ok = true;
+                        break;
+                    }
                 }
-                if (!ok) { a.wrongCount = (a.wrongCount || 0) + 1;
+
+                if (!ok) {
+                    a.wrongCount = (a.wrongCount || 0) + 1;
                     a.lastWrongAnswer = u;
-                    saveWrongCounts(currentFileId) }
+                    saveWrongCounts(currentFileId);
+                }
+
                 answerMap.set(qKey, a);
-                if (ic) { ic.className = 'result-icon ' + (ok ? 'correct' : 'wrong');
-                    ic.textContent = ok ? '✓' : '✗' }
+
+                if (ic) {
+                    ic.className = 'result-icon ' + (ok ? 'correct' : 'wrong');
+                    ic.textContent = ok ? '✓' : '✗';
+                }
                 i.style.borderBottomColor = ok ? '#4caf50' : '#f44336';
                 i.style.color = ok ? '#4caf50' : '#f44336';
-                if (dp && !ok) { dp.textContent = '答案: ' + a.answer;
-                    dp.classList.add('show') }
+                if (dp && !ok) {
+                    dp.textContent = '答案: ' + a.answer;
+                    dp.classList.add('show');
+                }
+
                 if (currentFileId) saveToHistory();
-                return ok ? 'correct' : 'wrong'
+                return ok ? 'correct' : 'wrong';
             }
 
+            // ==================== 保存历史 ====================
             function saveToHistory() {
                 if (!currentFileId) return;
-                var h = getHistoryData(currentFileId),
-                    ans = {},
+                var h = getHistoryData(currentFileId);
+                var ans = {},
                     chk = {},
                     wa = {};
+
                 answerMap.forEach(function(a, k) {
                     var i = document.querySelector('.fill-blank-input[data-q="' + k + '"]');
                     if (i && i.value.trim()) ans[k] = i.value;
                     if (a.checked) chk[k] = true;
-                    if (a.lastWrongAnswer) wa[k] = a.lastWrongAnswer
+                    if (a.lastWrongAnswer) wa[k] = a.lastWrongAnswer;
                 });
+
                 h.fileName = document.title;
                 h.date = new Date().toISOString();
                 h.answers = ans;
                 h.checked = chk;
                 h.wrongAnswers = wa;
-                localStorage.setItem('quiz_' + currentFileId, JSON.stringify(h))
+                localStorage.setItem('quiz_' + currentFileId, JSON.stringify(h));
             }
 
-            function getHistoryData(fid) { var s = localStorage.getItem('quiz_' + fid); return s ? (JSON.parse(s) ||
-                {}) : { fileName: '', date: '', answers: {}, checked: {}, wrongAnswers: {} } }
+            function getHistoryData(fid) {
+                var s = localStorage.getItem('quiz_' + fid);
+                return s ? (JSON.parse(s) || {}) : { fileName: '', date: '', answers: {}, checked: {}, wrongAnswers: {} };
+            }
 
-            function getAllHistory() { var h = []; for (var i = 0; i < localStorage.length; i++) { var k = localStorage
-                    .key(i); if (k.startsWith('quiz_')) { try { var d = JSON.parse(localStorage.getItem(k));
-                        d.fileId = k.replace('quiz_', '');
-                        h.push(d) } catch (e) {} } } return h.sort(function(a, b) { return new Date(b.date) - new Date(
-                        a.date) }) }
+            function getAllHistory() {
+                var h = [];
+                for (var i = 0; i < localStorage.length; i++) {
+                    var k = localStorage.key(i);
+                    if (k.startsWith('quiz_')) {
+                        try {
+                            var d = JSON.parse(localStorage.getItem(k));
+                            d.fileId = k.replace('quiz_', '');
+                            h.push(d);
+                        } catch (e) {}
+                    }
+                }
+                return h.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+            }
 
-            function deleteHistory(fid) { localStorage.removeItem('quiz_' + fid);
-                localStorage.removeItem('wrong_' + fid) }
+            function deleteHistory(fid) {
+                localStorage.removeItem('quiz_' + fid);
+                localStorage.removeItem('wrong_' + fid);
+            }
 
             function restoreHistory(fid) {
                 var h = getHistoryData(fid);
                 Object.keys(h.answers).forEach(function(k) {
                     var i = document.querySelector('.fill-blank-input[data-q="' + k + '"]');
-                    if (i) { i.value = h.answers[k]; if (h.checked[k]) checkAnswerSilent(k, h.answers[k]) }
-                })
+                    if (i) {
+                        i.value = h.answers[k];
+                        if (h.checked[k]) checkAnswerSilent(k, h.answers[k]);
+                    }
+                });
             }
 
             function checkAnswerSilent(qKey, ua) {
                 var a = answerMap.get(qKey);
                 if (!a || !a.answer) return;
-                var i = document.querySelector('.fill-blank-input[data-q="' + qKey + '"]'),
-                    ic = document.querySelector('.result-icon[data-q="' + qKey + '"]'),
-                    dp = document.querySelector('.answer-display[data-q="' + qKey + '"]');
+
+                var i = document.querySelector('.fill-blank-input[data-q="' + qKey + '"]');
+                var ic = document.querySelector('.result-icon[data-q="' + qKey + '"]');
+                var dp = document.querySelector('.answer-display[data-q="' + qKey + '"]');
                 if (!i) return;
+
                 a.checked = true;
-                var ok = false,
-                    nu = ua.replace(/\s+/g, ' ').trim(),
-                    pa = a.answer.split('|').map(function(x) { return x.replace(/\s+/g, ' ').trim() });
+
+                var ok = false;
+                var nu = ua.replace(/\s+/g, ' ').trim();
+                var pa = a.answer.split('|').map(function(x) { return x.replace(/\s+/g, ' ').trim(); });
+
                 for (var j = 0; j < pa.length; j++) {
-                    if (nu === pa[j] || nu.toLowerCase() === pa[j].toLowerCase() || nu.replace(/\s+/g, '')
-                        .toLowerCase() === pa[j].replace(/\s+/g, '').toLowerCase()) { ok = true; break }
+                    if (nu === pa[j] ||
+                        nu.toLowerCase() === pa[j].toLowerCase() ||
+                        nu.replace(/\s+/g, '').toLowerCase() === pa[j].replace(/\s+/g, '').toLowerCase()) {
+                        ok = true;
+                        break;
+                    }
                 }
-                if (!ok) { a.wrongCount = (a.wrongCount || 0) + 1;
+
+                if (!ok) {
+                    a.wrongCount = (a.wrongCount || 0) + 1;
                     a.lastWrongAnswer = ua;
-                    saveWrongCounts(currentFileId) }
+                    saveWrongCounts(currentFileId);
+                }
+
                 answerMap.set(qKey, a);
-                if (ic) { ic.className = 'result-icon ' + (ok ? 'correct' : 'wrong');
-                    ic.textContent = ok ? '✓' : '✗' }
+
+                if (ic) {
+                    ic.className = 'result-icon ' + (ok ? 'correct' : 'wrong');
+                    ic.textContent = ok ? '✓' : '✗';
+                }
                 i.style.borderBottomColor = ok ? '#4caf50' : '#f44336';
                 i.style.color = ok ? '#4caf50' : '#f44336';
-                if (dp && !ok) { dp.textContent = '答案: ' + a.answer;
-                    dp.classList.add('show') }
+                if (dp && !ok) {
+                    dp.textContent = '答案: ' + a.answer;
+                    dp.classList.add('show');
+                }
             }
 
-            setInterval(function() { if (currentFileId && answerMap.size > 0) saveToHistory() }, 30000);
+            // 定时自动保存
+            setInterval(function() {
+                if (currentFileId && answerMap.size > 0) saveToHistory();
+            }, 30000);
 
+            // ==================== 批量操作 ====================
             window.checkAllAnswers = function() {
                 if (isCheckingAll) return;
                 isCheckingAll = true;
@@ -2003,212 +2766,346 @@
                     w = 0,
                     na = 0,
                     e = 0;
+
                 answerMap.forEach(function(a, k) {
                     t++;
-                    if (!a.answer) { na++; return }
+                    if (!a.answer) { na++; return; }
                     var i = document.querySelector('.fill-blank-input[data-q="' + k + '"]');
-                    if (!i || i.value.trim() === '') { e++; return }
+                    if (!i || i.value.trim() === '') { e++; return; }
                     if (checkAnswer(k) === 'correct') c++;
-                    else w++
+                    else w++;
                 });
+
                 if (currentFileId) saveToHistory();
                 alert('共' + t + '题\n已填' + (t - e - na) + '题\n正确' + c + '题\n错误' + w + '题');
-                isCheckingAll = false
+                isCheckingAll = false;
             };
 
             window.clearAllMarks = function() {
-                document.querySelectorAll('.result-icon').forEach(function(i) { i.className = 'result-icon';
-                    i.textContent = '' });
-                document.querySelectorAll('.answer-display').forEach(function(d) { d.classList.remove('show');
-                    d.textContent = '' });
-                document.querySelectorAll('.fill-blank-input').forEach(function(i) { i.style.borderBottomColor =
-                        '#667eea';
-                    i.style.color = 'inherit' });
-                answerMap.forEach(function(a, k) { a.checked = false;
-                    answerMap.set(k, a) });
-                if (currentFileId) saveToHistory()
+                document.querySelectorAll('.result-icon').forEach(function(i) {
+                    i.className = 'result-icon';
+                    i.textContent = '';
+                });
+                document.querySelectorAll('.answer-display').forEach(function(d) {
+                    d.classList.remove('show');
+                    d.textContent = '';
+                });
+                document.querySelectorAll('.fill-blank-input').forEach(function(i) {
+                    i.style.borderBottomColor = '#667eea';
+                    i.style.color = 'inherit';
+                });
+                answerMap.forEach(function(a, k) {
+                    a.checked = false;
+                    answerMap.set(k, a);
+                });
+                if (currentFileId) saveToHistory();
             };
 
             window.clearWrongAnswers = function() {
                 document.querySelectorAll('.fill-blank-input').forEach(function(i) {
-                    var q = i.dataset.q,
-                        ic = document.querySelector('.result-icon[data-q="' + q + '"]'),
-                        dp = document.querySelector('.answer-display[data-q="' + q + '"]');
+                    var q = i.dataset.q;
+                    var ic = document.querySelector('.result-icon[data-q="' + q + '"]');
+                    var dp = document.querySelector('.answer-display[data-q="' + q + '"]');
                     if (ic && ic.classList.contains('wrong')) {
                         i.value = '';
                         i.style.borderBottomColor = '#667eea';
                         i.style.color = 'inherit';
                         ic.className = 'result-icon';
                         ic.textContent = '';
-                        if (dp) { dp.classList.remove('show');
-                            dp.textContent = '' }
+                        if (dp) {
+                            dp.classList.remove('show');
+                            dp.textContent = '';
+                        }
                         var a = answerMap.get(q);
-                        if (a) { a.checked = false;
-                            answerMap.set(q, a) }
+                        if (a) {
+                            a.checked = false;
+                            answerMap.set(q, a);
+                        }
                     }
                 });
-                if (currentFileId) saveToHistory()
+                if (currentFileId) saveToHistory();
             };
 
             function resetAllAnswers() {
-                document.querySelectorAll('.fill-blank-input').forEach(function(i) { i.value = '';
+                document.querySelectorAll('.fill-blank-input').forEach(function(i) {
+                    i.value = '';
                     i.style.borderBottomColor = '#667eea';
-                    i.style.color = 'inherit' });
-                document.querySelectorAll('.result-icon').forEach(function(i) { i.className = 'result-icon';
-                    i.textContent = '' });
-                document.querySelectorAll('.answer-display').forEach(function(d) { d.classList.remove('show');
-                    d.textContent = '' });
-                answerMap.forEach(function(a, k) { a.checked = false;
-                    answerMap.set(k, a) });
-                if (currentFileId) saveToHistory()
+                    i.style.color = 'inherit';
+                });
+                document.querySelectorAll('.result-icon').forEach(function(i) {
+                    i.className = 'result-icon';
+                    i.textContent = '';
+                });
+                document.querySelectorAll('.answer-display').forEach(function(d) {
+                    d.classList.remove('show');
+                    d.textContent = '';
+                });
+                answerMap.forEach(function(a, k) {
+                    a.checked = false;
+                    answerMap.set(k, a);
+                });
+                if (currentFileId) saveToHistory();
             }
 
             function clearExerciseData() {
-                document.querySelectorAll('.fill-blank-input').forEach(function(i) { i.value = '';
+                document.querySelectorAll('.fill-blank-input').forEach(function(i) {
+                    i.value = '';
                     i.style.borderBottomColor = '#667eea';
-                    i.style.color = 'inherit' });
-                document.querySelectorAll('.result-icon').forEach(function(i) { i.className = 'result-icon';
-                    i.textContent = '' });
-                document.querySelectorAll('.answer-display').forEach(function(d) { d.classList.remove('show');
-                    d.textContent = '' });
-                answerMap.forEach(function(a, k) { a.checked = false;
+                    i.style.color = 'inherit';
+                });
+                document.querySelectorAll('.result-icon').forEach(function(i) {
+                    i.className = 'result-icon';
+                    i.textContent = '';
+                });
+                document.querySelectorAll('.answer-display').forEach(function(d) {
+                    d.classList.remove('show');
+                    d.textContent = '';
+                });
+                answerMap.forEach(function(a, k) {
+                    a.checked = false;
                     a.wrongCount = 0;
                     a.lastWrongAnswer = null;
-                    answerMap.set(k, a) });
-                if (currentFileId) { saveToHistory();
-                    clearWrongCounts(currentFileId) }
+                    answerMap.set(k, a);
+                });
+                if (currentFileId) {
+                    saveToHistory();
+                    clearWrongCounts(currentFileId);
+                }
             }
 
+            // ==================== 统计面板 ====================
             window.showStats = function() {
-                var t = answerMap.size,
-                    c = 0,
+                var t = answerMap.size;
+                var c = 0,
                     ok = 0,
                     na = 0;
+
                 answerMap.forEach(function(a, k) {
                     if (!a.answer) na++;
                     if (a.checked) {
                         c++;
                         var i = document.querySelector('.fill-blank-input[data-q="' + k + '"]');
                         if (i && a.answer) {
-                            var u = i.value.replace(/\s+/g, ' ').trim(),
-                                pa = a.answer.split('|').map(function(x) { return x.replace(/\s+/g, ' ')
-                                    .trim() });
-                            if (pa.some(function(x) { return u === x || u.toLowerCase() === x
-                                    .toLowerCase() || u.replace(/\s+/g, '').toLowerCase() === x
-                                    .replace(/\s+/g, '').toLowerCase() })) ok++
+                            var u = i.value.replace(/\s+/g, ' ').trim();
+                            var pa = a.answer.split('|').map(function(x) { return x.replace(/\s+/g, ' ').trim(); });
+                            if (pa.some(function(x) {
+                                    return u === x ||
+                                        u.toLowerCase() === x.toLowerCase() ||
+                                        u.replace(/\s+/g, '').toLowerCase() === x.replace(/\s+/g, '')
+                                        .toLowerCase();
+                                })) {
+                                ok++;
+                            }
                         }
                     }
                 });
+
                 document.getElementById('statsContent').innerHTML = basicSanitize(
                     '<div class="stat-item"><span>总题数</span><strong>' + t +
                     '</strong></div><div class="stat-item"><span>已检查</span><strong>' + c +
                     '</strong></div><div class="stat-item"><span>正确</span><strong style="color:#4caf50;">' + ok +
-                    '</strong></div><div class="stat-item"><span>错误</span><strong style="color:#f44336;">' + (c -
-                        ok) +
-                    '</strong></div><div class="stat-item"><span>未检查</span><strong style="color:#999;">' + (t -
-                        c) +
-                    '</strong></div><div class="stat-item"><span>无答案</span><strong style="color:#ff9800;">' +
-                    na + '</strong></div>'
+                    '</strong></div><div class="stat-item"><span>错误</span><strong style="color:#f44336;">' + (c - ok) +
+                    '</strong></div><div class="stat-item"><span>未检查</span><strong style="color:#999;">' + (t - c) +
+                    '</strong></div><div class="stat-item"><span>无答案</span><strong style="color:#ff9800;">' + na +
+                    '</strong></div>'
                 );
                 document.getElementById('statsPanel').classList.add('show');
-                document.getElementById('statsOverlay').classList.add('show')
+                document.getElementById('statsOverlay').classList.add('show');
             };
 
             window.hideStats = function() {
                 document.getElementById('statsPanel').classList.remove('show');
-                document.getElementById('statsOverlay').classList.remove('show')
+                document.getElementById('statsOverlay').classList.remove('show');
             };
 
+            // ==================== 历史记录面板 ====================
             window.showHistory = function() {
-                var hs = getAllHistory(),
-                    ct = document.getElementById('historyContent');
-                if (hs.length === 0) ct.innerHTML = '<div class="history-empty">暂无历史记录</div>';
-                else ct.innerHTML = hs.map(function(h) {
-                    var d = new Date(h.date);
-                    return '<div class="history-item"><div class="history-item-info" onclick="loadHistoryFile(\'' +
-                        h.fileId + '\')"><div class="history-item-name">' + (h.fileName || '未命名') +
-                        '</div><div class="history-item-meta">' + (d.getMonth() + 1) + '/' + d.getDate() +
-                        ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes())
-                        .padStart(2, '0') + ' · ' + Object.keys(h.answers || {}).length +
-                        '题已填</div></div><button class="history-item-detail" onclick="event.stopPropagation();showWrongDetail(\'' +
-                        h.fileId + '\')">详情</button><button class="history-item-delete" onclick="event.stopPropagation();deleteHistoryItem(\'' +
-                        h.fileId + '\')">删除</button></div>'
-                }).join('');
+                var hs = getAllHistory();
+                var ct = document.getElementById('historyContent');
+
+                if (hs.length === 0) {
+                    ct.innerHTML = '<div class="history-empty">暂无历史记录</div>';
+                } else {
+                    ct.innerHTML = hs.map(function(h) {
+                        var d = new Date(h.date);
+                        return '<div class="history-item">' +
+                            '<div class="history-item-info" onclick="loadHistoryFile(\'' + h.fileId +
+                            '\')">' +
+                            '<div class="history-item-name">' + (h.fileName || '未命名') + '</div>' +
+                            '<div class="history-item-meta">' +
+                            (d.getMonth() + 1) + '/' + d.getDate() +
+                            ' ' + String(d.getHours()).padStart(2, '0') +
+                            ':' + String(d.getMinutes()).padStart(2, '0') +
+                            ' · ' + Object.keys(h.answers || {}).length + '题已填' +
+                            '</div></div>' +
+                            '<button class="history-item-detail" onclick="event.stopPropagation();showWrongDetail(\'' +
+                            h.fileId + '\')">详情</button>' +
+                            '<button class="history-item-delete" onclick="event.stopPropagation();deleteHistoryItem(\'' +
+                            h.fileId + '\')">删除</button>' +
+                            '</div>';
+                    }).join('');
+                }
+
                 document.getElementById('historyPanel').classList.add('show');
-                document.getElementById('historyOverlay').classList.add('show')
+                document.getElementById('historyOverlay').classList.add('show');
             };
 
             window.hideHistory = function() {
                 document.getElementById('historyPanel').classList.remove('show');
-                document.getElementById('historyOverlay').classList.remove('show')
+                document.getElementById('historyOverlay').classList.remove('show');
             };
 
-            window.deleteHistoryItem = function(fid) { deleteHistory(fid);
-                showHistory() };
+            window.deleteHistoryItem = function(fid) {
+                deleteHistory(fid);
+                showHistory();
+            };
 
-            window.loadHistoryFile = function(fid) { currentFileId = fid;
+            window.loadHistoryFile = function(fid) {
+                currentFileId = fid;
                 restoreHistory(fid);
-                hideHistory() };
+                hideHistory();
+            };
 
+            // ==================== 错误详情面板 ====================
             window.showWrongDetail = function(fid) {
-                var ws = loadWrongCounts(fid),
-                    h = getHistoryData(fid),
-                    wa = h.wrongAnswers || {},
-                    ht = '';
-                var es = Object.entries(ws).sort(function(a, b) { return a[0].localeCompare(b[0]) });
-                if (es.length === 0) ht = '<div style="text-align:center;color:#999;padding:20px;">暂无错误记录</div>';
-                else es.forEach(function(e) {
-                    var q = e[0],
-                        wc = e[1],
-                        qn = q.replace('Q', ''),
-                        ca = '',
-                        wr = wa[q] || '';
-                    if (currentFileId === fid && answerMap.has(q)) ca = answerMap.get(q).answer;
-                    if (!ca) {
-                        var sa = localStorage.getItem('answers_' + fid);
-                        if (sa) { try { var am = JSON.parse(sa);
-                                ca = am[q] || '' } catch (ex) {} }
-                    }
-                    ht += '<div class="wrong-detail-item"><div class="q-label">Q' + qn + '（错误 ' + wc +
-                        ' 次）</div><div>正确答案：<span class="correct-ans">' + (ca || '未知') +
-                        '</span></div>' + (wr ? '<div>错误回答：<span class="wrong-ans">' + escHtml(wr) +
-                        '</span></div>' : '') + '</div>'
-                });
+                var ws = loadWrongCounts(fid);
+                var h = getHistoryData(fid);
+                var wa = h.wrongAnswers || {};
+                var ht = '';
+                var es = Object.entries(ws).sort(function(a, b) { return a[0].localeCompare(b[0]); });
+
+                if (es.length === 0) {
+                    ht = '<div style="text-align:center;color:#999;padding:20px;">暂无错误记录</div>';
+                } else {
+                    es.forEach(function(e) {
+                        var q = e[0];
+                        var wc = e[1];
+                        var qn = q.replace('Q', '');
+                        var ca = '';
+                        var wr = wa[q] || '';
+
+                        if (currentFileId === fid && answerMap.has(q)) {
+                            ca = answerMap.get(q).answer;
+                        }
+                        if (!ca) {
+                            var sa = localStorage.getItem('answers_' + fid);
+                            if (sa) {
+                                try {
+                                    var am = JSON.parse(sa);
+                                    ca = am[q] || '';
+                                } catch (ex) {}
+                            }
+                        }
+
+                        ht += '<div class="wrong-detail-item">' +
+                            '<div class="q-label">Q' + qn + '（错误 ' + wc + ' 次）</div>' +
+                            '<div>正确答案：<span class="correct-ans">' + (ca || '未知') + '</span></div>' +
+                            (wr ? '<div>错误回答：<span class="wrong-ans">' + escHtml(wr) + '</span></div>' :
+                                '') +
+                            '</div>';
+                    });
+                }
+
                 document.getElementById('wrongDetailContent').innerHTML = basicSanitize(ht);
                 document.getElementById('wrongDetailPanel').classList.add('show');
-                document.getElementById('wrongDetailOverlay').classList.add('show')
+                document.getElementById('wrongDetailOverlay').classList.add('show');
             };
 
             window.hideWrongDetail = function() {
                 document.getElementById('wrongDetailPanel').classList.remove('show');
-                document.getElementById('wrongDetailOverlay').classList.remove('show')
+                document.getElementById('wrongDetailOverlay').classList.remove('show');
             };
 
+            // ==================== 保存答案映射 ====================
             function saveAnswersMap(fid) {
                 var a = {};
-                answerMap.forEach(function(d, k) { if (d.answer) a[k] = d.answer });
-                localStorage.setItem('answers_' + fid, JSON.stringify(a))
+                answerMap.forEach(function(d, k) {
+                    if (d.answer) a[k] = d.answer;
+                });
+                localStorage.setItem('answers_' + fid, JSON.stringify(a));
             }
-            var origSave = saveToHistory;
-            saveToHistory = function() { origSave(); if (currentFileId) saveAnswersMap(currentFileId) };
 
+            var origSave = saveToHistory;
+            saveToHistory = function() {
+                origSave();
+                if (currentFileId) saveAnswersMap(currentFileId);
+            };
+
+            // ==================== 使用说明 ====================
             window.showGuide = function() {
-                document.getElementById('guideContent').innerHTML = basicSanitize(
-                    '<h2>广播功能</h2><p><b>📡 广播题目：</b>输入口令后快速循环广播，显示已接收次数。</p><p><b>📥 接收广播：</b>输入口令后持续监听，每1秒尝试接收一次，收到文件后自动停止接收。</p>'
-                    );
+                var content = `
+                    <h2>📚 快速入门</h2>
+                    <div class="step">
+                        <strong>1. 打开文件</strong>
+                        <p>点击顶部 <code>文件 ▾</code> → <code>打开文件</code>，选择 <code>.docx</code>、<code>.xlsx</code> 或 <code>.txt</code> 格式的题目文件。</p>
+                        <p>文件中的 <code>Q1[提示]</code> 会自动转换为填空题输入框。</p>
+                    </div>
+                    <div class="step">
+                        <strong>2. 答题</strong>
+                        <p>在输入框中填写答案，点击 <button style="background:#667eea;color:white;border:none;border-radius:8px;padding:0 6px;font-size:10px;cursor:default;">检查</button> 按钮验证单个题目。</p>
+                        <p>点击 <code>答题 ▾</code> → <code>全部检查</code> 可一次性批改所有题目。</p>
+                    </div>
+                    <div class="step">
+                        <strong>3. 查看结果</strong>
+                        <p>正确显示 <span style="color:#4caf50;">✓</span>，错误显示 <span style="color:#f44336;">✗</span> 并显示正确答案。</p>
+                        <p>点击 <code>答题 ▾</code> → <code>统计</code> 查看答题概况。</p>
+                    </div>
+
+                    <h2>📡 广播功能</h2>
+                    <div class="step">
+                        <strong>📤 广播题目</strong>
+                        <p>点击 <code>文件 ▾</code> → <code>广播题目</code>，输入口令后开始广播当前文件。</p>
+                        <p>广播会持续循环发送，直到你点击 <code>终止广播</code>。</p>
+                    </div>
+                    <div class="step">
+                        <strong>📥 接收广播</strong>
+                        <p>点击 <code>文件 ▾</code> → <code>接收广播</code>，输入相同的口令即可接收文件。</p>
+                        <p>收到文件后会自动加载，并标记为"接收的文件"。</p>
+                        <div class="warning">
+                            <strong>⚠️ 安全提醒：</strong> 接收广播文件后下载时会弹出安全确认弹窗，需阅读提示并勾选确认后方可下载。
+                        </div>
+                    </div>
+
+                    <h2>📜 历史记录</h2>
+                    <div class="step">
+                        <p>点击 <code>文件 ▾</code> → <code>历史记录</code> 可查看所有答题记录。</p>
+                        <p>点击记录可恢复当时的答题状态，点击 <code>详情</code> 可查看错题统计。</p>
+                    </div>
+
+                    <h2>🔍 其他功能</h2>
+                    <ul>
+                        <li><strong>缩放：</strong> 使用右上角的 <code>+</code> 和 <code>−</code> 按钮，或 <kbd>Ctrl</kbd>+滚轮 缩放文档。</li>
+                        <li><strong>拖拽：</strong> 在文档上拖拽可移动视图。</li>
+                        <li><strong>自定义键盘：</strong> 在手机/平板上，点击输入框会自动弹出优化后的虚拟键盘（支持数字和英文）。</li>
+                        <li><strong>下载：</strong> 点击 <code>文件 ▾</code> → <code>下载文件</code> 可导出当前文件（接收的文件需先通过安全确认）。</li>
+                    </ul>
+
+                    <div class="note">
+                        <strong>💡 提示：</strong> 所有答题记录和错题统计都会自动保存在浏览器本地，关闭页面后重新打开仍然可以恢复。
+                    </div>
+                `;
+
+                document.getElementById('guideContent').innerHTML = basicSanitize(content);
                 document.getElementById('guidePanel').classList.add('show');
-                document.getElementById('guideOverlay').classList.add('show')
+                document.getElementById('guideOverlay').classList.add('show');
             };
 
             window.hideGuide = function() {
                 document.getElementById('guidePanel').classList.remove('show');
-                document.getElementById('guideOverlay').classList.remove('show')
+                document.getElementById('guideOverlay').classList.remove('show');
             };
 
+            // ==================== 初始化 ====================
             updateTransform();
             updateZoomDisplay();
+
             var urlFile = getUrlParam('file');
-            if (urlFile) { setTimeout(function() { loadFromUrl(urlFile) }, 500) }
+            if (urlFile) {
+                setTimeout(function() {
+                    loadFromUrl(urlFile);
+                }, 500);
+            }
+
         })();
     </script>
 </body>
