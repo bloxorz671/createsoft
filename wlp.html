@@ -27,7 +27,6 @@
         .zoom-text{font-size:10px;color:#666;min-width:32px;text-align:center;font-weight:500}
         .broadcast-bar{position:fixed;top:0;left:0;right:0;background:#ff9800;color:white;padding:4px 10px;font-size:11px;text-align:center;z-index:101;display:none;font-weight:500}
         .broadcast-bar.show{display:block}.broadcast-bar.receiving{background:#2196f3}
-        .broadcast-bar .stop-btn{background:rgba(255,255,255,0.3);color:white;border:1px solid rgba(255,255,255,0.5);padding:2px 8px;border-radius:10px;font-size:10px;cursor:pointer;margin-left:8px}
         .viewport{position:fixed;top:0;left:0;right:0;bottom:0;overflow:hidden;background:#e8e8e8}
         .viewport.interactive{touch-action:none}
         .doc-stage{position:absolute;top:0;left:0;transform-origin:0 0;transition:none}
@@ -93,6 +92,7 @@
         .guide-content .step{background:#f5f5f5;padding:10px 16px;border-radius:8px;margin:8px 0}.guide-content .step strong{color:#667eea}
         .empty-state{text-align:center;padding:50px 16px;color:#999}.empty-state .icon{font-size:50px;margin-bottom:12px}
         .empty-state .btn-open{display:inline-block;padding:12px 30px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;border-radius:22px;font-size:15px;font-weight:500;cursor:pointer}
+        .empty-state .btn-receive-big{display:inline-block;padding:12px 30px;background:#2196f3;color:white;border:none;border-radius:22px;font-size:15px;font-weight:500;cursor:pointer;margin-top:10px}
         @media(min-width:768px){.custom-keyboard{display:none!important}}
     </style>
 </head>
@@ -106,7 +106,7 @@
         </div>
         <div class="header-right"><div class="zoom-controls"><button class="zoom-btn" id="btnZoomOut" onclick="zoomOut()" disabled>−</button><span class="zoom-text" id="zoomLevel">100%</span><button class="zoom-btn" id="btnZoomIn" onclick="zoomIn()" disabled>+</button></div></div>
     </div>
-    <div class="viewport" id="viewport"><div class="doc-stage" id="docStage"><div class="doc-viewer" id="docViewer"><div class="empty-state"><div class="icon">📃</div><p>选择文件开始练习</p><button class="btn-open" onclick="openFileDialog()">打开文件</button><p>支持 .docx / .xlsx / .txt</p></div></div></div></div>
+    <div class="viewport" id="viewport"><div class="doc-stage" id="docStage"><div class="doc-viewer" id="docViewer"><div class="empty-state"><div class="icon">📃</div><p>选择文件开始练习</p><button class="btn-open" onclick="openFileDialog()">打开文件</button><button class="btn-receive-big" onclick="startReceive()">📥 接收广播文件</button><p style="margin-top:8px;font-size:11px">支持 .docx / .xlsx / .txt</p></div></div></div></div>
     <div class="custom-keyboard" id="customKeyboard"></div>
     <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><p id="confirmMsg"></p><div id="confirmInput" style="display:none"><input type="text" id="confirmInputField" placeholder="请输入口令"></div><div class="btns"><button class="btn-no" id="btnConfirmNo">取消</button><button class="btn-yes" id="btnConfirmYes">确定</button></div></div></div>
     <div class="panel-overlay" id="guideOverlay" onclick="hideGuide()"></div><div class="panel" id="guidePanel" style="max-width:680px;"><h3>使用说明</h3><div class="guide-content" id="guideContent"></div><button class="panel-close" onclick="hideGuide()">关闭</button></div>
@@ -118,7 +118,7 @@
     <script>
     (function(){
         let answerMap=new Map(),currentFileId=null,currentDocSize=null,activeInput=null,isShifted=false,isSymbolPage=false,docLoaded=false,dynamicMinScale=0.5,confirmYesCallback=null,deleteRepeatTimer=null,deleteRepeatInterval=null,noIndividualCheck=false,isCheckingAll=false;
-        let broadcastAbort=null,broadcastToken='',isBroadcasting=false,broadcastCount=0;
+        let broadcastAbort=null,broadcastToken='',isBroadcasting=false,broadcastCount=0,isReceiving=false;
         const isTouchDevice='ontouchstart' in window||navigator.maxTouchPoints>0;
         function vibrate(ms){if(navigator.vibrate)navigator.vibrate(ms||6)}
         const PAGE_SIZES={'A4':{width:210,height:297},'A4横向':{width:297,height:210},'A4横':{width:297,height:210},'A3':{width:297,height:420},'A3横向':{width:420,height:297},'A3横':{width:420,height:297},'A5':{width:148,height:210},'A5横向':{width:210,height:148},'A5横':{width:210,height:148},'B4':{width:257,height:364},'B5':{width:182,height:257},'letter':{width:215.9,height:279.4},'legal':{width:215.9,height:355.6}};
@@ -164,6 +164,13 @@
             document.getElementById('btnReceive').style.display='';
         };
 
+        window.stopReceive=function(){
+            if(broadcastAbort){broadcastAbort.abort();broadcastAbort=null}
+            isReceiving=false;hideBroadcastBar();
+            document.getElementById('btnReceive').textContent='📥 接收广播';
+            document.getElementById('btnBroadcast').style.display='';
+        };
+
         window.startBroadcast=function(){
             if(!currentFileId){alert('请先打开一个文件');return}
             if(isBroadcasting){stopBroadcast();return}
@@ -193,7 +200,10 @@
         }
 
         window.startReceive=function(){
-            showConfirm('请输入接收口令：',function(token){if(!token){alert('请输入口令');return}doReceive(token);},true,'btn-rc');
+            showConfirm('请输入接收口令：',function(token){
+                if(!token){alert('请输入口令');return}
+                doReceive(token);
+            },true,'btn-rc');
         };
 
         async function tryLoadWithFallback(blob,originalName){
@@ -206,20 +216,22 @@
 
         async function doReceive(token){
             if(broadcastAbort){broadcastAbort.abort();broadcastAbort=null}
-            broadcastAbort=new AbortController();broadcastToken=token;
-            updateBroadcastBar('📥 等待接收广播: '+token+' ...','receiving');
+            broadcastAbort=new AbortController();broadcastToken=token;isReceiving=true;
+            updateBroadcastBar('📥 正在接收广播: '+token+' ...','receiving');
             document.getElementById('btnReceive').textContent='⏹ 停止接收';
             document.getElementById('btnBroadcast').style.display='none';
-            var retryCount=0;
-            while(true){
-                if(broadcastAbort.signal.aborted)break;
-                try{var resp=await fetch('https://ppng.io/'+token,{method:'GET',signal:broadcastAbort.signal});
-                    if(!resp.ok){retryCount++;updateBroadcastBar('📥 等待中... (重试'+retryCount+'次)','receiving');await new Promise(r=>setTimeout(r,2000));continue}
+            while(isReceiving&&!broadcastAbort.signal.aborted){
+                try{
+                    var resp=await fetch('https://ppng.io/'+token,{method:'GET',signal:broadcastAbort.signal});
+                    if(!resp.ok){updateBroadcastBar('📥 等待广播: '+token+' ...','receiving');await new Promise(r=>setTimeout(r,1000));continue}
                     var cd=resp.headers.get('Content-Disposition')||'';var fn='received.docx';var m=cd.match(/filename="?([^"]+)"?/);if(m)fn=m[1];
-                    updateBroadcastBar('📥 正在下载: '+fn+' ...','receiving');var blob=await resp.blob();await tryLoadWithFallback(blob,fn);hideBroadcastBar();break;
-                }catch(err){if(err.name==='AbortError'){hideBroadcastBar();break}retryCount++;updateBroadcastBar('📥 连接失败，2秒后重试... ('+retryCount+'次)','receiving');await new Promise(r=>setTimeout(r,2000));}
+                    updateBroadcastBar('📥 正在下载: '+fn+' ...','receiving');var blob=await resp.blob();await tryLoadWithFallback(blob,fn);
+                    updateBroadcastBar('✅ 接收完成，继续监听中...','receiving');
+                    await new Promise(r=>setTimeout(r,1000));
+                }catch(err){if(err.name==='AbortError'){hideBroadcastBar();break}
+                    updateBroadcastBar('📥 连接失败，1秒后重试...','receiving');await new Promise(r=>setTimeout(r,1000));}
             }
-            broadcastAbort=null;document.getElementById('btnReceive').textContent='📥 接收广播';document.getElementById('btnBroadcast').style.display='';setTimeout(hideBroadcastBar,3000);
+            stopReceive();
         }
 
         window.addEventListener('beforeunload',function(){if(broadcastAbort)broadcastAbort.abort();if(currentFileId)saveToHistory()});
@@ -344,7 +356,7 @@
         function saveAnswersMap(fid){var a={};answerMap.forEach(function(d,k){if(d.answer)a[k]=d.answer});localStorage.setItem('answers_'+fid,JSON.stringify(a))}
         var origSave=saveToHistory;saveToHistory=function(){origSave();if(currentFileId)saveAnswersMap(currentFileId)};
 
-        window.showGuide=function(){document.getElementById('guideContent').innerHTML='<h2>一、这是什么？</h2><p>把Word/Excel/文本变成<strong>自动批改的填空练习</strong>。</p><div class="note">手机电脑都能用。</div><h2>二、广播功能</h2><p><b>📡 广播题目：</b>输入口令后快速循环广播，显示已接收次数。</p><p><b>📥 接收广播：</b>输入口令自动接收，打不开时自动尝试其他格式。</p>';document.getElementById('guidePanel').classList.add('show');document.getElementById('guideOverlay').classList.add('show')};
+        window.showGuide=function(){document.getElementById('guideContent').innerHTML='<h2>广播功能</h2><p><b>📡 广播题目：</b>输入口令后快速循环广播，显示已接收次数。</p><p><b>📥 接收广播：</b>输入口令后持续监听，每1秒尝试接收一次，点击停止接收即可终止。</p>';document.getElementById('guidePanel').classList.add('show');document.getElementById('guideOverlay').classList.add('show')};
         window.hideGuide=function(){document.getElementById('guidePanel').classList.remove('show');document.getElementById('guideOverlay').classList.remove('show')};
 
         updateTransform();updateZoomDisplay();
