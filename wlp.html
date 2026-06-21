@@ -1291,7 +1291,8 @@
 
     document.getElementById('confirmInput').style.display = 'none';
 
-    msgP.innerHTML = basicSanitize(
+    // 先设置内容
+    msgP.innerHTML = 
         '<div style="text-align:left;font-size:13px;line-height:1.7;">' +
         '<div style="text-align:center;font-size:18px;margin-bottom:8px;">⚠️ 安全提示</div>' +
         '<p>本文件由发送端上传，同一口令下可能存在多人传输导致文件串台。</p>' +
@@ -1301,58 +1302,74 @@
         '<div class="security-checkbox-wrapper" id="securityCheckboxWrapper">' +
         '<input type="checkbox" id="securityCheckbox">' +
         '<label for="securityCheckbox">我已阅读并确认下载</label>' +
-        '</div>'
-    );
-
-    var checkbox = document.getElementById('securityCheckbox');
+        '</div>';
 
     // 初始状态：按钮禁用
     yesBtn.className = 'btn-yes btn-yes-disabled';
     yesBtn.textContent = '确认下载';
     yesBtn.disabled = true;
-    checkbox.checked = false;
 
     noBtn.textContent = '取消下载';
     noBtn.className = 'btn-no';
 
     overlay.classList.add('show');
 
-    // 监听复选框变化
-    checkbox.addEventListener('change', function() {
-        if (checkbox.checked) {
-            yesBtn.disabled = false;
-            yesBtn.className = 'btn-yes btn-yes-ready';
-        } else {
-            yesBtn.disabled = true;
-            yesBtn.className = 'btn-yes btn-yes-disabled';
-        }
-    });
+    // 重要：等 DOM 更新后再绑定事件
+    setTimeout(function() {
+        var checkbox = document.getElementById('securityCheckbox');
+        var wrapper = document.getElementById('securityCheckboxWrapper');
 
-    // 点击整个wrapper也可以切换复选框
-    var wrapper = document.getElementById('securityCheckboxWrapper');
-    wrapper.addEventListener('click', function(e) {
-        if (e.target.tagName !== 'INPUT') {
-            checkbox.checked = !checkbox.checked;
-            var event = new Event('change');
-            checkbox.dispatchEvent(event);
-        }
-    });
+        // 确保复选框未选中
+        checkbox.checked = false;
+        yesBtn.disabled = true;
+        yesBtn.className = 'btn-yes btn-yes-disabled';
 
-    // 替换按钮，清除旧的事件监听
-    var newYesBtn = yesBtn.cloneNode(true);
-    yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
-    var newNoBtn = noBtn.cloneNode(true);
-    noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+        // 移除旧事件（通过克隆）
+        var newCheckbox = checkbox.cloneNode(true);
+        checkbox.parentNode.replaceChild(newCheckbox, checkbox);
+        checkbox = newCheckbox;
 
-    newYesBtn.addEventListener('click', function() {
-        if (newYesBtn.disabled) return;
-        if (!checkbox.checked) {
-            alert('请先勾选"我已阅读并确认下载"');
-            return;
-        }
-        overlay.classList.remove('show');
-        if (callback) callback(true);
-    });
+        // 监听复选框变化
+        checkbox.onchange = function() {
+            if (checkbox.checked) {
+                yesBtn.disabled = false;
+                yesBtn.className = 'btn-yes btn-yes-ready';
+            } else {
+                yesBtn.disabled = true;
+                yesBtn.className = 'btn-yes btn-yes-disabled';
+            }
+        };
+
+        // 点击 wrapper 也可以切换
+        wrapper.onclick = function(e) {
+            if (e.target.tagName !== 'INPUT') {
+                checkbox.checked = !checkbox.checked;
+                checkbox.onchange();
+            }
+        };
+
+        // 替换按钮
+        var newYesBtn = yesBtn.cloneNode(true);
+        yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+        var newNoBtn = noBtn.cloneNode(true);
+        noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+
+        newYesBtn.onclick = function() {
+            if (newYesBtn.disabled) return;
+            if (!checkbox.checked) {
+                alert('请先勾选"我已阅读并确认下载"');
+                return;
+            }
+            overlay.classList.remove('show');
+            if (callback) callback(true);
+        };
+
+        newNoBtn.onclick = function() {
+            overlay.classList.remove('show');
+            if (callback) callback(false);
+        };
+    }, 50);
+}
 
     newNoBtn.addEventListener('click', function() {
         overlay.classList.remove('show');
