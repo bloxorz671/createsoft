@@ -1,1 +1,2215 @@
-<h1>目前系统出现严重安全漏洞，仍在修复中，请稍后再打开<h1>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <title>交互式填空题系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.0/dist/docx-preview.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: #f0f0f0;
+            overscroll-behavior: none;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 6px 10px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .header-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-btn,
+        .btn-plain {
+            padding: 7px 12px;
+            border: none;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            background: #f5f5f5;
+            color: #333;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .dropdown-btn:active,
+        .btn-plain:active {
+            background: #e0e0e0;
+        }
+        .dropdown-btn .arrow {
+            font-size: 9px;
+            margin-left: 2px;
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 4px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            min-width: 140px;
+            padding: 5px;
+            display: none;
+            z-index: 150;
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
+        .dropdown-menu button {
+            display: block;
+            width: 100%;
+            padding: 8px 12px;
+            border: none;
+            background: none;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: left;
+            border-radius: 6px;
+            color: #333;
+        }
+        .dropdown-menu button:hover {
+            background: #f0f0f0;
+        }
+        .dropdown-menu .divider {
+            height: 1px;
+            background: #eee;
+            margin: 3px 0;
+        }
+        .btn-broadcast {
+            background: #ff9800 !important;
+            color: white !important;
+        }
+        .btn-receive {
+            background: #2196f3 !important;
+            color: white !important;
+        }
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            background: #f5f5f5;
+            border-radius: 16px;
+            padding: 2px;
+        }
+        .zoom-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        }
+        .zoom-btn:active {
+            background: #e0e0e0;
+        }
+        .zoom-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .zoom-text {
+            font-size: 10px;
+            color: #666;
+            min-width: 32px;
+            text-align: center;
+            font-weight: 500;
+        }
+        .broadcast-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ff9800;
+            color: white;
+            padding: 4px 10px;
+            font-size: 11px;
+            text-align: center;
+            z-index: 101;
+            display: none;
+            font-weight: 500;
+        }
+        .broadcast-bar.show {
+            display: block;
+        }
+        .broadcast-bar.receiving {
+            background: #2196f3;
+        }
+        .viewport {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            background: #e8e8e8;
+        }
+        .viewport.interactive {
+            touch-action: none;
+        }
+        .doc-stage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
+            transition: none;
+        }
+        .doc-viewer {
+            background: white;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+            position: relative;
+        }
+        .docx-wrapper {
+            background: white;
+        }
+        .docx-wrapper,
+        .docx-wrapper * {
+            page-break-before: auto !important;
+            page-break-after: auto !important;
+            break-before: auto !important;
+            break-after: auto !important;
+        }
+        .docx-wrapper section,
+        .docx-wrapper .docx-page,
+        .docx-wrapper>div {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+        }
+        .txt-content {
+            padding: 24px;
+            font-family: 'Courier New', 'Microsoft YaHei', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .xlsx-content {
+            padding: 16px;
+            overflow-x: auto;
+        }
+        .xlsx-content table {
+            border-collapse: collapse;
+            width: auto;
+            margin: 0 auto;
+            font-size: 13px;
+        }
+        .xlsx-content td,
+        .xlsx-content th {
+            border: 1px solid #ccc;
+            padding: 5px 10px;
+            min-width: 50px;
+        }
+        .fill-blank-wrapper {
+            display: inline;
+        }
+        .fill-blank-input {
+            display: inline-block;
+            border: none;
+            border-bottom: 2px solid #667eea;
+            padding: 1px 3px;
+            font-size: inherit;
+            font-family: inherit;
+            outline: none;
+            background: rgba(102, 126, 234, 0.03);
+            min-width: 50px;
+            margin: 0 2px;
+            vertical-align: baseline;
+            color: inherit;
+            caret-color: #667eea;
+            cursor: text;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        .fill-blank-input:focus {
+            border-bottom-color: #764ba2;
+            background: rgba(102, 126, 234, 0.08);
+        }
+        .fill-blank-input.native-input {
+            caret-color: auto;
+            border-bottom: 2px solid #e91e63;
+        }
+        .check-btn {
+            display: inline-block;
+            margin-left: 2px;
+            padding: 1px 5px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 10px;
+            cursor: pointer;
+            vertical-align: baseline;
+            white-space: nowrap;
+        }
+        .check-btn:active {
+            background: #764ba2;
+        }
+        .inline-check-btn {
+            display: inline-block;
+            padding: 6px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+        .inline-check-btn:active {
+            background: #764ba2;
+        }
+        .inline-check-btn.centered {
+            display: block;
+            margin: 16px auto;
+            text-align: center;
+            width: fit-content;
+            max-width: 90%;
+        }
+        .result-icon {
+            display: inline-block;
+            margin-left: 2px;
+            font-size: 12px;
+            vertical-align: baseline;
+        }
+        .result-icon.correct {
+            color: #4caf50;
+        }
+        .result-icon.wrong {
+            color: #f44336;
+        }
+        .answer-display {
+            display: none;
+            margin-left: 2px;
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        .answer-display.show {
+            display: inline;
+        }
+        .custom-keyboard {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #c8cad0;
+            padding: 8px 6px;
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+            z-index: 200;
+            display: none;
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.18);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        .custom-keyboard.show {
+            display: block;
+        }
+        .kb-row {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+        .kb-key {
+            flex: 1;
+            height: 46px;
+            max-width: 48px;
+            min-width: 30px;
+            background: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            color: #222;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            transition: background 0.03s, transform 0.03s;
+        }
+        .kb-key:active,
+        .kb-key.pressed {
+            background: #a0a5ae !important;
+            transform: scale(0.93);
+        }
+        .kb-key.space {
+            flex: 3;
+            max-width: none;
+        }
+        .kb-key.done {
+            background: #4a6cf7;
+            color: #fff;
+            font-weight: bold;
+            font-size: 14px;
+            max-width: 64px;
+        }
+        .kb-key.delete {
+            background: #dcdfe5;
+            font-size: 17px;
+            max-width: 54px;
+        }
+        .kb-key.shift {
+            background: #dcdfe5;
+            font-size: 13px;
+            max-width: 46px;
+        }
+        .kb-key.shift.active {
+            background: #4a6cf7;
+            color: #fff;
+        }
+        .kb-key.num-switch,
+        .kb-key.symbol {
+            background: #dcdfe5;
+            font-size: 13px;
+        }
+        @media (orientation:landscape) {
+            .custom-keyboard {
+                padding: 4px 10px;
+            }
+            .kb-row {
+                gap: 5px;
+                margin-bottom: 4px;
+            }
+            .kb-key {
+                height: 34px;
+                font-size: 14px;
+                max-width: 50px;
+                min-width: 28px;
+            }
+        }
+        @media (max-width:380px) and (orientation:portrait) {
+            .custom-keyboard {
+                padding: 6px 4px;
+            }
+            .kb-row {
+                gap: 4px;
+                margin-bottom: 4px;
+            }
+            .kb-key {
+                height: 40px;
+                font-size: 14px;
+                max-width: 40px;
+                min-width: 28px;
+            }
+        }
+        .confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .confirm-overlay.show {
+            display: flex;
+        }
+        .confirm-box {
+            background: white;
+            padding: 24px 20px;
+            border-radius: 14px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            min-width: 250px;
+            max-width: 360px;
+            text-align: center;
+        }
+        .confirm-box p {
+            margin: 0 0 18px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .confirm-box input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            text-align: center;
+            outline: none;
+        }
+        .confirm-box input:focus {
+            border-color: #667eea;
+        }
+        .confirm-box .btns {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .confirm-box .btns button {
+            padding: 9px 24px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .confirm-box .btn-no {
+            background: #e0e0e0;
+            color: #555;
+        }
+        .confirm-box .btn-yes {
+            background: #e91e63;
+            color: white;
+        }
+        .confirm-box .btn-bc {
+            background: #ff9800;
+            color: white;
+        }
+        .confirm-box .btn-rc {
+            background: #2196f3;
+            color: white;
+        }
+        .panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 999;
+            display: none;
+        }
+        .panel-overlay.show {
+            display: block;
+        }
+        .panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 22px;
+            border-radius: 14px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            min-width: 260px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .panel.show {
+            display: block;
+        }
+        .stat-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        .panel-close {
+            margin-top: 10px;
+            width: 100%;
+            padding: 9px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .history-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            gap: 5px;
+        }
+        .history-item-info {
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
+        }
+        .history-item-name {
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .history-item-meta {
+            font-size: 10px;
+            color: #999;
+        }
+        .history-item-delete {
+            padding: 3px 7px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 10px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .history-item-detail {
+            padding: 3px 7px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 10px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .guide-content {
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .guide-content h2 {
+            margin: 24px 0 12px;
+            color: #333;
+            font-size: 16px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+        .guide-content h2:first-child {
+            margin-top: 0;
+        }
+        .guide-content h3 {
+            margin: 16px 0 8px;
+            color: #555;
+            font-size: 14px;
+        }
+        .guide-content p {
+            margin: 4px 0 10px 0;
+        }
+        .guide-content code {
+            background: #fff3e0;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #e65100;
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+        }
+        .guide-content pre {
+            background: #f8f8f8;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 8px 0;
+            border: 1px solid #e0e0e0;
+            line-height: 1.6;
+        }
+        .guide-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+        .guide-content td,
+        .guide-content th {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .guide-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+        }
+        .guide-content .note {
+            background: #e8f5e9;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-size: 13px;
+            border-left: 4px solid #4caf50;
+        }
+        .guide-content .step {
+            background: #f5f5f5;
+            padding: 10px 16px;
+            border-radius: 8px;
+            margin: 8px 0;
+        }
+        .guide-content .step strong {
+            color: #667eea;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 50px 16px;
+            color: #999;
+        }
+        .empty-state .icon {
+            font-size: 50px;
+            margin-bottom: 12px;
+        }
+        .empty-state .btn-open {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 22px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .empty-state .btn-receive-big {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 22px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        @media (min-width:768px) {
+            .custom-keyboard {
+                display: none !important;
+            }
+        }
+        .confirm-box .btn-yes-disabled {
+            background: #bdbdbd;
+            color: #888;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .confirm-box .btn-yes-ready {
+            background: #e91e63;
+            color: white;
+            cursor: pointer;
+        }
+        .confirm-box .countdown-text {
+            color: #e91e63;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="broadcast-bar" id="broadcastBar"></div>
+    <div class="header" id="headerBar">
+        <div class="header-left">
+            <div class="dropdown" id="dropdownFile"><button class="dropdown-btn" onclick="toggleDropdown('dropdownFile')">文件 ▾</button><div class="dropdown-menu" id="dropdownFileMenu"><button onclick="openFileDialog()">打开文件</button><button onclick="showHistory()">历史记录</button><div class="divider"></div><button onclick="confirmReset()">重置</button><button onclick="confirmClearData()">清除数据</button><div class="divider"></div><button onclick="downloadCurrentFile()">下载文件</button><div class="divider"></div><button class="btn-broadcast" id="btnBroadcast" onclick="startBroadcast()">📡 广播题目</button><button class="btn-receive" id="btnReceive" onclick="startReceive()">📥 接收广播</button></div></div>
+            <div class="dropdown" id="dropdownAnswer"><button class="dropdown-btn" onclick="toggleDropdown('dropdownAnswer')">答题 ▾</button><div class="dropdown-menu" id="dropdownAnswerMenu"><button onclick="checkAllAnswers()">全部检查</button><button onclick="clearAllMarks()">清除批改</button><button onclick="clearWrongAnswers()">清除错误</button><div class="divider"></div><button onclick="showStats()">统计</button></div></div>
+            <button class="btn-plain" onclick="showGuide()">使用说明</button>
+        </div>
+        <div class="header-right"><div class="zoom-controls"><button class="zoom-btn" id="btnZoomOut" onclick="zoomOut()" disabled>−</button><span class="zoom-text" id="zoomLevel">100%</span><button class="zoom-btn" id="btnZoomIn" onclick="zoomIn()" disabled>+</button></div></div>
+    </div>
+    <div class="viewport" id="viewport"><div class="doc-stage" id="docStage"><div class="doc-viewer" id="docViewer"><div class="empty-state"><div class="icon">📃</div><p>选择文件开始练习</p><button class="btn-open" onclick="openFileDialog()">打开文件</button><button class="btn-receive-big" onclick="startReceive()">📥 接收广播文件</button><p style="margin-top:8px;font-size:11px">支持 .docx / .xlsx / .txt</p></div></div></div></div>
+    <div class="custom-keyboard" id="customKeyboard"></div>
+    <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><p id="confirmMsg"></p><div id="confirmInput" style="display:none"><input type="text" id="confirmInputField" placeholder="请输入口令"></div><div class="btns"><button class="btn-no" id="btnConfirmNo">取消</button><button class="btn-yes" id="btnConfirmYes">确定</button></div></div></div>
+    <div class="panel-overlay" id="guideOverlay" onclick="hideGuide()"></div><div class="panel" id="guidePanel" style="max-width:680px;"><h3>使用说明</h3><div class="guide-content" id="guideContent"></div><button class="panel-close" onclick="hideGuide()">关闭</button></div>
+    <div class="panel-overlay" id="statsOverlay" onclick="hideStats()"></div><div class="panel" id="statsPanel"><h3>答题统计</h3><div id="statsContent"></div><button class="panel-close" onclick="hideStats()">关闭</button></div>
+    <div class="panel-overlay" id="historyOverlay" onclick="hideHistory()"></div><div class="panel" id="historyPanel"><h3>历史记录</h3><div id="historyContent"></div><button class="panel-close" onclick="hideHistory()">关闭</button></div>
+    <div class="panel-overlay" id="wrongDetailOverlay" onclick="hideWrongDetail()"></div><div class="panel" id="wrongDetailPanel"><h3>错误详情</h3><div id="wrongDetailContent"></div><button class="panel-close" onclick="hideWrongDetail()">关闭</button></div>
+    <input type="file" id="fileInput" accept=".docx,.xlsx,.txt" hidden>
+
+    <script>
+        /**
+         * 基础HTML净化函数 - 防止XSS攻击
+         * 移除script标签、内联事件处理器和javascript:伪协议
+         */
+        function basicSanitize(html) {
+            if (typeof html !== 'string') return '';
+            return html
+                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
+                .replace(/javascript\s*:/gi, '');
+        }
+
+        (function() {
+            let answerMap = new Map(),
+                currentFileId = null,
+                currentDocSize = null,
+                activeInput = null,
+                isShifted = false,
+                isSymbolPage = false,
+                docLoaded = false,
+                dynamicMinScale = 0.5,
+                confirmYesCallback = null,
+                deleteRepeatTimer = null,
+                deleteRepeatInterval = null,
+                noIndividualCheck = false,
+                isCheckingAll = false;
+            let broadcastAbort = null,
+                broadcastToken = '',
+                isBroadcasting = false,
+                broadcastCount = 0,
+                isReceiving = false;
+            let isReceivedFile = false;
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+            function vibrate(ms) { if (navigator.vibrate) navigator.vibrate(ms || 6) }
+            const PAGE_SIZES = {
+                'A4': { width: 210, height: 297 },
+                'A4横向': { width: 297, height: 210 },
+                'A4横': { width: 297, height: 210 },
+                'A3': { width: 297, height: 420 },
+                'A3横向': { width: 420, height: 297 },
+                'A3横': { width: 420, height: 297 },
+                'A5': { width: 148, height: 210 },
+                'A5横向': { width: 210, height: 148 },
+                'A5横': { width: 210, height: 148 },
+                'B4': { width: 257, height: 364 },
+                'B5': { width: 182, height: 257 },
+                'letter': { width: 215.9, height: 279.4 },
+                'legal': { width: 215.9, height: 355.6 }
+            };
+            let docScale = 1,
+                docTx = 0,
+                docTy = 0;
+            const MAX_SCALE = 5.0,
+                SCALE_STEP = 0.1;
+            let dragging = false,
+                dragStart = { x: 0, y: 0 },
+                dragStartTrans = { x: 0, y: 0 },
+                lastDist = 0,
+                lastCtr = { x: 0, y: 0, sx: 0, sy: 0 },
+                userScale = null,
+                userTrans = null,
+                keyboardVisible = false,
+                lastKnownH = window.innerHeight;
+
+            function setZoomEnabled(e) {
+                document.getElementById('btnZoomIn').disabled = !e;
+                document.getElementById('btnZoomOut').disabled = !e;
+                document.getElementById('viewport').classList.toggle('interactive', e)
+            }
+            setZoomEnabled(false);
+
+            window.toggleDropdown = function(id) {
+                var m = document.getElementById(id + 'Menu'),
+                    o = m.classList.contains('show');
+                document.querySelectorAll('.dropdown-menu').forEach(function(x) { x.classList.remove('show') });
+                if (!o) m.classList.add('show')
+            };
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.dropdown')) document.querySelectorAll('.dropdown-menu').forEach(function(m) { m
+                        .classList.remove('show') })
+            });
+
+            window.openFileDialog = function() {
+                isReceivedFile = false;
+                document.getElementById('fileInput').click()
+            };
+
+            window.downloadCurrentFile = function() {
+                var file = document.getElementById('fileInput').files[0];
+                if (isReceivedFile || !file) {
+                    showSecurityConfirm(function(confirmed) {
+                        if (confirmed) {
+                            doDownloadFile(file);
+                        }
+                    });
+                    return;
+                }
+                doDownloadFile(file);
+            };
+
+            function doDownloadFile(file) {
+                if (!file) {
+                    var viewer = document.getElementById('docViewer');
+                    var text = viewer.textContent || '';
+                    var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                    var url = URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = (document.title || '题目') + '.txt';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    return;
+                }
+                var url = URL.createObjectURL(file);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = file.name;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            function showSecurityConfirm(callback) {
+                var overlay = document.getElementById('confirmOverlay');
+                var msgP = document.getElementById('confirmMsg');
+                var yesBtn = document.getElementById('btnConfirmYes');
+                var noBtn = document.getElementById('btnConfirmNo');
+
+                document.getElementById('confirmInput').style.display = 'none';
+
+                msgP.innerHTML = basicSanitize(`
+                    ⚠️ 安全提示<br><br>
+                    本文件由发送端上传，同一口令下可能存在多人传输导致文件串台。<br>
+                    本服务仅提供文件传输通道，不进行任何安全检测。<br><br>
+                    请在确认文件来源可靠后再下载，因下载文件造成的任何问题本站概不负责。<br><br>
+                    <span class="countdown-text" id="countdownDisplay">[3]</span> 我已阅读并确认下载<br>
+                `);
+
+                yesBtn.className = 'btn-yes btn-yes-disabled';
+                yesBtn.textContent = '等待 3 秒';
+                yesBtn.disabled = true;
+
+                noBtn.textContent = '取消下载';
+                noBtn.className = 'btn-no';
+
+                overlay.classList.add('show');
+
+                var countdown = 3;
+                var countdownEl = document.getElementById('countdownDisplay');
+
+                function updateCountdown() {
+                    if (countdown > 0) {
+                        countdownEl.textContent = '[' + countdown + ']';
+                        yesBtn.textContent = '等待 ' + countdown + ' 秒';
+                        countdown--;
+                        setTimeout(updateCountdown, 1000);
+                    } else {
+                        countdownEl.textContent = '[✓]';
+                        yesBtn.textContent = '我已阅读并确认下载';
+                        yesBtn.className = 'btn-yes btn-yes-ready';
+                        yesBtn.disabled = false;
+                    }
+                }
+                updateCountdown();
+
+                var newYesBtn = yesBtn.cloneNode(true);
+                yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+                var newNoBtn = noBtn.cloneNode(true);
+                noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+
+                newYesBtn.addEventListener('click', function() {
+                    if (newYesBtn.disabled) return;
+                    overlay.classList.remove('show');
+                    if (callback) callback(true);
+                });
+
+                newNoBtn.addEventListener('click', function() {
+                    overlay.classList.remove('show');
+                    if (callback) callback(false);
+                });
+            }
+
+            function showConfirm(msg, onYes, showInput, btnClass) {
+                document.getElementById('confirmMsg').innerHTML = basicSanitize(msg.replace(/\n/g, '<br>'));
+                confirmYesCallback = onYes;
+                var inputDiv = document.getElementById('confirmInput'),
+                    yesBtn = document.getElementById('btnConfirmYes');
+                if (showInput) { inputDiv.style.display = 'block';
+                    document.getElementById('confirmInputField').value = '' } else { inputDiv.style.display = 'none' }
+                yesBtn.className = btnClass || 'btn-yes';
+                document.getElementById('confirmOverlay').classList.add('show');
+            }
+
+            document.getElementById('btnConfirmYes').onclick = function() {
+                var val = document.getElementById('confirmInputField').value.trim(),
+                    cb = confirmYesCallback;
+                document.getElementById('confirmOverlay').classList.remove('show');
+                confirmYesCallback = null;
+                if (cb) cb(val);
+            };
+            document.getElementById('btnConfirmNo').onclick = function() {
+                document.getElementById('confirmOverlay').classList.remove('show');
+                confirmYesCallback = null
+            };
+
+            window.confirmReset = function() { showConfirm('确定要重置吗？', function() { resetAllAnswers() }) };
+            window.confirmClearData = function() { showConfirm('确定要清除数据吗？', function() { clearExerciseData() }) };
+
+            function updateBroadcastBar(text, type) {
+                var bar = document.getElementById('broadcastBar');
+                bar.textContent = text;
+                bar.className = 'broadcast-bar show';
+                if (type === 'receiving') bar.classList.add('receiving');
+                else bar.classList.remove('receiving');
+                updateViewportTop();
+            }
+
+            function hideBroadcastBar() { document.getElementById('broadcastBar').classList.remove('show');
+                updateViewportTop() }
+
+            window.stopBroadcast = function() {
+                if (broadcastAbort) { broadcastAbort.abort();
+                    broadcastAbort = null }
+                isBroadcasting = false;
+                hideBroadcastBar();
+                document.getElementById('btnBroadcast').textContent = '📡 广播题目';
+                document.getElementById('btnReceive').style.display = '';
+            };
+
+            window.stopReceive = function() {
+                if (broadcastAbort) { broadcastAbort.abort();
+                    broadcastAbort = null }
+                isReceiving = false;
+                hideBroadcastBar();
+                document.getElementById('btnReceive').textContent = '📥 接收广播';
+                document.getElementById('btnBroadcast').style.display = '';
+            };
+
+            window.startBroadcast = function() {
+                if (!currentFileId) { alert('请先打开一个文件'); return }
+                if (isBroadcasting) { stopBroadcast(); return }
+                showConfirm('请输入广播口令：\n\n⚠️ 关闭或刷新页面后广播会被停止', function(token) {
+                    if (!token) { alert('请输入口令'); return }
+                    doBroadcast(token);
+                }, true, 'btn-bc');
+            };
+
+            async function doBroadcast(token) {
+                if (broadcastAbort) { broadcastAbort.abort();
+                    broadcastAbort = null }
+                broadcastAbort = new AbortController();
+                broadcastToken = token;
+                isBroadcasting = true;
+                broadcastCount = 0;
+                document.getElementById('btnBroadcast').textContent = '⏹ 终止广播';
+                document.getElementById('btnReceive').style.display = 'none';
+                var file = document.getElementById('fileInput').files[0];
+                if (!file) { alert('请重新选择文件后再广播');
+                    stopBroadcast(); return }
+                var ext = file.name.split('.').pop() || 'docx';
+                var safeName = 'file.' + ext;
+                updateBroadcastBar('📡 广播中: ' + token + ' | 已接收 0 次', 'broadcast');
+                while (isBroadcasting && !broadcastAbort.signal.aborted) {
+                    try {
+                        var resp = await fetch('https://ppng.io/' + token, { method: 'PUT', body: file, signal: broadcastAbort
+                                .signal, headers: { 'Content-Disposition': 'attachment; filename="' + safeName +
+                                    '"' } });
+                        if (resp.ok) { broadcastCount++;
+                            var displayCount = Math.max(0, broadcastCount - 1);
+                            updateBroadcastBar('📡 广播中: ' + token + ' | 已接收 ' + displayCount + ' 次', 'broadcast') }
+                    } catch (err) { if (err.name === 'AbortError') { break } }
+                    if (isBroadcasting && !broadcastAbort.signal.aborted) { await new Promise(r => setTimeout(r, 100)) }
+                }
+                stopBroadcast();
+            }
+
+            window.startReceive = function() {
+                showConfirm('请输入接收口令：', function(token) {
+                    if (!token) { alert('请输入口令'); return }
+                    doReceive(token);
+                }, true, 'btn-rc');
+            };
+
+            async function tryLoadWithFallback(blob, originalName) {
+                var exts = ['docx', 'xlsx', 'txt'];
+                var origExt = originalName.split('.').pop()?.toLowerCase();
+                var tryExts = [origExt].concat(exts.filter(function(e) { return e !== origExt }));
+                var lastErr = null;
+                for (var i = 0; i < tryExts.length; i++) {
+                    var ext = tryExts[i];
+                    if (!ext) continue;
+                    var fn = originalName.replace(/\.[^.]+$/, '') + '.' + ext;
+                    try {
+                        var file = new File([blob], fn, { type: 'application/octet-stream' });
+                        var dt = new DataTransfer();
+                        dt.items.add(file);
+                        document.getElementById('fileInput').files = dt.files;
+                        isReceivedFile = true;
+                        await loadFile(file);
+                        return true;
+                    } catch (err) { lastErr = err }
+                }
+                throw lastErr || new Error('无法识别文件类型');
+            }
+
+            async function doReceive(token) {
+                if (broadcastAbort) { broadcastAbort.abort();
+                    broadcastAbort = null }
+                broadcastAbort = new AbortController();
+                broadcastToken = token;
+                isReceiving = true;
+                updateBroadcastBar('📥 正在接收广播: ' + token + ' ...', 'receiving');
+                document.getElementById('btnReceive').textContent = '⏹ 停止接收';
+                document.getElementById('btnBroadcast').style.display = 'none';
+
+                let fileReceived = false;
+                while (isReceiving && !broadcastAbort.signal.aborted && !fileReceived) {
+                    try {
+                        var resp = await fetch('https://ppng.io/' + token, { method: 'GET', signal: broadcastAbort
+                                .signal });
+                        if (!resp.ok) {
+                            updateBroadcastBar('📥 等待广播: ' + token + ' ...', 'receiving');
+                            await new Promise(r => setTimeout(r, 1000));
+                            continue;
+                        }
+                        var cd = resp.headers.get('Content-Disposition') || '';
+                        var fn = 'received.docx';
+                        var m = cd.match(/filename="?([^"]+)"?/);
+                        if (m) fn = m[1];
+                        updateBroadcastBar('📥 正在下载: ' + fn + ' ...', 'receiving');
+                        var blob = await resp.blob();
+                        await tryLoadWithFallback(blob, fn);
+                        fileReceived = true;
+                        isReceiving = false;
+                        document.getElementById('btnReceive').textContent = '📥 接收广播';
+                        document.getElementById('btnBroadcast').style.display = '';
+                        hideBroadcastBar();
+                        updateBroadcastBar('✅ 接收完成', 'receiving');
+                        setTimeout(hideBroadcastBar, 2000);
+                        break;
+                    } catch (err) {
+                        if (err.name === 'AbortError') {
+                            hideBroadcastBar();
+                            break;
+                        }
+                        updateBroadcastBar('📥 连接失败，1秒后重试...', 'receiving');
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
+                }
+                if (!fileReceived) {
+                    stopReceive();
+                }
+            }
+
+            window.addEventListener('beforeunload', function() {
+                if (broadcastAbort) broadcastAbort.abort();
+                if (currentFileId) saveToHistory()
+            });
+
+            function updateViewportTop() {
+                var top = document.getElementById('headerBar').offsetHeight;
+                var bb = document.getElementById('broadcastBar');
+                if (bb.classList.contains('show')) top += bb.offsetHeight;
+                document.getElementById('viewport').style.top = top + 'px'
+            }
+            updateViewportTop();
+            window.addEventListener('resize', updateViewportTop);
+
+            function updateTransform() { document.getElementById('docStage').style.transform =
+                    `translate(${docTx}px,${docTy}px) scale(${docScale})` }
+
+            function updateZoomDisplay() { document.getElementById('zoomLevel').textContent = Math.round(docScale * 100) +
+                '%' }
+
+            function setDocScale(s) {
+                var c = Math.min(MAX_SCALE, Math.max(dynamicMinScale, Math.round(s * 100) / 100));
+                if (c !== docScale) { docScale = c;
+                    updateTransform();
+                    updateZoomDisplay() }
+            }
+
+            function saveUserTransform() { userScale = docScale;
+                userTrans = { x: docTx, y: docTy } }
+
+            function clampTranslate() {
+                var vp = document.getElementById('viewport'),
+                    vw = vp.clientWidth,
+                    vh = vp.clientHeight,
+                    docEl = document.getElementById('docViewer'),
+                    dw = docEl.offsetWidth * docScale,
+                    dh = docEl.offsetHeight * docScale;
+                if (dw <= vw) docTx = (vw - dw) / 2;
+                else docTx = Math.min(0, Math.max(vw - dw, docTx));
+                if (dh <= vh) docTy = 0;
+                else docTy = Math.min(0, Math.max(vh - dh, docTy))
+            }
+
+            window.zoomIn = function() {
+                if (!docLoaded) return;
+                var ns = docScale + SCALE_STEP;
+                if (ns > MAX_SCALE) return;
+                setDocScale(ns);
+                clampTranslate();
+                saveUserTransform();
+                updateTransform()
+            };
+            window.zoomOut = function() {
+                if (!docLoaded) return;
+                var ns = docScale - SCALE_STEP;
+                if (ns < dynamicMinScale) return;
+                setDocScale(ns);
+                clampTranslate();
+                saveUserTransform();
+                updateTransform()
+            };
+
+            const viewportEl = document.getElementById('viewport');
+            viewportEl.addEventListener('touchstart', function(e) {
+                if (!docLoaded) return;
+                if (e.target.closest('.fill-blank-input,.check-btn,.inline-check-btn,.kb-key,.custom-keyboard'))
+                return;
+                var t = e.touches;
+                if (t.length === 1) {
+                    dragging = true;
+                    dragStart.x = t[0].clientX;
+                    dragStart.y = t[0].clientY;
+                    dragStartTrans.x = docTx;
+                    dragStartTrans.y = docTy
+                } else if (t.length === 2) {
+                    dragging = false;
+                    lastDist = getDist(t[0], t[1]);
+                    lastCtr = getCtr(t[0], t[1]);
+                    lastCtr.sx = (lastCtr.x - docTx) / docScale;
+                    lastCtr.sy = (lastCtr.y - docTy) / docScale
+                }
+            }, { passive: false });
+            viewportEl.addEventListener('touchmove', function(e) {
+                if (!docLoaded) return;
+                e.preventDefault();
+                var t = e.touches;
+                if (t.length === 1 && dragging) {
+                    docTx = dragStartTrans.x + (t[0].clientX - dragStart.x);
+                    docTy = dragStartTrans.y + (t[0].clientY - dragStart.y);
+                    clampTranslate();
+                    updateTransform();
+                    saveUserTransform()
+                } else if (t.length === 2) {
+                    var nd = getDist(t[0], t[1]),
+                        nc = getCtr(t[0], t[1]);
+                    if (lastDist > 0) {
+                        var ns = Math.min(MAX_SCALE, Math.max(dynamicMinScale, docScale * (nd / lastDist)));
+                        docTx = nc.x - lastCtr.sx * ns;
+                        docTy = nc.y - lastCtr.sy * ns;
+                        docScale = Math.round(ns * 100) / 100;
+                        clampTranslate();
+                        updateTransform();
+                        updateZoomDisplay();
+                        saveUserTransform()
+                    }
+                    lastDist = nd;
+                    lastCtr = nc;
+                    lastCtr.sx = (nc.x - docTx) / docScale;
+                    lastCtr.sy = (nc.y - docTy) / docScale
+                }
+            }, { passive: false });
+            viewportEl.addEventListener('touchend', function(e) {
+                if (e.touches.length === 0) { dragging = false;
+                    lastDist = 0 }
+            });
+            viewportEl.addEventListener('wheel', function(e) {
+                if (!docLoaded) return;
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    var d = e.deltaY > 0 ? -SCALE_STEP : SCALE_STEP,
+                        ns = docScale + d;
+                    if (ns < dynamicMinScale || ns > MAX_SCALE) return;
+                    var r = viewportEl.getBoundingClientRect(),
+                        mx = e.clientX - r.left,
+                        my = e.clientY - r.top,
+                        sx = (mx - docTx) / docScale,
+                        sy = (my - docTy) / docScale,
+                        cns = Math.min(MAX_SCALE, Math.max(dynamicMinScale, ns));
+                    docTx = mx - sx * cns;
+                    docTy = my - sy * cns;
+                    docScale = Math.round(cns * 100) / 100;
+                    clampTranslate();
+                    updateTransform();
+                    updateZoomDisplay();
+                    saveUserTransform()
+                }
+            }, { passive: false });
+
+            function getDist(a, b) { return Math.sqrt((a.clientX - b.clientX) ** 2 + (a.clientY - b.clientY) ** 2) }
+
+            function getCtr(a, b) { return { x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 } }
+
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', function() {
+                    var h = window.visualViewport.height;
+                    if (h < lastKnownH - 80) keyboardVisible = true;
+                    else if (h >= lastKnownH - 30) { keyboardVisible = false;
+                        lastKnownH = h }
+                    if (!keyboardVisible) lastKnownH = Math.max(lastKnownH, h)
+                })
+            }
+
+            function parseDocSize(text) {
+                for (const [n, s] of Object.entries(PAGE_SIZES)) {
+                    if (new RegExp('\\[' + n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]', 'i').test(text)) return s
+                }
+                var cm = text.match(/\[(\d+\.?\d*)\s*:\s*(\d+\.?\d*)\]/);
+                if (cm) { var w = parseFloat(cm[1]),
+                        h = parseFloat(cm[2]); return (w < 50 && h < 50) ? { width: 210, height: 210 * (h / w) } : { width: w,
+                            height: h } }
+                return PAGE_SIZES['A4']
+            }
+
+            function centerDocument(respectUser) {
+                if (keyboardVisible) return;
+                if (respectUser && userScale) {
+                    docScale = Math.max(dynamicMinScale, userScale);
+                    docTx = userTrans.x;
+                    docTy = userTrans.y;
+                    clampTranslate();
+                    updateTransform();
+                    updateZoomDisplay();
+                    return
+                }
+                var vp = document.getElementById('viewport'),
+                    v = document.getElementById('docViewer');
+                if (!currentDocSize) currentDocSize = PAGE_SIZES['A4'];
+                var mm = 3.779527559,
+                    dw = currentDocSize.width * mm,
+                    dh = currentDocSize.height * mm,
+                    vw = vp.clientWidth,
+                    vh = vp.clientHeight,
+                    minW = Math.max(dw, vw);
+                v.style.width = minW + 'px';
+                v.style.minHeight = dh + 'px';
+                var fitScale = vw / minW;
+                dynamicMinScale = Math.round(fitScale * 100) / 100;
+                if (dynamicMinScale > 1.0) dynamicMinScale = 1.0;
+                docScale = dynamicMinScale;
+                docTx = (vw - minW * docScale) / 2;
+                docTy = 0;
+                userScale = null;
+                userTrans = null;
+                clampTranslate();
+                updateTransform();
+                updateZoomDisplay()
+            }
+
+            function getUrlParam(name) { return new URL(window.location.href).searchParams.get(name) }
+
+            async function loadFromUrl(fileUrl) {
+                if (!fileUrl.startsWith('http')) fileUrl = new URL(fileUrl, window.location.href).href;
+                try {
+                    var r = await fetch(fileUrl);
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    var blob = await r.blob();
+                    var fn = fileUrl.split('/').pop().split('?')[0] || 'doc';
+                    await tryLoadWithFallback(blob, fn)
+                } catch (err) {}
+            }
+
+            async function loadFile(file) {
+                var ext = file.name.split('.').pop().toLowerCase();
+                currentFileId = 'file_' + file.name + '_' + file.size + '_' + file.lastModified;
+                userScale = null;
+                userTrans = null;
+                keyboardVisible = false;
+                lastKnownH = window.innerHeight;
+                docLoaded = false;
+                setZoomEnabled(false);
+                noIndividualCheck = false;
+                isCheckingAll = false;
+                dynamicMinScale = 0.5;
+                var viewer = document.getElementById('docViewer');
+                viewer.innerHTML = basicSanitize('<div class="empty-state"><div class="icon">⏳</div><div>加载中...</div></div>');
+                try {
+                    var rawText = '';
+                    if (ext === 'docx') {
+                        var ab = await file.arrayBuffer(),
+                            mr = await mammoth.extractRawText({ arrayBuffer: ab });
+                        rawText = mr.value;
+                        currentDocSize = parseDocSize(rawText);
+                        parseQATags(rawText);
+                        parseExtraTags(rawText);
+                        viewer.innerHTML = '';
+                        var wrapper = document.createElement('div');
+                        wrapper.className = 'docx-wrapper';
+                        viewer.appendChild(wrapper);
+                        await docx.renderAsync(ab, wrapper, null, { className: 'docx-content', inWrapper: true,
+                            ignoreWidth: false, ignoreHeight: false, ignoreFonts: false, breakPages: true,
+                            ignoreLastRenderedPageBreak: true, experimental: false });
+                        processRenderedDOM(viewer);
+                        finishLoad()
+                    } else if (ext === 'txt') {
+                        rawText = await file.text();
+                        currentDocSize = parseDocSize(rawText);
+                        parseQATags(rawText);
+                        parseExtraTags(rawText);
+                        viewer.innerHTML = basicSanitize('<div class="txt-content">' + processTextContent(rawText) + '</div>');
+                        finishLoad()
+                    } else if (ext === 'xlsx') {
+                        var ab2 = await file.arrayBuffer(),
+                            wb = XLSX.read(ab2, { type: 'array' });
+                        rawText = '';
+                        wb.SheetNames.forEach(function(n) {
+                            var s = wb.Sheets[n];
+                            if (!s || !s['!ref']) return;
+                            var rng = XLSX.utils.decode_range(s['!ref']);
+                            for (var r = rng.s.r; r <= rng.e.r; r++) {
+                                var rt = '';
+                                for (var c = rng.s.c; c <= rng.e.c; c++) {
+                                    var cr = XLSX.utils.encode_cell({ r: r, c: c }),
+                                        cell = s[cr];
+                                    if (cell) rt += (String(cell.w || cell.v || '').replace(/\n/g, ' ')) + ' '
+                                }
+                                rawText += rt.trim() + '\n'
+                            }
+                        });
+                        currentDocSize = parseDocSize(rawText);
+                        parseQATags(rawText);
+                        parseExtraTags(rawText);
+                        viewer.innerHTML = basicSanitize('<div class="xlsx-content">' + xlsxToHTML(wb) + '</div>');
+                        handleCheancTagsInHTML(viewer);
+                        cleanupXlsxEmptyRowsCols(viewer);
+                        cleanupXlsxTagText(viewer);
+                        finishLoad()
+                    } else { throw new Error('不支持: .' + ext) }
+                } catch (err) { throw err }
+            }
+
+            function finishLoad() {
+                centerDocument(false);
+                bindEvents();
+                docLoaded = true;
+                setZoomEnabled(true);
+                var h = getHistoryData(currentFileId);
+                if (h.answers && Object.keys(h.answers).length > 0) setTimeout(function() { restoreHistory(
+                    currentFileId) }, 300);
+                updateViewportTop()
+            }
+
+            function cleanupXlsxTagText(container) {
+                var w = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false),
+                    ns = [];
+                while (w.nextNode()) ns.push(w.currentNode);
+                ns.forEach(function(n) {
+                    var t = n.textContent;
+                    for (var k of Object.keys(PAGE_SIZES)) t = t.replace(new RegExp('\\[' + k.replace(
+                        /[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]', 'gi'), '');
+                    t = t.replace(/\[noet\]/gi, '').replace(/\[webpage\]/gi, '');
+                    if (t !== n.textContent) n.textContent = t
+                })
+            }
+
+            function parseQATags(text) {
+                answerMap.clear();
+                var sw = loadWrongCounts(currentFileId);
+                for (var m of text.matchAll(/A(\d+)\[([\s\S]*?)\]/gi)) answerMap.set('Q' + m[1], { answer: m[2].replace(
+                        /\n/g, ''), checked: false, wrongCount: sw['Q' + m[1]] || 0 });
+                for (var m of text.matchAll(/Q(\d+)\[([\s\S]*?)\]/gi)) { var k = 'Q' + m[1]; if (!answerMap.has(k))
+                        answerMap.set(k, { answer: '', checked: false, wrongCount: sw[k] || 0 }) }
+            }
+
+            function parseExtraTags(text) { if (/\[noet\]/i.test(text)) { noIndividualCheck = true } }
+
+            function parseCheancTag(match) { var inner = match[1] || '',
+                    parts = inner.split(','); return { label: (parts[0] || '').trim() || '检查答案', size: Math.max(8, Math
+                        .min(200, parseInt(parts[1]) || 14)), centered: (parts[2] || '').trim().toLowerCase() ===
+                        'middle' } }
+
+            function renderCheancBtn(cfg) {
+                return basicSanitize('<button class="inline-check-btn' + (cfg.centered ? ' centered' :
+                    '') + '" style="font-size:' + cfg.size + 'px;">' + escHtml(cfg.label) + '</button>');
+            }
+
+            function processTextContent(text) {
+                text = text.replace(/\[dpstart\][\s\S]*?\[dpend\]/gi, '').replace(/\[dpstart\]/gi, '').replace(
+                    /\[dpend\]/gi, '').replace(/\[noet\]/gi, '');
+                for (var n of Object.keys(PAGE_SIZES)) text = text.replace(new RegExp('\\[' + n.replace(
+                    /[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]', 'gi'), '');
+                text = text.replace(/\[\d+\.?\d*\s*:\s*\d+\.?\d*\]/g, '');
+                text = text.replace(/cheanc\[([\s\S]*?)\]/gi, function(m, inner) {
+                    var cfg = parseCheancTag([null, inner]);
+                    return renderCheancBtn(cfg);
+                });
+                text = text.replace(/Q(\d+)\[([\s\S]*?)\]/gi, function(m, num, content) {
+                    var q = 'Q' + num,
+                        a = answerMap.get(q),
+                        isChinese = a?.answer && /[\u4e00-\u9fff]/.test(a.answer);
+                    var html = '<span class="fill-blank-wrapper" data-q="' + q + '">' + (content.trim() ?
+                        '<span style="color:#888;">' + escHtml(content) + '</span>' : '') +
+                        '<input type="text" class="fill-blank-input' + (isChinese ? ' native-input' :
+                        '') + '" data-q="' + q + '" data-ans="' + (a?.answer || '') +
+                        '" placeholder="' + (content.trim() || '答案') +
+                        '" style="min-width:80px;" ' + (isChinese ? '' : 'inputmode="none"') +
+                        ' autocomplete="off">' + (noIndividualCheck ? '' :
+                        '<button class="check-btn" data-q="' + q + '">检查</button>') +
+                        '<span class="result-icon" data-q="' + q + '"></span><span class="answer-display" data-q="' +
+                        q + '"></span></span>';
+                    return basicSanitize(html);
+                });
+                return text.replace(/A\d+\[[\s\S]*?\]/gi, '')
+            }
+
+            function xlsxToHTML(wb) {
+                var sheetsData = [];
+                wb.SheetNames.forEach(function(n) {
+                    var s = wb.Sheets[n];
+                    if (!s || !s['!ref']) return;
+                    var rng = XLSX.utils.decode_range(s['!ref']);
+                    var rows = [];
+                    for (var r = rng.s.r; r <= rng.e.r; r++) {
+                        var row = [];
+                        for (var c = rng.s.c; c <= rng.e.c; c++) {
+                            var cr = XLSX.utils.encode_cell({ r: r, c: c }),
+                                cell = s[cr],
+                                v = '';
+                            if (cell) { v = String(cell.w || cell.v || '').trim() }
+                            row.push(v)
+                        }
+                        rows.push(row)
+                    }
+                    sheetsData.push(rows)
+                });
+                var maxCols = 0;
+                sheetsData.forEach(function(rows) { rows.forEach(function(row) { maxCols = Math.max(maxCols, row
+                        .length) }) });
+                var emptyCols = new Set();
+                for (var c = 0; c < maxCols; c++) {
+                    var allEmpty = true;
+                    sheetsData.forEach(function(rows) { rows.forEach(function(row) { if (c < row.length && row[c]
+                                .trim() !== '') allEmpty = false }) });
+                    if (allEmpty) emptyCols.add(c)
+                }
+                var h = '',
+                    cbh = '',
+                    hc = false;
+                sheetsData.forEach(function(rows) {
+                    h += '<table>';
+                    rows.forEach(function(row) {
+                        var rowHasContent = false;
+                        for (var c = 0; c < row.length; c++) { if (!emptyCols.has(c) && row[c].trim() !==
+                                '') { rowHasContent = true;
+                                break } }
+                        if (!rowHasContent) return;
+                        var rh = '';
+                        for (var c = 0; c < maxCols; c++) {
+                            if (emptyCols.has(c)) continue;
+                            var v = c < row.length ? row[c] : '';
+                            if (/cheanc\[.*,.*middle.*\]/i.test(v)) {
+                                hc = true;
+                                cbh = v.replace(/cheanc\[([\s\S]*?)\]/gi, function(m, inner) {
+                                    var cfg = parseCheancTag([null, inner]);
+                                    return renderCheancBtn(cfg);
+                                });
+                                v = v.replace(/cheanc\[[\s\S]*?\]/gi, '')
+                            }
+                            v = v.replace(/Q(\d+)\[([\s\S]*?)\]/gi, function(m, num, ct) {
+                                var q = 'Q' + num,
+                                    a = answerMap.get(q),
+                                    isChinese = a?.answer && /[\u4e00-\u9fff]/.test(a.answer);
+                                var html = '<span class="fill-blank-wrapper" data-q="' + q + '">' + (
+                                    ct.trim() ? '<span style="color:#888;">' + escHtml(ct) +
+                                    '</span>' : '') +
+                                    '<input type="text" class="fill-blank-input' + (isChinese ?
+                                        ' native-input' : '') + '" data-q="' + q +
+                                    '" data-ans="' + (a?.answer || '') +
+                                    '" placeholder="' + (ct.trim() || '答案') +
+                                    '" style="min-width:80px;" ' + (isChinese ? '' :
+                                        'inputmode="none"') + ' autocomplete="off">' + (
+                                        noIndividualCheck ? '' :
+                                        '<button class="check-btn" data-q="' + q +
+                                        '">检查</button>') +
+                                    '<span class="result-icon" data-q="' + q +
+                                    '"></span><span class="answer-display" data-q="' + q +
+                                    '"></span></span>';
+                                return basicSanitize(html);
+                            });
+                            v = v.replace(/\[dpstart\]/gi, '').replace(/\[dpend\]/gi, '');
+                            for (var k of Object.keys(PAGE_SIZES)) v = v.replace(new RegExp('\\[' + k
+                                .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]', 'gi'), '');
+                            v = v.replace(/\[noet\]/gi, '').replace(/\[webpage\]/gi, '');
+                            v = v.replace(/A\d+\[[\s\S]*?\]/gi, '');
+                            rh += '<td>' + v + '</td>';
+                        }
+                        h += '<tr>' + rh + '</tr>'
+                    });
+                    h += '</table><br>'
+                });
+                if (hc) h += cbh;
+                return basicSanitize(h);
+            }
+
+            function cleanupXlsxEmptyRowsCols(container) {
+                container.querySelectorAll('table').forEach(function(table) {
+                    var rows = table.querySelectorAll('tr');
+                    rows.forEach(function(tr) {
+                        var hasContent = false;
+                        tr.querySelectorAll('td').forEach(function(td) {
+                            if ((td.textContent || '').replace(/\s/g, '') !== '' || td.querySelector(
+                                    '.fill-blank-input,.inline-check-btn')) hasContent = true
+                        });
+                        if (!hasContent) tr.remove()
+                    });
+                    if (table.querySelectorAll('tr').length === 0) table.remove()
+                })
+            }
+
+            function handleCheancTagsInHTML(container) {
+                var w = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false),
+                    ns = [];
+                while (w.nextNode()) ns.push(w.currentNode);
+                ns.forEach(function(n) {
+                    if (/cheanc\[/i.test(n.textContent)) {
+                        var s = document.createElement('span');
+                        s.innerHTML = basicSanitize(n.textContent.replace(/cheanc\[([\s\S]*?)\]/gi, function(m,
+                            inner) {
+                            var cfg = parseCheancTag([null, inner]);
+                            return renderCheancBtn(cfg);
+                        }));
+                        n.parentElement.replaceChild(s, n)
+                    }
+                })
+            }
+
+            document.getElementById('fileInput').addEventListener('change', async function(e) {
+                if (e.target.files[0]) {
+                    isReceivedFile = false;
+                    await loadFile(e.target.files[0])
+                }
+            });
+
+            function processRenderedDOM(c) { markDpRegionsInText(c);
+                replaceQTags(c);
+                removeATags(c);
+                removeSizeTags(c);
+                handleCheancTags(c) }
+
+            function markDpRegionsInText(container) {
+                var w = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false),
+                    allNodes = [];
+                while (w.nextNode()) allNodes.push(w.currentNode);
+                var dpRanges = [],
+                    startIdx = -1;
+                for (var i = 0; i < allNodes.length; i++) {
+                    var t = allNodes[i].textContent;
+                    if (/\[dpstart\]/i.test(t) && startIdx < 0) startIdx = i;
+                    if (/\[dpend\]/i.test(t) && startIdx >= 0) { dpRanges.push({ start: startIdx, end: i });
+                        startIdx = -1 }
+                }
+                if (startIdx >= 0) dpRanges.push({ start: startIdx, end: allNodes.length - 1 });
+                dpRanges.forEach(function(range) {
+                    for (var i = range.start; i <= range.end; i++) {
+                        var node = allNodes[i],
+                            text = node.textContent;
+                        text = text.replace(/\[dpstart\]/gi, '').replace(/\[dpend\]/gi, '');
+                        if (i > range.start && i < range.end) text = '';
+                        node.textContent = text
+                    }
+                })
+            }
+
+            function handleCheancTags(c) {
+                var w = document.createTreeWalker(c, NodeFilter.SHOW_TEXT, null, false),
+                    ns = [];
+                while (w.nextNode()) ns.push(w.currentNode);
+                ns.forEach(function(n) {
+                    if (/cheanc\[/i.test(n.textContent)) {
+                        var s = document.createElement('span');
+                        s.innerHTML = basicSanitize(n.textContent.replace(/cheanc\[([\s\S]*?)\]/gi, function(m,
+                            inner) {
+                            var cfg = parseCheancTag([null, inner]);
+                            return renderCheancBtn(cfg);
+                        }));
+                        n.parentElement.replaceChild(s, n)
+                    }
+                })
+            }
+
+            function replaceQTags(c) {
+                var w = document.createTreeWalker(c, NodeFilter.SHOW_TEXT, null, false),
+                    ns = [];
+                while (w.nextNode()) ns.push(w.currentNode);
+                ns.forEach(function(n) {
+                    if (!n.parentElement || n.parentElement.closest('.fill-blank-wrapper')) return;
+                    if (/\[noet\]/i.test(n.textContent)) { n.textContent = n.textContent.replace(/\[noet\]/gi,
+                        ''); return }
+                    if (!/Q\d+\[/i.test(n.textContent)) return;
+                    var h = n.textContent.replace(/Q(\d+)\[([\s\S]*?)\]/gi, function(m, num, content) {
+                        var q = 'Q' + num,
+                            a = answerMap.get(q),
+                            isChinese = a?.answer && /[\u4e00-\u9fff]/.test(a.answer);
+                        var html = '<span class="fill-blank-wrapper" data-q="' + q + '">' + (content.trim() ?
+                            '<span style="color:#888;">' + escHtml(content) + '</span>' : '') +
+                            '<input type="text" class="fill-blank-input' + (isChinese ? ' native-input' :
+                                '') + '" data-q="' + q + '" data-ans="' + (a?.answer || '') +
+                            '" placeholder="' + (content.trim() || '答案') + '" style="min-width:' + (
+                                content.trim() ? '60px' : '80px') + ';" ' + (isChinese ? '' :
+                                'inputmode="none"') + ' autocomplete="off">' + (noIndividualCheck ?
+                                '' : '<button class="check-btn" data-q="' + q +
+                                '">检查</button>') +
+                            '<span class="result-icon" data-q="' + q +
+                            '"></span><span class="answer-display" data-q="' + q +
+                            '"></span></span>';
+                        return basicSanitize(html);
+                    });
+                    if (h !== n.textContent) { var s = document.createElement('span');
+                        s.innerHTML = h;
+                        n.parentElement.replaceChild(s, n) }
+                })
+            }
+
+            function removeATags(c) {
+                var w = document.createTreeWalker(c, NodeFilter.SHOW_TEXT, null, false),
+                    ns = [];
+                while (w.nextNode()) ns.push(w.currentNode);
+                ns.forEach(function(n) {
+                    if (!n.parentElement?.closest('.fill-blank-wrapper')) n.textContent = n.textContent.replace(
+                        /A\d+\[[\s\S]*?\]/gi, '')
+                })
+            }
+
+            function removeSizeTags(c) {
+                var w = document.createTreeWalker(c, NodeFilter.SHOW_TEXT, null, false),
+                    ns = [];
+                while (w.nextNode()) ns.push(w.currentNode);
+                ns.forEach(function(n) {
+                    var t = n.textContent;
+                    for (var k of Object.keys(PAGE_SIZES)) t = t.replace(new RegExp('\\[' + k.replace(
+                        /[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]', 'gi'), '');
+                    t = t.replace(/\[noet\]/gi, '').replace(/\[webpage\]/gi, '');
+                    n.textContent = t.replace(/\[\d+\.?\d*\s*:\s*\d+\.?\d*\]/g, '')
+                })
+            }
+
+            function escHtml(s) { var d = document.createElement('div');
+                d.textContent = s; return d.innerHTML }
+
+            function getAnswerType(ans) {
+                if (!ans) return 'text';
+                if (/[\u4e00-\u9fff]/.test(ans)) return 'text';
+                if (/^[\d\s\.\,\+\-\*\/\=\(\)\[\]\{\}\%]+$/.test(ans)) return 'number';
+                if (/^[a-zA-Z0-9\s\.\,\!\?\-\'\"\(\)\[\]\{\}\+\-\*\/\=\@\#\$\%\&\*\_\:\;]+$/.test(ans)) return 'english';
+                return 'text';
+            }
+
+            function buildKeyboard(type) {
+                var kb = document.getElementById('customKeyboard');
+                if (type === 'text') { kb.innerHTML = '';
+                    kb.classList.remove('show'); return }
+                var rows = [];
+                if (type === 'number') {
+                    rows = [
+                        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+                        ['-', '+', '*', '/', '=', '.', ',', '(', ')', '⌫'],
+                        [{ t: 'space', l: '空格' }, { t: 'done', l: '完成' }]
+                    ]
+                } else if (type === 'english') {
+                    if (isSymbolPage) {
+                        rows = [
+                            ["'", '"', '!', '?', '-', '_', '.', '@', '#', '$'],
+                            ['%', '^', '&', '*', '(', ')', '[', ']', '{', '}'],
+                            [{ t: 'abc', l: 'ABC' }, ':', ';', '<', '>', '/', '\\', '~', '⌫'],
+                            [{ t: 'num', l: '123' }, ',', '.', { t: 'space', l: '空格' }, '?', '!', "'", { t: 'done',
+                                l: '完成' }]
+                        ]
+                    } else {
+                        var l1 = isShifted ? ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'] : ['q', 'w', 'e', 'r',
+                            't', 'y', 'u', 'i', 'o', 'p'
+                        ];
+                        var l2 = isShifted ? ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'] : ['a', 's', 'd', 'f', 'g',
+                            'h', 'j', 'k', 'l'
+                        ];
+                        var l3 = [{ t: 'shift', l: '⇧' }].concat(isShifted ? ['Z', 'X', 'C', 'V', 'B', 'N', 'M'] : [
+                            'z', 'x', 'c', 'v', 'b', 'n', 'm'
+                        ]).concat(['⌫']);
+                        var l4 = [{ t: 'num', l: '123' }, { t: 'sym', l: '#+=' }, '.', { t: 'space', l: '空格' }, ',',
+                            '!', '?', { t: 'done', l: '完成' }
+                        ];
+                        rows = [l1, l2, l3, l4]
+                    }
+                } else if (type === 'num_from_eng') {
+                    rows = [
+                        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+                        ['-', '+', '*', '/', '=', '.', ',', '(', ')', '⌫'],
+                        [{ t: 'abc', l: 'ABC' }, { t: 'space', l: '空格' }, { t: 'done', l: '完成' }]
+                    ]
+                }
+                kb.innerHTML = rows.map(function(r, ri) {
+                    var pad = ri * 8;
+                    return '<div class="kb-row" style="padding:0 ' + pad + 'px;">' + r.map(function(k) {
+                        if (typeof k === 'object') {
+                            var cls = k.t === 'space' ? 'space' : k.t === 'done' ? 'done' : k.t ===
+                                'delete' ? 'delete' : k.t === 'shift' ? (isShifted ?
+                                'shift active' : 'shift') : k.t === 'sym' ? 'symbol' :
+                                'num-switch';
+                            return '<button class="kb-key ' + cls + '" data-action="' + k.t +
+                                '">' + k.l + '</button>'
+                        }
+                        if (k === '⌫') return '<button class="kb-key delete" data-action="backspace">⌫</button>';
+                        if (k === "'") return '<button class="kb-key" data-key="\'">\'</button>';
+                        return '<button class="kb-key" data-key="' + k + '">' + k + '</button>'
+                    }).join('') + '</div>'
+                }).join('');
+                kb.classList.add('show')
+            }
+
+            function hideKeyboard() { document.getElementById('customKeyboard').classList.remove('show');
+                stopDeleteRepeat();
+                activeInput = null;
+                isShifted = false;
+                isSymbolPage = false }
+
+            function stopDeleteRepeat() { if (deleteRepeatTimer) { clearTimeout(deleteRepeatTimer) } if (
+                deleteRepeatInterval) { clearInterval(deleteRepeatInterval) } }
+
+            function doDelete() { if (!activeInput) return;
+                activeInput.value = activeInput.value.slice(0, -1);
+                activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                clearMarkOnEdit(activeInput) }
+
+            function startDeleteRepeat() { doDelete();
+                vibrate(5);
+                deleteRepeatTimer = setTimeout(function() {
+                    deleteRepeatInterval = setInterval(function() { doDelete();
+                        vibrate(3) }, 50)
+                }, 400) }
+
+            function handleKeyAction(action, key) { if (!activeInput) return;
+                vibrate(6); if (action === 'done') { hideKeyboard(); return } if (action === 'backspace') {
+                    startDeleteRepeat(); return } if (action === 'shift') { isShifted = !isShifted;
+                    isSymbolPage = false;
+                    buildKeyboard('english'); return } if (action === 'num') { isShifted = false;
+                    isSymbolPage = false;
+                    buildKeyboard('num_from_eng'); return } if (action === 'abc') { isShifted = false;
+                    isSymbolPage = false;
+                    buildKeyboard('english'); return } if (action === 'sym') { isSymbolPage = !isSymbolPage;
+                    buildKeyboard('english'); return } if (action === 'space') { activeInput.value += ' ';
+                    activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    clearMarkOnEdit(activeInput); return } if (key) { activeInput.value += key;
+                    activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    clearMarkOnEdit(activeInput) } }
+
+            document.getElementById('customKeyboard').addEventListener('pointerdown', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var btn = e.target.closest('.kb-key');
+                if (!btn || !activeInput) return;
+                btn.classList.add('pressed');
+                setTimeout(function() { btn.classList.remove('pressed') }, 40);
+                handleKeyAction(btn.dataset.action, btn.dataset.key)
+            });
+            document.getElementById('customKeyboard').addEventListener('pointerup', stopDeleteRepeat);
+            document.getElementById('customKeyboard').addEventListener('pointerleave', stopDeleteRepeat);
+            document.getElementById('customKeyboard').addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                e.stopPropagation()
+            });
+
+            function clearMarkOnEdit(input) { var q = input.dataset.q,
+                    ic = document.querySelector('.result-icon[data-q="' + q + '"]'),
+                    dp = document.querySelector('.answer-display[data-q="' + q + '"]'); if (ic && (ic.classList
+                    .contains('wrong') || ic.classList.contains('correct'))) { ic.className = 'result-icon';
+                    ic.textContent = '';
+                    input.style.borderBottomColor = '#667eea';
+                    input.style.color = 'inherit'; if (dp) { dp.classList.remove('show');
+                        dp.textContent = '' } var a = answerMap.get(q); if (a) { a.checked = false;
+                        answerMap.set(q, a) } } }
+
+            function bindEvents() {
+                document.querySelectorAll('.check-btn').forEach(function(b) {
+                    b.addEventListener('click', function(e) { e.stopPropagation();
+                        checkAnswer(this.dataset.q) })
+                });
+                document.querySelectorAll('.inline-check-btn').forEach(function(b) {
+                    b.onclick = function(e) { e.stopPropagation();
+                        checkAllAnswers() }
+                });
+                document.querySelectorAll('.fill-blank-input').forEach(function(i) {
+                    var isNative = i.classList.contains('native-input');
+                    i.addEventListener('keydown', function(e) {
+                        if (e.key !== 'Enter' && e.key !== 'Tab') clearMarkOnEdit(i);
+                        if (!isNative && isTouchDevice && activeInput === i && getAnswerType(i
+                                .dataset.ans || '') !== 'text') e.preventDefault()
+                    });
+                    i.addEventListener('focus', function() {
+                        if (!isTouchDevice) return;
+                        var t = getAnswerType(this.dataset.ans || '');
+                        if (t === 'text') { hideKeyboard() } else { activeInput = this;
+                            isShifted = false;
+                            isSymbolPage = false;
+                            buildKeyboard(t) }
+                    });
+                    i.addEventListener('touchstart', function(e) {
+                        e.stopPropagation();
+                        if (isTouchDevice) {
+                            var t = getAnswerType(this.dataset.ans || '');
+                            if (t !== 'text') {
+                                e.preventDefault();
+                                if (activeInput !== this) { hideKeyboard();
+                                    activeInput = this;
+                                    isShifted = false;
+                                    isSymbolPage = false;
+                                    buildKeyboard(t);
+                                    this.focus() }
+                            }
+                        }
+                    });
+                    i.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') { e.stopPropagation();
+                            checkAnswer(this.dataset.q) }
+                    });
+                    i.addEventListener('blur', function() {
+                        setTimeout(function() {
+                            if (document.querySelector('.kb-key.pressed') && activeInput === i)
+                                i.focus()
+                        }, 100);
+                        if (currentFileId) saveToHistory()
+                    });
+                });
+                document.getElementById('docViewer').addEventListener('pointerdown', function(e) {
+                    if (!e.target.closest('.fill-blank-input') && !e.target.closest(
+                            '.custom-keyboard') && !e.target.closest('.check-btn') && !e.target
+                        .closest('.inline-check-btn')) hideKeyboard()
+                });
+            }
+
+            function loadWrongCounts(fid) { var s = localStorage.getItem('wrong_' + fid); return s ? (JSON.parse(s) ||
+                {}) : {} }
+
+            function saveWrongCounts(fid) { var c = {};
+                answerMap.forEach(function(a, k) { if (a.wrongCount > 0) c[k] = a.wrongCount });
+                localStorage.setItem('wrong_' + fid, JSON.stringify(c)) }
+
+            function clearWrongCounts(fid) { localStorage.removeItem('wrong_' + fid) }
+
+            function checkAnswer(qKey) {
+                var a = answerMap.get(qKey);
+                if (!a || !a.answer) return 'noanswer';
+                var i = document.querySelector('.fill-blank-input[data-q="' + qKey + '"]'),
+                    ic = document.querySelector('.result-icon[data-q="' + qKey + '"]'),
+                    dp = document.querySelector('.answer-display[data-q="' + qKey + '"]');
+                if (!i) return 'noinput';
+                var u = i.value.trim();
+                a.checked = true;
+                var ok = false,
+                    nu = u.replace(/\s+/g, ' ').trim(),
+                    pa = a.answer.split('|').map(function(x) { return x.replace(/\s+/g, ' ').trim() });
+                for (var j = 0; j < pa.length; j++) {
+                    if (nu === pa[j] || nu.toLowerCase() === pa[j].toLowerCase() || nu.replace(/\s+/g, '')
+                        .toLowerCase() === pa[j].replace(/\s+/g, '').toLowerCase()) { ok = true; break }
+                }
+                if (!ok) { a.wrongCount = (a.wrongCount || 0) + 1;
+                    a.lastWrongAnswer = u;
+                    saveWrongCounts(currentFileId) }
+                answerMap.set(qKey, a);
+                if (ic) { ic.className = 'result-icon ' + (ok ? 'correct' : 'wrong');
+                    ic.textContent = ok ? '✓' : '✗' }
+                i.style.borderBottomColor = ok ? '#4caf50' : '#f44336';
+                i.style.color = ok ? '#4caf50' : '#f44336';
+                if (dp && !ok) { dp.textContent = '答案: ' + a.answer;
+                    dp.classList.add('show') }
+                if (currentFileId) saveToHistory();
+                return ok ? 'correct' : 'wrong'
+            }
+
+            function saveToHistory() {
+                if (!currentFileId) return;
+                var h = getHistoryData(currentFileId),
+                    ans = {},
+                    chk = {},
+                    wa = {};
+                answerMap.forEach(function(a, k) {
+                    var i = document.querySelector('.fill-blank-input[data-q="' + k + '"]');
+                    if (i && i.value.trim()) ans[k] = i.value;
+                    if (a.checked) chk[k] = true;
+                    if (a.lastWrongAnswer) wa[k] = a.lastWrongAnswer
+                });
+                h.fileName = document.title;
+                h.date = new Date().toISOString();
+                h.answers = ans;
+                h.checked = chk;
+                h.wrongAnswers = wa;
+                localStorage.setItem('quiz_' + currentFileId, JSON.stringify(h))
+            }
+
+            function getHistoryData(fid) { var s = localStorage.getItem('quiz_' + fid); return s ? (JSON.parse(s) ||
+                {}) : { fileName: '', date: '', answers: {}, checked: {}, wrongAnswers: {} } }
+
+            function getAllHistory() { var h = []; for (var i = 0; i < localStorage.length; i++) { var k = localStorage
+                    .key(i); if (k.startsWith('quiz_')) { try { var d = JSON.parse(localStorage.getItem(k));
+                        d.fileId = k.replace('quiz_', '');
+                        h.push(d) } catch (e) {} } } return h.sort(function(a, b) { return new Date(b.date) - new Date(
+                        a.date) }) }
+
+            function deleteHistory(fid) { localStorage.removeItem('quiz_' + fid);
+                localStorage.removeItem('wrong_' + fid) }
+
+            function restoreHistory(fid) {
+                var h = getHistoryData(fid);
+                Object.keys(h.answers).forEach(function(k) {
+                    var i = document.querySelector('.fill-blank-input[data-q="' + k + '"]');
+                    if (i) { i.value = h.answers[k]; if (h.checked[k]) checkAnswerSilent(k, h.answers[k]) }
+                })
+            }
+
+            function checkAnswerSilent(qKey, ua) {
+                var a = answerMap.get(qKey);
+                if (!a || !a.answer) return;
+                var i = document.querySelector('.fill-blank-input[data-q="' + qKey + '"]'),
+                    ic = document.querySelector('.result-icon[data-q="' + qKey + '"]'),
+                    dp = document.querySelector('.answer-display[data-q="' + qKey + '"]');
+                if (!i) return;
+                a.checked = true;
+                var ok = false,
+                    nu = ua.replace(/\s+/g, ' ').trim(),
+                    pa = a.answer.split('|').map(function(x) { return x.replace(/\s+/g, ' ').trim() });
+                for (var j = 0; j < pa.length; j++) {
+                    if (nu === pa[j] || nu.toLowerCase() === pa[j].toLowerCase() || nu.replace(/\s+/g, '')
+                        .toLowerCase() === pa[j].replace(/\s+/g, '').toLowerCase()) { ok = true; break }
+                }
+                if (!ok) { a.wrongCount = (a.wrongCount || 0) + 1;
+                    a.lastWrongAnswer = ua;
+                    saveWrongCounts(currentFileId) }
+                answerMap.set(qKey, a);
+                if (ic) { ic.className = 'result-icon ' + (ok ? 'correct' : 'wrong');
+                    ic.textContent = ok ? '✓' : '✗' }
+                i.style.borderBottomColor = ok ? '#4caf50' : '#f44336';
+                i.style.color = ok ? '#4caf50' : '#f44336';
+                if (dp && !ok) { dp.textContent = '答案: ' + a.answer;
+                    dp.classList.add('show') }
+            }
+
+            setInterval(function() { if (currentFileId && answerMap.size > 0) saveToHistory() }, 30000);
+
+            window.checkAllAnswers = function() {
+                if (isCheckingAll) return;
+                isCheckingAll = true;
+                var t = 0,
+                    c = 0,
+                    w = 0,
+                    na = 0,
+                    e = 0;
+                answerMap.forEach(function(a, k) {
+                    t++;
+                    if (!a.answer) { na++; return }
+                    var i = document.querySelector('.fill-blank-input[data-q="' + k + '"]');
+                    if (!i || i.value.trim() === '') { e++; return }
+                    if (checkAnswer(k) === 'correct') c++;
+                    else w++
+                });
+                if (currentFileId) saveToHistory();
+                alert('共' + t + '题\n已填' + (t - e - na) + '题\n正确' + c + '题\n错误' + w + '题');
+                isCheckingAll = false
+            };
+
+            window.clearAllMarks = function() {
+                document.querySelectorAll('.result-icon').forEach(function(i) { i.className = 'result-icon';
+                    i.textContent = '' });
+                document.querySelectorAll('.answer-display').forEach(function(d) { d.classList.remove('show');
+                    d.textContent = '' });
+                document.querySelectorAll('.fill-blank-input').forEach(function(i) { i.style.borderBottomColor =
+                        '#667eea';
+                    i.style.color = 'inherit' });
+                answerMap.forEach(function(a, k) { a.checked = false;
+                    answerMap.set(k, a) });
+                if (currentFileId) saveToHistory()
+            };
+
+            window.clearWrongAnswers = function() {
+                document.querySelectorAll('.fill-blank-input').forEach(function(i) {
+                    var q = i.dataset.q,
+                        ic = document.querySelector('.result-icon[data-q="' + q + '"]'),
+                        dp = document.querySelector('.answer-display[data-q="' + q + '"]');
+                    if (ic && ic.classList.contains('wrong')) {
+                        i.value = '';
+                        i.style.borderBottomColor = '#667eea';
+                        i.style.color = 'inherit';
+                        ic.className = 'result-icon';
+                        ic.textContent = '';
+                        if (dp) { dp.classList.remove('show');
+                            dp.textContent = '' }
+                        var a = answerMap.get(q);
+                        if (a) { a.checked = false;
+                            answerMap.set(q, a) }
+                    }
+                });
+                if (currentFileId) saveToHistory()
+            };
+
+            function resetAllAnswers() {
+                document.querySelectorAll('.fill-blank-input').forEach(function(i) { i.value = '';
+                    i.style.borderBottomColor = '#667eea';
+                    i.style.color = 'inherit' });
+                document.querySelectorAll('.result-icon').forEach(function(i) { i.className = 'result-icon';
+                    i.textContent = '' });
+                document.querySelectorAll('.answer-display').forEach(function(d) { d.classList.remove('show');
+                    d.textContent = '' });
+                answerMap.forEach(function(a, k) { a.checked = false;
+                    answerMap.set(k, a) });
+                if (currentFileId) saveToHistory()
+            }
+
+            function clearExerciseData() {
+                document.querySelectorAll('.fill-blank-input').forEach(function(i) { i.value = '';
+                    i.style.borderBottomColor = '#667eea';
+                    i.style.color = 'inherit' });
+                document.querySelectorAll('.result-icon').forEach(function(i) { i.className = 'result-icon';
+                    i.textContent = '' });
+                document.querySelectorAll('.answer-display').forEach(function(d) { d.classList.remove('show');
+                    d.textContent = '' });
+                answerMap.forEach(function(a, k) { a.checked = false;
+                    a.wrongCount = 0;
+                    a.lastWrongAnswer = null;
+                    answerMap.set(k, a) });
+                if (currentFileId) { saveToHistory();
+                    clearWrongCounts(currentFileId) }
+            }
+
+            window.showStats = function() {
+                var t = answerMap.size,
+                    c = 0,
+                    ok = 0,
+                    na = 0;
+                answerMap.forEach(function(a, k) {
+                    if (!a.answer) na++;
+                    if (a.checked) {
+                        c++;
+                        var i = document.querySelector('.fill-blank-input[data-q="' + k + '"]');
+                        if (i && a.answer) {
+                            var u = i.value.replace(/\s+/g, ' ').trim(),
+                                pa = a.answer.split('|').map(function(x) { return x.replace(/\s+/g, ' ')
+                                    .trim() });
+                            if (pa.some(function(x) { return u === x || u.toLowerCase() === x
+                                    .toLowerCase() || u.replace(/\s+/g, '').toLowerCase() === x
+                                    .replace(/\s+/g, '').toLowerCase() })) ok++
+                        }
+                    }
+                });
+                document.getElementById('statsContent').innerHTML = basicSanitize(
+                    '<div class="stat-item"><span>总题数</span><strong>' + t +
+                    '</strong></div><div class="stat-item"><span>已检查</span><strong>' + c +
+                    '</strong></div><div class="stat-item"><span>正确</span><strong style="color:#4caf50;">' + ok +
+                    '</strong></div><div class="stat-item"><span>错误</span><strong style="color:#f44336;">' + (c -
+                        ok) +
+                    '</strong></div><div class="stat-item"><span>未检查</span><strong style="color:#999;">' + (t -
+                        c) +
+                    '</strong></div><div class="stat-item"><span>无答案</span><strong style="color:#ff9800;">' +
+                    na + '</strong></div>'
+                );
+                document.getElementById('statsPanel').classList.add('show');
+                document.getElementById('statsOverlay').classList.add('show')
+            };
+
+            window.hideStats = function() {
+                document.getElementById('statsPanel').classList.remove('show');
+                document.getElementById('statsOverlay').classList.remove('show')
+            };
+
+            window.showHistory = function() {
+                var hs = getAllHistory(),
+                    ct = document.getElementById('historyContent');
+                if (hs.length === 0) ct.innerHTML = '<div class="history-empty">暂无历史记录</div>';
+                else ct.innerHTML = hs.map(function(h) {
+                    var d = new Date(h.date);
+                    return '<div class="history-item"><div class="history-item-info" onclick="loadHistoryFile(\'' +
+                        h.fileId + '\')"><div class="history-item-name">' + (h.fileName || '未命名') +
+                        '</div><div class="history-item-meta">' + (d.getMonth() + 1) + '/' + d.getDate() +
+                        ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes())
+                        .padStart(2, '0') + ' · ' + Object.keys(h.answers || {}).length +
+                        '题已填</div></div><button class="history-item-detail" onclick="event.stopPropagation();showWrongDetail(\'' +
+                        h.fileId + '\')">详情</button><button class="history-item-delete" onclick="event.stopPropagation();deleteHistoryItem(\'' +
+                        h.fileId + '\')">删除</button></div>'
+                }).join('');
+                document.getElementById('historyPanel').classList.add('show');
+                document.getElementById('historyOverlay').classList.add('show')
+            };
+
+            window.hideHistory = function() {
+                document.getElementById('historyPanel').classList.remove('show');
+                document.getElementById('historyOverlay').classList.remove('show')
+            };
+
+            window.deleteHistoryItem = function(fid) { deleteHistory(fid);
+                showHistory() };
+
+            window.loadHistoryFile = function(fid) { currentFileId = fid;
+                restoreHistory(fid);
+                hideHistory() };
+
+            window.showWrongDetail = function(fid) {
+                var ws = loadWrongCounts(fid),
+                    h = getHistoryData(fid),
+                    wa = h.wrongAnswers || {},
+                    ht = '';
+                var es = Object.entries(ws).sort(function(a, b) { return a[0].localeCompare(b[0]) });
+                if (es.length === 0) ht = '<div style="text-align:center;color:#999;padding:20px;">暂无错误记录</div>';
+                else es.forEach(function(e) {
+                    var q = e[0],
+                        wc = e[1],
+                        qn = q.replace('Q', ''),
+                        ca = '',
+                        wr = wa[q] || '';
+                    if (currentFileId === fid && answerMap.has(q)) ca = answerMap.get(q).answer;
+                    if (!ca) {
+                        var sa = localStorage.getItem('answers_' + fid);
+                        if (sa) { try { var am = JSON.parse(sa);
+                                ca = am[q] || '' } catch (ex) {} }
+                    }
+                    ht += '<div class="wrong-detail-item"><div class="q-label">Q' + qn + '（错误 ' + wc +
+                        ' 次）</div><div>正确答案：<span class="correct-ans">' + (ca || '未知') +
+                        '</span></div>' + (wr ? '<div>错误回答：<span class="wrong-ans">' + escHtml(wr) +
+                        '</span></div>' : '') + '</div>'
+                });
+                document.getElementById('wrongDetailContent').innerHTML = basicSanitize(ht);
+                document.getElementById('wrongDetailPanel').classList.add('show');
+                document.getElementById('wrongDetailOverlay').classList.add('show')
+            };
+
+            window.hideWrongDetail = function() {
+                document.getElementById('wrongDetailPanel').classList.remove('show');
+                document.getElementById('wrongDetailOverlay').classList.remove('show')
+            };
+
+            function saveAnswersMap(fid) {
+                var a = {};
+                answerMap.forEach(function(d, k) { if (d.answer) a[k] = d.answer });
+                localStorage.setItem('answers_' + fid, JSON.stringify(a))
+            }
+            var origSave = saveToHistory;
+            saveToHistory = function() { origSave(); if (currentFileId) saveAnswersMap(currentFileId) };
+
+            window.showGuide = function() {
+                document.getElementById('guideContent').innerHTML = basicSanitize(
+                    '<h2>广播功能</h2><p><b>📡 广播题目：</b>输入口令后快速循环广播，显示已接收次数。</p><p><b>📥 接收广播：</b>输入口令后持续监听，每1秒尝试接收一次，收到文件后自动停止接收。</p>'
+                    );
+                document.getElementById('guidePanel').classList.add('show');
+                document.getElementById('guideOverlay').classList.add('show')
+            };
+
+            window.hideGuide = function() {
+                document.getElementById('guidePanel').classList.remove('show');
+                document.getElementById('guideOverlay').classList.remove('show')
+            };
+
+            updateTransform();
+            updateZoomDisplay();
+            var urlFile = getUrlParam('file');
+            if (urlFile) { setTimeout(function() { loadFromUrl(urlFile) }, 500) }
+        })();
+    </script>
+</body>
+</html>
