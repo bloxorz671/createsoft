@@ -24,4 +24,3 @@ app
 [n=八下英语Focusing on culture听力 p=audio.jpg l=Focusing on culture.mp3 g=英语（学科）资料]
 [n=八下英语Cross-curricular connection听力 p=audio.jpg l=Cross-curricular connection.mp3 g=英语（学科）资料]
 [n=八下英语单词听力 p=audio.jpg l=单词.mp3 g=英语（学科）资料]
-[n=5.1 人民代表大会制度.pptx p=ppt.jpg l=https://www.kdocs.cn/l/coORXaIJ3qIU g=政治（学科）资料]
