@@ -20,135 +20,31 @@
     <meta name="twitter:image" content="https://luckynum.top/41.jpg">
     <meta name="description" content="欢迎使用初二五班智慧应用平台">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
+    </script>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        body {
-            background: #f5f7fc;
-            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-            min-height: 100vh;
-            padding-bottom: 70px;
-        }
-        .platform-container {
-            max-width: 550px;
-            margin: 0 auto;
-            background: #ffffff;
-            min-height: calc(100vh - 70px);
-        }
-        .main-header {
-            text-align: center;
-            padding: 20px 16px 12px;
-            background: white;
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-        .main-header h1 {
-            font-size: 1.9rem;
-            font-weight: 700;
-            color: #1e3c72;
-            letter-spacing: -0.3px;
-            cursor: pointer;
-            display: inline-block;
-            padding: 0 16px;
-        }
-        .warning-banner {
-            background: #fff3cd;
-            color: #856404;
-            text-align: center;
-            padding: 8px;
-            font-size: 0.8rem;
-            border-bottom: 1px solid #ffeeba;
-        }
-        .greeting-section {
-            padding: 12px 20px 0 20px;
-            background: white;
-        }
-        .greeting-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            cursor: pointer;
-        }
-        .greeting-text {
-            font-size: 1.9rem;
-            font-weight: 700;
-            color: #1e3c72;
-            letter-spacing: -0.3px;
-        }
-        .logout-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 6px 16px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            cursor: pointer;
-            margin-left: 12px;
-        }
-        .logout-btn:hover {
-            background: #c0392b;
-        }
-        .unlogged-section {
-            padding: 12px 20px 0 20px;
-            background: white;
-        }
-        .unlogged-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-        .unlogged-text {
-            font-size: 1rem;
-            font-weight: 500;
-            color: #e67e22;
-            background: #fff3e0;
-            padding: 10px 16px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .scan-login-btn {
-            background: #2b4c8a;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 10px 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .scan-login-btn:hover {
-            background: #1e3c72;
-            transform: scale(1.02);
-        }
-        .rating-box {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px 14px;
-            font-size: 1rem;
-            font-weight: 600;
-            color: white;
-            border: 2px solid;
-            border-radius: 8px;
-            white-space: nowrap;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #f5f7fc; font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; min-height: 100vh; padding-bottom: 70px; }
+        .platform-container { max-width: 550px; margin: 0 auto; background: #ffffff; min-height: calc(100vh - 70px); }
+        .main-header { text-align: center; padding: 20px 16px 12px; background: white; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .main-header h1 { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; cursor: pointer; display: inline-block; padding: 0 16px; }
+        .warning-banner { background: #fff3cd; color: #856404; text-align: center; padding: 8px; font-size: 0.8rem; border-bottom: 1px solid #ffeeba; }
+        .greeting-section { padding: 12px 20px 0 20px; background: white; }
+        .greeting-wrapper { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; cursor: pointer; }
+        .greeting-text { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; }
+        .logout-btn { background: #e74c3c; color: white; border: none; border-radius: 20px; padding: 6px 16px; font-size: 0.8rem; font-weight: 500; cursor: pointer; margin-left: 12px; }
+        .logout-btn:hover { background: #c0392b; }
+        .unlogged-section { padding: 12px 20px 0 20px; background: white; }
+        .unlogged-wrapper { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; }
+        .unlogged-text { font-size: 1rem; font-weight: 500; color: #e67e22; background: #fff3e0; padding: 10px 16px; border-radius: 12px; text-align: center; }
+        .scan-login-btn { background: #2b4c8a; color: white; border: none; border-radius: 12px; padding: 10px 20px; font-size: 0.9rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+        .scan-login-btn:hover { background: #1e3c72; transform: scale(1.02); }
+        .rating-box { display: inline-flex; align-items: center; justify-content: center; padding: 4px 14px; font-size: 1rem; font-weight: 600; color: white; border: 2px solid; border-radius: 8px; white-space: nowrap; }
         .rating-box.level-0 { background: #e74c3c; border-color: #c0392b; }
         .rating-box.level-1 { background: #f39c12; border-color: #e67e22; }
         .rating-box.level-2 { background: #f1c40f; border-color: #d4ac0d; color: #8B6914; }
@@ -157,42 +53,20 @@
         .score-wrapper { display: inline-flex; align-items: baseline; gap: 4px; margin-left: 4px; }
         .score-label { font-size: 0.9rem; color: #666; }
         .score-number { font-size: 1.2rem; font-weight: 700; color: #2b4c8a; }
-        .edit-mode .carousel-slide,
-        .edit-mode .app-card { position: relative; }
-        .delete-btn {
-            position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none;
-            border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .edit-app-btn {
-            position: absolute; top: 5px; left: 5px; background: #3498db; color: white; border: none;
-            border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .drag-handle {
-            position: absolute; top: 5px; left: 35px; background: #95a5a6; color: white; border: none;
-            border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: grab; z-index: 10;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .edit-mode .carousel-slide, .edit-mode .app-card { position: relative; }
+        .delete-btn { position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .edit-app-btn { position: absolute; top: 5px; left: 5px; background: #3498db; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .drag-handle { position: absolute; top: 5px; left: 35px; background: #95a5a6; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: grab; z-index: 10; display: flex; align-items: center; justify-content: center; }
         .add-fab { position: fixed; bottom: 80px; right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 100; }
-        .add-btn, .file-manager-btn, .add-carousel-btn, .upload-only-btn {
-            background: #27ae60; color: white; border: none; border-radius: 50%; width: 56px; height: 56px;
-            font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
+        .add-btn, .file-manager-btn, .add-carousel-btn, .upload-only-btn { background: #27ae60; color: white; border: none; border-radius: 50%; width: 56px; height: 56px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         .add-carousel-btn { background: #3498db; }
         .upload-only-btn { background: #f39c12; font-size: 20px; }
         .file-manager-btn { background: #9b59b6; font-size: 20px; }
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5);
-            z-index: 2000; display: flex; align-items: center; justify-content: center; visibility: hidden;
-            opacity: 0; transition: all 0.2s;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: all 0.2s; }
         .modal-overlay.show { visibility: visible; opacity: 1; }
         .modal-content { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto; }
         .modal-content h3 { margin-bottom: 16px; }
-        .modal-content input,
-        .modal-content select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
         .modal-buttons { display: flex; gap: 10px; margin-top: 16px; }
         .confirm-btn { background: #2b4c8a; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
         .cancel-btn { background: #95a5a6; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
@@ -201,53 +75,30 @@
         .student-id-modal .subtitle { color: #666; font-size: 0.85rem; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
         .student-id-modal input { text-align: center; font-size: 1.2rem; letter-spacing: 2px; }
         .student-id-modal .warning-text { color: #e74c3c; font-size: 0.8rem; margin-top: 12px; display: none; }
-        .scan-modal .modal-content {
-            padding: 0; overflow: hidden; max-width: 100%; width: 100%; height: 100%; max-height: 100%;
-            border-radius: 0; background: #000; display: flex; flex-direction: column;
-        }
+        .scan-modal .modal-content { padding: 0; overflow: hidden; max-width: 100%; width: 100%; height: 100%; max-height: 100%; border-radius: 0; background: #000; display: flex; flex-direction: column; }
         .scan-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; background: #1a1a2e; color: white; flex-shrink: 0; }
         .scan-header h3 { margin: 0; font-size: 1.2rem; }
         .scan-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0 8px; }
         .scan-video-container { flex: 1; position: relative; background: #000; overflow: hidden; }
         #scanVideo { width: 100%; height: 100%; object-fit: cover; }
-        .scan-area {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 280px;
-            border: 2px solid rgba(255, 255, 255, 0.8); border-radius: 24px;
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); z-index: 10;
-        }
-        .scan-line {
-            position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-            background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 0, 0.3) 20%, #00ff00 45%, #00ff00 55%, rgba(0, 255, 0, 0.3) 80%, transparent 100%);
-            box-shadow: 0 0 8px #00ff00; animation: scanMove 2.5s ease-in-out infinite; pointer-events: none;
-        }
+        .scan-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 280px; height: 280px; border: 2px solid rgba(255,255,255,0.8); border-radius: 24px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.6); z-index: 10; }
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, transparent 0%, rgba(0,255,0,0.3) 20%, #00ff00 45%, #00ff00 55%, rgba(0,255,0,0.3) 80%, transparent 100%); box-shadow: 0 0 8px #00ff00; animation: scanMove 2.5s ease-in-out infinite; pointer-events: none; }
         @keyframes scanMove { 0% { top: 0; opacity: 1; } 45% { opacity: 1; } 55% { opacity: 0.8; } 100% { top: 100%; opacity: 0.3; } }
         .corner { position: absolute; width: 30px; height: 30px; border-color: #00ff00; border-style: solid; border-width: 0; }
         .corner-tl { top: -2px; left: -2px; border-top-width: 4px; border-left-width: 4px; border-radius: 8px 0 0 0; }
         .corner-tr { top: -2px; right: -2px; border-top-width: 4px; border-right-width: 4px; border-radius: 0 8px 0 0; }
         .corner-bl { bottom: -2px; left: -2px; border-bottom-width: 4px; border-left-width: 4px; border-radius: 0 0 0 8px; }
         .corner-br { bottom: -2px; right: -2px; border-bottom-width: 4px; border-right-width: 4px; border-radius: 0 0 8px 0; }
-        .scan-tip {
-            position: absolute; bottom: 20%; left: 0; right: 0; text-align: center; color: rgba(255, 255, 255, 0.8);
-            font-size: 14px; z-index: 20; background: rgba(0, 0, 0, 0.5); padding: 8px 16px; width: fit-content;
-            margin: 0 auto; border-radius: 20px; backdrop-filter: blur(4px); pointer-events: none;
-        }
-        .album-btn {
-            position: absolute; bottom: 40px; right: 20px; width: 56px; height: 56px;
-            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            border: 1px solid rgba(255, 255, 255, 0.3); cursor: pointer; z-index: 30;
-        }
+        .scan-tip { position: absolute; bottom: 20%; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.8); font-size: 14px; z-index: 20; background: rgba(0,0,0,0.5); padding: 8px 16px; width: fit-content; margin: 0 auto; border-radius: 20px; backdrop-filter: blur(4px); pointer-events: none; }
+        .album-btn { position: absolute; bottom: 40px; right: 20px; width: 56px; height: 56px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.3); cursor: pointer; z-index: 30; }
         .album-btn svg { width: 28px; height: 28px; fill: white; }
         .album-btn input { display: none; }
-        .scan-status {
-            position: absolute; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.6); color: white;
-            padding: 6px 12px; border-radius: 20px; font-size: 12px; z-index: 30; backdrop-filter: blur(4px);
-        }
+        .scan-status { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; z-index: 30; backdrop-filter: blur(4px); }
         .carousel-section { margin: 12px 16px 24px; background: #f0f2f6; overflow: hidden; }
         .carousel-wrapper { width: 100%; overflow: hidden; }
         .carousel-track { display: flex; transition: transform 0.4s; cursor: grab; }
         .carousel-slide { flex: 0 0 100%; position: relative; }
-        .carousel-slide img { width: 100%; display: block; aspect-ratio: 16 / 9; object-fit: cover; }
+        .carousel-slide img { width: 100%; display: block; aspect-ratio: 16/9; object-fit: cover; }
         .carousel-dots { display: flex; justify-content: center; gap: 10px; padding: 12px 0; }
         .dot { width: 8px; height: 8px; background: #bbb; border-radius: 50%; cursor: pointer; }
         .dot.active { width: 24px; background: #2b4c8a; border-radius: 12px; }
@@ -256,12 +107,8 @@
         .group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 8px 0; border-bottom: 2px solid #eef2f8; }
         .group-title { font-size: 1.3rem; font-weight: 600; color: #1f2937; }
         .apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 16px; }
-        .app-card {
-            background: #f9fafc; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-            padding: 16px 8px; border: 1px solid rgba(0, 0, 0, 0.03); cursor: pointer; position: relative;
-            transition: all 0.2s; border-radius: 12px;
-        }
-        .app-card:hover { transform: translateY(-4px); background: #ffffff; box-shadow: 0 18px 28px -8px rgba(0, 0, 0, 0.12); }
+        .app-card { background: #f9fafc; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 16px 8px; border: 1px solid rgba(0,0,0,0.03); cursor: pointer; position: relative; transition: all 0.2s; border-radius: 12px; }
+        .app-card:hover { transform: translateY(-4px); background: #ffffff; box-shadow: 0 18px 28px -8px rgba(0,0,0,0.12); }
         .app-icon { width: 58px; height: 58px; object-fit: contain; margin-bottom: 14px; background: #f0f2f5; padding: 4px; border-radius: 12px; }
         .app-name { font-size: 0.85rem; font-weight: 500; color: #1f2937; text-align: center; word-break: break-word; line-height: 1.3; }
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; }
@@ -270,12 +117,12 @@
         .viewer-header { background: #16213e; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; z-index: 10; }
         .viewer-title { font-size: 1rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; margin-right: 12px; }
         .viewer-controls { display: flex; gap: 12px; flex-shrink: 0; }
-        .viewer-btn { background: rgba(255, 255, 255, 0.2); border: none; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; white-space: nowrap; }
-        .viewer-btn:hover { background: rgba(255, 255, 255, 0.4); }
-        .zoom-btn { background: rgba(255, 255, 255, 0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; font-size: 1.2rem; font-weight: bold; }
+        .viewer-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; white-space: nowrap; }
+        .viewer-btn:hover { background: rgba(255,255,255,0.4); }
+        .zoom-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; font-size: 1.2rem; font-weight: bold; }
         .viewer-content { flex: 1; background: #0f0f1a; overflow-y: auto; position: relative; padding: 16px; }
         .audio-list-container { width: 100%; max-width: 600px; margin: 0 auto; }
-        .audio-list-item { background: #ffffff; border-radius: 16px; margin-bottom: 16px; padding: 14px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+        .audio-list-item { background: #ffffff; border-radius: 16px; margin-bottom: 16px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .audio-item-title { font-size: 1rem; font-weight: 600; color: #1e293b; margin-bottom: 12px; word-break: break-word; padding-left: 4px; }
         .audio-item-controls audio { width: 100%; height: 44px; border-radius: 8px; }
         @media (prefers-color-scheme: dark) { .audio-list-item { background: #2d2d44; } .audio-item-title { color: #f1f5f9; } }
@@ -296,14 +143,14 @@
         .file-action-btn:hover { background: #e0e0e0; }
         .file-action-btn.delete { color: #e74c3c; }
         .current-path { padding: 8px; background: #f5f5f5; border-radius: 8px; margin-bottom: 10px; font-family: monospace; font-size: 12px; word-break: break-all; }
-        .profile-card { background: linear-gradient(135deg, #2b4c8a, #1e3c72); border-radius: 24px; padding: 24px; margin-bottom: 24px; display: flex; align-items: center; gap: 18px; color: white; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); }
-        .avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); background: #f0f2f5; cursor: pointer; transition: transform 0.1s ease; }
+        .profile-card { background: linear-gradient(135deg, #2b4c8a, #1e3c72); border-radius: 24px; padding: 24px; margin-bottom: 24px; display: flex; align-items: center; gap: 18px; color: white; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); background: #f0f2f5; cursor: pointer; transition: transform 0.1s ease; }
         .avatar:active { transform: scale(0.97); }
         .profile-info { flex: 1; }
         .profile-name { font-size: 1.4rem; font-weight: 600; margin-bottom: 4px; }
         .profile-student-id { font-size: 0.85rem; opacity: 0.85; font-family: monospace; }
-        .profile-logout { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 30px; padding: 8px 16px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
-        .profile-logout:hover { background: rgba(255, 255, 255, 0.3); }
+        .profile-logout { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; padding: 8px 16px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+        .profile-logout:hover { background: rgba(255,255,255,0.3); }
         .menu-section { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eef2f8; }
         .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #f0f2f5; cursor: pointer; transition: background 0.2s; }
         .menu-item:last-child { border-bottom: none; }
@@ -320,7 +167,7 @@
         .record-score.plus { color: #10b981; }
         .record-score.minus { color: #ef4444; }
         .empty-records { text-align: center; padding: 40px; color: #94a3b8; }
-        .login-prompt { background: white; border-radius: 24px; padding: 48px 24px; text-align: center; margin: 40px 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .login-prompt { background: white; border-radius: 24px; padding: 48px 24px; text-align: center; margin: 40px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .login-prompt p { color: #64748b; margin-bottom: 20px; }
         .login-btn { background: #2b4c8a; color: white; border: none; padding: 12px 32px; border-radius: 40px; font-size: 1rem; font-weight: 500; cursor: pointer; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #eef2f8; display: flex; padding: 10px 30px 14px; justify-content: space-between; max-width: 550px; margin: 0 auto; z-index: 100; }
@@ -337,7 +184,6 @@
             .app-icon { width: 52px; height: 52px; }
             .app-name { font-size: 0.75rem; }
             .greeting-text { font-size: 1.6rem; }
-            .unlogged-text { font-size: 0.85rem; }
             .add-fab { bottom: 80px; right: 16px; }
             .add-btn, .file-manager-btn, .add-carousel-btn, .upload-only-btn { width: 48px; height: 48px; font-size: 20px; }
             .profile-card { padding: 16px; }
@@ -354,8 +200,8 @@
         .login-option-btn:active { transform: scale(0.98); }
         .login-option-cancel { background: #95a5a6; }
         .viewer-content::-webkit-scrollbar { width: 6px; }
-        .viewer-content::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
-        .viewer-content::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 3px; }
+        .viewer-content::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
+        .viewer-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
         .device-warning-modal .modal-content { text-align: center; max-width: 400px; }
         .device-warning-icon { font-size: 3rem; margin-bottom: 12px; }
         .device-warning-message { font-size: 1rem; color: #e67e22; line-height: 1.6; margin-bottom: 20px; padding: 0 10px; }
@@ -371,8 +217,6 @@
         .subscribe-btn-secondary:hover { background: #e2e8f0; }
         .subscribe-no-remind { margin-top: 8px; font-size: 0.8rem; color: #999; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
         .subscribe-no-remind input { width: 16px; height: 16px; cursor: pointer; }
-
-        /* 文档预览器样式 */
         .doc-viewer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f0f0; z-index: 50000; display: flex; flex-direction: column; }
         .doc-viewer-header { background: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; flex-shrink: 0; flex-wrap: wrap; gap: 8px; }
         .doc-viewer-header .doc-title { font-size: 1rem; font-weight: 500; color: #1e3c72; flex: 1; min-width: 100px; word-break: break-all; }
@@ -382,7 +226,7 @@
         .doc-viewer-header .doc-actions .close-btn { background: #e74c3c; color: white; }
         .doc-viewer-header .doc-actions .close-btn:hover { background: #c0392b; }
         .doc-viewer-body { flex: 1; overflow: auto; padding: 20px; background: #f5f5f5; display: flex; justify-content: center; align-items: flex-start; }
-        .doc-viewer-body .doc-content { background: white; padding: 24px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); max-width: 100%; width: 100%; min-height: 200px; border-radius: 4px; overflow: auto; }
+        .doc-viewer-body .doc-content { background: white; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); max-width: 100%; width: 100%; min-height: 200px; border-radius: 4px; overflow: auto; }
         .doc-viewer-body .doc-content img { max-width: 100%; height: auto; }
         .doc-viewer-body .doc-content .pdf-controls { display: flex; justify-content: center; align-items: center; gap: 16px; padding: 12px 0; flex-wrap: wrap; }
         .doc-viewer-body .doc-content .pdf-controls button { background: #2b4c8a; color: white; border: none; padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; }
@@ -395,8 +239,6 @@
         .doc-viewer-body .unsupported-content button { background: #2b4c8a; color: white; border: none; padding: 12px 32px; border-radius: 30px; font-size: 1rem; cursor: pointer; }
         .doc-viewer-body .unsupported-content button:hover { background: #1e3c72; }
         .doc-viewer-body .doc-content .txt-content { font-family: 'Courier New', monospace; white-space: pre-wrap; word-wrap: break-word; font-size: 14px; line-height: 1.8; }
-
-        /* XLSX 缩放和表格样式 */
         .xlsx-zoom-controls { display: flex; align-items: center; justify-content: center; padding: 10px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; flex-shrink: 0; gap: 4px; }
         .xlsx-zoom-btn { background: #2b4c8a; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
         .xlsx-zoom-btn:hover { background: #1e3c72; }
@@ -407,8 +249,11 @@
         .xlsx-table td { background: #ffffff; }
         .xlsx-table tr:nth-child(even) td { background: #f8f9fa; }
         .xlsx-table tr:hover td { background: #e8f4fd; }
+        .download-fallback-btn { display: inline-block; background: #e74c3c; color: white; border: none; padding: 14px 36px; border-radius: 30px; font-size: 1.1rem; font-weight: 600; cursor: pointer; text-decoration: none; margin-top: 12px; box-shadow: 0 4px 12px rgba(231,76,60,0.3); transition: all 0.2s; }
+        .download-fallback-btn:hover { background: #c0392b; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(231,76,60,0.4); }
     </style>
-    <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
+    <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js">
+    </script>
 </head>
 
 <body>
@@ -437,14 +282,12 @@
         </div>
         <div id="profilePage" class="page"><div id="profileContent" style="padding: 16px;"></div></div>
     </div>
-
     <div class="bottom-nav-wrapper">
         <div class="bottom-nav">
             <button class="nav-item active" id="navHomeBtn"><div class="nav-icon">🏠</div><span class="nav-label">主页</span></button>
             <button class="nav-item" id="navProfileBtn"><div class="nav-icon">👤</div><span class="nav-label">我的</span></button>
         </div>
     </div>
-
     <div class="add-fab" id="fabGroup" style="display: none;">
         <button class="file-manager-btn" id="fileManagerBtn" title="文件管理器">📁</button>
         <button class="upload-only-btn" id="uploadOnlyBtn" title="上传文件">📤</button>
@@ -452,7 +295,6 @@
         <button class="add-btn" id="addAppFab" title="添加应用">+</button>
         <button class="add-btn" id="addGroupFab" title="添加分组" style="background:#9b59b6;">📂</button>
     </div>
-
     <div id="deviceWarningModal" class="modal-overlay device-warning-modal" style="z-index: 30000;">
         <div class="modal-content">
             <div class="device-warning-icon" id="deviceWarningIcon"></div>
@@ -460,23 +302,21 @@
             <button class="device-warning-btn" id="deviceWarningCloseBtn">我知道了</button>
         </div>
     </div>
-
     <div id="subscribeModal" class="modal-overlay subscribe-modal" style="z-index: 30003;">
         <div class="modal-content">
             <div class="subscribe-icon">🔔</div>
-            <h3 style="margin-bottom: 8px;">订阅通知</h3>
+            <h3 style="margin-bottom:8px;">订阅通知</h3>
             <div class="subscribe-message">订阅通知后，你可以第一时间收到智慧平台发出的通知，可随时取消。</div>
             <div class="subscribe-buttons">
                 <button id="subscribeBtn" class="subscribe-btn-primary">去订阅</button>
                 <button id="cancelSubscribeBtn" class="subscribe-btn-secondary">取消</button>
             </div>
-            <div id="noRemindContainer" style="display: none; margin-top: 16px;">
+            <div id="noRemindContainer" style="display:none;margin-top:16px;">
                 <label class="subscribe-no-remind"><input type="checkbox" id="noRemindCheckbox"> 我已订阅不再提示</label>
             </div>
         </div>
     </div>
-
-    <div id="scanModal" class="modal-overlay scan-modal" style="z-index: 10000;">
+    <div id="scanModal" class="modal-overlay scan-modal" style="z-index:10000;">
         <div class="modal-content" style="padding:0;max-width:100%;width:100%;height:100%;border-radius:0;background:#000;display:flex;flex-direction:column;">
             <div class="scan-header"><h3>扫码登录</h3><button id="closeScanModal" class="scan-close">✕</button></div>
             <div class="scan-video-container">
@@ -488,15 +328,13 @@
             </div>
         </div>
     </div>
-
-    <div id="pointsModal" class="modal-overlay" style="z-index: 10001;">
+    <div id="pointsModal" class="modal-overlay" style="z-index:10001;">
         <div class="modal-content">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><h3>📊 积分明细</h3><button id="closePointsModal" style="background:none;border:none;font-size:1.5rem;cursor:pointer;">✕</button></div>
             <div id="pointsModalBody" style="max-height:60vh;overflow-y:auto;"></div>
         </div>
     </div>
-
-    <div id="loginOptionsModal" class="modal-overlay" style="z-index: 10002;">
+    <div id="loginOptionsModal" class="modal-overlay" style="z-index:10002;">
         <div class="modal-content login-options-modal">
             <h3>请选择登录方式</h3>
             <div class="login-options">
@@ -508,28 +346,33 @@
     </div>
 
     <script>
+        // ========== 全局错误处理 ==========
+        window.addEventListener('error', function(e) {
+            console.error('全局错误:', e.message, e.filename, e.lineno, e.colno);
+        });
+
         // ========== 订阅通知弹窗 ==========
         function checkAndShowSubscribeModal() {
-            const noRemind = localStorage.getItem('subscribe_no_remind');
+            var noRemind = localStorage.getItem('subscribe_no_remind');
             if (noRemind === 'true') return;
-            const modal = document.getElementById('subscribeModal');
+            var modal = document.getElementById('subscribeModal');
             if (!modal) return;
-            const subscribeBtn = document.getElementById('subscribeBtn');
-            const cancelBtn = document.getElementById('cancelSubscribeBtn');
-            const noRemindContainer = document.getElementById('noRemindContainer');
-            const noRemindCheckbox = document.getElementById('noRemindCheckbox');
+            var subscribeBtn = document.getElementById('subscribeBtn');
+            var cancelBtn = document.getElementById('cancelSubscribeBtn');
+            var noRemindContainer = document.getElementById('noRemindContainer');
+            var noRemindCheckbox = document.getElementById('noRemindCheckbox');
             if (noRemindCheckbox) noRemindCheckbox.checked = false;
             if (localStorage.getItem('has_clicked_subscribe') === 'true') {
                 if (noRemindContainer) noRemindContainer.style.display = 'block';
             } else {
                 if (noRemindContainer) noRemindContainer.style.display = 'none';
             }
-            setTimeout(() => modal.classList.add('show'), 500);
-            subscribeBtn.onclick = () => { localStorage.setItem('has_clicked_subscribe', 'true'); window.location.href = 'notwec'; };
-            cancelBtn.onclick = () => modal.classList.remove('show');
-            modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('show'); };
+            setTimeout(function() { modal.classList.add('show'); }, 500);
+            subscribeBtn.onclick = function() { localStorage.setItem('has_clicked_subscribe', 'true'); window.location.href = 'notwec'; };
+            cancelBtn.onclick = function() { modal.classList.remove('show'); };
+            modal.onclick = function(e) { if (e.target === modal) modal.classList.remove('show'); };
             if (noRemindCheckbox) {
-                noRemindCheckbox.onchange = (e) => {
+                noRemindCheckbox.onchange = function(e) {
                     if (e.target.checked) localStorage.setItem('subscribe_no_remind', 'true');
                     else localStorage.removeItem('subscribe_no_remind');
                 };
@@ -538,48 +381,47 @@
 
         // ========== 设备兼容性检测 ==========
         (function() {
-            const ua = navigator.userAgent;
-            const isIOS = /iPhone|iPad|iPod/i.test(ua);
-            const isMac = /Macintosh/i.test(ua) && !isIOS;
-            const modal = document.getElementById('deviceWarningModal');
-            const icon = document.getElementById('deviceWarningIcon');
-            const msg = document.getElementById('deviceWarningMessage');
-            const closeBtn = document.getElementById('deviceWarningCloseBtn');
-            let wm = null;
-            if (isIOS) { wm = '当前设备访问本平台可能出现问题，建议更换安卓或鸿蒙设备访问'; icon.textContent = '⚠️'; }
-            else if (isMac) { wm = '当前设备访问本平台可能出现问题，建议更换Windows或Linux设备访问'; icon.textContent = '⚠️'; }
+            var ua = navigator.userAgent;
+            var isIOS = /iPhone|iPad|iPod/i.test(ua);
+            var isMac = /Macintosh/i.test(ua) && !isIOS;
+            var modal = document.getElementById('deviceWarningModal');
+            var icon = document.getElementById('deviceWarningIcon');
+            var msg = document.getElementById('deviceWarningMessage');
+            var closeBtn = document.getElementById('deviceWarningCloseBtn');
+            var wm = null;
+            if (isIOS) { wm = '当前设备访问本平台可能出现问题，建议更换安卓或鸿蒙设备访问'; if(icon) icon.textContent = '⚠️'; }
+            else if (isMac) { wm = '当前设备访问本平台可能出现问题，建议更换Windows或Linux设备访问'; if(icon) icon.textContent = '⚠️'; }
             if (wm && modal && msg) {
                 msg.textContent = wm; modal.classList.add('show');
-                closeBtn.addEventListener('click', () => modal.classList.remove('show'));
-                modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('show'); });
+                if(closeBtn) closeBtn.addEventListener('click', function() { modal.classList.remove('show'); });
+                modal.addEventListener('click', function(e) { if (e.target === modal) modal.classList.remove('show'); });
             }
         })();
 
         // ========== 配置 ==========
-        const CONFIG_URL = 'https://cdn.jsdelivr.net/gh/bloxorz671/createsoft@main/5app.txt';
-        const GITHUB_OWNER = 'bloxorz671';
-        const GITHUB_REPO = 'createsoft';
-        const GITHUB_PATH = '5app.txt';
-        const NAME_FILE_URL = 'https://luckynum.top/5name.txt';
-        const INTEGRAL_FILE_URL = 'https://cdn.jsdelivr.net/gh/bloxorz671/5class-system@main/student-integral.txt';
-        const JFFI_FILE_URL = 'https://cdn.jsdelivr.net/gh/bloxorz671/5class-system@main/jffi.txt';
+        var CONFIG_URL = 'https://cdn.jsdelivr.net/gh/bloxorz671/createsoft@main/5app.txt';
+        var GITHUB_OWNER = 'bloxorz671';
+        var GITHUB_REPO = 'createsoft';
+        var GITHUB_PATH = '5app.txt';
+        var NAME_FILE_URL = 'https://luckynum.top/5name.txt';
+        var INTEGRAL_FILE_URL = 'https://cdn.jsdelivr.net/gh/bloxorz671/5class-system@main/student-integral.txt';
+        var JFFI_FILE_URL = 'https://cdn.jsdelivr.net/gh/bloxorz671/5class-system@main/jffi.txt';
+        var TARGET_UA = 'ClassApp/1.0 (Grade8Class5)';
+        var isTargetDevice = navigator.userAgent === TARGET_UA;
 
-        const TARGET_UA = 'ClassApp/1.0 (Grade8Class5)';
-        const isTargetDevice = navigator.userAgent === TARGET_UA;
+        var slidesData = [], appItems = [], groupOrder = ['其他应用'];
+        var currentIndex = 0, autoInterval = null, totalSlides = 0;
+        var isEditMode = false, currentToken = null, fileSha = null;
+        var currentStudentId = null;
+        var nameMapping = {}, integralMapping = {};
+        var isAddingApp = false, isAddingCarousel = false;
+        var scanCodeReader = null, scanningActive = false, lastScanTime = 0;
+        var SCAN_COOLDOWN = 1000;
+        var defaultCameraId = null;
+        var draggedGroupIndex = null, draggedAppData = null;
+        var cachedFileList = null, fileListLoading = false;
 
-        let slidesData = [], appItems = [], groupOrder = ['其他应用'];
-        let currentIndex = 0, autoInterval = null, totalSlides = 0;
-        let isEditMode = false, currentToken = null, fileSha = null;
-        let currentStudentId = null;
-        let nameMapping = {}, integralMapping = {};
-        let isAddingApp = false, isAddingCarousel = false;
-        let scanCodeReader = null, scanningActive = false, lastScanTime = 0;
-        const SCAN_COOLDOWN = 1000;
-        let defaultCameraId = null;
-        let draggedGroupIndex = null, draggedAppData = null;
-        let cachedFileList = null, fileListLoading = false;
-
-        const RATING_CONFIG = [
+        var RATING_CONFIG = [
             { min: 12, max: Infinity, name: '夯爆了', colorClass: 'level-0' },
             { min: 9, max: 11, name: '顶级', colorClass: 'level-1' },
             { min: 5, max: 8, name: '人上人', colorClass: 'level-2' },
@@ -588,9 +430,11 @@
         ];
 
         function getRatingByIntegral(integral) {
-            const score = parseInt(integral);
+            var score = parseInt(integral);
             if (isNaN(score)) return RATING_CONFIG[4];
-            for (let c of RATING_CONFIG) if (score >= c.min && score <= c.max) return c;
+            for (var i = 0; i < RATING_CONFIG.length; i++) {
+                if (score >= RATING_CONFIG[i].min && score <= RATING_CONFIG[i].max) return RATING_CONFIG[i];
+            }
             return RATING_CONFIG[4];
         }
 
@@ -598,16 +442,16 @@
             if (!id) return;
             try { localStorage.setItem('studentId', id); } catch(e) {}
             try { sessionStorage.setItem('studentId', id); } catch(e) {}
-            try { document.cookie = `studentId=${id}; path=/; max-age=${7*24*60*60}`; } catch(e) {}
+            try { document.cookie = 'studentId=' + id + '; path=/; max-age=' + (7*24*60*60); } catch(e) {}
         }
 
         function getStudentId() {
-            const params = new URLSearchParams(window.location.search);
-            let id = params.get('p');
+            var params = new URLSearchParams(window.location.search);
+            var id = params.get('p');
             if (id && /^\d{5}$/.test(id)) { saveStudentId(id); return id; }
             try { id = localStorage.getItem('studentId'); if (id && /^\d{5}$/.test(id)) return id; } catch(e) {}
             try { id = sessionStorage.getItem('studentId'); if (id && /^\d{5}$/.test(id)) return id; } catch(e) {}
-            try { const m = document.cookie.match(/studentId=([^;]+)/); if (m && /^\d{5}$/.test(m[1])) return m[1]; } catch(e) {}
+            try { var m = document.cookie.match(/studentId=([^;]+)/); if (m && /^\d{5}$/.test(m[1])) return m[1]; } catch(e) {}
             return null;
         }
 
@@ -621,18 +465,18 @@
         function saveDefaultCamera(deviceId) { if(deviceId){ try{localStorage.setItem('scan_defaultCameraId',deviceId);}catch(e){} defaultCameraId=deviceId; } }
         function loadDefaultCamera() { try{defaultCameraId=localStorage.getItem('scan_defaultCameraId');}catch(e){} return defaultCameraId; }
 
-        let audioContext = null;
+        var audioContext = null;
         function playBeep() {
             try {
                 if(!audioContext) audioContext = new (window.AudioContext||window.webkitAudioContext)();
-                if(audioContext.state==='suspended') audioContext.resume().then(()=>playBeepSound());
+                if(audioContext.state==='suspended') audioContext.resume().then(function(){ playBeepSound(); });
                 else playBeepSound();
             } catch(e){}
         }
         function playBeepSound() {
             try {
-                const now=audioContext.currentTime;
-                const osc=audioContext.createOscillator(), gain=audioContext.createGain();
+                var now=audioContext.currentTime;
+                var osc=audioContext.createOscillator(), gain=audioContext.createGain();
                 osc.connect(gain); gain.connect(audioContext.destination);
                 osc.frequency.value=600; osc.type='square';
                 gain.gain.setValueAtTime(0.4,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.12);
@@ -641,27 +485,25 @@
         }
 
         function extractLastFiveDigits(fullCode) {
-            const nums=fullCode.match(/\d/g);
+            var nums=fullCode.match(/\d/g);
             if(nums&&nums.length>=5) return nums.slice(-5).join('');
-            const last5=fullCode.slice(-5);
+            var last5=fullCode.slice(-5);
             if(/^\d{5}$/.test(last5)) return last5;
             return fullCode;
         }
 
         function onScanSuccess(fullCode) {
-            const now=Date.now();
+            var now=Date.now();
             if(now-lastScanTime<SCAN_COOLDOWN) return;
-            lastScanTime=now;
-            playBeep();
-            const sid=extractLastFiveDigits(fullCode);
+            lastScanTime=now; playBeep();
+            var sid=extractLastFiveDigits(fullCode);
             if(/^\d{5}$/.test(sid)) {
-                saveStudentId(sid);
-                stopScanCamera();
+                saveStudentId(sid); stopScanCamera();
                 document.getElementById('scanModal').classList.remove('show');
-                window.location.href=`?p=${sid}`;
+                window.location.href='?p='+sid;
             } else {
                 document.getElementById('scanStatus').textContent='识别失败，请重试';
-                setTimeout(()=>{const s=document.getElementById('scanStatus');if(s)s.textContent='扫描中...';},2000);
+                setTimeout(function(){ var s=document.getElementById('scanStatus'); if(s) s.textContent='扫描中...'; },2000);
             }
         }
 
@@ -671,22 +513,22 @@
             document.getElementById('scanStatus').textContent='获取摄像头列表...';
             scanningActive=true;
             try {
-                let devices=[];
-                try{devices=await scanCodeReader.listVideoInputDevices();}catch(e){const ts=await navigator.mediaDevices.getUserMedia({video:true});ts.getTracks().forEach(t=>t.stop());devices=await scanCodeReader.listVideoInputDevices();}
+                var devices=[];
+                try{devices=await scanCodeReader.listVideoInputDevices();}catch(e){var ts=await navigator.mediaDevices.getUserMedia({video:true});ts.getTracks().forEach(function(t){t.stop();});devices=await scanCodeReader.listVideoInputDevices();}
                 if(devices.length===0) throw new Error('未找到摄像头');
-                let selectedId=loadDefaultCamera();
-                if(!selectedId||!devices.find(d=>d.deviceId===selectedId)){const bc=devices.find(d=>(d.label||'').toLowerCase().includes('back')||(d.label||'').toLowerCase().includes('rear')||(d.label||'').includes('后置')||(d.label||'').includes('environment'));selectedId=bc?bc.deviceId:devices[0].deviceId;saveDefaultCamera(selectedId);}
-                const sel=devices.find(d=>d.deviceId===selectedId);
-                document.getElementById('scanStatus').textContent=`使用: ${sel?.label?.slice(0,30)||'摄像头'}`;
-                await scanCodeReader.decodeFromVideoDevice(selectedId,'scanVideo',(result,err)=>{if(result&&scanningActive)onScanSuccess(result.getText());if(err&&!(err instanceof ZXing.NotFoundException))console.warn(err);});
+                var selectedId=loadDefaultCamera();
+                if(!selectedId||!devices.find(function(d){return d.deviceId===selectedId;})){var bc=devices.find(function(d){var l=(d.label||'').toLowerCase();return l.includes('back')||l.includes('rear')||l.includes('后置')||l.includes('environment');});selectedId=bc?bc.deviceId:devices[0].deviceId;saveDefaultCamera(selectedId);}
+                var sel=devices.find(function(d){return d.deviceId===selectedId;});
+                document.getElementById('scanStatus').textContent='使用: '+(sel?.label?.slice(0,30)||'摄像头');
+                await scanCodeReader.decodeFromVideoDevice(selectedId,'scanVideo',function(result,err){if(result&&scanningActive)onScanSuccess(result.getText());if(err&&!(err instanceof ZXing.NotFoundException))console.warn(err);});
             } catch(err){document.getElementById('scanStatus').textContent='摄像头启动失败';console.error(err);}
         }
 
         function stopScanCamera() {
             scanningActive=false;
             if(scanCodeReader) try{scanCodeReader.reset();}catch(e){}
-            const v=document.getElementById('scanVideo');
-            if(v&&v.srcObject){try{const s=v.srcObject;if(s&&s.getTracks)s.getTracks().forEach(t=>t.stop());v.srcObject=null;}catch(e){}}
+            var v=document.getElementById('scanVideo');
+            if(v&&v.srcObject){try{var s=v.srcObject;if(s&&s.getTracks)s.getTracks().forEach(function(t){t.stop();});v.srcObject=null;}catch(e){}}
         }
 
         async function scanFromImage(file) {
@@ -694,469 +536,498 @@
             document.getElementById('scanStatus').textContent='处理图片中...';
             try {
                 if(scanCodeReader) try{scanCodeReader.reset();}catch(e){}
-                const v=document.getElementById('scanVideo');
-                if(v&&v.srcObject){const os=v.srcObject;if(os&&os.getTracks)os.getTracks().forEach(t=>t.stop());v.srcObject=null;}
-                const img=new Image();
-                const iurl=URL.createObjectURL(file);
-                await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=iurl;});
-                const c=document.createElement('canvas');c.width=img.width;c.height=img.height;
-                const ctx=c.getContext('2d');ctx.drawImage(img,0,0,img.width,img.height);
+                var v=document.getElementById('scanVideo');
+                if(v&&v.srcObject){var os=v.srcObject;if(os&&os.getTracks)os.getTracks().forEach(function(t){t.stop();});v.srcObject=null;}
+                var img=new Image(); var iurl=URL.createObjectURL(file);
+                await new Promise(function(r,rej){img.onload=r;img.onerror=rej;img.src=iurl;});
+                var c=document.createElement('canvas');c.width=img.width;c.height=img.height;
+                c.getContext('2d').drawImage(img,0,0,img.width,img.height);
                 URL.revokeObjectURL(iurl);
-                v.srcObject=c.captureStream(30);await v.play();await new Promise(r=>setTimeout(r,200));
+                v.srcObject=c.captureStream(30); await v.play(); await new Promise(function(r){setTimeout(r,200);});
                 document.getElementById('scanStatus').textContent='识别中...';
-                let tr=null;
+                var tr=null;
                 try{tr=new ZXing.BrowserMultiFormatReader();}catch(e){document.getElementById('scanStatus').textContent='扫码库加载失败';alert('扫码库加载失败');startScanCamera();return;}
-                const result=await tr.decodeFromVideoElement(v);
-                if(result&&result.text){playBeep();const sid=extractLastFiveDigits(result.text);if(/^\d{5}$/.test(sid)){saveStudentId(sid);stopScanCamera();document.getElementById('scanModal').classList.remove('show');window.location.href=`?p=${sid}`;}else{document.getElementById('scanStatus').textContent='未识别到有效学号';alert(`识别到的内容不是5位数学号：${sid}`);startScanCamera();}}
+                var result=await tr.decodeFromVideoElement(v);
+                if(result&&result.text){playBeep();var sid=extractLastFiveDigits(result.text);if(/^\d{5}$/.test(sid)){saveStudentId(sid);stopScanCamera();document.getElementById('scanModal').classList.remove('show');window.location.href='?p='+sid;}else{document.getElementById('scanStatus').textContent='未识别到有效学号';alert('识别到的内容不是5位数学号：'+sid);startScanCamera();}}
                 else {document.getElementById('scanStatus').textContent='未识别到二维码';alert('未识别到二维码');startScanCamera();}
             } catch(err){console.error(err);document.getElementById('scanStatus').textContent='识别失败';alert('识别失败');startScanCamera();}
         }
 
-        function showScanModalFunc() { document.getElementById('scanModal').classList.add('show'); setTimeout(()=>startScanCamera(),100); }
+        function showScanModalFunc() { document.getElementById('scanModal').classList.add('show'); setTimeout(function(){startScanCamera();},100); }
         function closeScanModalFunc() { stopScanCamera(); document.getElementById('scanModal').classList.remove('show'); }
 
-        function copyShareLink(appName) {
-            let u=window.location.origin+window.location.pathname;
-            if(appName) u+=`?app=${encodeURIComponent(appName)}`;
-            navigator.clipboard.writeText(u).then(()=>{const t=document.createElement('div');t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:white;padding:12px 24px;border-radius:30px;z-index:30000;font-size:14px;text-align:center;';t.textContent='✅ 网址已复制';document.body.appendChild(t);setTimeout(()=>t.remove(),1500);}).catch(()=>alert('复制失败'));
+        function encodeUrlForCopy(url) {
+            try {
+                if (/%[0-9A-Fa-f]{2}/.test(url)) return url;
+                return url.split('/').map(function(part) {
+                    if (part.includes('?')) {
+                        var idx = part.indexOf('?');
+                        return encodeURIComponent(decodeURIComponent(part.substring(0,idx))) + part.substring(idx);
+                    }
+                    return encodeURIComponent(decodeURIComponent(part));
+                }).join('/');
+            } catch(e) { return url; }
         }
 
-        function downloadFile(url, fileName) { const a=document.createElement('a');a.href=url;a.download=fileName.split('?')[0];a.target='_blank';a.click(); }
+        function copyShareLink(appName) {
+            var u = window.location.origin + window.location.pathname;
+            if (appName) u += '?app=' + encodeURIComponent(appName);
+            u = encodeUrlForCopy(u);
+            navigator.clipboard.writeText(u).then(function() {
+                var t = document.createElement('div');
+                t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:white;padding:12px 24px;border-radius:30px;z-index:60000;font-size:14px;text-align:center;';
+                t.textContent = '✅ 网址已复制';
+                document.body.appendChild(t);
+                setTimeout(function(){ t.remove(); }, 1500);
+            }).catch(function() { alert('复制失败，请手动复制'); });
+        }
+
+        function downloadFile(url, fileName) {
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = fileName.split('?')[0];
+            a.target = '_blank';
+            a.rel = 'noopener';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        // ========== 显示下载回退界面 ==========
+        function showDownloadFallback(container, url, fileName, errorMsg) {
+            var encodedUrl = encodeUrlForCopy(url || '');
+            container.innerHTML = '<div style="text-align:center;padding:60px 20px;">' +
+                '<div style="font-size:4rem;margin-bottom:16px;">⚠️</div>' +
+                '<h2 style="font-size:1.5rem;color:#e74c3c;margin-bottom:12px;">文件预览插件加载失败</h2>' +
+                '<p style="color:#666;margin-bottom:8px;font-size:0.9rem;">' + escapeHtml(fileName || '未知文件') + '</p>' +
+                '<p style="color:#999;margin-bottom:20px;font-size:0.8rem;">' + escapeHtml(errorMsg || '文件可能损坏或网络不稳定') + '</p>' +
+                '<button class="download-fallback-btn" onclick="downloadFile(\'' + escapeHtml(encodedUrl) + '\', \'' + escapeHtml(fileName || 'file') + '\')">📥 立即下载</button>' +
+                '<p style="color:#aaa;margin-top:16px;font-size:0.75rem;">建议下载后使用本地应用打开</p>' +
+                '</div>';
+        }
 
         // ========== 文档预览器 ==========
         function openDocumentViewer(url, fileName) {
-            const overlay=document.createElement('div');overlay.className='doc-viewer-overlay';
-            const ext=fileName.split('.').pop().toLowerCase();
-            const supported=['pdf','docx','xlsx','txt'];
-            const isSupported=supported.includes(ext);
-            const header=document.createElement('div');header.className='doc-viewer-header';
-            const titleDiv=document.createElement('div');titleDiv.className='doc-title';titleDiv.textContent=fileName;
-            const actionsDiv=document.createElement('div');actionsDiv.className='doc-actions';
-            const copyBtn=document.createElement('button');copyBtn.textContent='复制链接';copyBtn.onclick=()=>{navigator.clipboard.writeText(url).then(()=>{const t=document.createElement('div');t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:white;padding:12px 24px;border-radius:30px;z-index:60000;font-size:14px;';t.textContent='✅ 链接已复制';document.body.appendChild(t);setTimeout(()=>t.remove(),1500);}).catch(()=>alert('复制失败'));};
-            const downloadBtn=document.createElement('button');downloadBtn.textContent='下载文件';downloadBtn.onclick=()=>downloadFile(url,fileName);
-            const closeBtn=document.createElement('button');closeBtn.className='close-btn';closeBtn.textContent='关闭';closeBtn.onclick=()=>overlay.remove();
-            actionsDiv.appendChild(copyBtn);actionsDiv.appendChild(downloadBtn);actionsDiv.appendChild(closeBtn);
-            header.appendChild(titleDiv);header.appendChild(actionsDiv);overlay.appendChild(header);
-            const body=document.createElement('div');body.className='doc-viewer-body';
-            const contentDiv=document.createElement('div');contentDiv.className='doc-content';
-            if(!isSupported) {
-                contentDiv.innerHTML=`<div class="unsupported-content"><div class="icon">📄</div><p>该文件类型（.${ext}）不支持预览</p><button onclick="downloadFile('${escapeHtml(url)}','${escapeHtml(fileName)}')">📥 立即下载</button></div>`;
-            } else {
-                contentDiv.innerHTML='<div style="text-align:center;padding:40px;color:#666;">⏳ 加载文档中...</div>';
-                fetch(url).then(r=>{if(!r.ok)throw new Error('网络请求失败');return r.blob();}).then(blob=>{
-                    if(ext==='pdf') loadPDF(blob,contentDiv);
-                    else if(ext==='docx') loadDOCX(blob,contentDiv);
-                    else if(ext==='xlsx') loadXLSX(blob,contentDiv);
-                    else if(ext==='txt') loadTXT(blob,contentDiv);
-                }).catch(err=>{contentDiv.innerHTML=`<div class="unsupported-content"><div class="icon">❌</div><p>加载失败: ${escapeHtml(err.message)}</p><button onclick="downloadFile('${escapeHtml(url)}','${escapeHtml(fileName)}')">📥 立即下载</button></div>`;});
+            var overlay = document.createElement('div');
+            overlay.className = 'doc-viewer-overlay';
+            var ext = fileName.split('.').pop().toLowerCase();
+            var supportedTypes = ['pdf', 'docx', 'xlsx', 'txt'];
+            var isSupported = supportedTypes.indexOf(ext) !== -1;
+
+            var header = document.createElement('div');
+            header.className = 'doc-viewer-header';
+            header.innerHTML = '<div class="doc-title">' + escapeHtml(fileName) + '</div>' +
+                '<div class="doc-actions">' +
+                '<button id="docCopyBtn">复制链接</button>' +
+                '<button id="docDownloadBtn">下载文件</button>' +
+                '<button class="close-btn" id="docCloseBtn">关闭</button>' +
+                '</div>';
+
+            var body = document.createElement('div');
+            body.className = 'doc-viewer-body';
+            var contentDiv = document.createElement('div');
+            contentDiv.className = 'doc-content';
+
+            if (!isSupported) {
+                contentDiv.innerHTML = '<div class="unsupported-content">' +
+                    '<div class="icon">📄</div>' +
+                    '<p>该文件类型（.' + ext + '）不支持预览</p>' +
+                    '<button class="download-fallback-btn" id="unsupportedDownloadBtn">📥 立即下载</button>' +
+                    '</div>';
+                body.appendChild(contentDiv);
+                overlay.appendChild(header);
+                overlay.appendChild(body);
+                document.body.appendChild(overlay);
+
+                document.getElementById('unsupportedDownloadBtn').onclick = function() { downloadFile(url, fileName); };
+                document.getElementById('docCopyBtn').onclick = function() {
+                    var eu = encodeUrlForCopy(url);
+                    navigator.clipboard.writeText(eu).then(function() {
+                        var t = document.createElement('div');
+                        t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:white;padding:12px 24px;border-radius:30px;z-index:60000;font-size:14px;';
+                        t.textContent = '✅ 链接已复制（中文已编码）';
+                        document.body.appendChild(t);
+                        setTimeout(function(){ t.remove(); }, 1500);
+                    }).catch(function() { alert('复制失败'); });
+                };
+                document.getElementById('docDownloadBtn').onclick = function() { downloadFile(url, fileName); };
+                document.getElementById('docCloseBtn').onclick = function() { overlay.remove(); };
+                overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+                return;
             }
-            body.appendChild(contentDiv);overlay.appendChild(body);document.body.appendChild(overlay);
+
+            contentDiv.innerHTML = '<div style="text-align:center;padding:40px;color:#666;">⏳ 加载文档中...</div>';
+            body.appendChild(contentDiv);
+            overlay.appendChild(header);
+            overlay.appendChild(body);
+            document.body.appendChild(overlay);
+
+            // 绑定按钮事件
+            document.getElementById('docCopyBtn').onclick = function() {
+                var eu = encodeUrlForCopy(url);
+                navigator.clipboard.writeText(eu).then(function() {
+                    var t = document.createElement('div');
+                    t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:white;padding:12px 24px;border-radius:30px;z-index:60000;font-size:14px;';
+                    t.textContent = '✅ 链接已复制（中文已编码）';
+                    document.body.appendChild(t);
+                    setTimeout(function(){ t.remove(); }, 1500);
+                }).catch(function() { alert('复制失败'); });
+            };
+            document.getElementById('docDownloadBtn').onclick = function() { downloadFile(url, fileName); };
+            document.getElementById('docCloseBtn').onclick = function() { overlay.remove(); };
+            overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+
+            // 使用 XHR 加载文档
+            loadDocumentWithXHR(url, ext, contentDiv, fileName);
+        }
+
+        function loadDocumentWithXHR(url, ext, contentDiv, fileName) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.responseType = 'arraybuffer';
+            xhr.timeout = 120000;
+            var lastProgressTime = Date.now();
+            var loadFailed = false;
+
+            xhr.onprogress = function(e) {
+                if (loadFailed) return;
+                var now = Date.now();
+                if (now - lastProgressTime > 500) {
+                    if (e.lengthComputable) {
+                        var percent = Math.round((e.loaded / e.total) * 100);
+                        contentDiv.innerHTML = '<div style="text-align:center;padding:40px;color:#666;">⏳ 加载文档中... ' + percent + '%</div>';
+                    } else if (e.loaded > 0) {
+                        var loadedMB = (e.loaded / 1024 / 1024).toFixed(1);
+                        contentDiv.innerHTML = '<div style="text-align:center;padding:40px;color:#666;">⏳ 加载文档中... 已下载 ' + loadedMB + 'MB</div>';
+                    }
+                    lastProgressTime = now;
+                }
+            };
+
+            xhr.onload = function() {
+                if (loadFailed) return;
+                if (xhr.status === 200 || xhr.status === 304 || xhr.status === 0) {
+                    var arrayBuffer = xhr.response;
+                    if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+                        showDownloadFallback(contentDiv, url, fileName, '文件为空');
+                        return;
+                    }
+                    console.log('文件下载成功，大小:', (arrayBuffer.byteLength / 1024).toFixed(1), 'KB');
+                    try {
+                        var blob = new Blob([arrayBuffer]);
+                        if (ext === 'pdf') loadPDF(blob, contentDiv);
+                        else if (ext === 'docx') loadDOCX(blob, contentDiv);
+                        else if (ext === 'xlsx') loadXLSX(blob, contentDiv, url, fileName);
+                        else if (ext === 'txt') loadTXT(blob, contentDiv);
+                    } catch(err) {
+                        console.error('处理文件失败:', err);
+                        showDownloadFallback(contentDiv, url, fileName, err.message);
+                    }
+                } else {
+                    showDownloadFallback(contentDiv, url, fileName, 'HTTP 状态码: ' + xhr.status);
+                }
+            };
+
+            xhr.onerror = function() {
+                loadFailed = true;
+                console.error('XHR 请求失败');
+                showDownloadFallback(contentDiv, url, fileName, '网络请求失败（可能被浏览器拦截）');
+            };
+
+            xhr.ontimeout = function() {
+                loadFailed = true;
+                console.error('XHR 请求超时');
+                showDownloadFallback(contentDiv, url, fileName, '下载超时（文件可能过大或网络不稳定）');
+            };
+
+            xhr.send();
         }
 
         // ----- PDF 加载 -----
         function loadPDF(blob, container) {
-            const reader=new FileReader();
-            reader.onload=function(e){
-                const data=new Uint8Array(e.target.result);
-                const pdfjsLib=window.pdfjsLib;
-                if(!pdfjsLib){container.innerHTML='<div class="unsupported-content"><div class="icon">❌</div><p>PDF.js 库未加载</p></div>';return;}
-                pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
-                let currentPage=1,pdfDoc=null;
-                const renderPage=(pageNum)=>{pdfDoc.getPage(pageNum).then(page=>{const viewport=page.getViewport({scale:1.5});const canvas=document.createElement('canvas');canvas.width=viewport.width;canvas.height=viewport.height;canvas.style.width='100%';canvas.style.height='auto';const ctx=canvas.getContext('2d');page.render({canvasContext:ctx,viewport:viewport});container.innerHTML='';const controls=document.createElement('div');controls.className='pdf-controls';controls.innerHTML=`<button id="pdfPrevBtn">◀ 上一页</button><span id="pdfPageInfo">${pageNum} / ${pdfDoc.numPages}</span><button id="pdfNextBtn">下一页 ▶</button><span style="font-size:0.8rem;color:#999;margin-left:8px;">${pdfDoc.numPages} 页</span>`;container.appendChild(controls);container.appendChild(canvas);document.getElementById('pdfPrevBtn').onclick=()=>{if(currentPage>1){currentPage--;renderPage(currentPage);}};document.getElementById('pdfNextBtn').onclick=()=>{if(currentPage<pdfDoc.numPages){currentPage++;renderPage(currentPage);}};}).catch(()=>{container.innerHTML='<div class="unsupported-content"><div class="icon">❌</div><p>渲染页面失败</p></div>';});};
-                pdfjsLib.getDocument({data:data}).promise.then(doc=>{pdfDoc=doc;renderPage(1);}).catch(err=>{container.innerHTML=`<div class="unsupported-content"><div class="icon">❌</div><p>PDF 加载失败: ${escapeHtml(err.message)}</p></div>`;});
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var data = new Uint8Array(e.target.result);
+                var pdfjsLib = window.pdfjsLib;
+                if (!pdfjsLib) {
+                    container.innerHTML = '<div class="unsupported-content"><div class="icon">❌</div><p>PDF.js 库未加载</p></div>';
+                    return;
+                }
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+                var currentPage = 1, pdfDoc = null;
+                var renderPage = function(pageNum) {
+                    pdfDoc.getPage(pageNum).then(function(page) {
+                        var viewport = page.getViewport({ scale: 1.5 });
+                        var canvas = document.createElement('canvas');
+                        canvas.width = viewport.width; canvas.height = viewport.height;
+                        canvas.style.width = '100%'; canvas.style.height = 'auto';
+                        page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport });
+                        container.innerHTML = '';
+                        var controls = document.createElement('div');
+                        controls.className = 'pdf-controls';
+                        controls.innerHTML = '<button id="pdfPrevBtn">◀ 上一页</button><span id="pdfPageInfo">' + pageNum + ' / ' + pdfDoc.numPages + '</span><button id="pdfNextBtn">下一页 ▶</button><span style="font-size:0.8rem;color:#999;margin-left:8px;">' + pdfDoc.numPages + ' 页</span>';
+                        container.appendChild(controls);
+                        container.appendChild(canvas);
+                        document.getElementById('pdfPrevBtn').onclick = function() { if (currentPage > 1) { currentPage--; renderPage(currentPage); } };
+                        document.getElementById('pdfNextBtn').onclick = function() { if (currentPage < pdfDoc.numPages) { currentPage++; renderPage(currentPage); } };
+                    }).catch(function() { container.innerHTML = '<div class="unsupported-content"><div class="icon">❌</div><p>渲染页面失败</p></div>'; });
+                };
+                pdfjsLib.getDocument({ data: data }).promise.then(function(doc) { pdfDoc = doc; renderPage(1); }).catch(function(err) { container.innerHTML = '<div class="unsupported-content"><div class="icon">❌</div><p>PDF 加载失败: ' + escapeHtml(err.message) + '</p></div>'; });
             };
+            reader.onerror = function() { container.innerHTML = '<div class="unsupported-content"><div class="icon">❌</div><p>文件读取失败</p></div>'; };
             reader.readAsArrayBuffer(blob);
         }
 
         // ----- DOCX 加载 -----
         function loadDOCX(blob, container) {
-            const reader=new FileReader();
-            reader.onload=function(e){if(typeof mammoth==='undefined'){container.innerHTML='<div class="unsupported-content"><div class="icon">❌</div><p>mammoth.js 库未加载</p></div>';return;}mammoth.convertToHtml({arrayBuffer:e.target.result}).then(result=>{container.innerHTML=result.value||'<p style="color:#999;">（文档内容为空）</p>';}).catch(err=>{container.innerHTML=`<div class="unsupported-content"><div class="icon">❌</div><p>DOCX 解析失败: ${escapeHtml(err.message)}</p></div>`;});};
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                if (typeof mammoth === 'undefined') {
+                    container.innerHTML = '<div class="unsupported-content"><div class="icon">❌</div><p>mammoth.js 库未加载</p></div>';
+                    return;
+                }
+                mammoth.convertToHtml({ arrayBuffer: e.target.result })
+                    .then(function(result) { container.innerHTML = result.value || '<p style="color:#999;">（文档内容为空）</p>'; })
+                    .catch(function(err) { container.innerHTML = '<div class="unsupported-content"><div class="icon">❌</div><p>DOCX 解析失败: ' + escapeHtml(err.message) + '</p></div>'; });
+            };
+            reader.onerror = function() { container.innerHTML = '<div class="unsupported-content"><div class="icon">❌</div><p>文件读取失败</p></div>'; };
             reader.readAsArrayBuffer(blob);
         }
 
-        // ----- XLSX 加载（完整修改版 - 修复单元格尺寸和边框显示） -----
-        function loadXLSX(blob, container) {
-            const reader = new FileReader();
+        // ----- XLSX 加载 -----
+        function loadXLSX(blob, container, url, fileName) {
+            var reader = new FileReader();
             reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
+                var data = new Uint8Array(e.target.result);
                 if (typeof XLSX === 'undefined') {
                     container.innerHTML = '<div class="unsupported-content"><div class="icon">❌</div><p>XLSX 库未加载</p></div>';
                     return;
                 }
                 try {
-                    // 使用更完整的选项读取，包含单元格样式、日期、数字格式、空单元格存根
-                    const workbook = XLSX.read(data, { 
-                        type: 'array',
-                        cellStyles: true,
-                        cellDates: true,
-                        cellNF: true,
-                        sheetStubs: true  // 关键：保留空单元格的占位符
-                    });
+                    var workbook = XLSX.read(data, { type: 'array', cellStyles: true, cellDates: true, cellNF: true, sheetStubs: true });
                     
-                    // 创建缩放控制栏
-                    const zoomControls = document.createElement('div');
+                    var zoomControls = document.createElement('div');
                     zoomControls.className = 'xlsx-zoom-controls';
-                    zoomControls.innerHTML = `
-                        <button id="xlsxZoomOut" class="xlsx-zoom-btn">−</button>
-                        <span id="xlsxZoomLevel" style="margin: 0 8px; font-size: 0.9rem; color: #666;">100%</span>
-                        <button id="xlsxZoomIn" class="xlsx-zoom-btn">+</button>
-                        <button id="xlsxZoomReset" class="xlsx-zoom-btn" style="margin-left: 8px; width: auto; padding: 0 12px; border-radius: 16px;">⟳ 重置</button>
-                    `;
+                    zoomControls.innerHTML = '<button id="xlsxZoomOut" class="xlsx-zoom-btn">−</button>' +
+                        '<span id="xlsxZoomLevel" style="margin:0 8px;font-size:0.9rem;color:#666;">100%</span>' +
+                        '<button id="xlsxZoomIn" class="xlsx-zoom-btn">+</button>' +
+                        '<button id="xlsxZoomReset" class="xlsx-zoom-btn" style="margin-left:8px;width:auto;padding:0 12px;border-radius:16px;">⟳ 重置</button>';
                     
-                    // 创建表格容器
-                    const tableWrapper = document.createElement('div');
+                    var tableWrapper = document.createElement('div');
                     tableWrapper.className = 'xlsx-table-wrapper';
-                    
-                    let currentZoom = 1;
-                    let allTablesHtml = '';
-                    
-                    workbook.SheetNames.forEach(sheetName => {
-                        const sheet = workbook.Sheets[sheetName];
+                    var currentZoom = 1;
+                    var allTablesHtml = '';
+
+                    workbook.SheetNames.forEach(function(sheetName) {
+                        var sheet = workbook.Sheets[sheetName];
                         if (!sheet || !sheet['!ref']) return;
+                        var range = XLSX.utils.decode_range(sheet['!ref']);
+                        var merges = sheet['!merges'] || [];
+                        var colWidths = sheet['!cols'] || [];
+                        var rowHeights = sheet['!rows'] || [];
+                        var mergeMap = {}, mergeSpanMap = {};
                         
-                        // 获取工作表范围
-                        const range = XLSX.utils.decode_range(sheet['!ref']);
-                        
-                        // 获取合并单元格信息
-                        const merges = sheet['!merges'] || [];
-                        
-                        // 获取列宽和行高信息
-                        const colWidths = sheet['!cols'] || [];
-                        const rowHeights = sheet['!rows'] || [];
-                        
-                        // 创建合并单元格映射
-                        const mergeMap = {};
-                        const mergeSpanMap = {};
-                        merges.forEach(merge => {
-                            const key = `${merge.s.r},${merge.s.c}`;
-                            mergeSpanMap[key] = {
-                                rowspan: merge.e.r - merge.s.r + 1,
-                                colspan: merge.e.c - merge.s.c + 1
-                            };
-                            for (let r = merge.s.r; r <= merge.e.r; r++) {
-                                for (let c = merge.s.c; c <= merge.e.c; c++) {
-                                    if (r === merge.s.r && c === merge.s.c) continue;
-                                    mergeMap[`${r},${c}`] = true;
+                        merges.forEach(function(merge) {
+                            var key = merge.s.r + ',' + merge.s.c;
+                            mergeSpanMap[key] = { rowspan: merge.e.r - merge.s.r + 1, colspan: merge.e.c - merge.s.c + 1 };
+                            for (var r = merge.s.r; r <= merge.e.r; r++) {
+                                for (var c = merge.s.c; c <= merge.e.c; c++) {
+                                    if (r !== merge.s.r || c !== merge.s.c) mergeMap[r + ',' + c] = true;
                                 }
                             }
                         });
-                        
-                        // 判断单元格是否有内容或边框（用于计算有效范围）
-                        const cellHasContentOrBorder = (r, c) => {
-                            const cellRef = XLSX.utils.encode_cell({ r, c });
-                            const cell = sheet[cellRef];
-                            if (!cell) return false;
-                            // 有值
-                            if (cell.v !== undefined && cell.v !== null && cell.v !== '') return true;
-                            // 有边框
-                            if (cell.s && cell.s.border) {
-                                const border = cell.s.border;
-                                if (border.top || border.bottom || border.left || border.right) return true;
-                            }
-                            return false;
-                        };
-                        
-                        // 使用完整范围（包括空单元格），确保所有设置了边框的单元格都显示
-                        const minRow = range.s.r;
-                        const maxRow = range.e.r;
-                        const minCol = range.s.c;
-                        const maxCol = range.e.c;
-                        
-                        // 添加工作表标题
-                        allTablesHtml += `<h4 style="margin:16px 0 8px 0;color:#1e3c72;padding:0 8px;">📊 ${escapeHtml(sheetName)}</h4>`;
+
+                        var minRow = range.s.r, maxRow = range.e.r, minCol = range.s.c, maxCol = range.e.c;
+
+                        if (workbook.SheetNames.length > 1) {
+                            allTablesHtml += '<h4 style="margin:16px 0 8px 0;color:#1e3c72;padding:0 8px;">📊 ' + escapeHtml(sheetName) + '</h4>';
+                        }
                         allTablesHtml += '<div class="xlsx-table-container"><table class="xlsx-table">';
                         
-                        // 生成列宽
-                        let colgroup = '<colgroup>';
-                        for (let c = minCol; c <= maxCol; c++) {
-                            const colInfo = colWidths[c];
-                            let width = 100; // 默认宽度
-                            if (colInfo && colInfo.wpx) {
-                                width = colInfo.wpx;
-                            } else if (colInfo && colInfo.wch) {
-                                // 字符宽度转换为像素（近似）
-                                width = Math.max(colInfo.wch * 7.5, 40);
-                            }
-                            colgroup += `<col style="width:${Math.max(width, 40)}px;min-width:${Math.max(width, 40)}px;">`;
+                        var colgroup = '<colgroup>';
+                        for (var c = minCol; c <= maxCol; c++) {
+                            var colInfo = colWidths[c];
+                            var width = 100;
+                            if (colInfo && colInfo.wpx) width = colInfo.wpx;
+                            else if (colInfo && colInfo.wch) width = Math.max(colInfo.wch * 7.5, 40);
+                            colgroup += '<col style="width:' + Math.max(width,40) + 'px;min-width:' + Math.max(width,40) + 'px;">';
                         }
                         colgroup += '</colgroup>';
                         allTablesHtml += colgroup;
-                        
-                        // 生成表格内容
-                        for (let r = minRow; r <= maxRow; r++) {
-                            // 获取行高信息
-                            const rowInfo = rowHeights[r];
-                            let rowStyle = '';
-                            if (rowInfo && rowInfo.hpx) {
-                                rowStyle = ` style="height:${rowInfo.hpx}px;"`;
-                            } else if (rowInfo && rowInfo.hpt) {
-                                rowStyle = ` style="height:${rowInfo.hpt * 1.33}px;"`;
-                            }
+
+                        for (var r = minRow; r <= maxRow; r++) {
+                            var rowInfo = rowHeights[r];
+                            var rowStyle = '';
+                            if (rowInfo && rowInfo.hpx) rowStyle = ' style="height:' + rowInfo.hpx + 'px;"';
+                            else if (rowInfo && rowInfo.hpt) rowStyle = ' style="height:' + (rowInfo.hpt * 1.33) + 'px;"';
+                            allTablesHtml += '<tr' + rowStyle + '>';
                             
-                            allTablesHtml += `<tr${rowStyle}>`;
-                            for (let c = minCol; c <= maxCol; c++) {
-                                // 跳过被合并的单元格
-                                if (mergeMap[`${r},${c}`]) continue;
-                                
-                                const cellRef = XLSX.utils.encode_cell({ r, c });
-                                const cell = sheet[cellRef];
-                                
-                                // 获取合并信息
-                                const mergeKey = `${r},${c}`;
-                                const mergeInfo = mergeSpanMap[mergeKey] || { rowspan: 1, colspan: 1 };
-                                
-                                // 获取单元格值和样式
-                                let cellValue = '';
-                                let cellStyle = '';
-                                let borderStyle = 'border:1px solid #d0d0d0;';
+                            for (var c = minCol; c <= maxCol; c++) {
+                                if (mergeMap[r + ',' + c]) continue;
+                                var cellRef = XLSX.utils.encode_cell({ r: r, c: c });
+                                var cell = sheet[cellRef];
+                                var mergeInfo = mergeSpanMap[r + ',' + c] || { rowspan: 1, colspan: 1 };
+                                var cellValue = '', cellStyle = '', borderStyle = 'border:1px solid #d0d0d0;';
                                 
                                 if (cell) {
-                                    // 获取值
                                     if (cell.t === 'n') {
-                                        // 数字类型，检查日期格式
-                                        if (cell.z && (cell.z.includes('yy') || cell.z.includes('dd') || cell.z.includes('mm') || cell.z.includes('YY') || cell.z.includes('DD') || cell.z.includes('MM'))) {
-                                            try {
-                                                const date = XLSX.SSF.parse_date_code(cell.v);
-                                                if (date) {
-                                                    cellValue = `${date.y}-${String(date.m).padStart(2,'0')}-${String(date.d).padStart(2,'0')}`;
-                                                } else {
-                                                    cellValue = cell.v;
-                                                }
-                                            } catch(ex) {
-                                                cellValue = cell.v;
-                                            }
+                                        if (cell.z && (cell.z.includes('yy')||cell.z.includes('dd')||cell.z.includes('mm')||cell.z.includes('YY')||cell.z.includes('DD')||cell.z.includes('MM'))) {
+                                            try { var date = XLSX.SSF.parse_date_code(cell.v); if(date) cellValue = date.y + '-' + String(date.m).padStart(2,'0') + '-' + String(date.d).padStart(2,'0'); else cellValue = cell.v; } catch(ex) { cellValue = cell.v; }
                                         } else if (cell.z && cell.z.includes('%')) {
                                             cellValue = (cell.v * 100).toFixed(2) + '%';
-                                        } else {
-                                            // 保留数字格式
-                                            if (cell.z && cell.z !== 'General') {
-                                                try {
-                                                    cellValue = XLSX.SSF.format(cell.z, cell.v);
-                                                } catch(ex) {
-                                                    cellValue = cell.v;
-                                                }
-                                            } else {
-                                                cellValue = cell.v;
-                                            }
-                                        }
-                                    } else if (cell.t === 's') {
-                                        cellValue = cell.v || '';
-                                    } else if (cell.t === 'b') {
-                                        cellValue = cell.v ? 'TRUE' : 'FALSE';
-                                    } else if (cell.t === 'd') {
-                                        // 日期对象
-                                        if (cell.v instanceof Date) {
-                                            cellValue = cell.v.toLocaleDateString('zh-CN');
-                                        } else {
-                                            cellValue = cell.v;
-                                        }
-                                    } else {
-                                        cellValue = cell.v !== undefined ? cell.v : '';
-                                    }
+                                        } else if (cell.z && cell.z !== 'General') {
+                                            try { cellValue = XLSX.SSF.format(cell.z, cell.v); } catch(ex) { cellValue = cell.v; }
+                                        } else { cellValue = cell.v; }
+                                    } else if (cell.t === 's') { cellValue = cell.v || ''; }
+                                    else if (cell.t === 'b') { cellValue = cell.v ? 'TRUE' : 'FALSE'; }
+                                    else if (cell.t === 'd') { cellValue = cell.v instanceof Date ? cell.v.toLocaleDateString('zh-CN') : cell.v; }
+                                    else { cellValue = cell.v !== undefined ? cell.v : ''; }
                                     
-                                    // 获取字体样式
-                                    const styles = [];
+                                    var styles = [];
                                     if (cell.s) {
-                                        // 字体
                                         if (cell.s.font) {
                                             if (cell.s.font.bold) styles.push('font-weight:bold');
                                             if (cell.s.font.italic) styles.push('font-style:italic');
                                             if (cell.s.font.underline) styles.push('text-decoration:underline');
-                                            if (cell.s.font.color && cell.s.font.color.rgb) {
-                                                styles.push(`color:#${cell.s.font.color.rgb}`);
-                                            }
-                                            if (cell.s.font.sz) {
-                                                styles.push(`font-size:${cell.s.font.sz}pt`);
-                                            }
-                                            if (cell.s.font.name) {
-                                                styles.push(`font-family:"${cell.s.font.name}",sans-serif`);
-                                            }
+                                            if (cell.s.font.color && cell.s.font.color.rgb) styles.push('color:#' + cell.s.font.color.rgb);
+                                            if (cell.s.font.sz) styles.push('font-size:' + cell.s.font.sz + 'pt');
+                                            if (cell.s.font.name) styles.push('font-family:"' + cell.s.font.name + '",sans-serif');
                                         }
-                                        // 填充色
                                         if (cell.s.fill && cell.s.fill.fgColor && cell.s.fill.fgColor.rgb) {
-                                            const rgb = cell.s.fill.fgColor.rgb;
-                                            if (rgb !== '00000000' && rgb !== 'FFFFFF') {
-                                                styles.push(`background-color:#${rgb}`);
-                                            }
+                                            var rgb = cell.s.fill.fgColor.rgb;
+                                            if (rgb !== '00000000' && rgb !== 'FFFFFF') styles.push('background-color:#' + rgb);
                                         }
-                                        // 对齐
                                         if (cell.s.alignment) {
-                                            if (cell.s.alignment.horizontal) {
-                                                const hMap = { left: 'left', center: 'center', right: 'right', justify: 'justify' };
-                                                styles.push(`text-align:${hMap[cell.s.alignment.horizontal] || 'left'}`);
-                                            }
-                                            if (cell.s.alignment.vertical) {
-                                                const vMap = { top: 'top', center: 'middle', bottom: 'bottom' };
-                                                styles.push(`vertical-align:${vMap[cell.s.alignment.vertical] || 'middle'}`);
-                                            }
-                                            if (cell.s.alignment.wrapText) {
-                                                styles.push('white-space:normal;word-wrap:break-word;');
-                                            }
+                                            var hMap = { left:'left', center:'center', right:'right', justify:'justify' };
+                                            if (cell.s.alignment.horizontal) styles.push('text-align:' + (hMap[cell.s.alignment.horizontal]||'left'));
+                                            var vMap = { top:'top', center:'middle', bottom:'bottom' };
+                                            if (cell.s.alignment.vertical) styles.push('vertical-align:' + (vMap[cell.s.alignment.vertical]||'middle'));
+                                            if (cell.s.alignment.wrapText) styles.push('white-space:normal;word-wrap:break-word;');
                                         }
-                                        // 边框 - 使用更精确的边框样式
                                         if (cell.s.border) {
-                                            const border = cell.s.border;
-                                            const bStyles = [];
-                                            if (border.top && border.top.style) bStyles.push(`border-top:${border.top.style} solid #${border.top.color?.rgb || '000000'}`);
-                                            if (border.bottom && border.bottom.style) bStyles.push(`border-bottom:${border.bottom.style} solid #${border.bottom.color?.rgb || '000000'}`);
-                                            if (border.left && border.left.style) bStyles.push(`border-left:${border.left.style} solid #${border.left.color?.rgb || '000000'}`);
-                                            if (border.right && border.right.style) bStyles.push(`border-right:${border.right.style} solid #${border.right.color?.rgb || '000000'}`);
-                                            if (bStyles.length > 0) {
-                                                borderStyle = bStyles.join(';') + ';';
-                                            }
+                                            var border = cell.s.border;
+                                            var bStyles = [];
+                                            if (border.top && border.top.style) bStyles.push('border-top:' + border.top.style + ' solid #' + (border.top.color?.rgb||'000000'));
+                                            if (border.bottom && border.bottom.style) bStyles.push('border-bottom:' + border.bottom.style + ' solid #' + (border.bottom.color?.rgb||'000000'));
+                                            if (border.left && border.left.style) bStyles.push('border-left:' + border.left.style + ' solid #' + (border.left.color?.rgb||'000000'));
+                                            if (border.right && border.right.style) bStyles.push('border-right:' + border.right.style + ' solid #' + (border.right.color?.rgb||'000000'));
+                                            if (bStyles.length > 0) borderStyle = bStyles.join(';') + ';';
                                         }
                                     }
-                                    
-                                    if (styles.length > 0) {
-                                        cellStyle = ` style="${styles.join(';')};${borderStyle}"`;
-                                    } else {
-                                        cellStyle = ` style="${borderStyle}"`;
-                                    }
+                                    cellStyle = styles.length > 0 ? ' style="' + styles.join(';') + ';' + borderStyle + '"' : ' style="' + borderStyle + '"';
                                 } else {
-                                    // 空单元格也应用默认边框
-                                    cellStyle = ` style="${borderStyle}"`;
+                                    cellStyle = ' style="' + borderStyle + '"';
                                 }
                                 
-                                const rowspanAttr = mergeInfo.rowspan > 1 ? ` rowspan="${mergeInfo.rowspan}"` : '';
-                                const colspanAttr = mergeInfo.colspan > 1 ? ` colspan="${mergeInfo.colspan}"` : '';
-                                
-                                allTablesHtml += `<td${rowspanAttr}${colspanAttr}${cellStyle}>${escapeHtml(String(cellValue))}</td>`;
+                                var rowspanAttr = mergeInfo.rowspan > 1 ? ' rowspan="' + mergeInfo.rowspan + '"' : '';
+                                var colspanAttr = mergeInfo.colspan > 1 ? ' colspan="' + mergeInfo.colspan + '"' : '';
+                                allTablesHtml += '<td' + rowspanAttr + colspanAttr + cellStyle + '>' + escapeHtml(String(cellValue)) + '</td>';
                             }
                             allTablesHtml += '</tr>';
                         }
-                        
                         allTablesHtml += '</table></div>';
                     });
-                    
-                    // 设置初始内容
+
                     tableWrapper.innerHTML = allTablesHtml || '<p style="text-align:center;color:#999;padding:40px;">（表格内容为空）</p>';
-                    
-                    // 缩放函数
-                    const applyZoom = (zoom) => {
-                        const containers = tableWrapper.querySelectorAll('.xlsx-table-container');
-                        containers.forEach(cont => {
-                            const table = cont.querySelector('.xlsx-table');
-                            if (table) {
-                                table.style.transform = `scale(${zoom})`;
-                                table.style.transformOrigin = 'top left';
-                                table.style.transition = 'transform 0.2s ease';
-                            }
-                        });
-                        const levelEl = document.getElementById('xlsxZoomLevel');
-                        if (levelEl) levelEl.textContent = Math.round(zoom * 100) + '%';
-                        
-                        // 调整容器高度以适应缩放后的表格
-                        containers.forEach(cont => {
-                            const table = cont.querySelector('.xlsx-table');
-                            if (table) {
-                                const originalHeight = table.getBoundingClientRect().height / (currentZoom || 1);
-                                cont.style.minHeight = (originalHeight * zoom) + 'px';
-                            }
-                        });
-                    };
-                    
-                    // 清空容器并重新组装
                     container.innerHTML = '';
                     container.appendChild(zoomControls);
                     container.appendChild(tableWrapper);
-                    
-                    // 绑定缩放按钮事件
-                    document.getElementById('xlsxZoomIn').onclick = () => {
-                        currentZoom = Math.min(currentZoom + 0.1, 3);
-                        applyZoom(currentZoom);
+
+                    var applyZoom = function(zoom) {
+                        var tables = tableWrapper.querySelectorAll('.xlsx-table');
+                        tables.forEach(function(table) {
+                            table.style.transform = 'scale(' + zoom + ')';
+                            table.style.transformOrigin = 'top left';
+                            table.style.transition = 'transform 0.2s ease';
+                        });
+                        var containers = tableWrapper.querySelectorAll('.xlsx-table-container');
+                        containers.forEach(function(cont) {
+                            var table = cont.querySelector('.xlsx-table');
+                            if (table) cont.style.minHeight = (table.getBoundingClientRect().height * zoom / (currentZoom || 1)) + 'px';
+                        });
+                        var levelEl = document.getElementById('xlsxZoomLevel');
+                        if (levelEl) levelEl.textContent = Math.round(zoom * 100) + '%';
                     };
-                    document.getElementById('xlsxZoomOut').onclick = () => {
-                        currentZoom = Math.max(currentZoom - 0.1, 0.3);
-                        applyZoom(currentZoom);
-                    };
-                    document.getElementById('xlsxZoomReset').onclick = () => {
-                        currentZoom = 1;
-                        applyZoom(currentZoom);
-                    };
-                    
-                    // 支持滚轮缩放（按住Ctrl键）
-                    tableWrapper.addEventListener('wheel', (e) => {
-                        if (e.ctrlKey) {
-                            e.preventDefault();
-                            if (e.deltaY < 0) {
-                                currentZoom = Math.min(currentZoom + 0.05, 3);
-                            } else {
-                                currentZoom = Math.max(currentZoom - 0.05, 0.3);
-                            }
-                            applyZoom(currentZoom);
-                        }
+
+                    document.getElementById('xlsxZoomIn').onclick = function() { currentZoom = Math.min(currentZoom + 0.1, 3); applyZoom(currentZoom); };
+                    document.getElementById('xlsxZoomOut').onclick = function() { currentZoom = Math.max(currentZoom - 0.1, 0.3); applyZoom(currentZoom); };
+                    document.getElementById('xlsxZoomReset').onclick = function() { currentZoom = 1; applyZoom(currentZoom); };
+
+                    tableWrapper.addEventListener('wheel', function(e) {
+                        if (e.ctrlKey) { e.preventDefault(); currentZoom = e.deltaY < 0 ? Math.min(currentZoom + 0.05, 3) : Math.max(currentZoom - 0.05, 0.3); applyZoom(currentZoom); }
                     }, { passive: false });
-                    
-                    // 支持触摸缩放
-                    let initialPinchDistance = 0;
-                    let initialPinchZoom = 1;
-                    
-                    tableWrapper.addEventListener('touchstart', (e) => {
+
+                    var initialPinchDistance = 0, initialPinchZoom = 1;
+                    tableWrapper.addEventListener('touchstart', function(e) {
                         if (e.touches.length === 2) {
-                            initialPinchDistance = Math.hypot(
-                                e.touches[0].clientX - e.touches[1].clientX,
-                                e.touches[0].clientY - e.touches[1].clientY
-                            );
+                            initialPinchDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
                             initialPinchZoom = currentZoom;
                         }
                     });
-                    
-                    tableWrapper.addEventListener('touchmove', (e) => {
+                    tableWrapper.addEventListener('touchmove', function(e) {
                         if (e.touches.length === 2) {
-                            const newDistance = Math.hypot(
-                                e.touches[0].clientX - e.touches[1].clientX,
-                                e.touches[0].clientY - e.touches[1].clientY
-                            );
-                            const scale = newDistance / initialPinchDistance;
-                            currentZoom = Math.min(Math.max(initialPinchZoom * scale, 0.3), 3);
+                            var newDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                            currentZoom = Math.min(Math.max(initialPinchZoom * newDistance / initialPinchDistance, 0.3), 3);
                             applyZoom(currentZoom);
                         }
                     });
-                    
-                } catch (err) {
-                    container.innerHTML = `<div class="unsupported-content"><div class="icon">❌</div><p>XLSX 解析失败: ${escapeHtml(err.message)}</p></div>`;
+                } catch(err) {
+                    console.error('XLSX解析错误:', err);
+                    if (url && fileName) showDownloadFallback(container, url, fileName, err.message);
+                    else container.innerHTML = '<div class="unsupported-content"><div class="icon">❌</div><h2>文件预览插件加载失败</h2><p>' + escapeHtml(err.message) + '</p></div>';
                 }
+            };
+            reader.onerror = function() {
+                if (url && fileName) showDownloadFallback(container, url, fileName, '文件读取失败');
+                else container.innerHTML = '<div class="unsupported-content"><div class="icon">❌</div><h2>文件预览插件加载失败</h2><p>文件读取失败</p></div>';
             };
             reader.readAsArrayBuffer(blob);
         }
 
         // ----- TXT 加载 -----
         function loadTXT(blob, container) {
-            const reader = new FileReader();
-            reader.onload = function(e) { container.innerHTML = `<div class="txt-content">${escapeHtml(e.target.result)}</div>`; };
+            var reader = new FileReader();
+            reader.onload = function(e) { container.innerHTML = '<div class="txt-content">' + escapeHtml(e.target.result) + '</div>'; };
+            reader.onerror = function() { container.innerHTML = '<div class="unsupported-content"><div class="icon">❌</div><h2>文件预览插件加载失败</h2><p>文件读取失败</p></div>'; };
             reader.readAsText(blob);
         }
-
-        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
 
         // ========== 文件类型判断 ==========
         function getFileTypeFromUrl(url) {
             if (!url) return 'link';
-            const fileName = url.split('/').pop().split('?')[0];
-            const ext = fileName.split('.').pop().toLowerCase();
-            if (['jpg','jpeg','png','gif','webp','bmp','svg','ico'].includes(ext)) return 'image';
-            if (['mp4','webm','ogg','mov','avi','mkv'].includes(ext)) return 'video';
-            if (['mp3','m4a','wav','flac','aac'].includes(ext)) return 'audio';
-            if (['pdf','docx','xlsx','txt'].includes(ext)) return 'document';
+            var fileName = url.split('/').pop().split('?')[0];
+            var ext = fileName.split('.').pop().toLowerCase();
+            var imageExts = ['jpg','jpeg','png','gif','webp','bmp','svg','ico'];
+            var videoExts = ['mp4','webm','ogg','mov','avi','mkv'];
+            var audioExts = ['mp3','m4a','wav','flac','aac'];
+            var docExts = ['pdf','docx','xlsx','txt'];
+            if (imageExts.indexOf(ext) !== -1) return 'image';
+            if (videoExts.indexOf(ext) !== -1) return 'video';
+            if (audioExts.indexOf(ext) !== -1) return 'audio';
+            if (docExts.indexOf(ext) !== -1) return 'document';
             return 'unsupported';
         }
 
         function isFileUrl(url) {
             if (!url) return false;
-            const fileName = url.split('/').pop().split('?')[0];
-            const ext = fileName.split('.').pop().toLowerCase();
-            const fileExts = ['jpg','jpeg','png','gif','webp','bmp','svg','ico','mp4','webm','ogg','mov','avi','mkv','mp3','m4a','wav','flac','aac','pdf','docx','xlsx','txt','apk','zip','rar','7z','exe','msi','dmg','pkg','iso','bin','dat','db','sqlite','log','ini','cfg','xml','json','yaml','yml','toml','csv','tsv','md','markdown','rst','tex','bib','sty','ppt','pptx','odt','ods','odp','rtf'];
-            return fileExts.includes(ext);
+            var fileName = url.split('/').pop().split('?')[0];
+            var ext = fileName.split('.').pop().toLowerCase();
+            var fileExts = ['jpg','jpeg','png','gif','webp','bmp','svg','ico','mp4','webm','ogg','mov','avi','mkv','mp3','m4a','wav','flac','aac','pdf','docx','xlsx','txt','apk','zip','rar','7z','exe','msi','dmg','pkg','iso','bin','dat','db','sqlite','log','ini','cfg','xml','json','yaml','yml','toml','csv','tsv','md','markdown','rst','tex','bib','sty','ppt','pptx','odt','ods','odp','rtf'];
+            return fileExts.indexOf(ext) !== -1;
         }
 
         async function fetchFileList() {
             if (cachedFileList) return cachedFileList;
-            if (fileListLoading) { await new Promise(r => setTimeout(r, 500)); return cachedFileList; }
+            if (fileListLoading) { await new Promise(function(r) { setTimeout(r, 500); }); return cachedFileList; }
             fileListLoading = true;
             try {
-                const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/`);
-                if (res.ok) { const items = await res.json(); cachedFileList = items.filter(i => i.type === 'file').map(i => i.name); }
+                var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/');
+                if (res.ok) { var items = await res.json(); cachedFileList = items.filter(function(i) { return i.type === 'file'; }).map(function(i) { return i.name; }); }
                 else { cachedFileList = []; }
             } catch(e) { cachedFileList = []; }
             fileListLoading = false;
@@ -1164,151 +1035,169 @@
         }
 
         function parseEpisodeInfo(fileName) {
-            const match = fileName.match(/^(.+?)-(\d+)-(.+?)\.([^.]+)$/);
+            var match = fileName.match(/^(.+?)-(\d+)-(.+?)\.([^.]+)$/);
             if (match) return { seriesName: match[1], episode: parseInt(match[2]), episodeName: match[3], ext: match[4] };
             return null;
         }
 
-        async function findSeriesFiles(currentFileName, allowedExts = ['mp3','m4a','wav','flac','aac','mp4','webm','ogg','mov','avi','mkv']) {
-            const fileList = await fetchFileList();
+        async function findSeriesFiles(currentFileName, allowedExts) {
+            if (!allowedExts) allowedExts = ['mp3','m4a','wav','flac','aac','mp4','webm','ogg','mov','avi','mkv'];
+            var fileList = await fetchFileList();
             if (!fileList || fileList.length === 0) return [];
-            let seriesName = null;
-            const currentInfo = parseEpisodeInfo(currentFileName);
-            if (currentInfo) { seriesName = currentInfo.seriesName; }
-            else { seriesName = currentFileName.replace(/\.(mp3|m4a|wav|flac|aac|mp4|webm|ogg|mov|avi|mkv)$/i, ''); }
-            if (!seriesName) return [{ fileName: currentFileName, episode: 0, displayName: currentFileName, url: `https://luckynum.top/${currentFileName}` }];
-            const seriesFiles = [];
-            for (const fn of fileList) {
-                const info = parseEpisodeInfo(fn);
-                if (info && info.seriesName === seriesName && allowedExts.includes(info.ext)) {
-                    seriesFiles.push({ fileName: fn, episode: info.episode, displayName: `${info.seriesName}-${info.episodeName}`, url: `https://luckynum.top/${fn}` });
+            var seriesName = null;
+            var currentInfo = parseEpisodeInfo(currentFileName);
+            if (currentInfo) seriesName = currentInfo.seriesName;
+            else seriesName = currentFileName.replace(/\.(mp3|m4a|wav|flac|aac|mp4|webm|ogg|mov|avi|mkv)$/i, '');
+            if (!seriesName) return [{ fileName: currentFileName, episode: 0, displayName: currentFileName, url: 'https://luckynum.top/' + encodeURIComponent(currentFileName) }];
+            var seriesFiles = [];
+            fileList.forEach(function(fn) {
+                var info = parseEpisodeInfo(fn);
+                if (info && info.seriesName === seriesName && allowedExts.indexOf(info.ext) !== -1) {
+                    seriesFiles.push({ fileName: fn, episode: info.episode, displayName: info.seriesName + '-' + info.episodeName, url: 'https://luckynum.top/' + encodeURIComponent(fn) });
                 }
-            }
-            seriesFiles.sort((a, b) => a.episode - b.episode);
-            if (seriesFiles.length === 0) return [{ fileName: currentFileName, episode: 0, displayName: currentFileName, url: `https://luckynum.top/${currentFileName}` }];
+            });
+            seriesFiles.sort(function(a, b) { return a.episode - b.episode; });
+            if (seriesFiles.length === 0) return [{ fileName: currentFileName, episode: 0, displayName: currentFileName, url: 'https://luckynum.top/' + encodeURIComponent(currentFileName) }];
             return seriesFiles;
         }
 
         function openAudioViewer(url, fileName, seriesFiles) {
-            const overlay = document.createElement('div'); overlay.className = 'file-viewer-overlay';
-            const header = document.createElement('div'); header.className = 'viewer-header';
-            header.innerHTML = `<div class="viewer-title">🎵 音频列表</div><div class="viewer-controls"><button class="viewer-btn close-btn">关闭</button></div>`;
-            const content = document.createElement('div'); content.className = 'viewer-content';
+            var overlay = document.createElement('div'); overlay.className = 'file-viewer-overlay';
+            var header = document.createElement('div'); header.className = 'viewer-header';
+            header.innerHTML = '<div class="viewer-title">🎵 音频列表</div><div class="viewer-controls"><button class="viewer-btn close-btn">关闭</button></div>';
+            var content = document.createElement('div'); content.className = 'viewer-content';
             if (!seriesFiles || seriesFiles.length === 0) {
-                const dn = fileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '');
-                content.innerHTML = `<div class="audio-list-container"><div class="audio-list-item"><div class="audio-item-title">📻 ${escapeHtml(dn)}</div><div class="audio-item-controls"><audio controls preload="metadata" src="${escapeHtml(url)}"></audio></div></div></div>`;
+                var dn = fileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i, '');
+                content.innerHTML = '<div class="audio-list-container"><div class="audio-list-item"><div class="audio-item-title">📻 ' + escapeHtml(dn) + '</div><div class="audio-item-controls"><audio controls preload="metadata" src="' + escapeHtml(url) + '"></audio></div></div></div>';
             } else {
-                let listHtml = '<div class="audio-list-container">';
-                for (const item of seriesFiles) {
-                    listHtml += `<div class="audio-list-item"><div class="audio-item-title">📻 ${escapeHtml(item.displayName)}</div><div class="audio-item-controls"><audio controls preload="metadata" src="${escapeHtml(item.url)}"></audio></div></div>`;
-                }
+                var listHtml = '<div class="audio-list-container">';
+                seriesFiles.forEach(function(item) {
+                    listHtml += '<div class="audio-list-item"><div class="audio-item-title">📻 ' + escapeHtml(item.displayName) + '</div><div class="audio-item-controls"><audio controls preload="metadata" src="' + escapeHtml(item.url) + '"></audio></div></div>';
+                });
                 listHtml += '</div>';
                 content.innerHTML = listHtml;
             }
             overlay.appendChild(header); overlay.appendChild(content); document.body.appendChild(overlay);
-            header.querySelector('.close-btn').onclick = () => overlay.remove();
-            overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+            header.querySelector('.close-btn').onclick = function() { overlay.remove(); };
+            overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
         }
 
         function openVideoViewer(url, fileName, seriesFiles) {
-            const overlay = document.createElement('div'); overlay.className = 'file-viewer-overlay';
-            const header = document.createElement('div'); header.className = 'viewer-header';
-            header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
-            const content = document.createElement('div'); content.className = 'viewer-content';
-            content.innerHTML = `<div class="video-container"><video id="videoPlayer" controls style="max-width:100%;max-height:70%;object-fit:contain;"><source src="${escapeHtml(url)}"></video></div>`;
+            var overlay = document.createElement('div'); overlay.className = 'file-viewer-overlay';
+            var header = document.createElement('div'); header.className = 'viewer-header';
+            header.innerHTML = '<div class="viewer-title">' + escapeHtml(fileName) + '</div><div class="viewer-controls"><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>';
+            var content = document.createElement('div'); content.className = 'viewer-content';
+            content.innerHTML = '<div class="video-container"><video id="videoPlayer" controls style="max-width:100%;max-height:70%;object-fit:contain;"><source src="' + escapeHtml(url) + '"></video></div>';
             if (seriesFiles && seriesFiles.length > 1) {
-                let listHtml = '<div class="audio-list-container" style="margin-top:16px;"><div style="color:white;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.2);margin-bottom:8px;">📋 同系列视频</div>';
-                for (const item of seriesFiles) {
-                    const dn = item.fileName.replace(/\.(mp4|webm|ogg|mov|avi|mkv)$/i, '');
-                    const isCurrent = item.fileName === fileName;
-                    listHtml += `<div class="audio-list-item" style="cursor:pointer;${isCurrent?'background:rgba(255,255,255,0.2);':''}" data-video-url="${escapeHtml(item.url)}" data-video-name="${escapeHtml(dn)}"><div class="audio-item-title" style="color:white;">🎬 ${escapeHtml(dn)}</div></div>`;
-                }
+                var listHtml = '<div class="audio-list-container" style="margin-top:16px;"><div style="color:white;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.2);margin-bottom:8px;">📋 同系列视频</div>';
+                seriesFiles.forEach(function(item) {
+                    var dn = item.fileName.replace(/\.(mp4|webm|ogg|mov|avi|mkv)$/i, '');
+                    var isCurrent = item.fileName === fileName;
+                    listHtml += '<div class="audio-list-item" style="cursor:pointer;' + (isCurrent?'background:rgba(255,255,255,0.2);':'') + '" data-video-url="' + escapeHtml(item.url) + '" data-video-name="' + escapeHtml(dn) + '"><div class="audio-item-title" style="color:white;">🎬 ' + escapeHtml(dn) + '</div></div>';
+                });
                 listHtml += '</div>';
                 content.innerHTML += listHtml;
             }
             overlay.appendChild(header); overlay.appendChild(content); document.body.appendChild(overlay);
-            const video = content.querySelector('#videoPlayer');
+            var video = content.querySelector('#videoPlayer');
             if (seriesFiles && seriesFiles.length > 1) {
-                const videoItems = content.querySelectorAll('[data-video-url]');
-                videoItems.forEach(item => {
-                    item.addEventListener('click', () => {
-                        video.src = item.dataset.videoUrl; video.load(); video.play().catch(e => console.log(e));
-                        const ts = header.querySelector('.viewer-title'); if (ts) ts.textContent = item.dataset.videoName;
-                        videoItems.forEach(vi => vi.style.background = 'rgba(255,255,255,0.08)');
-                        item.style.background = 'rgba(255,255,255,0.2)';
+                var videoItems = content.querySelectorAll('[data-video-url]');
+                videoItems.forEach(function(item) {
+                    item.addEventListener('click', function() {
+                        video.src = this.dataset.videoUrl; video.load(); video.play().catch(function(){});
+                        var ts = header.querySelector('.viewer-title'); if (ts) ts.textContent = this.dataset.videoName;
+                        videoItems.forEach(function(vi) { vi.style.background = 'rgba(255,255,255,0.08)'; });
+                        this.style.background = 'rgba(255,255,255,0.2)';
                     });
                 });
             }
-            header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
-            header.querySelector('.close-btn').onclick = () => { video.pause(); overlay.remove(); };
-            overlay.onclick = (e) => { if (e.target === overlay) { video.pause(); overlay.remove(); } };
+            header.querySelector('.share-btn').onclick = function() { copyShareLink(fileName); };
+            header.querySelector('.close-btn').onclick = function() { video.pause(); overlay.remove(); };
+            overlay.onclick = function(e) { if (e.target === overlay) { video.pause(); overlay.remove(); } };
         }
 
         function createZoomableImage(url, fileName) {
-            const container = document.createElement('div'); container.className = 'image-container';
-            const img = document.createElement('img'); img.src = url; img.className = 'zoomable-image';
+            var container = document.createElement('div'); container.className = 'image-container';
+            var img = document.createElement('img'); img.src = url; img.className = 'zoomable-image';
             img.style.transform = 'translate(0px, 0px) scale(1)'; container.appendChild(img);
-            let scale = 1, translateX = 0, translateY = 0;
-            const updateTransform = () => { img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; };
-            const clampTranslate = () => { const rect = img.getBoundingClientRect(); const crect = container.getBoundingClientRect(); const maxX = Math.max(0, (rect.width * scale - crect.width) / 2); const maxY = Math.max(0, (rect.height * scale - crect.height) / 2); translateX = Math.min(maxX, Math.max(-maxX, translateX)); translateY = Math.min(maxY, Math.max(-maxY, translateY)); };
-            const zoomIn = () => { scale = Math.min(scale + 0.25, 4); clampTranslate(); updateTransform(); };
-            const zoomOut = () => { scale = Math.max(scale - 0.25, 1); if (scale === 1) { translateX = 0; translateY = 0; } else clampTranslate(); updateTransform(); };
-            const resetZoom = () => { scale = 1; translateX = 0; translateY = 0; updateTransform(); };
-            img.addEventListener('wheel', (e) => { e.preventDefault(); e.deltaY < 0 ? zoomIn() : zoomOut(); });
-            let isDragging = false, dragStartX = 0, dragStartY = 0, startTranslateX = 0, startTranslateY = 0;
-            img.addEventListener('mousedown', (e) => { if (scale > 1) { isDragging = true; dragStartX = e.clientX; dragStartY = e.clientY; startTranslateX = translateX; startTranslateY = translateY; img.style.cursor = 'grabbing'; e.preventDefault(); } });
-            document.addEventListener('mousemove', (e) => { if (isDragging && scale > 1) { translateX = startTranslateX + (e.clientX - dragStartX); translateY = startTranslateY + (e.clientY - dragStartY); clampTranslate(); updateTransform(); } });
-            document.addEventListener('mouseup', () => { isDragging = false; if (scale > 1) img.style.cursor = 'grab'; });
-            const getDistance = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
-            let initialDistance = 0, initialScale = 1, lastTouchX = 0, lastTouchY = 0, isPanning = false;
-            container.addEventListener('touchstart', (e) => { e.preventDefault(); const touches = Array.from(e.touches); if (touches.length === 1) { isPanning = true; lastTouchX = touches[0].clientX; lastTouchY = touches[0].clientY; } else if (touches.length === 2) { initialDistance = getDistance(touches); initialScale = scale; const c = { x: (touches[0].clientX + touches[1].clientX) / 2, y: (touches[0].clientY + touches[1].clientY) / 2 }; lastTouchX = c.x; lastTouchY = c.y; } });
-            container.addEventListener('touchmove', (e) => { e.preventDefault(); const touches = Array.from(e.touches); if (touches.length === 1 && isPanning && scale > 1) { translateX += touches[0].clientX - lastTouchX; translateY += touches[0].clientY - lastTouchY; clampTranslate(); updateTransform(); lastTouchX = touches[0].clientX; lastTouchY = touches[0].clientY; } else if (touches.length === 2) { const nd = getDistance(touches); const ns = initialScale * (nd / initialDistance); scale = Math.min(Math.max(ns, 1), 4); if (scale === 1) { translateX = 0; translateY = 0; } else { const nc = { x: (touches[0].clientX + touches[1].clientX) / 2, y: (touches[0].clientY + touches[1].clientY) / 2 }; translateX += nc.x - lastTouchX; translateY += nc.y - lastTouchY; clampTranslate(); lastTouchX = nc.x; lastTouchY = nc.y; } updateTransform(); initialDistance = nd; initialScale = scale; } });
-            container.addEventListener('touchend', () => { isPanning = false; });
-            img.onerror = () => { container.innerHTML = `<div class="unsupported-view"><h2>🖼️ 图片加载失败</h2><button class="fallback-download">📥 立即下载</button></div>`; container.querySelector('.fallback-download').onclick = () => downloadFile(url, fileName); };
-            return { container, zoomIn, zoomOut, resetZoom };
+            var scale = 1, translateX = 0, translateY = 0;
+            var updateTransform = function() { img.style.transform = 'translate(' + translateX + 'px, ' + translateY + 'px) scale(' + scale + ')'; };
+            var clampTranslate = function() {
+                var rect = img.getBoundingClientRect();
+                var crect = container.getBoundingClientRect();
+                var maxX = Math.max(0, (rect.width * scale - crect.width) / 2);
+                var maxY = Math.max(0, (rect.height * scale - crect.height) / 2);
+                translateX = Math.min(maxX, Math.max(-maxX, translateX));
+                translateY = Math.min(maxY, Math.max(-maxY, translateY));
+            };
+            var zoomIn = function() { scale = Math.min(scale + 0.25, 4); clampTranslate(); updateTransform(); };
+            var zoomOut = function() { scale = Math.max(scale - 0.25, 1); if (scale === 1) { translateX = 0; translateY = 0; } else clampTranslate(); updateTransform(); };
+            var resetZoom = function() { scale = 1; translateX = 0; translateY = 0; updateTransform(); };
+            img.addEventListener('wheel', function(e) { e.preventDefault(); e.deltaY < 0 ? zoomIn() : zoomOut(); });
+            var isDragging = false, dragStartX = 0, dragStartY = 0, startTranslateX = 0, startTranslateY = 0;
+            img.addEventListener('mousedown', function(e) { if (scale > 1) { isDragging = true; dragStartX = e.clientX; dragStartY = e.clientY; startTranslateX = translateX; startTranslateY = translateY; img.style.cursor = 'grabbing'; e.preventDefault(); } });
+            document.addEventListener('mousemove', function(e) { if (isDragging && scale > 1) { translateX = startTranslateX + (e.clientX - dragStartX); translateY = startTranslateY + (e.clientY - dragStartY); clampTranslate(); updateTransform(); } });
+            document.addEventListener('mouseup', function() { isDragging = false; if (scale > 1) img.style.cursor = 'grab'; });
+            var getDistance = function(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); };
+            var initialDistance = 0, initialScale = 1, lastTouchX = 0, lastTouchY = 0, isPanning = false;
+            container.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                var touches = Array.from(e.touches);
+                if (touches.length === 1) { isPanning = true; lastTouchX = touches[0].clientX; lastTouchY = touches[0].clientY; }
+                else if (touches.length === 2) { initialDistance = getDistance(touches); initialScale = scale; var c = { x: (touches[0].clientX + touches[1].clientX) / 2, y: (touches[0].clientY + touches[1].clientY) / 2 }; lastTouchX = c.x; lastTouchY = c.y; }
+            });
+            container.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                var touches = Array.from(e.touches);
+                if (touches.length === 1 && isPanning && scale > 1) { translateX += touches[0].clientX - lastTouchX; translateY += touches[0].clientY - lastTouchY; clampTranslate(); updateTransform(); lastTouchX = touches[0].clientX; lastTouchY = touches[0].clientY; }
+                else if (touches.length === 2) { var nd = getDistance(touches); var ns = initialScale * (nd / initialDistance); scale = Math.min(Math.max(ns, 1), 4); if (scale === 1) { translateX = 0; translateY = 0; } else { var nc = { x: (touches[0].clientX + touches[1].clientX) / 2, y: (touches[0].clientY + touches[1].clientY) / 2 }; translateX += nc.x - lastTouchX; translateY += nc.y - lastTouchY; clampTranslate(); lastTouchX = nc.x; lastTouchY = nc.y; } updateTransform(); initialDistance = nd; initialScale = scale; }
+            });
+            container.addEventListener('touchend', function() { isPanning = false; });
+            img.onerror = function() { container.innerHTML = '<div class="unsupported-view"><h2>🖼️ 图片加载失败</h2><button class="download-fallback-btn" id="imgErrorDownloadBtn">📥 立即下载</button></div>'; var btn = container.querySelector('#imgErrorDownloadBtn'); if (btn) btn.onclick = function() { downloadFile(url, fileName); }; };
+            return { container: container, zoomIn: zoomIn, zoomOut: zoomOut, resetZoom: resetZoom };
         }
 
         function openImageViewer(url, fileName) {
-            const overlay = document.createElement('div'); overlay.className = 'file-viewer-overlay';
-            const header = document.createElement('div'); header.className = 'viewer-header';
-            header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><div id="zoomControls" style="display:flex;gap:8px;"></div><button class="viewer-btn download-btn">下载</button><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
-            const content = document.createElement('div'); content.className = 'viewer-content';
+            var overlay = document.createElement('div'); overlay.className = 'file-viewer-overlay';
+            var header = document.createElement('div'); header.className = 'viewer-header';
+            header.innerHTML = '<div class="viewer-title">' + escapeHtml(fileName) + '</div><div class="viewer-controls"><div id="zoomControls" style="display:flex;gap:8px;"></div><button class="viewer-btn download-btn">下载</button><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>';
+            var content = document.createElement('div'); content.className = 'viewer-content';
             overlay.appendChild(header); overlay.appendChild(content); document.body.appendChild(overlay);
-            const { container, zoomIn, zoomOut, resetZoom } = createZoomableImage(url, fileName);
-            content.appendChild(container);
-            const zc = header.querySelector('#zoomControls');
-            zc.innerHTML = `<button class="zoom-btn" id="zoomOutBtn">−</button><button class="zoom-btn" id="resetZoomBtn">⟳</button><button class="zoom-btn" id="zoomInBtn">+</button>`;
-            zc.querySelector('#zoomInBtn').onclick = zoomIn;
-            zc.querySelector('#zoomOutBtn').onclick = zoomOut;
-            zc.querySelector('#resetZoomBtn').onclick = resetZoom;
-            header.querySelector('.download-btn').onclick = () => downloadFile(url, fileName);
-            header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
-            header.querySelector('.close-btn').onclick = () => overlay.remove();
-            overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+            var result = createZoomableImage(url, fileName);
+            content.appendChild(result.container);
+            var zc = header.querySelector('#zoomControls');
+            zc.innerHTML = '<button class="zoom-btn" id="zoomOutBtn">−</button><button class="zoom-btn" id="resetZoomBtn">⟳</button><button class="zoom-btn" id="zoomInBtn">+</button>';
+            zc.querySelector('#zoomInBtn').onclick = result.zoomIn;
+            zc.querySelector('#zoomOutBtn').onclick = result.zoomOut;
+            zc.querySelector('#resetZoomBtn').onclick = result.resetZoom;
+            header.querySelector('.download-btn').onclick = function() { downloadFile(url, fileName); };
+            header.querySelector('.share-btn').onclick = function() { copyShareLink(fileName); };
+            header.querySelector('.close-btn').onclick = function() { overlay.remove(); };
+            overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
         }
 
         function showUnsupportedDialog(url, fileName) {
-            const overlay = document.createElement('div'); overlay.className = 'file-viewer-overlay';
-            const header = document.createElement('div'); header.className = 'viewer-header';
-            header.innerHTML = `<div class="viewer-title">${escapeHtml(fileName)}</div><div class="viewer-controls"><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>`;
-            const content = document.createElement('div'); content.className = 'viewer-content';
-            content.innerHTML = `<div class="unsupported-view"><h2>📄 该文件不支持预览</h2><p>${escapeHtml(fileName)}</p><button id="downloadBtn">📥 立即下载</button></div>`;
+            var overlay = document.createElement('div'); overlay.className = 'file-viewer-overlay';
+            var header = document.createElement('div'); header.className = 'viewer-header';
+            header.innerHTML = '<div class="viewer-title">' + escapeHtml(fileName) + '</div><div class="viewer-controls"><button class="viewer-btn share-btn">分享</button><button class="viewer-btn close-btn">关闭</button></div>';
+            var content = document.createElement('div'); content.className = 'viewer-content';
+            content.innerHTML = '<div class="unsupported-view"><h2>📄 该文件不支持预览</h2><p>' + escapeHtml(fileName) + '</p><button class="download-fallback-btn" id="unsupportedDownloadBtn">📥 立即下载</button></div>';
             overlay.appendChild(header); overlay.appendChild(content); document.body.appendChild(overlay);
-            content.querySelector('#downloadBtn').onclick = () => downloadFile(url, fileName);
-            header.querySelector('.share-btn').onclick = () => copyShareLink(fileName);
-            header.querySelector('.close-btn').onclick = () => overlay.remove();
-            overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+            content.querySelector('#unsupportedDownloadBtn').onclick = function() { downloadFile(url, fileName); };
+            header.querySelector('.share-btn').onclick = function() { copyShareLink(fileName); };
+            header.querySelector('.close-btn').onclick = function() { overlay.remove(); };
+            overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
         }
 
         async function handleAppClick(link, name) {
-            let fullUrl = link;
-            if (fullUrl && !fullUrl.startsWith('http') && !fullUrl.startsWith('//')) fullUrl = `https://luckynum.top/${fullUrl}`;
+            var fullUrl = link;
+            if (fullUrl && fullUrl.indexOf('http') !== 0 && fullUrl.indexOf('//') !== 0) fullUrl = 'https://luckynum.top/' + encodeURIComponent(link);
             if (isFileUrl(link)) {
-                const fileName = link.split('/').pop().split('?')[0];
-                const fileType = getFileTypeFromUrl(link);
+                var fileName = link.split('/').pop().split('?')[0];
+                var fileType = getFileTypeFromUrl(link);
                 if (fileType === 'image') { openImageViewer(fullUrl, name); return; }
-                if (fileType === 'video') { const sf = await findSeriesFiles(fileName, ['mp4','webm','ogg','mov','avi','mkv']); openVideoViewer(fullUrl, name, sf); return; }
-                if (fileType === 'audio') { const sf = await findSeriesFiles(fileName, ['mp3','m4a','wav','flac','aac']); openAudioViewer(fullUrl, name, sf); return; }
+                if (fileType === 'video') { var sf = await findSeriesFiles(fileName, ['mp4','webm','ogg','mov','avi','mkv']); openVideoViewer(fullUrl, name, sf); return; }
+                if (fileType === 'audio') { var sf = await findSeriesFiles(fileName, ['mp3','m4a','wav','flac','aac']); openAudioViewer(fullUrl, name, sf); return; }
                 if (fileType === 'document') { openDocumentViewer(fullUrl, fileName); return; }
                 showUnsupportedDialog(fullUrl, name); return;
             }
@@ -1316,43 +1205,43 @@
         }
 
         async function handleUrlAppParameter() {
-            const params = new URLSearchParams(window.location.search);
-            let appParam = params.get('app');
+            var params = new URLSearchParams(window.location.search);
+            var appParam = params.get('app');
             if (!appParam) return;
             try { appParam = decodeURIComponent(appParam); } catch(e) {}
-            let rc = 0;
-            while (appItems.length === 0 && rc < 30) { await new Promise(r => setTimeout(r, 200)); rc++; }
-            let targetApp = appItems.find(a => a.name === appParam);
-            if (!targetApp) targetApp = appItems.find(a => a.name.toLowerCase().includes(appParam.toLowerCase()));
-            if (targetApp) { setTimeout(() => handleAppClick(targetApp.link, targetApp.name), 500); return; }
+            var rc = 0;
+            while (appItems.length === 0 && rc < 30) { await new Promise(function(r) { setTimeout(r, 200); }); rc++; }
+            var targetApp = appItems.find(function(a) { return a.name === appParam; });
+            if (!targetApp) targetApp = appItems.find(function(a) { return a.name.toLowerCase().indexOf(appParam.toLowerCase()) !== -1; });
+            if (targetApp) { setTimeout(function() { handleAppClick(targetApp.link, targetApp.name); }, 500); return; }
             if (isFileUrl(appParam)) {
-                const ft = getFileTypeFromUrl(appParam);
-                const fn = appParam.split('/').pop();
-                let fu = appParam;
-                if (!fu.startsWith('http')) fu = `https://luckynum.top/${fu}`;
+                var ft = getFileTypeFromUrl(appParam);
+                var fn = appParam.split('/').pop();
+                var fu = appParam;
+                if (fu.indexOf('http') !== 0) fu = 'https://luckynum.top/' + encodeURIComponent(appParam);
                 if (ft === 'image') { openImageViewer(fu, fn); return; }
-                if (ft === 'video') { const sf = await findSeriesFiles(fn, ['mp4','webm','ogg','mov','avi','mkv']); openVideoViewer(fu, fn, sf); return; }
-                if (ft === 'audio') { const sf = await findSeriesFiles(fn, ['mp3','m4a','wav','flac','aac']); openAudioViewer(fu, fn, sf); return; }
+                if (ft === 'video') { var sf = await findSeriesFiles(fn, ['mp4','webm','ogg','mov','avi','mkv']); openVideoViewer(fu, fn, sf); return; }
+                if (ft === 'audio') { var sf = await findSeriesFiles(fn, ['mp3','m4a','wav','flac','aac']); openAudioViewer(fu, fn, sf); return; }
                 if (ft === 'document') { openDocumentViewer(fu, fn); return; }
                 showUnsupportedDialog(fu, fn); return;
             }
-            alert(`❌ 应用/文件不存在或已被删除\n\n"${appParam}"`);
+            alert('❌ 应用/文件不存在或已被删除\n\n"' + appParam + '"');
         }
 
         function parseAppTxt(raw) {
-            const lines = raw.split(/\r?\n/);
-            let mode = null;
-            let groups = [], pics = [], apps = [];
-            for (let line of lines) {
+            var lines = raw.split(/\r?\n/);
+            var mode = null;
+            var groups = [], pics = [], apps = [];
+            lines.forEach(function(line) {
                 line = line.trim();
-                if (line === '') continue;
-                if (line.toLowerCase() === 'group') { mode = 'group'; continue; }
-                if (line.toLowerCase() === 'pic') { mode = 'pic'; continue; }
-                if (line.toLowerCase() === 'app') { mode = 'app'; continue; }
-                if (mode === 'group') { let m = line.match(/\[g=([^\]]+)\]/); if (m) groups.push(m[1].trim()); }
-                else if (mode === 'pic') { let m = line.match(/\[p=([^\s\]]+)\s+l=([^\s\]]+)\]/); if (m) pics.push({ imgUrl: m[1].trim(), linkUrl: m[2].trim() }); }
-                else if (mode === 'app') { let m = line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)(?:\s+g=([^\s\]]+))?\]/); if (!m) m = line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)(?:\s+g=(.+?))?\]/); if (m) apps.push({ name: m[1].trim(), icon: m[2].trim(), link: m[3].trim(), group: m[4] ? m[4].trim() : null }); }
-            }
+                if (line === '') return;
+                if (line.toLowerCase() === 'group') { mode = 'group'; return; }
+                if (line.toLowerCase() === 'pic') { mode = 'pic'; return; }
+                if (line.toLowerCase() === 'app') { mode = 'app'; return; }
+                if (mode === 'group') { var m = line.match(/\[g=([^\]]+)\]/); if (m) groups.push(m[1].trim()); }
+                else if (mode === 'pic') { var m = line.match(/\[p=([^\s\]]+)\s+l=([^\s\]]+)\]/); if (m) pics.push({ imgUrl: m[1].trim(), linkUrl: m[2].trim() }); }
+                else if (mode === 'app') { var m = line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)(?:\s+g=([^\s\]]+))?\]/); if (!m) m = line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)(?:\s+g=(.+?))?\]/); if (m) apps.push({ name: m[1].trim(), icon: m[2].trim(), link: m[3].trim(), group: m[4] ? m[4].trim() : null }); }
+            });
             groupOrder = groups.length ? groups : ['其他应用'];
             slidesData = pics; appItems = apps;
             renderGroups();
@@ -1362,32 +1251,31 @@
         }
 
         function renderGroups() {
-            const gc = document.getElementById('groupsContainer');
+            var gc = document.getElementById('groupsContainer');
             if (!gc) return;
-            let appsByGroup = {};
-            for (let g of groupOrder) appsByGroup[g] = [];
-            for (let app of appItems) {
-                let g = app.group || '其他应用';
+            var appsByGroup = {};
+            groupOrder.forEach(function(g) { appsByGroup[g] = []; });
+            appItems.forEach(function(app) {
+                var g = app.group || '其他应用';
                 if (!appsByGroup[g]) appsByGroup[g] = [];
                 appsByGroup[g].push(app);
-            }
-            let html = '';
-            for (let i = 0; i < groupOrder.length; i++) {
-                const gn = groupOrder[i];
-                const apps = appsByGroup[gn] || [];
-                html += `<div class="group-section" data-group-index="${i}"><div class="group-header${isEditMode?' draggable':''}" data-group="${escapeHtml(gn)}"><span class="group-title">${escapeHtml(gn)}</span>${isEditMode?`<div><button onclick="editGroup('${escapeHtml(gn)}')">✎</button><button onclick="deleteGroup('${escapeHtml(gn)}')">🗑</button></div>`:''}</div><div class="apps-grid" data-group="${escapeHtml(gn)}" data-group-index="${i}">`;
+            });
+            var html = '';
+            groupOrder.forEach(function(gn, i) {
+                var apps = appsByGroup[gn] || [];
+                html += '<div class="group-section" data-group-index="' + i + '"><div class="group-header' + (isEditMode?' draggable':'') + '" data-group="' + escapeHtml(gn) + '"><span class="group-title">' + escapeHtml(gn) + '</span>' + (isEditMode?'<div><button onclick="editGroup(\'' + escapeHtml(gn) + '\')">✎</button><button onclick="deleteGroup(\'' + escapeHtml(gn) + '\')">🗑</button></div>':'') + '</div><div class="apps-grid" data-group="' + escapeHtml(gn) + '" data-group-index="' + i + '">';
                 if (apps.length === 0) html += '<div class="empty-group">暂无应用</div>';
-                else for (let app of apps) {
-                    let icon = app.icon;
-                    if (icon && !icon.startsWith('http')) icon = `https://luckynum.top/${icon}`;
-                    const fallback = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'%3E%3Crect width=\'48\' height=\'48\' fill=\'%23ddd\'/%3E%3C/svg%3E';
-                    html += `<div class="app-card" data-app-name="${escapeHtml(app.name)}" data-app-link="${escapeHtml(app.link)}" data-app-icon="${escapeHtml(app.icon)}" data-app-group="${escapeHtml(gn)}">${isEditMode?`<button class="edit-app-btn" onclick="editApp('${escapeHtml(app.name)}','${escapeHtml(app.link)}','${escapeHtml(app.icon)}','${escapeHtml(gn)}')">✎</button><button class="delete-btn" onclick="deleteApp('${escapeHtml(app.name)}','${escapeHtml(app.link)}')">✕</button><div class="drag-handle" draggable="true">⋮⋮</div>`:''}<img class="app-icon" src="${escapeHtml(icon)}" onerror="this.src='${fallback}'"><span class="app-name">${escapeHtml(app.name)}</span></div>`;
-                }
+                else apps.forEach(function(app) {
+                    var icon = app.icon;
+                    if (icon && icon.indexOf('http') !== 0) icon = 'https://luckynum.top/' + encodeURIComponent(icon);
+                    var fallback = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'%3E%3Crect width=\'48\' height=\'48\' fill=\'%23ddd\'/%3E%3C/svg%3E';
+                    html += '<div class="app-card" data-app-name="' + escapeHtml(app.name) + '" data-app-link="' + escapeHtml(app.link) + '" data-app-icon="' + escapeHtml(app.icon) + '" data-app-group="' + escapeHtml(gn) + '">' + (isEditMode?'<button class="edit-app-btn" onclick="editApp(\'' + escapeHtml(app.name) + '\',\'' + escapeHtml(app.link) + '\',\'' + escapeHtml(app.icon) + '\',\'' + escapeHtml(gn) + '\')">✎</button><button class="delete-btn" onclick="deleteApp(\'' + escapeHtml(app.name) + '\',\'' + escapeHtml(app.link) + '\')">✕</button><div class="drag-handle" draggable="true">⋮⋮</div>':'') + '<img class="app-icon" src="' + escapeHtml(icon) + '" onerror="this.src=\'' + fallback + '\'"><span class="app-name">' + escapeHtml(app.name) + '</span></div>';
+                });
                 html += '</div></div>';
-            }
+            });
             gc.innerHTML = html;
-            document.querySelectorAll('.app-card').forEach(card => {
-                card.addEventListener('click', (e) => {
+            document.querySelectorAll('.app-card').forEach(function(card) {
+                card.addEventListener('click', function(e) {
                     if (e.target.classList.contains('edit-app-btn') || e.target.classList.contains('delete-btn') || e.target.classList.contains('drag-handle')) return;
                     handleAppClick(card.dataset.appLink, card.dataset.appName);
                 });
@@ -1396,46 +1284,46 @@
         }
 
         function initDragSort() {
-            document.querySelectorAll('.group-header.draggable').forEach(header => {
+            document.querySelectorAll('.group-header.draggable').forEach(function(header) {
                 header.setAttribute('draggable', 'true');
-                header.ondragstart = (e) => { const gd = header.closest('.group-section'); draggedGroupIndex = parseInt(gd.dataset.groupIndex); e.dataTransfer.setData('text/plain', draggedGroupIndex); e.dataTransfer.effectAllowed = 'move'; };
-                header.ondragover = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
-                header.ondrop = async (e) => { e.preventDefault(); const tg = header.closest('.group-section'); const ti = parseInt(tg.dataset.groupIndex); if (draggedGroupIndex !== null && draggedGroupIndex !== ti) { const mg = groupOrder[draggedGroupIndex]; groupOrder.splice(draggedGroupIndex, 1); groupOrder.splice(ti, 0, mg); if (await saveToGitHub(generateFileContent())) renderGroups(); } draggedGroupIndex = null; };
+                header.ondragstart = function(e) { var gd = header.closest('.group-section'); draggedGroupIndex = parseInt(gd.dataset.groupIndex); e.dataTransfer.setData('text/plain', draggedGroupIndex); e.dataTransfer.effectAllowed = 'move'; };
+                header.ondragover = function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
+                header.ondrop = async function(e) { e.preventDefault(); var tg = header.closest('.group-section'); var ti = parseInt(tg.dataset.groupIndex); if (draggedGroupIndex !== null && draggedGroupIndex !== ti) { var mg = groupOrder[draggedGroupIndex]; groupOrder.splice(draggedGroupIndex, 1); groupOrder.splice(ti, 0, mg); if (await saveToGitHub(generateFileContent())) renderGroups(); } draggedGroupIndex = null; };
             });
-            document.querySelectorAll('.app-card .drag-handle').forEach(handle => {
+            document.querySelectorAll('.app-card .drag-handle').forEach(function(handle) {
                 handle.setAttribute('draggable', 'true');
-                handle.ondragstart = (e) => { const card = handle.closest('.app-card'); draggedAppData = { name: card.dataset.appName, link: card.dataset.appLink, icon: card.dataset.appIcon, group: card.dataset.appGroup }; e.dataTransfer.setData('text/plain', JSON.stringify(draggedAppData)); e.dataTransfer.effectAllowed = 'move'; card.classList.add('dragging'); };
-                handle.ondragend = (e) => { e.target.closest('.app-card').classList.remove('dragging'); draggedAppData = null; };
+                handle.ondragstart = function(e) { var card = handle.closest('.app-card'); draggedAppData = { name: card.dataset.appName, link: card.dataset.appLink, icon: card.dataset.appIcon, group: card.dataset.appGroup }; e.dataTransfer.setData('text/plain', JSON.stringify(draggedAppData)); e.dataTransfer.effectAllowed = 'move'; card.classList.add('dragging'); };
+                handle.ondragend = function(e) { e.target.closest('.app-card').classList.remove('dragging'); draggedAppData = null; };
             });
-            document.querySelectorAll('.apps-grid').forEach(grid => {
-                grid.ondragover = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
-                grid.ondrop = async (e) => { e.preventDefault(); if (draggedAppData) { const tg = grid.dataset.group; const app = appItems.find(a => a.name === draggedAppData.name && a.link === draggedAppData.link); if (app && app.group !== tg) { app.group = tg; if (await saveToGitHub(generateFileContent())) renderGroups(); } draggedAppData = null; } };
+            document.querySelectorAll('.apps-grid').forEach(function(grid) {
+                grid.ondragover = function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
+                grid.ondrop = async function(e) { e.preventDefault(); if (draggedAppData) { var tg = grid.dataset.group; var app = appItems.find(function(a) { return a.name === draggedAppData.name && a.link === draggedAppData.link; }); if (app && app.group !== tg) { app.group = tg; if (await saveToGitHub(generateFileContent())) renderGroups(); } draggedAppData = null; } };
             });
         }
 
         function renderCarousel() {
-            const ct = document.getElementById('carouselTrack');
+            var ct = document.getElementById('carouselTrack');
             if (!ct) return;
             totalSlides = slidesData.length;
             if (totalSlides === 0) { document.getElementById('carouselSection').style.display = 'none'; return; }
             document.getElementById('carouselSection').style.display = 'block';
-            let html = '';
-            for (let i = 0; i < slidesData.length; i++) {
-                let img = slidesData[i].imgUrl, link = slidesData[i].linkUrl;
-                if (img && !img.startsWith('http')) img = `https://luckynum.top/${img}`;
-                if (link && !link.startsWith('http')) link = `https://luckynum.top/${link}`;
-                html += `<div class="carousel-slide">${isEditMode?`<button class="delete-btn" onclick="deleteSlide(${i})">✕</button>`:''}<a href="${escapeHtml(link)}" target="_blank"><img src="${escapeHtml(img)}" onerror="this.src='https://luckynum.top/41.jpg'"></a></div>`;
-            }
+            var html = '';
+            slidesData.forEach(function(s, i) {
+                var img = s.imgUrl, link = s.linkUrl;
+                if (img && img.indexOf('http') !== 0) img = 'https://luckynum.top/' + encodeURIComponent(img);
+                if (link && link.indexOf('http') !== 0) link = 'https://luckynum.top/' + encodeURIComponent(link);
+                html += '<div class="carousel-slide">' + (isEditMode?'<button class="delete-btn" onclick="deleteSlide(' + i + ')">✕</button>':'') + '<a href="' + escapeHtml(link) + '" target="_blank"><img src="' + escapeHtml(img) + '" onerror="this.src=\'https://luckynum.top/41.jpg\'"></a></div>';
+            });
             ct.innerHTML = html;
-            let dots = '';
-            for (let i = 0; i < totalSlides; i++) dots += `<div class="dot${i===currentIndex?' active':''}" data-index="${i}"></div>`;
+            var dots = '';
+            for (var i = 0; i < totalSlides; i++) dots += '<div class="dot' + (i===currentIndex?' active':'') + '" data-index="' + i + '"></div>';
             document.getElementById('carouselDots').innerHTML = dots;
             updateCarouselPosition();
-            document.querySelectorAll('.dot').forEach(dot => dot.onclick = () => { currentIndex = parseInt(dot.dataset.index); updateCarouselPosition(); updateDotsActive(); resetAutoSlide(); });
+            document.querySelectorAll('.dot').forEach(function(dot) { dot.onclick = function() { currentIndex = parseInt(this.dataset.index); updateCarouselPosition(); updateDotsActive(); resetAutoSlide(); }; });
         }
 
-        function updateCarouselPosition() { document.getElementById('carouselTrack').style.transform = `translateX(${-currentIndex*100}%)`; }
-        function updateDotsActive() { document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('active', i===currentIndex)); }
+        function updateCarouselPosition() { document.getElementById('carouselTrack').style.transform = 'translateX(' + (-currentIndex*100) + '%)'; }
+        function updateDotsActive() { document.querySelectorAll('.dot').forEach(function(d, i) { d.classList.toggle('active', i===currentIndex); }); }
         function nextSlide() { if (totalSlides) { currentIndex = (currentIndex + 1) % totalSlides; updateCarouselPosition(); updateDotsActive(); } }
         function startAutoSlide() { if (autoInterval) clearInterval(autoInterval); if (totalSlides > 1) autoInterval = setInterval(nextSlide, 5000); }
         function resetAutoSlide() { startAutoSlide(); }
@@ -1443,7 +1331,7 @@
         async function loadConfigFile() {
             document.getElementById('warningBanner').style.display = 'block';
             try {
-                const res = await fetch(CONFIG_URL + '?t=' + Date.now());
+                var res = await fetch(CONFIG_URL + '?t=' + Date.now());
                 if (!res.ok) throw new Error();
                 parseAppTxt(await res.text());
             } catch(e) {
@@ -1454,28 +1342,28 @@
 
         async function loadPointsRecords(studentId) {
             try {
-                const res = await fetch(JFFI_FILE_URL + '?t=' + Date.now());
+                var res = await fetch(JFFI_FILE_URL + '?t=' + Date.now());
                 if (!res.ok) return { records: [], total: 0 };
-                const text = await res.text();
-                const lines = text.split(/\r?\n/);
-                const records = [];
-                let total = 0;
-                for (let line of lines) {
+                var text = await res.text();
+                var lines = text.split(/\r?\n/);
+                var records = [];
+                var total = 0;
+                lines.forEach(function(line) {
                     line = line.trim();
-                    if (line === '') continue;
-                    const regex = /^(\d{4}\/\d{2}\/\d{2})\s+(\d{2}:\d{2})\s+(\d{5})\s+(.+?)\s+([+-]\d+)$/;
-                    const match = line.match(regex);
+                    if (line === '') return;
+                    var regex = /^(\d{4}\/\d{2}\/\d{2})\s+(\d{2}:\d{2})\s+(\d{5})\s+(.+?)\s+([+-]\d+)$/;
+                    var match = line.match(regex);
                     if (match) {
-                        const [_, date, time, sid, event, scoreStr] = match;
-                        const score = parseInt(scoreStr);
+                        var date = match[1], time = match[2], sid = match[3], event = match[4], scoreStr = match[5];
+                        var score = parseInt(scoreStr);
                         if (sid === studentId) {
-                            records.push({ datetime: `${date} ${time}`, event, score, isPlus: score > 0 });
+                            records.push({ datetime: date + ' ' + time, event: event, score: score, isPlus: score > 0 });
                             total += score;
                         }
                     }
-                }
-                records.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
-                return { records, total };
+                });
+                records.sort(function(a, b) { return new Date(b.datetime) - new Date(a.datetime); });
+                return { records: records, total: total };
             } catch(e) { return { records: [], total: 0 }; }
         }
 
@@ -1483,14 +1371,14 @@
             if (!currentStudentId) { alert('请先登录'); return; }
             document.getElementById('pointsModal').classList.add('show');
             document.getElementById('pointsModalBody').innerHTML = '<div class="loading-tip">📡 加载积分记录中...</div>';
-            const { records } = await loadPointsRecords(currentStudentId);
-            if (records.length === 0) { document.getElementById('pointsModalBody').innerHTML = '<div class="empty-records">暂无积分记录</div>'; return; }
-            let html = '';
-            for (const r of records) {
-                const sc = r.isPlus ? 'plus' : 'minus';
-                const ss = r.isPlus ? `+${r.score}` : `${r.score}`;
-                html += `<div class="record-item"><span class="record-date">${escapeHtml(r.datetime)}</span><span class="record-event">${escapeHtml(r.event)}</span><span class="record-score ${sc}">${ss}</span></div>`;
-            }
+            var result = await loadPointsRecords(currentStudentId);
+            if (result.records.length === 0) { document.getElementById('pointsModalBody').innerHTML = '<div class="empty-records">暂无积分记录</div>'; return; }
+            var html = '';
+            result.records.forEach(function(r) {
+                var sc = r.isPlus ? 'plus' : 'minus';
+                var ss = r.isPlus ? '+' + r.score : '' + r.score;
+                html += '<div class="record-item"><span class="record-date">' + escapeHtml(r.datetime) + '</span><span class="record-event">' + escapeHtml(r.event) + '</span><span class="record-score ' + sc + '">' + ss + '</span></div>';
+            });
             document.getElementById('pointsModalBody').innerHTML = html;
         }
 
@@ -1498,23 +1386,23 @@
 
         function setAvatarImage(imgEl, sid) {
             if (!imgEl || !sid) return;
-            const ts = Date.now();
-            imgEl.src = `${sid}pic.jpg?t=${ts}`;
-            imgEl.onerror = function() { this.onerror = null; this.src = `41.jpg?t=${ts}`; };
+            var ts = Date.now();
+            imgEl.src = sid + 'pic.jpg?t=' + ts;
+            imgEl.onerror = function() { this.onerror = null; this.src = '41.jpg?t=' + ts; };
         }
 
         async function renderProfilePage() {
-            const pc = document.getElementById('profileContent');
+            var pc = document.getElementById('profileContent');
             if (!pc) return;
             if (!currentStudentId) { pc.innerHTML = '<div class="login-prompt"><p>👤 您还未登录</p><button class="login-btn" onclick="showLoginOptions()">立即登录</button></div>'; return; }
-            const sn = nameMapping[currentStudentId] || currentStudentId;
-            const ct = integralMapping[currentStudentId] || 0;
-            pc.innerHTML = `<div class="profile-card"><img class="avatar" id="profileAvatar" src="41.jpg" alt="头像"><div class="profile-info"><div class="profile-name">${escapeHtml(sn)}</div><div class="profile-student-id">学号：${currentStudentId}</div><div class="profile-student-id" style="margin-top:4px;">⭐ 当前积分：${ct}</div></div><button class="profile-logout" id="profileLogoutBtn">退出登录</button></div><div class="menu-section"><div class="menu-item" id="pointsMenuItem"><div class="menu-left"><span class="menu-icon">📊</span><span class="menu-title">积分明细</span></div><span class="menu-arrow">›</span></div><div class="menu-item" id="rankMenuItem"><div class="menu-left"><span class="menu-icon">🏆</span><span class="menu-title">积分排行榜</span></div><span class="menu-arrow">›</span></div></div>`;
-            const av = document.getElementById('profileAvatar');
-            if (av && currentStudentId) { setAvatarImage(av, currentStudentId); av.onclick = () => { window.location.href = 'https://wj.qq.com/s2/26860993/0922/'; }; }
-            document.getElementById('profileLogoutBtn').onclick = () => { clearStudentId(); window.location.href = window.location.pathname; };
-            document.getElementById('pointsMenuItem').onclick = () => showPointsDetail();
-            document.getElementById('rankMenuItem').onclick = () => { window.location.href = '/5pm'; };
+            var sn = nameMapping[currentStudentId] || currentStudentId;
+            var ct = integralMapping[currentStudentId] || 0;
+            pc.innerHTML = '<div class="profile-card"><img class="avatar" id="profileAvatar" src="41.jpg" alt="头像"><div class="profile-info"><div class="profile-name">' + escapeHtml(sn) + '</div><div class="profile-student-id">学号：' + currentStudentId + '</div><div class="profile-student-id" style="margin-top:4px;">⭐ 当前积分：' + ct + '</div></div><button class="profile-logout" id="profileLogoutBtn">退出登录</button></div><div class="menu-section"><div class="menu-item" id="pointsMenuItem"><div class="menu-left"><span class="menu-icon">📊</span><span class="menu-title">积分明细</span></div><span class="menu-arrow">›</span></div><div class="menu-item" id="rankMenuItem"><div class="menu-left"><span class="menu-icon">🏆</span><span class="menu-title">积分排行榜</span></div><span class="menu-arrow">›</span></div></div>';
+            var av = document.getElementById('profileAvatar');
+            if (av && currentStudentId) { setAvatarImage(av, currentStudentId); av.onclick = function() { window.location.href = 'https://wj.qq.com/s2/26860993/0922/'; }; }
+            document.getElementById('profileLogoutBtn').onclick = function() { clearStudentId(); window.location.href = window.location.pathname; };
+            document.getElementById('pointsMenuItem').onclick = function() { showPointsDetail(); };
+            document.getElementById('rankMenuItem').onclick = function() { window.location.href = '/5pm'; };
         }
 
         function showHome() { document.getElementById('homePage').classList.add('active'); document.getElementById('profilePage').classList.remove('active'); document.getElementById('navHomeBtn').classList.add('active'); document.getElementById('navProfileBtn').classList.remove('active'); }
@@ -1522,100 +1410,100 @@
 
         async function loadNameMapping() {
             try {
-                const res = await fetch(NAME_FILE_URL + '?t=' + Date.now());
-                if (res.ok) { const text = await res.text(); nameMapping = {}; text.split(/\r?\n/).forEach(line => { line = line.trim(); if (!line) return; const sp = line.indexOf(' '); if (sp !== -1) nameMapping[line.substring(0, sp)] = line.substring(sp + 1).trim(); }); return true; }
+                var res = await fetch(NAME_FILE_URL + '?t=' + Date.now());
+                if (res.ok) { var text = await res.text(); nameMapping = {}; text.split(/\r?\n/).forEach(function(line) { line = line.trim(); if (!line) return; var sp = line.indexOf(' '); if (sp !== -1) nameMapping[line.substring(0, sp)] = line.substring(sp + 1).trim(); }); return true; }
             } catch(e) {}
             return false;
         }
 
         async function loadIntegralData() {
             try {
-                const res = await fetch(INTEGRAL_FILE_URL + '?t=' + Date.now());
-                if (res.ok) { const text = await res.text(); integralMapping = {}; text.split(/\r?\n/).forEach(line => { line = line.trim(); if (!line) return; const parts = line.split(/\s+/); if (parts.length >= 2) integralMapping[parts[0].trim()] = parts[1].trim(); }); return true; }
+                var res = await fetch(INTEGRAL_FILE_URL + '?t=' + Date.now());
+                if (res.ok) { var text = await res.text(); integralMapping = {}; text.split(/\r?\n/).forEach(function(line) { line = line.trim(); if (!line) return; var parts = line.split(/\s+/); if (parts.length >= 2) integralMapping[parts[0].trim()] = parts[1].trim(); }); return true; }
             } catch(e) {}
             return false;
         }
 
         async function showGreeting() {
             currentStudentId = getStudentId();
-            const gc = document.getElementById('greetingContainer');
-            const uc = document.getElementById('unloggedContainer');
+            var gc = document.getElementById('greetingContainer');
+            var uc = document.getElementById('unloggedContainer');
             if (!currentStudentId) { if (gc) gc.style.display = 'none'; if (uc) uc.style.display = 'block'; return; }
             if (uc) uc.style.display = 'none';
-            const te = gc?.querySelector('.greeting-text');
+            var te = gc ? gc.querySelector('.greeting-text') : null;
             if (Object.keys(nameMapping).length === 0) await loadNameMapping();
-            const sn = nameMapping[currentStudentId] || currentStudentId;
+            var sn = nameMapping[currentStudentId] || currentStudentId;
             if (gc && te) {
                 te.textContent = sn; gc.style.display = 'block';
                 if (Object.keys(integralMapping).length === 0) await loadIntegralData();
-                const rc = document.getElementById('ratingContainer');
+                var rc = document.getElementById('ratingContainer');
                 if (integralMapping[currentStudentId]) {
-                    const integral = integralMapping[currentStudentId];
-                    const rating = getRatingByIntegral(integral);
+                    var integral = integralMapping[currentStudentId];
+                    var rating = getRatingByIntegral(integral);
                     rc.innerHTML = '';
-                    const rb = document.createElement('div'); rb.className = `rating-box ${rating.colorClass}`; rb.textContent = rating.name;
-                    const sw = document.createElement('div'); sw.className = 'score-wrapper'; sw.innerHTML = `<span class="score-label">分数</span><span class="score-number">${integral}</span>`;
+                    var rb = document.createElement('div'); rb.className = 'rating-box ' + rating.colorClass; rb.textContent = rating.name;
+                    var sw = document.createElement('div'); sw.className = 'score-wrapper'; sw.innerHTML = '<span class="score-label">分数</span><span class="score-number">' + integral + '</span>';
                     rc.appendChild(rb); rc.appendChild(sw); rc.style.display = 'inline-flex';
                 } else rc.style.display = 'none';
             }
-            const lb = document.getElementById('logoutBtn');
-            if (lb) { lb.style.display = 'inline-block'; lb.onclick = () => { clearStudentId(); window.location.href = window.location.pathname; }; }
-            const gw = document.getElementById('greetingWrapper');
-            if (gw) { gw.style.cursor = 'pointer'; gw.onclick = (e) => { if (e.target === lb || lb?.contains(e.target)) return; window.location.href = '/5pm'; }; }
+            var lb = document.getElementById('logoutBtn');
+            if (lb) { lb.style.display = 'inline-block'; lb.onclick = function() { clearStudentId(); window.location.href = window.location.pathname; }; }
+            var gw = document.getElementById('greetingWrapper');
+            if (gw) { gw.style.cursor = 'pointer'; gw.onclick = function(e) { if (e.target === lb || (lb && lb.contains(e.target))) return; window.location.href = '/5pm'; }; }
         }
 
         function showStudentIdPrompt() {
-            return new Promise((resolve) => {
-                const modal = document.createElement('div'); modal.className = 'modal-overlay student-id-modal';
+            return new Promise(function(resolve) {
+                var modal = document.createElement('div'); modal.className = 'modal-overlay student-id-modal';
                 modal.innerHTML = '<div class="modal-content"><h3>🔐 初二五班专用系统</h3><div class="subtitle">请验证身份以继续使用</div><input type="number" id="studentIdInput" placeholder="请输入5位数学号" maxlength="5" autocomplete="off"><div class="warning-text" id="warningText">❌ 学号必须是5位数字</div><div class="modal-buttons"><button class="confirm-btn" id="confirmBtn">确定</button><button class="cancel-btn" id="cancelBtn">取消</button></div></div>';
                 document.body.appendChild(modal); modal.classList.add('show');
-                const input = modal.querySelector('#studentIdInput'); input.focus();
-                const wt = modal.querySelector('#warningText');
-                const hc = () => { const v = input.value.trim(); if (/^\d{5}$/.test(v)) { modal.remove(); resolve(v); } else { wt.style.display = 'block'; input.style.borderColor = '#e74c3c'; input.value = ''; input.focus(); } };
+                var input = modal.querySelector('#studentIdInput'); input.focus();
+                var wt = modal.querySelector('#warningText');
+                var hc = function() { var v = input.value.trim(); if (/^\d{5}$/.test(v)) { modal.remove(); resolve(v); } else { wt.style.display = 'block'; input.style.borderColor = '#e74c3c'; input.value = ''; input.focus(); } };
                 modal.querySelector('#confirmBtn').onclick = hc;
-                modal.querySelector('#cancelBtn').onclick = () => { modal.remove(); resolve(null); };
-                input.onkeypress = (e) => { if (e.key === 'Enter') hc(); };
-                modal.onclick = (e) => { if (e.target === modal) { modal.remove(); resolve(null); } };
+                modal.querySelector('#cancelBtn').onclick = function() { modal.remove(); resolve(null); };
+                input.onkeypress = function(e) { if (e.key === 'Enter') hc(); };
+                modal.onclick = function(e) { if (e.target === modal) { modal.remove(); resolve(null); } };
             });
         }
 
         async function checkUserAgentAndPrompt() {
             if (!isTargetDevice) return;
-            let existingId = getStudentId();
+            var existingId = getStudentId();
             if (existingId) { currentStudentId = existingId; await showGreeting(); return; }
-            const sid = await showStudentIdPrompt();
-            if (sid) { saveStudentId(sid); window.location.href = `?p=${sid}`; }
-            else { const wb = document.getElementById('warningBanner'); wb.style.display = 'block'; wb.innerHTML = '⚠️ 请输入学号以使用完整功能 | <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">点击重试</span>'; }
+            var sid = await showStudentIdPrompt();
+            if (sid) { saveStudentId(sid); window.location.href = '?p=' + sid; }
+            else { var wb = document.getElementById('warningBanner'); wb.style.display = 'block'; wb.innerHTML = '⚠️ 请输入学号以使用完整功能 | <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">点击重试</span>'; }
         }
 
         function showLoginOptions() { document.getElementById('loginOptionsModal').classList.add('show'); }
         function hideLoginOptions() { document.getElementById('loginOptionsModal').classList.remove('show'); }
-        function showManualIdInput() { hideLoginOptions(); showStudentIdPrompt().then(sid => { if (sid) { saveStudentId(sid); window.location.href = `?p=${sid}`; } }); }
+        function showManualIdInput() { hideLoginOptions(); showStudentIdPrompt().then(function(sid) { if (sid) { saveStudentId(sid); window.location.href = '?p=' + sid; } }); }
 
-        document.getElementById('showLoginOptionsBtn').onclick = isTargetDevice ? () => { showStudentIdPrompt().then(sid => { if (sid) { saveStudentId(sid); window.location.href = `?p=${sid}`; } }); } : showLoginOptions;
-        document.getElementById('scanLoginOptionBtn').onclick = () => { hideLoginOptions(); showScanModalFunc(); };
-        document.getElementById('inputIdLoginOptionBtn').onclick = () => { hideLoginOptions(); showManualIdInput(); };
+        document.getElementById('showLoginOptionsBtn').onclick = isTargetDevice ? function() { showStudentIdPrompt().then(function(sid) { if (sid) { saveStudentId(sid); window.location.href = '?p=' + sid; } }); } : showLoginOptions;
+        document.getElementById('scanLoginOptionBtn').onclick = function() { hideLoginOptions(); showScanModalFunc(); };
+        document.getElementById('inputIdLoginOptionBtn').onclick = function() { hideLoginOptions(); showManualIdInput(); };
         document.getElementById('cancelLoginOptionBtn').onclick = hideLoginOptions;
-        document.getElementById('loginOptionsModal').onclick = (e) => { if (e.target === document.getElementById('loginOptionsModal')) hideLoginOptions(); };
+        document.getElementById('loginOptionsModal').onclick = function(e) { if (e.target === document.getElementById('loginOptionsModal')) hideLoginOptions(); };
 
-        let clickCount = 0, clickTimer = null;
-        document.getElementById('titleClickTarget').addEventListener('click', () => {
+        var clickCount = 0, clickTimer = null;
+        document.getElementById('titleClickTarget').addEventListener('click', function() {
             clickCount++;
             if (clickTimer) clearTimeout(clickTimer);
-            clickTimer = setTimeout(() => { clickCount = 0; }, 1000);
+            clickTimer = setTimeout(function() { clickCount = 0; }, 1000);
             if (clickCount === 3) { clickCount = 0; if (isEditMode) { alert('编辑模式已开启'); return; } showTokenModal(); }
         });
 
         function showTokenModal() {
-            const modal = document.createElement('div'); modal.className = 'modal-overlay';
+            var modal = document.createElement('div'); modal.className = 'modal-overlay';
             modal.innerHTML = '<div class="modal-content"><h3>验证Token</h3><input type="password" id="tokenInput" placeholder="GitHub Token" autocomplete="off"><div class="modal-buttons"><button class="confirm-btn" id="confirmBtn">验证</button><button class="cancel-btn" id="cancelBtn">取消</button></div></div>';
             document.body.appendChild(modal); modal.classList.add('show');
-            modal.querySelector('#confirmBtn').onclick = async () => {
-                const token = modal.querySelector('#tokenInput').value.trim();
+            modal.querySelector('#confirmBtn').onclick = async function() {
+                var token = modal.querySelector('#tokenInput').value.trim();
                 if (!token) { alert('请输入Token'); return; }
-                const btn = modal.querySelector('#confirmBtn'); btn.disabled = true; btn.textContent = '验证中...';
+                var btn = modal.querySelector('#confirmBtn'); btn.disabled = true; btn.textContent = '验证中...';
                 try {
-                    const tr = await fetch('https://api.github.com/user', { headers: { 'Authorization': `Bearer ${token}` } });
+                    var tr = await fetch('https://api.github.com/user', { headers: { 'Authorization': 'Bearer ' + token } });
                     if (!tr.ok) throw new Error('Token无效');
                     currentToken = token; isEditMode = true;
                     document.body.classList.add('edit-mode');
@@ -1624,86 +1512,96 @@
                     alert('✅ 编辑模式已启用！');
                 } catch(e) { alert('❌ Token验证失败：' + e.message); btn.disabled = false; btn.textContent = '验证'; }
             };
-            modal.querySelector('#cancelBtn').onclick = () => modal.remove();
-            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            modal.querySelector('#cancelBtn').onclick = function() { modal.remove(); };
+            modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
         }
 
         window.deleteSlide = function(idx) { if (!isEditMode) { alert('请先开启编辑模式'); return; } if (confirm('确定删除？')) { slidesData.splice(idx, 1); renderCarousel(); saveToGitHub(generateFileContent()); } };
-        window.editGroup = function(gn) { if (!isEditMode) { alert('请先开启编辑模式'); return; } const nn = prompt('新名称', gn); if (nn && nn !== gn) { const i = groupOrder.indexOf(gn); if (i !== -1) { groupOrder[i] = nn; appItems.forEach(a => { if (a.group === gn) a.group = nn; }); saveToGitHub(generateFileContent()).then(() => renderGroups()); } } };
-        window.deleteGroup = function(gn) { if (!isEditMode) { alert('请先开启编辑模式'); return; } if (gn === '其他应用') { alert('不能删除'); return; } if (confirm(`确定删除"${gn}"？`)) { const i = groupOrder.indexOf(gn); if (i !== -1) { groupOrder.splice(i, 1); appItems.forEach(a => { if (a.group === gn) a.group = '其他应用'; }); saveToGitHub(generateFileContent()).then(() => renderGroups()); } } };
+        window.editGroup = function(gn) { if (!isEditMode) { alert('请先开启编辑模式'); return; } var nn = prompt('新名称', gn); if (nn && nn !== gn) { var i = groupOrder.indexOf(gn); if (i !== -1) { groupOrder[i] = nn; appItems.forEach(function(a) { if (a.group === gn) a.group = nn; }); saveToGitHub(generateFileContent()).then(function() { renderGroups(); }); } } };
+        window.deleteGroup = function(gn) { if (!isEditMode) { alert('请先开启编辑模式'); return; } if (gn === '其他应用') { alert('不能删除'); return; } if (confirm('确定删除"' + gn + '"？')) { var i = groupOrder.indexOf(gn); if (i !== -1) { groupOrder.splice(i, 1); appItems.forEach(function(a) { if (a.group === gn) a.group = '其他应用'; }); saveToGitHub(generateFileContent()).then(function() { renderGroups(); }); } } };
         window.editApp = function(name, link, icon, group) {
             if (!isEditMode) { alert('请先开启编辑模式'); return; }
-            const modal = document.createElement('div'); modal.className = 'modal-overlay';
-            modal.innerHTML = `<div class="modal-content"><h3>编辑应用</h3><label>名称</label><input id="appName" value="${escapeHtml(name)}"><label>图标</label><input id="appIcon" value="${escapeHtml(icon)}"><label>链接</label><input id="appLink" value="${escapeHtml(link)}"><label>分组</label><select id="appGroup">${groupOrder.map(g=>`<option value="${escapeHtml(g)}"${g===group?' selected':''}>${escapeHtml(g)}</option>`).join('')}</select><div class="modal-buttons"><button class="confirm-btn">保存</button><button class="cancel-btn">取消</button></div></div>`;
+            var modal = document.createElement('div'); modal.className = 'modal-overlay';
+            var optionsHtml = groupOrder.map(function(g) { return '<option value="' + escapeHtml(g) + '"' + (g===group?' selected':'') + '>' + escapeHtml(g) + '</option>'; }).join('');
+            modal.innerHTML = '<div class="modal-content"><h3>编辑应用</h3><label>名称</label><input id="appName" value="' + escapeHtml(name) + '"><label>图标</label><input id="appIcon" value="' + escapeHtml(icon) + '"><label>链接</label><input id="appLink" value="' + escapeHtml(link) + '"><label>分组</label><select id="appGroup">' + optionsHtml + '</select><div class="modal-buttons"><button class="confirm-btn">保存</button><button class="cancel-btn">取消</button></div></div>';
             document.body.appendChild(modal); modal.classList.add('show');
-            modal.querySelector('.confirm-btn').onclick = async () => {
-                const nn = modal.querySelector('#appName').value.trim();
-                const ni = modal.querySelector('#appIcon').value.trim() || 'null.jpg';
-                const nl = modal.querySelector('#appLink').value.trim();
-                const ng = modal.querySelector('#appGroup').value;
+            modal.querySelector('.confirm-btn').onclick = async function() {
+                var nn = modal.querySelector('#appName').value.trim();
+                var ni = modal.querySelector('#appIcon').value.trim() || 'null.jpg';
+                var nl = modal.querySelector('#appLink').value.trim();
+                var ng = modal.querySelector('#appGroup').value;
                 if (!nn || !nl) { alert('请填写完整'); return; }
-                const app = appItems.find(a => a.name === name && a.link === link);
+                var app = appItems.find(function(a) { return a.name === name && a.link === link; });
                 if (app) { app.name = nn; app.icon = ni; app.link = nl; app.group = ng; if (await saveToGitHub(generateFileContent())) renderGroups(); modal.remove(); }
             };
-            modal.querySelector('.cancel-btn').onclick = () => modal.remove();
-            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            modal.querySelector('.cancel-btn').onclick = function() { modal.remove(); };
+            modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
         };
-        window.deleteApp = async function(name, link) { if (!isEditMode) { alert('请先开启编辑模式'); return; } if (confirm('确定删除？')) { const i = appItems.findIndex(a => a.name === name && a.link === link); if (i !== -1) appItems.splice(i, 1); if (await saveToGitHub(generateFileContent())) renderGroups(); } };
+        window.deleteApp = async function(name, link) { if (!isEditMode) { alert('请先开启编辑模式'); return; } if (confirm('确定删除？')) { var i = appItems.findIndex(function(a) { return a.name === name && a.link === link; }); if (i !== -1) appItems.splice(i, 1); if (await saveToGitHub(generateFileContent())) renderGroups(); } };
 
         function addApp() {
             if (!isEditMode) { alert('请先开启编辑模式'); return; }
             if (isAddingApp) { alert('请稍候'); return; }
-            const modal = document.createElement('div'); modal.className = 'modal-overlay';
-            modal.innerHTML = `<div class="modal-content"><h3>添加应用</h3><input id="appName" placeholder="名称"><input id="iconUrl" placeholder="图标链接"><input id="appLink" placeholder="https://..."><select id="appGroup">${groupOrder.map(g=>`<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('')}</select><div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div></div>`;
+            var modal = document.createElement('div'); modal.className = 'modal-overlay';
+            var optionsHtml = groupOrder.map(function(g) { return '<option value="' + escapeHtml(g) + '">' + escapeHtml(g) + '</option>'; }).join('');
+            modal.innerHTML = '<div class="modal-content"><h3>添加应用</h3><input id="appName" placeholder="名称"><input id="iconUrl" placeholder="图标链接"><input id="appLink" placeholder="https://..."><select id="appGroup">' + optionsHtml + '</select><div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div></div>';
             document.body.appendChild(modal); modal.classList.add('show');
-            const cb = modal.querySelector('.confirm-btn');
-            cb.onclick = async () => {
-                const n = modal.querySelector('#appName').value.trim();
-                const i = modal.querySelector('#iconUrl').value.trim() || 'null.jpg';
-                const l = modal.querySelector('#appLink').value.trim();
-                const g = modal.querySelector('#appGroup').value;
+            var cb = modal.querySelector('.confirm-btn');
+            cb.onclick = async function() {
+                var n = modal.querySelector('#appName').value.trim();
+                var i = modal.querySelector('#iconUrl').value.trim() || 'null.jpg';
+                var l = modal.querySelector('#appLink').value.trim();
+                var g = modal.querySelector('#appGroup').value;
                 if (!n || !l) { alert('请填写完整'); return; }
                 isAddingApp = true; cb.disabled = true; cb.textContent = '保存中...';
                 appItems.push({ name: n, icon: i, link: l, group: g }); renderGroups();
-                const s = await saveToGitHub(generateFileContent());
+                var s = await saveToGitHub(generateFileContent());
                 if (s) { modal.remove(); } else { appItems.pop(); renderGroups(); alert('保存失败'); }
                 isAddingApp = false; cb.disabled = false;
             };
-            modal.querySelector('.cancel-btn').onclick = () => modal.remove();
-            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            modal.querySelector('.cancel-btn').onclick = function() { modal.remove(); };
+            modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
         }
 
         function addCarousel() {
             if (!isEditMode) { alert('请先开启编辑模式'); return; }
             if (isAddingCarousel) { alert('请稍候'); return; }
-            const modal = document.createElement('div'); modal.className = 'modal-overlay';
+            var modal = document.createElement('div'); modal.className = 'modal-overlay';
             modal.innerHTML = '<div class="modal-content"><h3>添加轮播图</h3><input id="imgUrl" placeholder="图片链接"><input id="linkUrl" placeholder="跳转链接"><div class="modal-buttons"><button class="confirm-btn">添加</button><button class="cancel-btn">取消</button></div></div>';
             document.body.appendChild(modal); modal.classList.add('show');
-            const cb = modal.querySelector('.confirm-btn');
-            cb.onclick = async () => {
-                const img = modal.querySelector('#imgUrl').value.trim();
-                const link = modal.querySelector('#linkUrl').value.trim();
+            var cb = modal.querySelector('.confirm-btn');
+            cb.onclick = async function() {
+                var img = modal.querySelector('#imgUrl').value.trim();
+                var link = modal.querySelector('#linkUrl').value.trim();
                 if (!img) { alert('请填写图片链接'); return; }
                 isAddingCarousel = true; cb.disabled = true; cb.textContent = '保存中...';
                 slidesData.push({ imgUrl: img, linkUrl: link }); renderCarousel();
-                const s = await saveToGitHub(generateFileContent());
+                var s = await saveToGitHub(generateFileContent());
                 if (s) { modal.remove(); } else { slidesData.pop(); renderCarousel(); alert('保存失败'); }
                 isAddingCarousel = false; cb.disabled = false;
             };
-            modal.querySelector('.cancel-btn').onclick = () => modal.remove();
-            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            modal.querySelector('.cancel-btn').onclick = function() { modal.remove(); };
+            modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
         }
 
-        function addGroup() { if (!isEditMode) { alert('请先开启编辑模式'); return; } const nn = prompt('分组名称'); if (nn && !groupOrder.includes(nn)) { groupOrder.push(nn); saveToGitHub(generateFileContent()).then(() => renderGroups()); } else if (nn) alert('已存在'); }
+        function addGroup() { if (!isEditMode) { alert('请先开启编辑模式'); return; } var nn = prompt('分组名称'); if (nn && groupOrder.indexOf(nn) === -1) { groupOrder.push(nn); saveToGitHub(generateFileContent()).then(function() { renderGroups(); }); } else if (nn) alert('已存在'); }
 
-        function generateFileContent() { let c = 'group\n'; for (let g of groupOrder) c += `[g=${g}]\n`; c += 'pic\n'; for (let s of slidesData) c += `[p=${s.imgUrl} l=${s.linkUrl}]\n`; c += 'app\n'; for (let a of appItems) c += `[n=${a.name} p=${a.icon} l=${a.link}${a.group?` g=${a.group}`:''}]\n`; return c; }
+        function generateFileContent() {
+            var c = 'group\n';
+            groupOrder.forEach(function(g) { c += '[g=' + g + ']\n'; });
+            c += 'pic\n';
+            slidesData.forEach(function(s) { c += '[p=' + s.imgUrl + ' l=' + s.linkUrl + ']\n'; });
+            c += 'app\n';
+            appItems.forEach(function(a) { c += '[n=' + a.name + ' p=' + a.icon + ' l=' + a.link + (a.group?' g=' + a.group:'') + ']\n'; });
+            return c;
+        }
 
         async function saveToGitHub(content) {
             if (!currentToken) { alert('请先输入Token'); return false; }
             try {
-                let sha = fileSha;
-                if (!sha) { const cr = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, { headers: { 'Authorization': `Bearer ${currentToken}` } }); if (cr.ok) sha = (await cr.json()).sha; }
-                const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${currentToken}` }, body: JSON.stringify({ message: '更新配置', content: btoa(unescape(encodeURIComponent(content))), branch: 'main', sha }) });
+                var sha = fileSha;
+                if (!sha) { var cr = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + GITHUB_PATH, { headers: { 'Authorization': 'Bearer ' + currentToken } }); if (cr.ok) sha = (await cr.json()).sha; }
+                var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + GITHUB_PATH, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + currentToken }, body: JSON.stringify({ message: '更新配置', content: btoa(unescape(encodeURIComponent(content))), branch: 'main', sha: sha }) });
                 if (!res.ok) throw new Error();
                 fileSha = (await res.json()).content.sha;
                 alert('保存成功！'); return true;
@@ -1713,65 +1611,70 @@
         async function uploadToRoot(file) {
             if (!currentToken) { alert('请先输入Token'); return null; }
             try {
-                const reader = new FileReader();
-                const base64 = await new Promise(r => { reader.onload = e => r(e.target.result.split(',')[1]); reader.readAsDataURL(file); });
-                const fn = file.name;
-                const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fn}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${currentToken}` }, body: JSON.stringify({ message: `上传 ${fn}`, content: base64, branch: 'main' }) });
+                var reader = new FileReader();
+                var base64 = await new Promise(function(r) { reader.onload = function(e) { r(e.target.result.split(',')[1]); }; reader.readAsDataURL(file); });
+                var fn = file.name;
+                var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + encodeURIComponent(fn), { method: 'PUT', headers: { 'Authorization': 'Bearer ' + currentToken }, body: JSON.stringify({ message: '上传 ' + fn, content: base64, branch: 'main' }) });
                 if (!res.ok) throw new Error();
-                alert(`✅ 上传成功：${fn}`); return fn;
+                alert('✅ 上传成功：' + fn); return fn;
             } catch(e) { alert('上传失败'); return null; }
         }
 
-        function uploadFileToRoot() { if (!isEditMode) { alert('请先开启编辑模式'); return; } const inp = document.createElement('input'); inp.type = 'file'; inp.onchange = async (e) => { if (e.target.files[0]) await uploadToRoot(e.target.files[0]); }; inp.click(); }
+        function uploadFileToRoot() { if (!isEditMode) { alert('请先开启编辑模式'); return; } var inp = document.createElement('input'); inp.type = 'file'; inp.onchange = async function(e) { if (e.target.files[0]) await uploadToRoot(e.target.files[0]); }; inp.click(); }
 
         async function openFileManager() {
             if (!isEditMode) { alert('请先开启编辑模式'); return; }
-            const modal = document.createElement('div'); modal.className = 'modal-overlay';
+            var modal = document.createElement('div'); modal.className = 'modal-overlay';
             modal.innerHTML = '<div class="modal-content" style="max-width:500px;"><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><h3>📁 文件管理器</h3><button class="cancel-btn" id="closeFileManagerBtn" style="width:auto;padding:5px 15px;">关闭</button></div><div class="current-path" id="currentPath">/</div><div id="fileList" style="max-height:400px;overflow-y:auto;"></div></div>';
             document.body.appendChild(modal); modal.classList.add('show');
             await loadFileList(modal);
-            modal.querySelector('#closeFileManagerBtn').onclick = () => modal.remove();
-            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            modal.querySelector('#closeFileManagerBtn').onclick = function() { modal.remove(); };
+            modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
         }
 
         async function loadFileList(modal) {
-            const fld = modal.querySelector('#fileList');
+            var fld = modal.querySelector('#fileList');
             try {
-                const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/`, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/', { headers: { 'Authorization': 'Bearer ' + currentToken } });
                 if (!res.ok) throw new Error();
-                const items = await res.json();
-                let html = '';
-                for (let item of items) {
-                    if (item.type !== 'dir' && item.name.toLowerCase().endsWith('.html')) continue;
-                    html += `<div class="file-item ${item.type==='dir'?'folder':'file'}"><span>${escapeHtml(item.name)}</span><div class="file-actions"><button class="file-action-btn" onclick="copyFileLink('${item.name}')">🔗</button><button class="file-action-btn delete" onclick="deleteFile('${item.name}')">🗑</button></div></div>`;
-                }
+                var items = await res.json();
+                var html = '';
+                items.forEach(function(item) {
+                    if (item.type !== 'dir' && item.name.toLowerCase().endsWith('.html')) return;
+                    html += '<div class="file-item ' + (item.type==='dir'?'folder':'file') + '"><span>' + escapeHtml(item.name) + '</span><div class="file-actions"><button class="file-action-btn" onclick="copyFileLink(\'' + escapeHtml(item.name) + '\')">🔗</button><button class="file-action-btn delete" onclick="deleteFile(\'' + escapeHtml(item.name) + '\')">🗑</button></div></div>';
+                });
                 fld.innerHTML = html;
             } catch(e) { fld.innerHTML = '<div class="error-tip">加载失败</div>'; }
         }
 
-        window.copyFileLink = function(fn) { navigator.clipboard.writeText(`/${fn}\nhttps://luckynum.top/${fn}`); alert('已复制链接'); };
+        window.copyFileLink = function(fn) {
+            var encodedFn = encodeURIComponent(fn);
+            navigator.clipboard.writeText('/' + encodedFn + '\nhttps://luckynum.top/' + encodedFn);
+            alert('已复制链接（中文已编码）');
+        };
         window.deleteFile = async function(fn) {
-            if (!confirm(`确定删除 ${fn} 吗？`)) return;
+            if (!confirm('确定删除 ' + fn + ' 吗？')) return;
             try {
-                const cr = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fn}`, { headers: { 'Authorization': `Bearer ${currentToken}` } });
-                const data = await cr.json();
-                const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fn}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` }, body: JSON.stringify({ message: `删除 ${fn}`, sha: data.sha, branch: 'main' }) });
-                if (res.ok) { alert('删除成功'); const m = document.querySelector('.modal-overlay'); if (m) loadFileList(m); } else alert('删除失败');
+                var cr = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + encodeURIComponent(fn), { headers: { 'Authorization': 'Bearer ' + currentToken } });
+                var data = await cr.json();
+                var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + encodeURIComponent(fn), { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + currentToken }, body: JSON.stringify({ message: '删除 ' + fn, sha: data.sha, branch: 'main' }) });
+                if (res.ok) { alert('删除成功'); var m = document.querySelector('.modal-overlay'); if (m) loadFileList(m); } else alert('删除失败');
             } catch(e) { alert('删除失败'); }
         };
 
-        document.getElementById('addAppFab')?.addEventListener('click', addApp);
-        document.getElementById('addCarouselFab')?.addEventListener('click', addCarousel);
-        document.getElementById('uploadOnlyBtn')?.addEventListener('click', uploadFileToRoot);
-        document.getElementById('fileManagerBtn')?.addEventListener('click', openFileManager);
-        document.getElementById('addGroupFab')?.addEventListener('click', addGroup);
-        document.getElementById('closeScanModal')?.addEventListener('click', closeScanModalFunc);
-        document.getElementById('scanAlbumBtn')?.addEventListener('click', () => document.getElementById('scanAlbumInput')?.click());
-        document.getElementById('scanAlbumInput')?.addEventListener('change', (e) => { if (e.target.files?.[0]) { scanFromImage(e.target.files[0]); e.target.value = ''; } });
-        document.getElementById('navHomeBtn')?.addEventListener('click', showHome);
-        document.getElementById('navProfileBtn')?.addEventListener('click', showProfile);
-        document.getElementById('closePointsModal')?.addEventListener('click', closePointsModalFunc);
-        document.getElementById('pointsModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('pointsModal')) closePointsModalFunc(); });
+        // 绑定事件
+        document.getElementById('addAppFab').addEventListener('click', addApp);
+        document.getElementById('addCarouselFab').addEventListener('click', addCarousel);
+        document.getElementById('uploadOnlyBtn').addEventListener('click', uploadFileToRoot);
+        document.getElementById('fileManagerBtn').addEventListener('click', openFileManager);
+        document.getElementById('addGroupFab').addEventListener('click', addGroup);
+        document.getElementById('closeScanModal').addEventListener('click', closeScanModalFunc);
+        document.getElementById('scanAlbumBtn').addEventListener('click', function() { document.getElementById('scanAlbumInput').click(); });
+        document.getElementById('scanAlbumInput').addEventListener('change', function(e) { if (e.target.files && e.target.files[0]) { scanFromImage(e.target.files[0]); e.target.value = ''; } });
+        document.getElementById('navHomeBtn').addEventListener('click', showHome);
+        document.getElementById('navProfileBtn').addEventListener('click', showProfile);
+        document.getElementById('closePointsModal').addEventListener('click', closePointsModalFunc);
+        document.getElementById('pointsModal').addEventListener('click', function(e) { if (e.target === document.getElementById('pointsModal')) closePointsModalFunc(); });
 
         async function init() {
             await Promise.all([loadConfigFile(), loadNameMapping(), loadIntegralData()]);
