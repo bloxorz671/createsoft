@@ -62,58 +62,6 @@
     }
     .back-btn:hover { color: #1a73e8; }
     .main-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .upload-panel {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      background: white;
-      margin: 20px;
-      border-radius: 20px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.06);
-      text-align: center;
-      padding: 40px 30px;
-    }
-    .upload-icon { font-size: 48px; }
-    .upload-title { font-size: 20px; font-weight: 600; color: #333; }
-    .upload-desc { color: #666; font-size: 14px; }
-    .file-select-btn {
-      background: #1a73e8;
-      color: white;
-      border: none;
-      padding: 12px 28px;
-      border-radius: 24px;
-      font-size: 15px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-    .file-select-btn:hover { background: #1557b0; }
-    .url-input-row {
-      display: flex;
-      gap: 8px;
-      width: 100%;
-      max-width: 400px;
-    }
-    .url-input {
-      flex: 1;
-      padding: 10px 14px;
-      border: 1px solid #d0d0d0;
-      border-radius: 20px;
-      font-size: 13px;
-      outline: none;
-    }
-    .url-btn {
-      padding: 10px 18px;
-      background: #333;
-      color: white;
-      border: none;
-      border-radius: 20px;
-      font-size: 13px;
-      cursor: pointer;
-      white-space: nowrap;
-    }
     .preview-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #e8eaed; }
     .hidden { display: none !important; }
     .toast-message {
@@ -132,6 +80,15 @@
     }
     .toast-message.show { opacity: 1; }
 
+    .loading-page {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #999;
+      background: #f5f5f5;
+    }
     .error-page {
       flex: 1;
       display: flex;
@@ -193,7 +150,6 @@
     .pdf-page { background: white; box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
     .pdf-page canvas { display: block; }
 
-    /* Office iframe - 用vh确保高度 */
     .office-wrapper {
       flex: 1;
       min-height: 0;
@@ -218,39 +174,24 @@
     <button class="action-btn" id="copyLinkBtn">🔗 复制链接</button>
   </div>
   <div class="main-container" id="mainContainer">
-    <div id="uploadPanel" class="upload-panel">
-      <div class="upload-icon">📂</div>
-      <div class="upload-title">选择文件预览</div>
-      <div class="upload-desc">图片 · 视频 · 音频 · PDF · DOCX · XLSX · PPTX</div>
-      <button class="file-select-btn" id="selectFileBtn">📁 打开本地文件</button>
-      <div class="url-input-row">
-        <input type="text" class="url-input" id="urlInput" placeholder="或输入文件URL链接">
-        <button class="url-btn" id="urlBtn">打开</button>
-      </div>
-      <input type="file" id="fileInput" hidden accept="image/*,video/*,audio/*,.pdf,.docx,.xlsx,.pptx,.ppt">
-    </div>
+    <div class="loading-page" id="loadingPage">加载中...</div>
     <div id="previewWrapper" class="preview-wrapper hidden"></div>
   </div>
   <div id="toast" class="toast-message"></div>
 
   <script>
     (function() {
-      const uploadPanel = document.getElementById('uploadPanel');
+      const loadingPage = document.getElementById('loadingPage');
       const previewWrapper = document.getElementById('previewWrapper');
       const topBar = document.getElementById('topBar');
-      const fileInput = document.getElementById('fileInput');
-      const selectFileBtn = document.getElementById('selectFileBtn');
       const fileNameDisplay = document.getElementById('fileNameDisplay');
       const backBtn = document.getElementById('backBtn');
       const downloadBtn = document.getElementById('downloadBtn');
       const copyLinkBtn = document.getElementById('copyLinkBtn');
       const toast = document.getElementById('toast');
-      const urlInput = document.getElementById('urlInput');
-      const urlBtn = document.getElementById('urlBtn');
 
       let currentFileURL = null;
       let currentFileName = '文件预览';
-      let originalFileBlob = null;
       let remoteSourceURL = null;
 
       const BASE_DOMAIN = 'https://luckynum.top';
@@ -269,11 +210,10 @@
         setTimeout(() => toast.classList.remove('show'), 2000);
       }
 
-      function setUIMode(preview) {
-        uploadPanel.classList.toggle('hidden', preview);
-        previewWrapper.classList.toggle('hidden', !preview);
-        topBar.classList.toggle('hidden', !preview);
-        if (!preview) previewWrapper.innerHTML = '';
+      function showPreview() {
+        loadingPage.classList.add('hidden');
+        previewWrapper.classList.remove('hidden');
+        topBar.classList.remove('hidden');
       }
 
       function getExt(name) { return (name.split('.').pop() || '').toLowerCase(); }
@@ -288,12 +228,7 @@
         return 'unknown';
       }
 
-      function revokeURL() {
-        if (currentFileURL && !remoteSourceURL && currentFileURL.startsWith('blob:')) URL.revokeObjectURL(currentFileURL);
-      }
-
       function goBack() {
-        revokeURL();
         if (document.referrer && document.referrer !== window.location.href) {
           window.history.back();
         } else {
@@ -302,7 +237,10 @@
       }
 
       function showErrorPage(errorMessage) {
-        setUIMode(true);
+        loadingPage.classList.add('hidden');
+        previewWrapper.classList.remove('hidden');
+        topBar.classList.remove('hidden');
+        fileNameDisplay.textContent = '加载失败';
         previewWrapper.innerHTML = `
           <div class="error-page">
             <div class="error-icon">⚠️</div>
@@ -314,11 +252,6 @@
         document.getElementById('errorDownloadBtn').addEventListener('click', () => {
           if (remoteSourceURL) {
             window.open(toAbsoluteURL(remoteSourceURL), '_blank');
-          } else if (currentFileURL) {
-            const a = document.createElement('a');
-            a.href = currentFileURL;
-            a.download = currentFileName;
-            a.click();
           }
         });
       }
@@ -441,20 +374,12 @@
       function renderOfficeOnline(sourceURL) {
         const wrapper = document.createElement('div');
         wrapper.className = 'office-wrapper';
-        wrapper.style.cssText = 'position:relative;flex:1;min-height:0;';
         const iframe = document.createElement('iframe');
         const absoluteURL = toAbsoluteURL(sourceURL);
-        // 关键：使用encodeURIComponent确保URL正确编码
-        const officeURL = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(absoluteURL)}`;
-        iframe.src = officeURL;
+        iframe.src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(absoluteURL)}`;
         iframe.allowFullscreen = true;
-        iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border:none;';
         wrapper.appendChild(iframe);
         previewWrapper.appendChild(wrapper);
-        // 强制触发重绘
-        setTimeout(() => {
-          iframe.style.display = 'block';
-        }, 100);
       }
 
       function renderVideo(url) {
@@ -476,14 +401,12 @@
         previewWrapper.appendChild(container);
       }
 
-      function renderPreview(fileURL, fileName, blob, sourceURL) {
-        revokeURL();
+      function renderPreview(fileURL, fileName, sourceURL) {
         currentFileURL = fileURL;
         currentFileName = fileName;
-        originalFileBlob = blob;
         remoteSourceURL = sourceURL || null;
         fileNameDisplay.textContent = decodeURIComponent(fileName);
-        setUIMode(true);
+        showPreview();
         previewWrapper.innerHTML = '';
 
         const type = getType(getExt(fileName));
@@ -506,16 +429,6 @@
         }
       }
 
-      function loadFile(file) {
-        if (!file) return;
-        renderPreview(URL.createObjectURL(file), file.name, file, null);
-      }
-
-      function openURL(url) {
-        if (!url) return;
-        loadRemote(url);
-      }
-
       async function loadRemote(remoteUrl) {
         try {
           const absoluteURL = toAbsoluteURL(remoteUrl);
@@ -531,52 +444,31 @@
             else if (ct.includes('powerpoint')) name += '.pptx';
             else name += '.bin';
           }
-          renderPreview(URL.createObjectURL(blob), name, blob, remoteUrl);
+          renderPreview(URL.createObjectURL(blob), name, remoteUrl);
         } catch (err) {
-          alert('加载失败');
-          goBack();
+          showErrorPage('无法加载文件：' + err.message);
         }
       }
 
-      selectFileBtn.addEventListener('click', () => fileInput.click());
-      fileInput.addEventListener('change', (e) => {
-        if (e.target.files[0]) loadFile(e.target.files[0]);
-        fileInput.value = '';
-      });
-      urlBtn.addEventListener('click', () => openURL(urlInput.value.trim()));
-      urlInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') openURL(urlInput.value.trim());
-      });
       backBtn.addEventListener('click', goBack);
       downloadBtn.addEventListener('click', () => {
         if (remoteSourceURL) {
           window.open(toAbsoluteURL(remoteSourceURL), '_blank');
-        } else if (currentFileURL) {
-          const a = document.createElement('a');
-          a.href = currentFileURL;
-          a.download = currentFileName;
-          a.click();
         }
       });
       copyLinkBtn.addEventListener('click', async () => {
         if (remoteSourceURL) {
-          const shareURL = toAbsoluteURL(remoteSourceURL);
-          await navigator.clipboard.writeText(`${BASE_DOMAIN}/filereader?file=${encodeURIComponent(shareURL)}`);
+          await navigator.clipboard.writeText(`${BASE_DOMAIN}/filereader?file=${encodeURIComponent(remoteSourceURL)}`);
           showToast('链接已复制');
         } else {
-          showToast('仅远程文件可复制链接');
+          showToast('无法复制链接');
         }
       });
 
-      document.body.addEventListener('dragover', e => e.preventDefault());
-      document.body.addEventListener('drop', e => {
-        e.preventDefault();
-        if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
-      });
-
       const p = new URL(location.href).searchParams.get('file');
-      if (p) loadRemote(p);
-      else setUIMode(false);
+      if (p) {
+        loadRemote(p);
+      }
     })();
   </script>
 </body>
