@@ -4,8 +4,7 @@ group
 [g=物理（学科）资料]
 [g=英语（学科）资料]
 [g=政治（学科）资料]
-[g=生物（学科）资料]
-[g=美术（学科）资料]
+
 pic
 app
 [n=初二五班登分表Excel下载 p=excel.jpg l=初二五班登分表.xlsx g=班级应用]
@@ -25,6 +24,5 @@ app
 [n=八下英语Focusing on culture听力 p=audio.jpg l=Focusing on culture.mp3 g=英语（学科）资料]
 [n=八下英语Cross-curricular connection听力 p=audio.jpg l=Cross-curricular connection.mp3 g=英语（学科）资料]
 [n=八下英语单词听力 p=audio.jpg l=单词.mp3 g=英语（学科）资料]
-[n=5.1 人民代表大会制度.pptx p=ppt.jpg l=https://www.kdocs.cn/l/coORXaIJ3qIU g=政治（学科）资料]
-[n=物理周末模拟卷电子版 p=pdf.jpg l=https://www.kdocs.cn/l/cfyikEM6ck4o g=物理（学科）资料]
+[n=物理知识点过关测试题.doc p=docx.jpg l=物理知识点过关测试题.doc g=物理（学科）资料]
 [n=物理知识结构（初二下）原版.pdf p=pdf.jpg l=物理知识结构（初二下）原版.pdf g=物理（学科）资料]
