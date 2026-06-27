@@ -1,1 +1,636 @@
- 
+ <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+  <title>文件预览</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+    .top-bar {
+      width: 100%;
+      background: white;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      z-index: 50;
+      flex-shrink: 0;
+      min-height: 48px;
+    }
+    .file-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: #1e1e1e;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      min-width: 100px;
+    }
+    .action-btn {
+      padding: 6px 12px;
+      border-radius: 16px;
+      border: 1px solid #d0d0d0;
+      background: white;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      color: #333;
+    }
+    .action-btn:hover { background: #f5f5f5; }
+    .back-btn {
+      padding: 6px 10px;
+      background: none;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      color: #555;
+    }
+    .back-btn:hover { color: #1a73e8; }
+    .main-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .upload-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      background: white;
+      margin: 20px;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+      text-align: center;
+      padding: 40px 30px;
+    }
+    .upload-icon { font-size: 48px; }
+    .upload-title { font-size: 20px; font-weight: 600; color: #333; }
+    .upload-desc { color: #666; font-size: 14px; }
+    .file-select-btn {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 24px;
+      font-size: 15px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .file-select-btn:hover { background: #1557b0; }
+    .preview-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #e8eaed; }
+    .hidden { display: none !important; }
+    .toast-message {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 10px 24px;
+      border-radius: 24px;
+      font-size: 14px;
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .toast-message.show { opacity: 1; }
+    .zoom-stage {
+      flex: 1;
+      overflow: hidden;
+      background: #525659;
+      position: relative;
+      touch-action: none;
+    }
+    .zoom-stage.light { background: #e8eaed; }
+    .zoom-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      padding: 20px;
+    }
+    .pdf-page { background: white; box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
+    .pdf-page canvas { display: block; }
+    .docx-a4-page {
+      width: 794px;
+      min-height: 1123px;
+      background: white;
+      padding: 96px 72px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+      font-family: 'Times New Roman', '宋体', serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #000;
+      word-wrap: break-word;
+    }
+    .docx-a4-page * { max-width: 100%; box-sizing: border-box; }
+    .docx-a4-page table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+    .docx-a4-page td, .docx-a4-page th { border: 1px solid #000; padding: 4px 6px; word-break: break-all; }
+    .docx-a4-page img { max-width: 100%; height: auto; }
+    .xlsx-scroll {
+      flex: 1;
+      overflow: auto;
+      background: #f5f5f5;
+      padding: 16px;
+    }
+    .xlsx-content {
+      background: white;
+      border-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      overflow-x: auto;
+      display: inline-block;
+      min-width: 100%;
+    }
+    .xlsx-content table {
+      border-collapse: collapse;
+      width: auto;
+      margin: 0 auto;
+      font-size: 13px;
+    }
+    .xlsx-content td, .xlsx-content th {
+      border: 1px solid #ccc;
+      padding: 5px 10px;
+      min-width: 50px;
+      white-space: nowrap;
+    }
+    .sheet-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      background: #f5f5f5;
+      z-index: 5;
+      padding: 5px 0;
+    }
+    .sheet-tab {
+      padding: 6px 14px;
+      background: #e0e0e0;
+      border: none;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .sheet-tab.active { background: #1a73e8; color: white; }
+    .media-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: auto;
+    }
+    .media-container img, .media-container video {
+      max-width: 95%;
+      max-height: 80vh;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    .audio-box { text-align: center; background: white; padding: 30px; border-radius: 16px; }
+  </style>
+</head>
+<body>
+  <div id="topBar" class="top-bar hidden">
+    <button class="back-btn" id="backBtn">← 返回</button>
+    <span class="file-name" id="fileNameDisplay">文件名称</span>
+    <button class="action-btn" id="downloadBtn">⬇️ 下载</button>
+    <button class="action-btn" id="copyLinkBtn">🔗 复制链接</button>
+  </div>
+  <div class="main-container" id="mainContainer">
+    <div id="uploadPanel" class="upload-panel">
+      <div class="upload-icon">📂</div>
+      <div class="upload-title">选择文件预览</div>
+      <div class="upload-desc">图片 · 视频 · 音频 · PDF · DOCX · XLSX</div>
+      <button class="file-select-btn" id="selectFileBtn">📁 打开本地文件</button>
+      <input type="file" id="fileInput" hidden accept="image/*,video/*,audio/*,.pdf,.docx,.xlsx">
+    </div>
+    <div id="previewWrapper" class="preview-wrapper hidden"></div>
+  </div>
+  <div id="toast" class="toast-message"></div>
+
+  <script>
+    (function() {
+      const uploadPanel = document.getElementById('uploadPanel');
+      const previewWrapper = document.getElementById('previewWrapper');
+      const topBar = document.getElementById('topBar');
+      const fileInput = document.getElementById('fileInput');
+      const selectFileBtn = document.getElementById('selectFileBtn');
+      const fileNameDisplay = document.getElementById('fileNameDisplay');
+      const backBtn = document.getElementById('backBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const copyLinkBtn = document.getElementById('copyLinkBtn');
+      const toast = document.getElementById('toast');
+
+      let currentFileURL = null;
+      let currentFileName = '文件预览';
+      let originalFileBlob = null;
+      let isRemoteFile = false;
+
+      function showToast(text) {
+        toast.textContent = text;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      }
+
+      function setUIMode(preview) {
+        uploadPanel.classList.toggle('hidden', preview);
+        previewWrapper.classList.toggle('hidden', !preview);
+        topBar.classList.toggle('hidden', !preview);
+        if (!preview) previewWrapper.innerHTML = '';
+      }
+
+      function getExt(name) { return (name.split('.').pop() || '').toLowerCase(); }
+      function getType(ext) {
+        if (/^(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(ext)) return 'image';
+        if (/^(mp4|webm|ogg|mov|avi|mkv)$/i.test(ext)) return 'video';
+        if (/^(mp3|wav|ogg|aac|flac|m4a)$/i.test(ext)) return 'audio';
+        if (ext === 'pdf') return 'pdf';
+        if (ext === 'docx') return 'docx';
+        if (ext === 'xlsx') return 'xlsx';
+        return 'unknown';
+      }
+
+      function revokeURL() {
+        if (currentFileURL && !isRemoteFile && currentFileURL.startsWith('blob:')) URL.revokeObjectURL(currentFileURL);
+      }
+
+      function goBack() {
+        revokeURL();
+        currentFileURL = null;
+        originalFileBlob = null;
+        isRemoteFile = false;
+        setUIMode(false);
+      }
+
+      function readFileAsBinaryString(blob) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsBinaryString(blob);
+        });
+      }
+
+      function createZoomStage(lightBg = false) {
+        const stage = document.createElement('div');
+        stage.className = 'zoom-stage' + (lightBg ? ' light' : '');
+        const content = document.createElement('div');
+        content.className = 'zoom-content';
+        stage.appendChild(content);
+        let scale = 1, tx = 0, ty = 0;
+        let drag = false, startX, startY, startTX, startTY;
+        let pinchDist = 0, pinchScale, pinchTX, pinchTY, pinchCX, pinchCY;
+
+        function updateTransform() { content.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`; }
+        function fitToScreen() {
+          setTimeout(() => {
+            const rect = stage.getBoundingClientRect();
+            const cw = content.scrollWidth || 800;
+            scale = Math.min(1, (rect.width * 0.9) / cw);
+            tx = (rect.width - cw * scale) / 2;
+            ty = 10;
+            updateTransform();
+          }, 100);
+        }
+
+        stage.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 1) {
+            drag = true;
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            startTX = tx;
+            startTY = ty;
+          } else if (e.touches.length === 2) {
+            drag = false;
+            pinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+            pinchCX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            pinchCY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            pinchScale = scale;
+            pinchTX = tx;
+            pinchTY = ty;
+          }
+          e.preventDefault();
+        }, { passive: false });
+
+        stage.addEventListener('touchmove', (e) => {
+          if (e.touches.length === 2 && pinchDist > 0) {
+            const nd = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+            const ns = Math.min(5, Math.max(0.3, pinchScale * (nd / pinchDist)));
+            const ratio = ns / pinchScale;
+            tx = (pinchCX - stage.getBoundingClientRect().left) - ((pinchCX - stage.getBoundingClientRect().left) - pinchTX) * ratio;
+            ty = (pinchCY - stage.getBoundingClientRect().top) - ((pinchCY - stage.getBoundingClientRect().top) - pinchTY) * ratio;
+            scale = ns;
+            updateTransform();
+          } else if (e.touches.length === 1 && drag) {
+            tx = startTX + (e.touches[0].clientX - startX);
+            ty = startTY + (e.touches[0].clientY - startY);
+            updateTransform();
+          }
+          e.preventDefault();
+        }, { passive: false });
+
+        stage.addEventListener('touchend', () => { drag = false; pinchDist = 0; });
+        stage.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          const rect = stage.getBoundingClientRect();
+          const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+          const ns = Math.min(5, Math.max(0.3, scale * (e.deltaY < 0 ? 1.1 : 0.9)));
+          const ratio = ns / scale;
+          tx = mx - (mx - tx) * ratio;
+          ty = my - (my - ty) * ratio;
+          scale = ns;
+          updateTransform();
+        }, { passive: false });
+
+        return { stage, content, fitToScreen };
+      }
+
+      async function renderPDF(url) {
+        const { stage, content, fitToScreen } = createZoomStage(false);
+        previewWrapper.appendChild(stage);
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        try {
+          const pdf = await pdfjsLib.getDocument(url).promise;
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const vp = page.getViewport({ scale: 1.5 });
+            const wrapper = document.createElement('div');
+            wrapper.className = 'pdf-page';
+            wrapper.style.width = vp.width + 'px';
+            wrapper.style.height = vp.height + 'px';
+            const canvas = document.createElement('canvas');
+            canvas.width = vp.width;
+            canvas.height = vp.height;
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+            wrapper.appendChild(canvas);
+            content.appendChild(wrapper);
+          }
+          fitToScreen();
+        } catch (err) {
+          content.innerHTML = '<div class="error-message" style="color:white;">PDF加载失败</div>';
+        }
+      }
+
+      async function renderDocx(url, blob) {
+        const { stage, content, fitToScreen } = createZoomStage(true);
+        previewWrapper.appendChild(stage);
+        try {
+          let ab = blob ? await blob.arrayBuffer() : await (await fetch(url)).arrayBuffer();
+          const result = await mammoth.convertToHtml({ arrayBuffer: ab });
+          const page = document.createElement('div');
+          page.className = 'docx-a4-page';
+          page.innerHTML = result.value;
+          page.querySelectorAll('*').forEach(el => { el.style.maxWidth = '100%'; el.style.boxSizing = 'border-box'; });
+          page.querySelectorAll('table').forEach(t => { t.style.width = '100%'; t.style.tableLayout = 'fixed'; });
+          page.querySelectorAll('td,th').forEach(c => { c.style.wordBreak = 'break-word'; });
+          page.querySelectorAll('img').forEach(i => { i.style.maxWidth = '100%'; i.style.height = 'auto'; });
+          content.appendChild(page);
+          fitToScreen();
+        } catch (err) {
+          content.innerHTML = '<div class="error-message">DOCX解析失败</div>';
+        }
+      }
+
+      async function renderXlsx(url, blob) {
+        const container = document.createElement('div');
+        container.className = 'xlsx-scroll';
+        previewWrapper.appendChild(container);
+
+        try {
+          let workbook;
+          if (blob) {
+            const binaryString = await readFileAsBinaryString(blob);
+            workbook = XLSX.read(binaryString, { type: 'binary' });
+          } else {
+            const resp = await fetch(url);
+            const blob2 = await resp.blob();
+            const binaryString = await readFileAsBinaryString(blob2);
+            workbook = XLSX.read(binaryString, { type: 'binary' });
+          }
+
+          const sheetNames = workbook.SheetNames;
+          const sheetHTMLCache = {};
+
+          function buildSheetHTML(sheetName) {
+            if (sheetHTMLCache[sheetName]) return sheetHTMLCache[sheetName];
+            
+            const sheet = workbook.Sheets[sheetName];
+            if (!sheet || !sheet['!ref']) {
+              return '<div style="padding:20px;text-align:center;">空工作表</div>';
+            }
+
+            const range = XLSX.utils.decode_range(sheet['!ref']);
+            const rows = [];
+            
+            for (let r = range.s.r; r <= range.e.r; r++) {
+              const row = [];
+              for (let c = range.s.c; c <= range.e.c; c++) {
+                const cellRef = XLSX.utils.encode_cell({ r, c });
+                const cell = sheet[cellRef];
+                let value = '';
+                if (cell) {
+                  if (cell.w !== undefined) value = String(cell.w);
+                  else if (cell.v !== undefined) value = String(cell.v);
+                }
+                row.push(value);
+              }
+              rows.push(row);
+            }
+
+            let maxCols = 0;
+            rows.forEach(row => { if (row.length > maxCols) maxCols = row.length; });
+
+            const emptyCols = new Set();
+            for (let c = 0; c < maxCols; c++) {
+              let allEmpty = true;
+              for (let r = 0; r < rows.length; r++) {
+                if (c < rows[r].length && rows[r][c].trim() !== '') {
+                  allEmpty = false;
+                  break;
+                }
+              }
+              if (allEmpty) emptyCols.add(c);
+            }
+
+            let html = '<table>';
+            rows.forEach(row => {
+              let hasContent = false;
+              for (let c = 0; c < row.length; c++) {
+                if (!emptyCols.has(c) && row[c].trim() !== '') {
+                  hasContent = true;
+                  break;
+                }
+              }
+              if (!hasContent) return;
+
+              html += '<tr>';
+              for (let c = 0; c < maxCols; c++) {
+                if (emptyCols.has(c)) continue;
+                const value = c < row.length ? row[c] : '';
+                html += `<td>${escapeHtml(value)}</td>`;
+              }
+              html += '</tr>';
+            });
+            html += '</table>';
+
+            sheetHTMLCache[sheetName] = html;
+            return html;
+          }
+
+          const tabsDiv = document.createElement('div');
+          tabsDiv.className = 'sheet-tabs';
+          const contentDiv = document.createElement('div');
+          contentDiv.className = 'xlsx-content';
+
+          sheetNames.forEach((name, i) => {
+            const tab = document.createElement('button');
+            tab.className = 'sheet-tab' + (i === 0 ? ' active' : '');
+            tab.textContent = name;
+            tab.onclick = () => {
+              tabsDiv.querySelectorAll('.sheet-tab').forEach(t => t.classList.remove('active'));
+              tab.classList.add('active');
+              contentDiv.innerHTML = buildSheetHTML(name);
+            };
+            tabsDiv.appendChild(tab);
+          });
+
+          container.appendChild(tabsDiv);
+          container.appendChild(contentDiv);
+          contentDiv.innerHTML = buildSheetHTML(sheetNames[0]);
+
+        } catch (err) {
+          container.innerHTML = `<div class="error-message">XLSX解析失败: ${err.message}</div>`;
+        }
+      }
+
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      function renderImage(url) {
+        const div = document.createElement('div');
+        div.className = 'media-container';
+        div.innerHTML = `<img src="${url}" alt="${currentFileName}">`;
+        previewWrapper.appendChild(div);
+      }
+
+      function renderVideo(url) {
+        const div = document.createElement('div');
+        div.className = 'media-container';
+        div.innerHTML = `<video src="${url}" controls style="max-width:95%;max-height:80vh;"></video>`;
+        previewWrapper.appendChild(div);
+      }
+
+      function renderAudio(url) {
+        const div = document.createElement('div');
+        div.className = 'media-container';
+        div.innerHTML = `<div class="audio-box"><h3>🎵 ${currentFileName}</h3><audio src="${url}" controls style="width:100%;margin-top:15px;"></audio></div>`;
+        previewWrapper.appendChild(div);
+      }
+
+      function renderPreview(fileURL, fileName, blob, remote) {
+        revokeURL();
+        currentFileURL = fileURL;
+        currentFileName = fileName;
+        originalFileBlob = blob;
+        isRemoteFile = remote;
+        fileNameDisplay.textContent = fileName;
+        setUIMode(true);
+        previewWrapper.innerHTML = '';
+
+        const type = getType(getExt(fileName));
+        switch (type) {
+          case 'image': renderImage(fileURL); break;
+          case 'video': renderVideo(fileURL); break;
+          case 'audio': renderAudio(fileURL); break;
+          case 'pdf': renderPDF(fileURL); break;
+          case 'docx': renderDocx(fileURL, blob); break;
+          case 'xlsx': renderXlsx(fileURL, blob); break;
+          default:
+            previewWrapper.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;">暂不支持此格式</div>';
+        }
+      }
+
+      function loadFile(file) {
+        if (!file) return;
+        renderPreview(URL.createObjectURL(file), file.name, file, false);
+      }
+
+      async function loadRemote(remoteUrl) {
+        try {
+          const resp = await fetch(remoteUrl);
+          if (!resp.ok) throw new Error('网络错误');
+          const blob = await resp.blob();
+          let name = remoteUrl.split('/').pop().split('?')[0] || 'file';
+          if (!name.includes('.')) {
+            const ct = resp.headers.get('content-type') || '';
+            if (ct.includes('pdf')) name += '.pdf';
+            else if (ct.includes('word')) name += '.docx';
+            else if (ct.includes('excel')) name += '.xlsx';
+            else name += '.bin';
+          }
+          renderPreview(URL.createObjectURL(blob), name, blob, true);
+        } catch (err) {
+          alert('加载失败');
+          goBack();
+        }
+      }
+
+      selectFileBtn.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files[0]) loadFile(e.target.files[0]);
+        fileInput.value = '';
+      });
+      backBtn.addEventListener('click', goBack);
+      downloadBtn.addEventListener('click', () => {
+        if (!currentFileURL) return;
+        const a = document.createElement('a');
+        a.href = currentFileURL;
+        a.download = currentFileName;
+        a.click();
+      });
+      copyLinkBtn.addEventListener('click', async () => {
+        if (isRemoteFile && currentFileURL && !currentFileURL.startsWith('blob:')) {
+          await navigator.clipboard.writeText(`https://luckynum.top/filereader?file=${encodeURIComponent(currentFileURL)}`);
+          showToast('链接已复制');
+        } else {
+          showToast('仅远程文件可复制链接');
+        }
+      });
+
+      document.body.addEventListener('dragover', e => e.preventDefault());
+      document.body.addEventListener('drop', e => {
+        e.preventDefault();
+        if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+      });
+
+      const p = new URL(location.href).searchParams.get('file');
+      if (p) loadRemote(p);
+      else setUIMode(false);
+    })();
+  </script>
+</body>
+</html>
