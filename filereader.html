@@ -109,7 +109,6 @@
     }
     .toast-message.show { opacity: 1; }
 
-    /* 错误页面 */
     .error-page {
       flex: 1;
       display: flex;
@@ -163,6 +162,11 @@
       align-items: center;
       gap: 15px;
       padding: 20px;
+    }
+    .zoom-content img {
+      display: block;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     }
     .pdf-page { background: white; box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
     .pdf-page canvas { display: block; }
@@ -266,6 +270,7 @@
       let currentFileName = '文件预览';
       let originalFileBlob = null;
       let isRemoteFile = false;
+      let remoteSourceURL = null;
 
       function showToast(text) {
         toast.textContent = text;
@@ -297,10 +302,6 @@
 
       function goBack() {
         revokeURL();
-        currentFileURL = null;
-        originalFileBlob = null;
-        isRemoteFile = false;
-        // 如果有历史记录，回退；否则关闭页面
         if (document.referrer && document.referrer !== window.location.href) {
           window.history.back();
         } else {
@@ -355,7 +356,8 @@
             const cw = content.scrollWidth || 800;
             scale = Math.min(1.5, (rect.width * 0.9) / cw);
             tx = (rect.width - cw * scale) / 2;
-            ty = 10;
+            ty = (rect.height - (content.scrollHeight || 600) * scale) / 2;
+            ty = Math.max(10, ty);
             updateTransform();
           }, 100);
         }
@@ -412,7 +414,7 @@
         return { stage, content, fitToScreen };
       }
 
-      // ==================== 图片（支持缩放） ====================
+      // ==================== 图片（独立缩放舞台） ====================
       async function renderImage(url) {
         const { stage, content, fitToScreen } = createZoomStage(true);
         previewWrapper.appendChild(stage);
@@ -421,8 +423,6 @@
         img.alt = currentFileName;
         img.style.maxWidth = '90vw';
         img.style.maxHeight = '80vh';
-        img.style.borderRadius = '8px';
-        img.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
         content.appendChild(img);
         img.onload = () => fitToScreen();
       }
@@ -568,7 +568,6 @@
         return div.innerHTML;
       }
 
-      // ==================== 视频 ====================
       function renderVideo(url) {
         const container = document.createElement('div');
         container.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;background:#000;';
@@ -581,7 +580,6 @@
         previewWrapper.appendChild(container);
       }
 
-      // ==================== 音频 ====================
       function renderAudio(url) {
         const container = document.createElement('div');
         container.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;';
@@ -589,12 +587,13 @@
         previewWrapper.appendChild(container);
       }
 
-      function renderPreview(fileURL, fileName, blob, remote) {
+      function renderPreview(fileURL, fileName, blob, remote, sourceURL) {
         revokeURL();
         currentFileURL = fileURL;
         currentFileName = fileName;
         originalFileBlob = blob;
         isRemoteFile = remote;
+        remoteSourceURL = sourceURL || null;
         fileNameDisplay.textContent = fileName;
         setUIMode(true);
         previewWrapper.innerHTML = '';
@@ -614,7 +613,7 @@
 
       function loadFile(file) {
         if (!file) return;
-        renderPreview(URL.createObjectURL(file), file.name, file, false);
+        renderPreview(URL.createObjectURL(file), file.name, file, false, null);
       }
 
       async function loadRemote(remoteUrl) {
@@ -630,7 +629,7 @@
             else if (ct.includes('excel')) name += '.xlsx';
             else name += '.bin';
           }
-          renderPreview(URL.createObjectURL(blob), name, blob, true);
+          renderPreview(URL.createObjectURL(blob), name, blob, true, remoteUrl);
         } catch (err) {
           alert('加载失败');
           goBack();
@@ -651,8 +650,8 @@
         a.click();
       });
       copyLinkBtn.addEventListener('click', async () => {
-        if (isRemoteFile && currentFileURL && !currentFileURL.startsWith('blob:')) {
-          await navigator.clipboard.writeText(`https://luckynum.top/filereader?file=${encodeURIComponent(currentFileURL)}`);
+        if (remoteSourceURL) {
+          await navigator.clipboard.writeText(`https://luckynum.top/filereader?file=${encodeURIComponent(remoteSourceURL)}`);
           showToast('链接已复制');
         } else {
           showToast('仅远程文件可复制链接');
