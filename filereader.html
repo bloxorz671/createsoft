@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
   <title>文件预览</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -15,6 +13,7 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      height: 100dvh;
       overflow: hidden;
       touch-action: manipulation;
     }
@@ -193,94 +192,21 @@
     }
     .pdf-page { background: white; box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
     .pdf-page canvas { display: block; }
-    .docx-a4-page {
-      width: 794px;
-      min-height: 1123px;
-      background: white;
-      padding: 96px 72px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-      font-family: 'Times New Roman', '宋体', serif;
-      font-size: 14px;
-      line-height: 1.5;
-      color: #000;
-      word-wrap: break-word;
-    }
-    .docx-a4-page * { max-width: 100%; box-sizing: border-box; }
-    .docx-a4-page table { border-collapse: collapse; width: 100%; table-layout: fixed; }
-    .docx-a4-page td, .docx-a4-page th { border: 1px solid #000; padding: 4px 6px; word-break: break-all; }
-    .docx-a4-page img { max-width: 100%; height: auto; }
-    .xlsx-scroll {
-      flex: 1;
-      overflow: auto;
-      background: #f5f5f5;
-      padding: 16px;
-    }
-    .xlsx-content {
-      background: white;
-      border-radius: 4px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      overflow-x: auto;
-      display: inline-block;
-      min-width: 100%;
-    }
-    .xlsx-content table {
-      border-collapse: collapse;
-      width: auto;
-      margin: 0 auto;
-      font-size: 13px;
-    }
-    .xlsx-content td, .xlsx-content th {
-      border: 1px solid #ccc;
-      padding: 5px 10px;
-      min-width: 50px;
-      white-space: nowrap;
-    }
-    .sheet-tabs {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-      position: sticky;
-      top: 0;
-      background: #f5f5f5;
-      z-index: 5;
-      padding: 5px 0;
-    }
-    .sheet-tab {
-      padding: 6px 14px;
-      background: #e0e0e0;
-      border: none;
-      border-radius: 6px 6px 0 0;
-      cursor: pointer;
-      font-size: 13px;
-    }
-    .sheet-tab.active { background: #1a73e8; color: white; }
 
-    /* PPT iframe */
-    .ppt-container {
+    /* Office iframe - 用vh确保高度 */
+    .office-wrapper {
       flex: 1;
-      overflow: auto;
-      padding: 20px;
-      background: #f0f2f5;
-    }
-    .ppt-iframe-wrapper {
+      min-height: 0;
       position: relative;
-      padding-bottom: 75%;
-      height: 0;
-      overflow: hidden;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-      max-width: 1200px;
-      margin: 0 auto;
     }
-    .ppt-iframe-wrapper iframe {
+    .office-wrapper iframe {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       border: none;
+      background: #f5f5f5;
     }
   </style>
 </head>
@@ -327,6 +253,16 @@
       let originalFileBlob = null;
       let remoteSourceURL = null;
 
+      const BASE_DOMAIN = 'https://luckynum.top';
+
+      function toAbsoluteURL(url) {
+        if (!url) return url;
+        if (url.startsWith('http://') || url.startsWith('https://')) return url;
+        if (url.startsWith('//')) return 'https:' + url;
+        if (url.startsWith('/')) return BASE_DOMAIN + url;
+        return BASE_DOMAIN + '/' + url;
+      }
+
       function showToast(text) {
         toast.textContent = text;
         toast.classList.add('show');
@@ -346,8 +282,8 @@
         if (/^(mp4|webm|ogg|mov|avi|mkv)$/i.test(ext)) return 'video';
         if (/^(mp3|wav|ogg|aac|flac|m4a)$/i.test(ext)) return 'audio';
         if (ext === 'pdf') return 'pdf';
-        if (ext === 'docx') return 'docx';
-        if (ext === 'xlsx') return 'xlsx';
+        if (ext === 'docx' || ext === 'doc') return 'docx';
+        if (ext === 'xlsx' || ext === 'xls') return 'xlsx';
         if (ext === 'pptx' || ext === 'ppt') return 'ppt';
         return 'unknown';
       }
@@ -377,22 +313,13 @@
         `;
         document.getElementById('errorDownloadBtn').addEventListener('click', () => {
           if (remoteSourceURL) {
-            window.open(remoteSourceURL, '_blank');
+            window.open(toAbsoluteURL(remoteSourceURL), '_blank');
           } else if (currentFileURL) {
             const a = document.createElement('a');
             a.href = currentFileURL;
             a.download = currentFileName;
             a.click();
           }
-        });
-      }
-
-      function readFileAsBinaryString(blob) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsBinaryString(blob);
         });
       }
 
@@ -511,123 +438,23 @@
         }
       }
 
-      async function renderDocx(url, blob) {
-        const { stage, content, fitToScreen } = createZoomStage(true);
-        previewWrapper.appendChild(stage);
-        try {
-          let ab = blob ? await blob.arrayBuffer() : await (await fetch(url)).arrayBuffer();
-          const result = await mammoth.convertToHtml({ arrayBuffer: ab });
-          const page = document.createElement('div');
-          page.className = 'docx-a4-page';
-          page.innerHTML = result.value;
-          page.querySelectorAll('*').forEach(el => { el.style.maxWidth = '100%'; el.style.boxSizing = 'border-box'; });
-          page.querySelectorAll('table').forEach(t => { t.style.width = '100%'; t.style.tableLayout = 'fixed'; });
-          page.querySelectorAll('td,th').forEach(c => { c.style.wordBreak = 'break-word'; });
-          page.querySelectorAll('img').forEach(i => { i.style.maxWidth = '100%'; i.style.height = 'auto'; });
-          content.appendChild(page);
-          fitToScreen();
-        } catch (err) {
-          showErrorPage(err.message);
-        }
-      }
-
-      async function renderXlsx(url, blob) {
-        const container = document.createElement('div');
-        container.className = 'xlsx-scroll';
-        previewWrapper.appendChild(container);
-        try {
-          let workbook;
-          if (blob) {
-            const binaryString = await readFileAsBinaryString(blob);
-            workbook = XLSX.read(binaryString, { type: 'binary' });
-          } else {
-            const resp = await fetch(url);
-            const blob2 = await resp.blob();
-            const binaryString = await readFileAsBinaryString(blob2);
-            workbook = XLSX.read(binaryString, { type: 'binary' });
-          }
-          const sheetNames = workbook.SheetNames;
-          const sheetHTMLCache = {};
-          function buildSheetHTML(sheetName) {
-            if (sheetHTMLCache[sheetName]) return sheetHTMLCache[sheetName];
-            const sheet = workbook.Sheets[sheetName];
-            if (!sheet || !sheet['!ref']) return '<div style="padding:20px;text-align:center;">空工作表</div>';
-            const range = XLSX.utils.decode_range(sheet['!ref']);
-            const rows = [];
-            for (let r = range.s.r; r <= range.e.r; r++) {
-              const row = [];
-              for (let c = range.s.c; c <= range.e.c; c++) {
-                const cell = sheet[XLSX.utils.encode_cell({ r, c })];
-                row.push(cell ? (cell.w !== undefined ? String(cell.w) : String(cell.v || '')) : '');
-              }
-              rows.push(row);
-            }
-            let maxCols = 0;
-            rows.forEach(row => { if (row.length > maxCols) maxCols = row.length; });
-            const emptyCols = new Set();
-            for (let c = 0; c < maxCols; c++) {
-              let allEmpty = true;
-              for (let r = 0; r < rows.length; r++) {
-                if (c < rows[r].length && rows[r][c].trim() !== '') { allEmpty = false; break; }
-              }
-              if (allEmpty) emptyCols.add(c);
-            }
-            let html = '<table>';
-            rows.forEach(row => {
-              let hasContent = false;
-              for (let c = 0; c < row.length; c++) { if (!emptyCols.has(c) && row[c].trim() !== '') { hasContent = true; break; } }
-              if (!hasContent) return;
-              html += '<tr>';
-              for (let c = 0; c < maxCols; c++) {
-                if (emptyCols.has(c)) continue;
-                html += `<td>${escapeHtml(c < row.length ? row[c] : '')}</td>`;
-              }
-              html += '</tr>';
-            });
-            html += '</table>';
-            sheetHTMLCache[sheetName] = html;
-            return html;
-          }
-          const tabsDiv = document.createElement('div');
-          tabsDiv.className = 'sheet-tabs';
-          const contentDiv = document.createElement('div');
-          contentDiv.className = 'xlsx-content';
-          sheetNames.forEach((name, i) => {
-            const tab = document.createElement('button');
-            tab.className = 'sheet-tab' + (i === 0 ? ' active' : '');
-            tab.textContent = name;
-            tab.onclick = () => {
-              tabsDiv.querySelectorAll('.sheet-tab').forEach(t => t.classList.remove('active'));
-              tab.classList.add('active');
-              contentDiv.innerHTML = buildSheetHTML(name);
-            };
-            tabsDiv.appendChild(tab);
-          });
-          container.appendChild(tabsDiv);
-          container.appendChild(contentDiv);
-          contentDiv.innerHTML = buildSheetHTML(sheetNames[0]);
-        } catch (err) {
-          showErrorPage(err.message);
-        }
-      }
-
-      function renderPPT(sourceURL) {
-        const container = document.createElement('div');
-        container.className = 'ppt-container';
+      function renderOfficeOnline(sourceURL) {
         const wrapper = document.createElement('div');
-        wrapper.className = 'ppt-iframe-wrapper';
+        wrapper.className = 'office-wrapper';
+        wrapper.style.cssText = 'position:relative;flex:1;min-height:0;';
         const iframe = document.createElement('iframe');
-        iframe.src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(sourceURL)}`;
+        const absoluteURL = toAbsoluteURL(sourceURL);
+        // 关键：使用encodeURIComponent确保URL正确编码
+        const officeURL = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(absoluteURL)}`;
+        iframe.src = officeURL;
         iframe.allowFullscreen = true;
+        iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border:none;';
         wrapper.appendChild(iframe);
-        container.appendChild(wrapper);
-        previewWrapper.appendChild(container);
-      }
-
-      function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
+        previewWrapper.appendChild(wrapper);
+        // 强制触发重绘
+        setTimeout(() => {
+          iframe.style.display = 'block';
+        }, 100);
       }
 
       function renderVideo(url) {
@@ -645,7 +472,7 @@
       function renderAudio(url) {
         const container = document.createElement('div');
         container.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;';
-        container.innerHTML = `<div style="background:white;padding:30px;border-radius:16px;text-align:center;"><h3>🎵 ${currentFileName}</h3><audio src="${url}" controls style="width:100%;margin-top:15px;"></audio></div>`;
+        container.innerHTML = `<div style="background:white;padding:30px;border-radius:16px;text-align:center;"><h3>🎵 ${decodeURIComponent(currentFileName)}</h3><audio src="${url}" controls style="width:100%;margin-top:15px;"></audio></div>`;
         previewWrapper.appendChild(container);
       }
 
@@ -665,13 +492,13 @@
           case 'video': renderVideo(fileURL); break;
           case 'audio': renderAudio(fileURL); break;
           case 'pdf': renderPDF(fileURL); break;
-          case 'docx': renderDocx(fileURL, blob); break;
-          case 'xlsx': renderXlsx(fileURL, blob); break;
+          case 'docx':
+          case 'xlsx':
           case 'ppt':
             if (sourceURL) {
-              renderPPT(sourceURL);
+              renderOfficeOnline(sourceURL);
             } else {
-              showErrorPage('PPT/PPTX 文件需要远程链接才能预览');
+              showErrorPage('Office 文件需要远程链接才能预览');
             }
             break;
           default:
@@ -691,7 +518,8 @@
 
       async function loadRemote(remoteUrl) {
         try {
-          const resp = await fetch(remoteUrl);
+          const absoluteURL = toAbsoluteURL(remoteUrl);
+          const resp = await fetch(absoluteURL);
           if (!resp.ok) throw new Error('网络错误');
           const blob = await resp.blob();
           let name = remoteUrl.split('/').pop().split('?')[0] || 'file';
@@ -700,7 +528,7 @@
             if (ct.includes('pdf')) name += '.pdf';
             else if (ct.includes('word')) name += '.docx';
             else if (ct.includes('excel')) name += '.xlsx';
-            else if (ct.includes('powerpoint') || ct.includes('presentation')) name += '.pptx';
+            else if (ct.includes('powerpoint')) name += '.pptx';
             else name += '.bin';
           }
           renderPreview(URL.createObjectURL(blob), name, blob, remoteUrl);
@@ -722,7 +550,7 @@
       backBtn.addEventListener('click', goBack);
       downloadBtn.addEventListener('click', () => {
         if (remoteSourceURL) {
-          window.open(remoteSourceURL, '_blank');
+          window.open(toAbsoluteURL(remoteSourceURL), '_blank');
         } else if (currentFileURL) {
           const a = document.createElement('a');
           a.href = currentFileURL;
@@ -732,7 +560,8 @@
       });
       copyLinkBtn.addEventListener('click', async () => {
         if (remoteSourceURL) {
-          await navigator.clipboard.writeText(`https://luckynum.top/filereader?file=${encodeURIComponent(remoteSourceURL)}`);
+          const shareURL = toAbsoluteURL(remoteSourceURL);
+          await navigator.clipboard.writeText(`${BASE_DOMAIN}/filereader?file=${encodeURIComponent(shareURL)}`);
           showToast('链接已复制');
         } else {
           showToast('仅远程文件可复制链接');
