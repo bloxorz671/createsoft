@@ -22,3 +22,4 @@ app
 [n=八下英语Focusing on culture听力 p=audio.jpg l=Focusing on culture.mp3 g=英语（学科）资料]
 [n=八下英语Cross-curricular connection听力 p=audio.jpg l=Cross-curricular connection.mp3 g=英语（学科）资料]
 [n=八下英语单词听力 p=audio.jpg l=单词.mp3 g=英语（学科）资料]
+[n=物理知识点过关测试题.doc p=docx.png l=物理知识点过关测试题.doc g=物理（学科）资料]
