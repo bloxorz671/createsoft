@@ -9,7 +9,7 @@ app
 [n=初二五班登分表Excel下载 p=excel.jpg l=初二五班登分表.xlsx g=班级应用]
 [n=新课表 p=mmexport1779630111840.jpg l=mmexport1779630111840.jpg g=班级应用]
 [n=系统问题反馈 p=help.jpg l=help.jpg g=班级应用]
-[n=电子作业提交平台 p=homeworkapp.jpg l=homeworkapp g=班级应用]
+[n=电子作业提交平台（已弃用） p=homeworkapp.jpg l=homeworkapp g=班级应用]
 [n=电子值日码 p=ezr.jpg l=ezr g=班级应用]
 [n=【学生】2025学年第二学期八年级总复习生物学练习题.pdf p=pdf.jpg l=https://www.kdocs.cn/l/cld2xA02PFve g=生物（学科）资料]
 [n=2025年中学美术素养模拟命题（最终版）.pptx p=ppt.jpg l=https://www.kdocs.cn/l/cpTKNPp1DpPL g=美术（学科）资料]
