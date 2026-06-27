@@ -143,7 +143,6 @@
       font-weight: 500;
     }
 
-    /* 可缩放舞台 */
     .zoom-stage {
       flex: 1;
       overflow: hidden;
@@ -269,7 +268,6 @@
       let currentFileURL = null;
       let currentFileName = '文件预览';
       let originalFileBlob = null;
-      let isRemoteFile = false;
       let remoteSourceURL = null;
 
       function showToast(text) {
@@ -297,7 +295,7 @@
       }
 
       function revokeURL() {
-        if (currentFileURL && !isRemoteFile && currentFileURL.startsWith('blob:')) URL.revokeObjectURL(currentFileURL);
+        if (currentFileURL && !remoteSourceURL && currentFileURL.startsWith('blob:')) URL.revokeObjectURL(currentFileURL);
       }
 
       function goBack() {
@@ -320,7 +318,9 @@
           </div>
         `;
         document.getElementById('errorDownloadBtn').addEventListener('click', () => {
-          if (currentFileURL) {
+          if (remoteSourceURL) {
+            window.open(remoteSourceURL, '_blank');
+          } else if (currentFileURL) {
             const a = document.createElement('a');
             a.href = currentFileURL;
             a.download = currentFileName;
@@ -338,7 +338,6 @@
         });
       }
 
-      // ==================== 通用缩放舞台 ====================
       function createZoomStage(lightBg = false) {
         const stage = document.createElement('div');
         stage.className = 'zoom-stage' + (lightBg ? ' light' : '');
@@ -414,7 +413,6 @@
         return { stage, content, fitToScreen };
       }
 
-      // ==================== 图片（独立缩放舞台） ====================
       async function renderImage(url) {
         const { stage, content, fitToScreen } = createZoomStage(true);
         previewWrapper.appendChild(stage);
@@ -427,7 +425,6 @@
         img.onload = () => fitToScreen();
       }
 
-      // ==================== PDF ====================
       async function renderPDF(url) {
         const { stage, content, fitToScreen } = createZoomStage(false);
         previewWrapper.appendChild(stage);
@@ -456,7 +453,6 @@
         }
       }
 
-      // ==================== DOCX ====================
       async function renderDocx(url, blob) {
         const { stage, content, fitToScreen } = createZoomStage(true);
         previewWrapper.appendChild(stage);
@@ -477,7 +473,6 @@
         }
       }
 
-      // ==================== XLSX ====================
       async function renderXlsx(url, blob) {
         const container = document.createElement('div');
         container.className = 'xlsx-scroll';
@@ -587,12 +582,11 @@
         previewWrapper.appendChild(container);
       }
 
-      function renderPreview(fileURL, fileName, blob, remote, sourceURL) {
+      function renderPreview(fileURL, fileName, blob, sourceURL) {
         revokeURL();
         currentFileURL = fileURL;
         currentFileName = fileName;
         originalFileBlob = blob;
-        isRemoteFile = remote;
         remoteSourceURL = sourceURL || null;
         fileNameDisplay.textContent = fileName;
         setUIMode(true);
@@ -613,7 +607,7 @@
 
       function loadFile(file) {
         if (!file) return;
-        renderPreview(URL.createObjectURL(file), file.name, file, false, null);
+        renderPreview(URL.createObjectURL(file), file.name, file, null);
       }
 
       async function loadRemote(remoteUrl) {
@@ -629,7 +623,7 @@
             else if (ct.includes('excel')) name += '.xlsx';
             else name += '.bin';
           }
-          renderPreview(URL.createObjectURL(blob), name, blob, true, remoteUrl);
+          renderPreview(URL.createObjectURL(blob), name, blob, remoteUrl);
         } catch (err) {
           alert('加载失败');
           goBack();
@@ -643,11 +637,16 @@
       });
       backBtn.addEventListener('click', goBack);
       downloadBtn.addEventListener('click', () => {
-        if (!currentFileURL) return;
-        const a = document.createElement('a');
-        a.href = currentFileURL;
-        a.download = currentFileName;
-        a.click();
+        if (remoteSourceURL) {
+          // 远程文件：直接用原始链接打开下载
+          window.open(remoteSourceURL, '_blank');
+        } else if (currentFileURL) {
+          // 本地文件：用Blob URL下载
+          const a = document.createElement('a');
+          a.href = currentFileURL;
+          a.download = currentFileName;
+          a.click();
+        }
       });
       copyLinkBtn.addEventListener('click', async () => {
         if (remoteSourceURL) {
