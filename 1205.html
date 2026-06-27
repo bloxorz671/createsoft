@@ -414,7 +414,7 @@
     function openFileWithFilereader(link, name) {
         var fileName=getFileNameFromLink(link);
         var encodedFileName=encodeURIComponent(fileName);
-        var viewerUrl='filereader.html?file='+encodedFileName;
+        var viewerUrl='filereader?file='+encodedFileName;
         console.log('跳转到文件阅读器:', viewerUrl);
         window.location.href=viewerUrl;
     }
