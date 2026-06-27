@@ -231,6 +231,20 @@
       font-size: 13px;
     }
     .sheet-tab.active { background: #1a73e8; color: white; }
+
+    /* PPT iframe */
+    .ppt-iframe-wrapper {
+      flex: 1;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .ppt-iframe-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
   </style>
 </head>
 <body>
@@ -244,9 +258,9 @@
     <div id="uploadPanel" class="upload-panel">
       <div class="upload-icon">📂</div>
       <div class="upload-title">选择文件预览</div>
-      <div class="upload-desc">图片 · 视频 · 音频 · PDF · DOCX · XLSX</div>
+      <div class="upload-desc">图片 · 视频 · 音频 · PDF · DOCX · XLSX · PPTX</div>
       <button class="file-select-btn" id="selectFileBtn">📁 打开本地文件</button>
-      <input type="file" id="fileInput" hidden accept="image/*,video/*,audio/*,.pdf,.docx,.xlsx">
+      <input type="file" id="fileInput" hidden accept="image/*,video/*,audio/*,.pdf,.docx,.xlsx,.pptx,.ppt">
     </div>
     <div id="previewWrapper" class="preview-wrapper hidden"></div>
   </div>
@@ -291,6 +305,7 @@
         if (ext === 'pdf') return 'pdf';
         if (ext === 'docx') return 'docx';
         if (ext === 'xlsx') return 'xlsx';
+        if (ext === 'pptx' || ext === 'ppt') return 'ppt';
         return 'unknown';
       }
 
@@ -557,6 +572,16 @@
         }
       }
 
+      function renderPPT(url) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'ppt-iframe-wrapper';
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`;
+        iframe.allowFullscreen = true;
+        wrapper.appendChild(iframe);
+        previewWrapper.appendChild(wrapper);
+      }
+
       function escapeHtml(str) {
         const div = document.createElement('div');
         div.textContent = str;
@@ -600,6 +625,13 @@
           case 'pdf': renderPDF(fileURL); break;
           case 'docx': renderDocx(fileURL, blob); break;
           case 'xlsx': renderXlsx(fileURL, blob); break;
+          case 'ppt':
+            if (sourceURL) {
+              renderPPT(sourceURL);
+            } else {
+              showErrorPage('PPT/PPTX 文件需要远程链接才能预览，本地文件请先上传到服务器');
+            }
+            break;
           default:
             showErrorPage('不支持的文件格式');
         }
@@ -621,6 +653,7 @@
             if (ct.includes('pdf')) name += '.pdf';
             else if (ct.includes('word')) name += '.docx';
             else if (ct.includes('excel')) name += '.xlsx';
+            else if (ct.includes('powerpoint') || ct.includes('presentation')) name += '.pptx';
             else name += '.bin';
           }
           renderPreview(URL.createObjectURL(blob), name, blob, remoteUrl);
@@ -638,10 +671,8 @@
       backBtn.addEventListener('click', goBack);
       downloadBtn.addEventListener('click', () => {
         if (remoteSourceURL) {
-          // 远程文件：直接用原始链接打开下载
           window.open(remoteSourceURL, '_blank');
         } else if (currentFileURL) {
-          // 本地文件：用Blob URL下载
           const a = document.createElement('a');
           a.href = currentFileURL;
           a.download = currentFileName;
