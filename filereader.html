@@ -91,6 +91,30 @@
       font-weight: 500;
     }
     .file-select-btn:hover { background: #1557b0; }
+    .url-input-row {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      max-width: 400px;
+    }
+    .url-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #d0d0d0;
+      border-radius: 20px;
+      font-size: 13px;
+      outline: none;
+    }
+    .url-btn {
+      padding: 10px 18px;
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
     .preview-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #e8eaed; }
     .hidden { display: none !important; }
     .toast-message {
@@ -233,14 +257,27 @@
     .sheet-tab.active { background: #1a73e8; color: white; }
 
     /* PPT iframe */
-    .ppt-iframe-wrapper {
+    .ppt-container {
       flex: 1;
+      overflow: auto;
+      padding: 20px;
+      background: #f0f2f5;
+    }
+    .ppt-iframe-wrapper {
+      position: relative;
+      padding-bottom: 75%;
+      height: 0;
+      overflow: hidden;
       background: white;
       border-radius: 12px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-      overflow: hidden;
+      max-width: 1200px;
+      margin: 0 auto;
     }
     .ppt-iframe-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
       border: none;
@@ -260,6 +297,10 @@
       <div class="upload-title">选择文件预览</div>
       <div class="upload-desc">图片 · 视频 · 音频 · PDF · DOCX · XLSX · PPTX</div>
       <button class="file-select-btn" id="selectFileBtn">📁 打开本地文件</button>
+      <div class="url-input-row">
+        <input type="text" class="url-input" id="urlInput" placeholder="或输入文件URL链接">
+        <button class="url-btn" id="urlBtn">打开</button>
+      </div>
       <input type="file" id="fileInput" hidden accept="image/*,video/*,audio/*,.pdf,.docx,.xlsx,.pptx,.ppt">
     </div>
     <div id="previewWrapper" class="preview-wrapper hidden"></div>
@@ -278,6 +319,8 @@
       const downloadBtn = document.getElementById('downloadBtn');
       const copyLinkBtn = document.getElementById('copyLinkBtn');
       const toast = document.getElementById('toast');
+      const urlInput = document.getElementById('urlInput');
+      const urlBtn = document.getElementById('urlBtn');
 
       let currentFileURL = null;
       let currentFileName = '文件预览';
@@ -492,7 +535,6 @@
         const container = document.createElement('div');
         container.className = 'xlsx-scroll';
         previewWrapper.appendChild(container);
-
         try {
           let workbook;
           if (blob) {
@@ -504,10 +546,8 @@
             const binaryString = await readFileAsBinaryString(blob2);
             workbook = XLSX.read(binaryString, { type: 'binary' });
           }
-
           const sheetNames = workbook.SheetNames;
           const sheetHTMLCache = {};
-
           function buildSheetHTML(sheetName) {
             if (sheetHTMLCache[sheetName]) return sheetHTMLCache[sheetName];
             const sheet = workbook.Sheets[sheetName];
@@ -548,7 +588,6 @@
             sheetHTMLCache[sheetName] = html;
             return html;
           }
-
           const tabsDiv = document.createElement('div');
           tabsDiv.className = 'sheet-tabs';
           const contentDiv = document.createElement('div');
@@ -572,14 +611,17 @@
         }
       }
 
-      function renderPPT(url) {
+      function renderPPT(sourceURL) {
+        const container = document.createElement('div');
+        container.className = 'ppt-container';
         const wrapper = document.createElement('div');
         wrapper.className = 'ppt-iframe-wrapper';
         const iframe = document.createElement('iframe');
-        iframe.src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`;
+        iframe.src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(sourceURL)}`;
         iframe.allowFullscreen = true;
         wrapper.appendChild(iframe);
-        previewWrapper.appendChild(wrapper);
+        container.appendChild(wrapper);
+        previewWrapper.appendChild(container);
       }
 
       function escapeHtml(str) {
@@ -613,7 +655,7 @@
         currentFileName = fileName;
         originalFileBlob = blob;
         remoteSourceURL = sourceURL || null;
-        fileNameDisplay.textContent = fileName;
+        fileNameDisplay.textContent = decodeURIComponent(fileName);
         setUIMode(true);
         previewWrapper.innerHTML = '';
 
@@ -629,7 +671,7 @@
             if (sourceURL) {
               renderPPT(sourceURL);
             } else {
-              showErrorPage('PPT/PPTX 文件需要远程链接才能预览，本地文件请先上传到服务器');
+              showErrorPage('PPT/PPTX 文件需要远程链接才能预览');
             }
             break;
           default:
@@ -640,6 +682,11 @@
       function loadFile(file) {
         if (!file) return;
         renderPreview(URL.createObjectURL(file), file.name, file, null);
+      }
+
+      function openURL(url) {
+        if (!url) return;
+        loadRemote(url);
       }
 
       async function loadRemote(remoteUrl) {
@@ -667,6 +714,10 @@
       fileInput.addEventListener('change', (e) => {
         if (e.target.files[0]) loadFile(e.target.files[0]);
         fileInput.value = '';
+      });
+      urlBtn.addEventListener('click', () => openURL(urlInput.value.trim()));
+      urlInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') openURL(urlInput.value.trim());
       });
       backBtn.addEventListener('click', goBack);
       downloadBtn.addEventListener('click', () => {
