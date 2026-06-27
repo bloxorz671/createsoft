@@ -13,7 +13,6 @@ app
 [n=系统问题反馈 p=help.jpg l=help.jpg g=班级应用]
 [n=电子作业提交平台 p=homeworkapp.jpg l=homeworkapp g=班级应用]
 [n=电子值日码 p=ezr.jpg l=ezr g=班级应用]
-[n=【学生】2025学年第二学期八年级总复习生物学练习题.pdf p=pdf.jpg l=https://www.kdocs.cn/l/cld2xA02PFve g=生物（学科）资料]
 [n=2025年中学美术素养模拟命题（最终版）.pptx p=ppt.jpg l=https://www.kdocs.cn/l/cpTKNPp1DpPL g=美术（学科）资料]
 [n=附件3：2026年广州市初中学业水平考试生物学实验操作考试范围.pdf p=pdf.jpg l=https://www.kdocs.cn/l/cafIxRqs4p44 g=生物（学科）资料]
 [n=七上期末复习课件-2025-2026学年人教版生物七年级上册 p=ppt.jpg l=https://www.kdocs.cn/l/cdjOM643677l g=生物（学科）资料]
