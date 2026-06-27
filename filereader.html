@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -108,6 +108,43 @@
       transition: opacity 0.3s;
     }
     .toast-message.show { opacity: 1; }
+
+    /* 错误页面 */
+    .error-page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f5f5f5;
+      padding: 30px;
+      text-align: center;
+    }
+    .error-icon { font-size: 64px; margin-bottom: 16px; }
+    .error-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 8px; }
+    .error-detail {
+      background: #fff3f3;
+      border: 1px solid #ffcdd2;
+      color: #c62828;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      max-width: 500px;
+      word-break: break-all;
+    }
+    .error-download-btn {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 24px;
+      font-size: 15px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    /* 可缩放舞台 */
     .zoom-stage {
       flex: 1;
       overflow: hidden;
@@ -191,21 +228,6 @@
       font-size: 13px;
     }
     .sheet-tab.active { background: #1a73e8; color: white; }
-    .media-container {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      overflow: auto;
-    }
-    .media-container img, .media-container video {
-      max-width: 95%;
-      max-height: 80vh;
-      border-radius: 8px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    }
-    .audio-box { text-align: center; background: white; padding: 30px; border-radius: 16px; }
   </style>
 </head>
 <body>
@@ -278,7 +300,32 @@
         currentFileURL = null;
         originalFileBlob = null;
         isRemoteFile = false;
-        setUIMode(false);
+        // 如果有历史记录，回退；否则关闭页面
+        if (document.referrer && document.referrer !== window.location.href) {
+          window.history.back();
+        } else {
+          window.close();
+        }
+      }
+
+      function showErrorPage(errorMessage) {
+        setUIMode(true);
+        previewWrapper.innerHTML = `
+          <div class="error-page">
+            <div class="error-icon">⚠️</div>
+            <div class="error-title">当前文件无法预览</div>
+            <div class="error-detail">${errorMessage}</div>
+            <button class="error-download-btn" id="errorDownloadBtn">📥 下载文件</button>
+          </div>
+        `;
+        document.getElementById('errorDownloadBtn').addEventListener('click', () => {
+          if (currentFileURL) {
+            const a = document.createElement('a');
+            a.href = currentFileURL;
+            a.download = currentFileName;
+            a.click();
+          }
+        });
       }
 
       function readFileAsBinaryString(blob) {
@@ -290,6 +337,7 @@
         });
       }
 
+      // ==================== 通用缩放舞台 ====================
       function createZoomStage(lightBg = false) {
         const stage = document.createElement('div');
         stage.className = 'zoom-stage' + (lightBg ? ' light' : '');
@@ -305,7 +353,7 @@
           setTimeout(() => {
             const rect = stage.getBoundingClientRect();
             const cw = content.scrollWidth || 800;
-            scale = Math.min(1, (rect.width * 0.9) / cw);
+            scale = Math.min(1.5, (rect.width * 0.9) / cw);
             tx = (rect.width - cw * scale) / 2;
             ty = 10;
             updateTransform();
@@ -364,6 +412,22 @@
         return { stage, content, fitToScreen };
       }
 
+      // ==================== 图片（支持缩放） ====================
+      async function renderImage(url) {
+        const { stage, content, fitToScreen } = createZoomStage(true);
+        previewWrapper.appendChild(stage);
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = currentFileName;
+        img.style.maxWidth = '90vw';
+        img.style.maxHeight = '80vh';
+        img.style.borderRadius = '8px';
+        img.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
+        content.appendChild(img);
+        img.onload = () => fitToScreen();
+      }
+
+      // ==================== PDF ====================
       async function renderPDF(url) {
         const { stage, content, fitToScreen } = createZoomStage(false);
         previewWrapper.appendChild(stage);
@@ -388,10 +452,11 @@
           }
           fitToScreen();
         } catch (err) {
-          content.innerHTML = '<div class="error-message" style="color:white;">PDF加载失败</div>';
+          showErrorPage(err.message);
         }
       }
 
+      // ==================== DOCX ====================
       async function renderDocx(url, blob) {
         const { stage, content, fitToScreen } = createZoomStage(true);
         previewWrapper.appendChild(stage);
@@ -408,10 +473,11 @@
           content.appendChild(page);
           fitToScreen();
         } catch (err) {
-          content.innerHTML = '<div class="error-message">DOCX解析失败</div>';
+          showErrorPage(err.message);
         }
       }
 
+      // ==================== XLSX ====================
       async function renderXlsx(url, blob) {
         const container = document.createElement('div');
         container.className = 'xlsx-scroll';
@@ -434,66 +500,41 @@
 
           function buildSheetHTML(sheetName) {
             if (sheetHTMLCache[sheetName]) return sheetHTMLCache[sheetName];
-            
             const sheet = workbook.Sheets[sheetName];
-            if (!sheet || !sheet['!ref']) {
-              return '<div style="padding:20px;text-align:center;">空工作表</div>';
-            }
-
+            if (!sheet || !sheet['!ref']) return '<div style="padding:20px;text-align:center;">空工作表</div>';
             const range = XLSX.utils.decode_range(sheet['!ref']);
             const rows = [];
-            
             for (let r = range.s.r; r <= range.e.r; r++) {
               const row = [];
               for (let c = range.s.c; c <= range.e.c; c++) {
-                const cellRef = XLSX.utils.encode_cell({ r, c });
-                const cell = sheet[cellRef];
-                let value = '';
-                if (cell) {
-                  if (cell.w !== undefined) value = String(cell.w);
-                  else if (cell.v !== undefined) value = String(cell.v);
-                }
-                row.push(value);
+                const cell = sheet[XLSX.utils.encode_cell({ r, c })];
+                row.push(cell ? (cell.w !== undefined ? String(cell.w) : String(cell.v || '')) : '');
               }
               rows.push(row);
             }
-
             let maxCols = 0;
             rows.forEach(row => { if (row.length > maxCols) maxCols = row.length; });
-
             const emptyCols = new Set();
             for (let c = 0; c < maxCols; c++) {
               let allEmpty = true;
               for (let r = 0; r < rows.length; r++) {
-                if (c < rows[r].length && rows[r][c].trim() !== '') {
-                  allEmpty = false;
-                  break;
-                }
+                if (c < rows[r].length && rows[r][c].trim() !== '') { allEmpty = false; break; }
               }
               if (allEmpty) emptyCols.add(c);
             }
-
             let html = '<table>';
             rows.forEach(row => {
               let hasContent = false;
-              for (let c = 0; c < row.length; c++) {
-                if (!emptyCols.has(c) && row[c].trim() !== '') {
-                  hasContent = true;
-                  break;
-                }
-              }
+              for (let c = 0; c < row.length; c++) { if (!emptyCols.has(c) && row[c].trim() !== '') { hasContent = true; break; } }
               if (!hasContent) return;
-
               html += '<tr>';
               for (let c = 0; c < maxCols; c++) {
                 if (emptyCols.has(c)) continue;
-                const value = c < row.length ? row[c] : '';
-                html += `<td>${escapeHtml(value)}</td>`;
+                html += `<td>${escapeHtml(c < row.length ? row[c] : '')}</td>`;
               }
               html += '</tr>';
             });
             html += '</table>';
-
             sheetHTMLCache[sheetName] = html;
             return html;
           }
@@ -502,7 +543,6 @@
           tabsDiv.className = 'sheet-tabs';
           const contentDiv = document.createElement('div');
           contentDiv.className = 'xlsx-content';
-
           sheetNames.forEach((name, i) => {
             const tab = document.createElement('button');
             tab.className = 'sheet-tab' + (i === 0 ? ' active' : '');
@@ -514,13 +554,11 @@
             };
             tabsDiv.appendChild(tab);
           });
-
           container.appendChild(tabsDiv);
           container.appendChild(contentDiv);
           contentDiv.innerHTML = buildSheetHTML(sheetNames[0]);
-
         } catch (err) {
-          container.innerHTML = `<div class="error-message">XLSX解析失败: ${err.message}</div>`;
+          showErrorPage(err.message);
         }
       }
 
@@ -530,25 +568,25 @@
         return div.innerHTML;
       }
 
-      function renderImage(url) {
-        const div = document.createElement('div');
-        div.className = 'media-container';
-        div.innerHTML = `<img src="${url}" alt="${currentFileName}">`;
-        previewWrapper.appendChild(div);
-      }
-
+      // ==================== 视频 ====================
       function renderVideo(url) {
-        const div = document.createElement('div');
-        div.className = 'media-container';
-        div.innerHTML = `<video src="${url}" controls style="max-width:95%;max-height:80vh;"></video>`;
-        previewWrapper.appendChild(div);
+        const container = document.createElement('div');
+        container.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;background:#000;';
+        const video = document.createElement('video');
+        video.src = url;
+        video.controls = true;
+        video.style.maxWidth = '95%';
+        video.style.maxHeight = '80vh';
+        container.appendChild(video);
+        previewWrapper.appendChild(container);
       }
 
+      // ==================== 音频 ====================
       function renderAudio(url) {
-        const div = document.createElement('div');
-        div.className = 'media-container';
-        div.innerHTML = `<div class="audio-box"><h3>🎵 ${currentFileName}</h3><audio src="${url}" controls style="width:100%;margin-top:15px;"></audio></div>`;
-        previewWrapper.appendChild(div);
+        const container = document.createElement('div');
+        container.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;';
+        container.innerHTML = `<div style="background:white;padding:30px;border-radius:16px;text-align:center;"><h3>🎵 ${currentFileName}</h3><audio src="${url}" controls style="width:100%;margin-top:15px;"></audio></div>`;
+        previewWrapper.appendChild(container);
       }
 
       function renderPreview(fileURL, fileName, blob, remote) {
@@ -570,7 +608,7 @@
           case 'docx': renderDocx(fileURL, blob); break;
           case 'xlsx': renderXlsx(fileURL, blob); break;
           default:
-            previewWrapper.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;">暂不支持此格式</div>';
+            showErrorPage('不支持的文件格式');
         }
       }
 
