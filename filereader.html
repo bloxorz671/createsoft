@@ -596,6 +596,7 @@
       }
 
       async function getFileSize(url) {
+        // 方法1: HEAD 请求
         try {
           const resp = await fetch(url, { method: 'HEAD' });
           if (resp.ok) {
@@ -603,6 +604,16 @@
             if (length) return formatFileSize(parseInt(length));
           }
         } catch (e) {}
+
+        // 方法2: GET 请求读取 blob size
+        try {
+          const resp = await fetch(url);
+          if (resp.ok) {
+            const blob = await resp.blob();
+            if (blob.size > 0) return formatFileSize(blob.size);
+          }
+        } catch (e) {}
+
         return '未知大小';
       }
 
