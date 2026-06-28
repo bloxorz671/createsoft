@@ -399,19 +399,12 @@
     // ========== 判断是否是网页链接（非文件） ==========
     function isWebLink(url) {
         if(!url) return true;
-        // 去掉参数和锚点
         var cleanUrl = url.split('?')[0].split('#')[0];
-        // 以 / 结尾 = 目录链接
         if(cleanUrl.endsWith('/')) return true;
-        // 提取文件名
         var fn = cleanUrl.split('/').pop();
-        // 无扩展名 = 链接
         if(fn.indexOf('.') === -1) return true;
-        // 检查扩展名
         var ext = fn.split('.').pop().toLowerCase();
-        // 网页后缀 = 链接
         if(WEB_EXTS.indexOf(ext) !== -1) return true;
-        // 其他 = 文件
         return false;
     }
 
@@ -429,39 +422,40 @@
         return link.split('/').pop().split('?')[0];
     }
 
-    // ========== 打开文件：跳转到 filehelper?文件名 ==========
+    // ========== 打开文件：跳转到 /filehelper.html?file=完整URL ==========
     function openFileWithFilehelper(link) {
-        var fileName = getFileNameFromLink(link);
-        var encodedFileName = encodeURIComponent(fileName);
-        var helperUrl = 'filehelper.html?file=' + encodedFileName;
-        console.log('跳转到文件助手:', helperUrl);
+        // 构建完整URL
+        var fullUrl = link;
+        if(fullUrl.indexOf('http')!==0 && fullUrl.indexOf('//')!==0) {
+            fullUrl = 'https://luckynum.top/' + link;
+        }
+        // 使用绝对路径 /filehelper.html，确保跳转到根目录
+        var helperUrl = '/filehelper.html?file=' + encodeURIComponent(fullUrl);
+        console.log('跳转到文件助手:', helperUrl, '完整URL:', fullUrl);
         window.location.href = helperUrl;
     }
 
     // ========== 处理应用点击 ==========
     async function handleAppClick(link, name) {
         var fullUrl = link;
-        // 补全相对链接
         if(fullUrl && fullUrl.indexOf('http')!==0 && fullUrl.indexOf('//')!==0) {
             fullUrl = 'https://luckynum.top/' + encodeURIComponent(link);
         }
 
         // 判断是否是网页链接
         if(isWebLink(link)) {
-            // 普通链接 → 新窗口打开
             window.open(fullUrl, '_blank');
             return;
         }
 
-        // 是文件 → 进一步判断
+        // 是文件 → 判断是否是音频
         if(isAudioFile(link)) {
-            // 音频 → 内置播放器
             var seriesFiles = await findSeriesFiles(getFileNameFromLink(link), AUDIO_EXTS);
             openAudioViewer(fullUrl, name, seriesFiles);
             return;
         }
 
-        // 所有其他文件 → filehelper
+        // 所有其他文件 → /filehelper.html
         openFileWithFilehelper(link);
     }
 
