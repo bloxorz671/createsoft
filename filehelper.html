@@ -310,6 +310,7 @@
             align-items: center;
             gap: 2px;
             padding-bottom: 0;
+            position: relative;
         }
 
         .control-label {
@@ -429,6 +430,45 @@
             cursor: pointer;
         }
 
+        /* 倍速弹窗 */
+        .speed-popup {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            padding: 6px;
+            display: none;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        .speed-popup.show {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .speed-option {
+            padding: 6px 14px;
+            border: none;
+            background: none;
+            font-size: 12px;
+            color: #333;
+            cursor: pointer;
+            border-radius: 6px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .speed-option:hover,
+        .speed-option.active {
+            background: #1A2A6C;
+            color: white;
+        }
+
         /* PDF/DOCX/PPT/XLSX 预览 */
         .zoom-stage {
             flex: 1;
@@ -532,19 +572,10 @@
         }
 
         @media (max-width: 400px) {
-            .transfer-file-name {
-                font-size: 24px;
-            }
-            .section-bottom button {
-                font-size: 18px;
-            }
-            .transfer-icon-wrapper {
-                width: 80px;
-                height: 80px;
-            }
-            .section-bottom {
-                max-width: 160px;
-            }
+            .transfer-file-name { font-size: 24px; }
+            .section-bottom button { font-size: 18px; }
+            .transfer-icon-wrapper { width: 80px; height: 80px; }
+            .section-bottom { max-width: 160px; }
         }
     </style>
 </head>
@@ -602,10 +633,7 @@
                 const units = ['B', 'KB', 'MB', 'GB'];
                 let i = 0;
                 let size = bytes;
-                while (size >= 1024 && i < units.length - 1) {
-                    size /= 1024;
-                    i++;
-                }
+                while (size >= 1024 && i < units.length - 1) { size /= 1024; i++; }
                 return size.toFixed(1) + units[i];
             }
 
@@ -622,7 +650,6 @@
             }
 
             function getExt(name) { return (name.split('.').pop() || '').toLowerCase(); }
-
             function getType(ext) {
                 if (/^(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(ext)) return 'image';
                 if (/^(mp4|webm|ogg|mov|avi|mkv)$/i.test(ext)) return 'video';
@@ -645,44 +672,33 @@
             }
 
             function goBack() {
-                if (document.referrer && document.referrer !== window.location.href) {
-                    window.history.back();
-                } else {
-                    window.close();
-                }
+                if (document.referrer && document.referrer !== window.location.href) window.history.back();
+                else window.close();
             }
 
             function showTransferPage(sourceURL, fileName, fileSize) {
                 loadingPage.classList.add('hidden');
                 previewWrapper.classList.remove('hidden');
                 topBar.classList.add('hidden');
-
                 const ext = getExt(fileName);
                 const type = getType(ext);
                 const iconFile = getIconForType(type);
                 const decodedName = decodeURIComponent(fileName);
-
                 document.title = decodedName;
 
                 previewWrapper.innerHTML = `
-                    <div class="transfer-page">
-                        <div class="transfer-container">
-                            <div class="section-top">
-                                <div class="transfer-icon-wrapper">
-                                    <img src="${iconFile}" alt="文件图标" onerror="this.src='null.jpg'">
-                                </div>
-                                <div class="transfer-file-name">${decodedName}</div>
-                                <div class="transfer-file-size">文件大小：${fileSize}</div>
-                            </div>
-                            <div class="spacer"></div>
-                            <div class="section-bottom">
-                                <button class="btn-preview" id="btnTransferPreview">预览</button>
-                                <button class="btn-download" id="btnTransferDownload">下载</button>
-                            </div>
+                    <div class="transfer-page"><div class="transfer-container">
+                        <div class="section-top">
+                            <div class="transfer-icon-wrapper"><img src="${iconFile}" alt="文件图标" onerror="this.src='null.jpg'"></div>
+                            <div class="transfer-file-name">${decodedName}</div>
+                            <div class="transfer-file-size">文件大小：${fileSize}</div>
                         </div>
-                    </div>
-                `;
-
+                        <div class="spacer"></div>
+                        <div class="section-bottom">
+                            <button class="btn-preview" id="btnTransferPreview">预览</button>
+                            <button class="btn-download" id="btnTransferDownload">下载</button>
+                        </div>
+                    </div></div>`;
                 document.getElementById('btnTransferPreview').addEventListener('click', () => doPreview(sourceURL, fileName));
                 document.getElementById('btnTransferDownload').addEventListener('click', () => window.open(toAbsoluteURL(sourceURL), '_blank'));
             }
@@ -693,17 +709,8 @@
                 topBar.classList.remove('hidden');
                 fileNameDisplay.textContent = '加载失败';
                 document.title = '加载失败 - 文件';
-                previewWrapper.innerHTML = `
-                    <div class="error-page">
-                        <div class="error-icon">⚠️</div>
-                        <div class="error-title">当前文件无法预览</div>
-                        <div class="error-detail">${errorMessage}</div>
-                        <button class="error-download-btn" id="errorDownloadBtn">📥 下载文件</button>
-                    </div>
-                `;
-                document.getElementById('errorDownloadBtn').addEventListener('click', () => {
-                    if (remoteSourceURL) window.open(toAbsoluteURL(remoteSourceURL), '_blank');
-                });
+                previewWrapper.innerHTML = `<div class="error-page"><div class="error-icon">⚠️</div><div class="error-title">当前文件无法预览</div><div class="error-detail">${errorMessage}</div><button class="error-download-btn" id="errorDownloadBtn">📥 下载文件</button></div>`;
+                document.getElementById('errorDownloadBtn').addEventListener('click', () => { if (remoteSourceURL) window.open(toAbsoluteURL(remoteSourceURL), '_blank'); });
             }
 
             function createZoomStage(lightBg = false) {
@@ -728,20 +735,11 @@
                         updateTransform();
                     }, 100);
                 }
-
                 stage.addEventListener('touchstart', (e) => {
-                    if (e.touches.length === 1) {
-                        drag = true; startX = e.touches[0].clientX; startY = e.touches[0].clientY; startTX = tx; startTY = ty;
-                    } else if (e.touches.length === 2) {
-                        drag = false;
-                        pinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                        pinchCX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                        pinchCY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-                        pinchScale = scale; pinchTX = tx; pinchTY = ty;
-                    }
+                    if (e.touches.length === 1) { drag = true; startX = e.touches[0].clientX; startY = e.touches[0].clientY; startTX = tx; startTY = ty; }
+                    else if (e.touches.length === 2) { drag = false; pinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); pinchCX = (e.touches[0].clientX + e.touches[1].clientX) / 2; pinchCY = (e.touches[0].clientY + e.touches[1].clientY) / 2; pinchScale = scale; pinchTX = tx; pinchTY = ty; }
                     e.preventDefault();
                 }, { passive: false });
-
                 stage.addEventListener('touchmove', (e) => {
                     if (e.touches.length === 2 && pinchDist > 0) {
                         const nd = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
@@ -750,14 +748,9 @@
                         tx = (pinchCX - stage.getBoundingClientRect().left) - ((pinchCX - stage.getBoundingClientRect().left) - pinchTX) * ratio;
                         ty = (pinchCY - stage.getBoundingClientRect().top) - ((pinchCY - stage.getBoundingClientRect().top) - pinchTY) * ratio;
                         scale = ns; updateTransform();
-                    } else if (e.touches.length === 1 && drag) {
-                        tx = startTX + (e.touches[0].clientX - startX);
-                        ty = startTY + (e.touches[0].clientY - startY);
-                        updateTransform();
-                    }
+                    } else if (e.touches.length === 1 && drag) { tx = startTX + (e.touches[0].clientX - startX); ty = startTY + (e.touches[0].clientY - startY); updateTransform(); }
                     e.preventDefault();
                 }, { passive: false });
-
                 stage.addEventListener('touchend', () => { drag = false; pinchDist = 0; });
                 stage.addEventListener('wheel', (e) => {
                     e.preventDefault();
@@ -768,7 +761,6 @@
                     tx = mx - (mx - tx) * ratio; ty = my - (my - ty) * ratio;
                     scale = ns; updateTransform();
                 }, { passive: false });
-
                 return { stage, content, fitToScreen };
             }
 
@@ -793,8 +785,7 @@
                         const page = await pdf.getPage(i);
                         const vp = page.getViewport({ scale: 1.5 });
                         const wrapper = document.createElement('div');
-                        wrapper.className = 'pdf-page';
-                        wrapper.style.width = vp.width + 'px'; wrapper.style.height = vp.height + 'px';
+                        wrapper.className = 'pdf-page'; wrapper.style.width = vp.width + 'px'; wrapper.style.height = vp.height + 'px';
                         const canvas = document.createElement('canvas');
                         canvas.width = vp.width; canvas.height = vp.height;
                         canvas.style.width = '100%'; canvas.style.height = '100%';
@@ -827,31 +818,27 @@
             function renderAudio(url) {
                 const container = document.createElement('div');
                 container.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;background:#fff;';
+                const speedOptions = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 5.0];
+                const speedLabels = ['0.25倍', '0.5倍', '0.75倍', '正常', '1.25倍', '1.5倍', '2.0倍', '3.0倍', '5.0倍'];
                 container.innerHTML = `
                     <div class="audio-player">
                         <div class="vinyl-wrapper" id="vinylWrapper">
-                            <svg width="200" height="200" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect width="100" height="100" rx="20" fill="#1A2A6C"/>
-                                <g class="vinyl-disc"><circle cx="50" cy="50" r="38" fill="#1A1A1A"/><circle cx="50" cy="50" r="38" fill="url(#shine)" opacity="0.15"/><circle cx="50" cy="50" r="30" stroke="#2A2A2A" stroke-width="0.5" fill="none"/><circle cx="50" cy="50" r="25" stroke="#2A2A2A" stroke-width="0.5" fill="none"/><circle cx="50" cy="50" r="20" stroke="#2A2A2A" stroke-width="0.5" fill="none"/><circle cx="50" cy="50" r="15" stroke="#2A2A2A" stroke-width="0.5" fill="none"/><circle cx="50" cy="50" r="12" fill="#E8D5B5"/><circle cx="50" cy="50" r="11" fill="#F5E6D0"/><circle cx="50" cy="50" r="3" fill="#1A1A1A"/></g>
-                                <line x1="5" y1="8" x2="38" y2="32" stroke="#C0C0C0" stroke-width="2.5" stroke-linecap="round"/><circle cx="38" cy="32" r="3" fill="#E8E8E8"/>
-                                <defs><radialGradient id="shine" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="white"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>
-                            </svg>
+                            <svg width="200" height="200" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#1A2A6C"/><g class="vinyl-disc"><circle cx="50" cy="50" r="38" fill="#1A1A1A"/><circle cx="50" cy="50" r="38" fill="url(#shine)" opacity="0.15"/><circle cx="50" cy="50" r="30" stroke="#2A2A2A" stroke-width="0.5" fill="none"/><circle cx="50" cy="50" r="25" stroke="#2A2A2A" stroke-width="0.5" fill="none"/><circle cx="50" cy="50" r="20" stroke="#2A2A2A" stroke-width="0.5" fill="none"/><circle cx="50" cy="50" r="15" stroke="#2A2A2A" stroke-width="0.5" fill="none"/><circle cx="50" cy="50" r="12" fill="#E8D5B5"/><circle cx="50" cy="50" r="11" fill="#F5E6D0"/><circle cx="50" cy="50" r="3" fill="#1A1A1A"/></g><line x1="5" y1="8" x2="38" y2="32" stroke="#C0C0C0" stroke-width="2.5" stroke-linecap="round"/><circle cx="38" cy="32" r="3" fill="#E8E8E8"/><defs><radialGradient id="shine" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="white"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs></svg>
                         </div>
                         <div class="audio-title">${decodeURIComponent(currentFileName)}</div>
                         <div class="progress-row">
                             <span class="time-text" id="currentTime">00:00</span>
-                            <input type="range" id="progressSlider" min="0" max="250" value="0" step="0.1">
+                            <input type="range" id="progressSlider" min="0" max="100" value="0" step="0.1">
                             <span class="time-text" id="totalTime">00:00</span>
                         </div>
                         <div class="controls-row">
-                            <div class="control-item"><button class="control-btn" id="btnLoop"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M3 9.5C3 6.5 5.5 4.5 8.5 4.5H16.5C18 4.5 19.5 5.5 20.5 7" stroke="#333" stroke-width="1.8" stroke-linecap="round"/><path d="M17 4.5L20.5 7L17.5 10" stroke="#333" stroke-width="1.8" stroke-linecap="round"/><path d="M21 14.5C21 17.5 18.5 19.5 15.5 19.5H7.5C6 19.5 4.5 18.5 3.5 17" stroke="#333" stroke-width="1.8" stroke-linecap="round"/><path d="M7 19.5L3.5 17L6.5 14" stroke="#333" stroke-width="1.8" stroke-linecap="round"/></svg></button><span class="control-label">循环</span></div>
+                            <div class="control-item"><button class="control-btn" id="btnSpeed"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 4 C17.5 4 20 7.5 20 12 C20 17.5 16.5 20 12 20 C7.5 20 4 16.5 4 12" stroke="#333" stroke-width="1.8" stroke-linecap="round" fill="none"/><circle cx="12" cy="4" r="1.2" fill="#333"/><path d="M4 12L2.5 10L3 13.5" stroke="#333" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><line x1="12" y1="12" x2="17" y2="7" stroke="#333" stroke-width="1.8" stroke-linecap="round"/><line x1="12" y1="12" x2="15.5" y2="15.5" stroke="#333" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="2.5" fill="#333"/></svg></button><span class="control-label">倍速</span><div class="speed-popup" id="speedPopup">${speedOptions.map((s, i) => `<button class="speed-option${s===1?' active':''}" data-speed="${s}">${speedLabels[i]}</button>`).join('')}</div></div>
                             <div class="control-item"><button class="control-btn" id="btnRewind"><svg width="28" height="28" viewBox="0 0 24 24"><path d="M21 19L11 12L21 5V19Z" fill="#333"/><path d="M12 19L2 12L12 5V19Z" fill="#333"/></svg></button><span class="control-label">后退5秒</span></div>
                             <div class="btn-play-wrapper"><button class="btn-play" id="btnPlay"><svg width="28" height="28" viewBox="0 0 24 24" id="iconPlay"><path d="M6 4L20 12L6 20V4Z" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg><svg width="28" height="28" viewBox="0 0 24 24" id="iconPause" style="display:none;"><rect x="6" y="4" width="4" height="16" fill="#fff"/><rect x="14" y="4" width="4" height="16" fill="#fff"/></svg></button></div>
                             <div class="control-item"><button class="control-btn" id="btnForward"><svg width="28" height="28" viewBox="0 0 24 24"><path d="M3 19L13 12L3 5V19Z" fill="#333"/><path d="M12 19L22 12L12 5V19Z" fill="#333"/></svg></button><span class="control-label">快进5秒</span></div>
                             <div class="control-item volume-wrapper" id="volumeWrapper"><button class="control-btn" id="volumeBtn"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M4 8H8L13 4V20L8 16H4V8Z" fill="#333" stroke="#333" stroke-width="1.5" stroke-linejoin="round"/><path d="M17 8C18.5 9.5 18.5 14.5 17 16" stroke="#333" stroke-width="1.5" stroke-linecap="round"/><path d="M19 5.5C21.5 8 21.5 16 19 18.5" stroke="#333" stroke-width="1.5" stroke-linecap="round"/></svg></button><span class="control-label">音量</span><div class="volume-popup" id="volumePopup"><div class="volume-popup-inner"><input type="range" id="volumeSlider" min="0" max="100" value="100"><span class="volume-popup-num" id="volumeNum">100</span></div></div></div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 previewWrapper.appendChild(container);
                 initAudioPlayer(url);
             }
@@ -859,13 +846,15 @@
             function initAudioPlayer(url) {
                 const audio = new Audio(url);
                 audio.volume = 1.0;
+                audio.loop = true;
 
                 const btnPlay = document.getElementById('btnPlay');
                 const iconPlay = document.getElementById('iconPlay');
                 const iconPause = document.getElementById('iconPause');
                 const btnRewind = document.getElementById('btnRewind');
                 const btnForward = document.getElementById('btnForward');
-                const btnLoop = document.getElementById('btnLoop');
+                const btnSpeed = document.getElementById('btnSpeed');
+                const speedPopup = document.getElementById('speedPopup');
                 const progressSlider = document.getElementById('progressSlider');
                 const currentTimeEl = document.getElementById('currentTime');
                 const totalTimeEl = document.getElementById('totalTime');
@@ -876,10 +865,8 @@
                 const vinylWrapper = document.getElementById('vinylWrapper');
 
                 let isPlaying = false;
-                let isLoop = false;
                 let duration = 0;
                 let animationId = null;
-                let startTimestamp = null;
 
                 function formatTime(seconds) {
                     const m = Math.floor(seconds / 60);
@@ -907,62 +894,45 @@
                     updateProgressUI(0);
                 });
 
-                audio.addEventListener('ended', () => {
-                    if (isLoop) {
-                        audio.currentTime = 0;
-                        audio.play();
-                    } else {
-                        setPlaying(false);
-                        updateProgressUI(0);
-                    }
-                });
-
                 function setPlaying(state) {
                     isPlaying = state;
-                    if (state) {
-                        iconPlay.style.display = 'none';
-                        iconPause.style.display = 'block';
-                        vinylWrapper.classList.add('playing');
-                    } else {
-                        iconPlay.style.display = 'block';
-                        iconPause.style.display = 'none';
-                        vinylWrapper.classList.remove('playing');
-                    }
+                    if (state) { iconPlay.style.display = 'none'; iconPause.style.display = 'block'; vinylWrapper.classList.add('playing'); }
+                    else { iconPlay.style.display = 'block'; iconPause.style.display = 'none'; vinylWrapper.classList.remove('playing'); }
                 }
 
-                function animate(timestamp) {
-                    if (!startTimestamp) startTimestamp = timestamp;
+                function animate() {
                     updateProgressUI(audio.currentTime);
                     if (!audio.paused) animationId = requestAnimationFrame(animate);
                 }
 
                 function togglePlay() {
-                    if (isPlaying) {
-                        audio.pause();
-                        cancelAnimationFrame(animationId);
-                        setPlaying(false);
-                    } else {
-                        audio.play();
-                        setPlaying(true);
-                        animationId = requestAnimationFrame(animate);
-                    }
+                    if (isPlaying) { audio.pause(); cancelAnimationFrame(animationId); setPlaying(false); }
+                    else { audio.play(); setPlaying(true); animationId = requestAnimationFrame(animate); }
                 }
 
                 btnPlay.addEventListener('click', togglePlay);
                 btnRewind.addEventListener('click', () => { audio.currentTime = Math.max(0, audio.currentTime - 5); updateProgressUI(audio.currentTime); });
                 btnForward.addEventListener('click', () => { audio.currentTime = Math.min(duration, audio.currentTime + 5); updateProgressUI(audio.currentTime); });
-                btnLoop.addEventListener('click', () => { isLoop = !isLoop; btnLoop.style.opacity = isLoop ? '0.5' : '1'; });
+
+                btnSpeed.addEventListener('click', (e) => { e.stopPropagation(); speedPopup.classList.toggle('show'); });
+                speedPopup.querySelectorAll('.speed-option').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const sp = parseFloat(btn.dataset.speed);
+                        audio.playbackRate = sp;
+                        speedPopup.querySelectorAll('.speed-option').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        speedPopup.classList.remove('show');
+                    });
+                });
 
                 progressSlider.addEventListener('input', () => { audio.currentTime = parseFloat(progressSlider.value); updateProgressUI(audio.currentTime); });
 
-                volumeSlider.addEventListener('input', () => {
-                    audio.volume = parseInt(volumeSlider.value) / 100;
-                    updateVolumeUI(parseInt(volumeSlider.value));
-                });
-
+                volumeSlider.addEventListener('input', () => { audio.volume = parseInt(volumeSlider.value) / 100; updateVolumeUI(parseInt(volumeSlider.value)); });
                 volumeBtn.addEventListener('click', (e) => { e.stopPropagation(); volumePopup.classList.toggle('show'); });
-                document.addEventListener('click', () => volumePopup.classList.remove('show'));
+                document.addEventListener('click', () => { volumePopup.classList.remove('show'); speedPopup.classList.remove('show'); });
                 volumePopup.addEventListener('click', (e) => e.stopPropagation());
+                speedPopup.addEventListener('click', (e) => e.stopPropagation());
 
                 updateVolumeUI(100);
             }
@@ -975,10 +945,8 @@
                 document.title = decodedName;
                 showTopBar();
                 previewWrapper.innerHTML = '';
-
                 const type = getType(getExt(fileName));
                 const absoluteURL = toAbsoluteURL(sourceURL);
-
                 switch (type) {
                     case 'image': renderImage(absoluteURL); break;
                     case 'video': renderVideo(absoluteURL); break;
@@ -990,15 +958,10 @@
             }
 
             function renderPreview(fileURL, fileName, sourceURL) {
-                currentFileURL = fileURL;
-                currentFileName = fileName;
-                remoteSourceURL = sourceURL || null;
+                currentFileURL = fileURL; currentFileName = fileName; remoteSourceURL = sourceURL || null;
                 const decodedName = decodeURIComponent(fileName);
-                fileNameDisplay.textContent = decodedName;
-                document.title = decodedName;
-                showTopBar();
-                previewWrapper.innerHTML = '';
-
+                fileNameDisplay.textContent = decodedName; document.title = decodedName;
+                showTopBar(); previewWrapper.innerHTML = '';
                 const type = getType(getExt(fileName));
                 switch (type) {
                     case 'image': renderImage(fileURL); break;
@@ -1006,8 +969,7 @@
                     case 'audio': renderAudio(fileURL); break;
                     case 'pdf': renderPDF(sourceURL || fileURL); break;
                     case 'docx': case 'xlsx': case 'ppt':
-                        if (sourceURL) renderOfficeOnline(sourceURL);
-                        else showErrorPage('Office 文件需要远程链接才能预览');
+                        if (sourceURL) renderOfficeOnline(sourceURL); else showErrorPage('Office 文件需要远程链接才能预览');
                         break;
                     default: showErrorPage('不支持的文件格式');
                 }
@@ -1023,25 +985,17 @@
                 try {
                     const absoluteURL = toAbsoluteURL(remoteUrl);
                     let name = remoteUrl.split('/').pop().split('?')[0] || 'file';
-                    const ext = getExt(name);
-                    const type = getType(ext);
-
-                    if (type === 'image' || type === 'video' || type === 'audio') {
-                        renderPreview(absoluteURL, name, remoteUrl);
-                    } else {
-                        const fileSize = await getFileSize(absoluteURL);
-                        showTransferPage(remoteUrl, name, fileSize);
-                    }
+                    const ext = getExt(name); const type = getType(ext);
+                    if (type === 'image' || type === 'video' || type === 'audio') renderPreview(absoluteURL, name, remoteUrl);
+                    else { const fileSize = await getFileSize(absoluteURL); showTransferPage(remoteUrl, name, fileSize); }
                 } catch (err) { showErrorPage('无法加载文件：' + err.message); }
             }
 
             backBtn.addEventListener('click', goBack);
             downloadBtn.addEventListener('click', () => { if (remoteSourceURL) window.open(toAbsoluteURL(remoteSourceURL), '_blank'); });
             copyLinkBtn.addEventListener('click', async () => {
-                if (remoteSourceURL) {
-                    await navigator.clipboard.writeText(`${BASE_DOMAIN}/filehelper?file=${encodeURIComponent(remoteSourceURL)}`);
-                    showToast('链接已复制');
-                } else showToast('无法复制链接');
+                if (remoteSourceURL) { await navigator.clipboard.writeText(`${BASE_DOMAIN}/filehelper?file=${encodeURIComponent(remoteSourceURL)}`); showToast('链接已复制'); }
+                else showToast('无法复制链接');
             });
 
             const p = new URL(location.href).searchParams.get('file');
