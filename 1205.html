@@ -299,7 +299,6 @@
 
     <script>
     // ========== 配置 ==========
-    // 改用 raw 链接（与积分数据同代理）
     var CONFIG_URL = 'https://raw.githubusercontent.com/bloxorz671/createsoft/main/5app.txt';
     var GITHUB_OWNER = 'bloxorz671';
     var GITHUB_REPO = 'createsoft';
@@ -391,61 +390,79 @@
 
     function downloadFile(url,fileName) { var a=document.createElement('a');a.href=url;a.download=fileName.split('?')[0];a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();document.body.removeChild(a); }
 
-    // ========== 文件类型判断（增加 ppt/pptx） ==========
-    var FILE_EXT_MAP = {
-        image: ['jpg','jpeg','png','gif','webp','bmp','svg','ico'],
-        video: ['mp4','webm','ogg','mov','avi','mkv'],
-        audio: ['mp3','m4a','wav','flac','aac'],
-        document: ['pdf','docx','doc','xlsx','xls','txt','ppt','pptx']
-    };
+    // ========== 音频扩展名列表 ==========
+    var AUDIO_EXTS = ['mp3','m4a','wav','flac','aac','ogg','wma','opus'];
 
-    function getFileTypeFromUrl(url) {
-        if(!url) return 'link';
-        var fn=url.split('/').pop().split('?')[0];
-        var ext=fn.split('.').pop().toLowerCase();
-        for(var t in FILE_EXT_MAP){ if(FILE_EXT_MAP[t].indexOf(ext)!==-1) return t; }
-        return 'unsupported';
+    // ========== 网页链接扩展名 ==========
+    var WEB_EXTS = ['html','htm','php','asp','jsp','aspx','cgi','pl','py','rb','do','action'];
+
+    // ========== 判断是否是网页链接（非文件） ==========
+    function isWebLink(url) {
+        if(!url) return true;
+        // 去掉参数和锚点
+        var cleanUrl = url.split('?')[0].split('#')[0];
+        // 以 / 结尾 = 目录链接
+        if(cleanUrl.endsWith('/')) return true;
+        // 提取文件名
+        var fn = cleanUrl.split('/').pop();
+        // 无扩展名 = 链接
+        if(fn.indexOf('.') === -1) return true;
+        // 检查扩展名
+        var ext = fn.split('.').pop().toLowerCase();
+        // 网页后缀 = 链接
+        if(WEB_EXTS.indexOf(ext) !== -1) return true;
+        // 其他 = 文件
+        return false;
     }
 
-    function isFileUrl(url) {
+    // ========== 判断是否是音频文件 ==========
+    function isAudioFile(url) {
         if(!url) return false;
-        var fn=url.split('/').pop().split('?')[0];
-        var ext=fn.split('.').pop().toLowerCase();
-        for(var t in FILE_EXT_MAP){ if(FILE_EXT_MAP[t].indexOf(ext)!==-1) return true; }
-        var otherExts=['apk','zip','rar','7z','exe','msi','dmg','pkg','iso','bin','dat','db','sqlite','log','ini','cfg','xml','json','yaml','yml','toml','csv','tsv','md','markdown','rst','tex','bib','sty','ppt','pptx','odt','ods','odp','rtf'];
-        return otherExts.indexOf(ext)!==-1;
+        var fn = url.split('/').pop().split('?')[0];
+        var ext = fn.split('.').pop().toLowerCase();
+        return AUDIO_EXTS.indexOf(ext) !== -1;
     }
 
+    // ========== 获取文件名 ==========
     function getFileNameFromLink(link) {
         if(!link) return '';
         return link.split('/').pop().split('?')[0];
     }
 
-    // ========== 打开文件：跳转到 filereader?文件名 ==========
-    function openFileWithFilereader(link, name) {
-        var fileName=getFileNameFromLink(link);
-        var encodedFileName=encodeURIComponent(fileName);
-        var viewerUrl='filereader.html?file='+encodedFileName;
-        console.log('跳转到文件阅读器:', viewerUrl);
-        window.location.href=viewerUrl;
+    // ========== 打开文件：跳转到 filehelper?文件名 ==========
+    function openFileWithFilehelper(link) {
+        var fileName = getFileNameFromLink(link);
+        var encodedFileName = encodeURIComponent(fileName);
+        var helperUrl = 'filehelper.html?file=' + encodedFileName;
+        console.log('跳转到文件助手:', helperUrl);
+        window.location.href = helperUrl;
     }
 
     // ========== 处理应用点击 ==========
     async function handleAppClick(link, name) {
-        var fullUrl=link;
-        if(fullUrl&&fullUrl.indexOf('http')!==0&&fullUrl.indexOf('//')!==0) fullUrl='https://luckynum.top/'+encodeURIComponent(link);
-        if(isFileUrl(link)){
-            var fileType=getFileTypeFromUrl(link);
-            if(fileType==='image'||fileType==='video'||fileType==='document'){
-                openFileWithFilereader(link, name); return;
-            }
-            if(fileType==='audio'){
-                var seriesFiles=await findSeriesFiles(getFileNameFromLink(link),['mp3','m4a','wav','flac','aac']);
-                openAudioViewer(fullUrl, name, seriesFiles); return;
-            }
-            downloadFile(fullUrl, name); return;
+        var fullUrl = link;
+        // 补全相对链接
+        if(fullUrl && fullUrl.indexOf('http')!==0 && fullUrl.indexOf('//')!==0) {
+            fullUrl = 'https://luckynum.top/' + encodeURIComponent(link);
         }
-        window.open(fullUrl,'_blank');
+
+        // 判断是否是网页链接
+        if(isWebLink(link)) {
+            // 普通链接 → 新窗口打开
+            window.open(fullUrl, '_blank');
+            return;
+        }
+
+        // 是文件 → 进一步判断
+        if(isAudioFile(link)) {
+            // 音频 → 内置播放器
+            var seriesFiles = await findSeriesFiles(getFileNameFromLink(link), AUDIO_EXTS);
+            openAudioViewer(fullUrl, name, seriesFiles);
+            return;
+        }
+
+        // 所有其他文件 → filehelper
+        openFileWithFilehelper(link);
     }
 
     // ========== 音频查看器 ==========
@@ -455,7 +472,7 @@
         header.innerHTML='<div class="viewer-title">🎵 音频列表</div><div class="viewer-controls"><button class="viewer-btn close-btn">关闭</button></div>';
         var content=document.createElement('div'); content.className='viewer-content';
         if(!seriesFiles||seriesFiles.length===0){
-            var dn=fileName.replace(/\.(mp3|m4a|wav|flac|aac)$/i,'');
+            var dn=fileName.replace(/\.(mp3|m4a|wav|flac|aac|ogg|wma|opus)$/i,'');
             content.innerHTML='<div class="audio-list-container"><div class="audio-list-item"><div class="audio-item-title">📻 '+escapeHtml(dn)+'</div><div class="audio-item-controls"><audio controls preload="metadata" src="'+escapeHtml(url)+'"></audio></div></div></div>';
         }else{
             var listHtml='<div class="audio-list-container">';
@@ -485,7 +502,7 @@
         if(!allowedExts) allowedExts=['mp3','m4a','wav','flac','aac','mp4','webm','ogg','mov','avi','mkv'];
         var fileList=await fetchFileList(); if(!fileList||fileList.length===0) return [];
         var seriesName=null; var ci=parseEpisodeInfo(currentFileName);
-        if(ci) seriesName=ci.seriesName; else seriesName=currentFileName.replace(/\.(mp3|m4a|wav|flac|aac|mp4|webm|ogg|mov|avi|mkv)$/i,'');
+        if(ci) seriesName=ci.seriesName; else seriesName=currentFileName.replace(/\.(mp3|m4a|wav|flac|aac|mp4|webm|ogg|mov|avi|mkv|ogg|wma|opus)$/i,'');
         if(!seriesName) return [{fileName:currentFileName,episode:0,displayName:currentFileName,url:'https://luckynum.top/'+encodeURIComponent(currentFileName)}];
         var sf=[]; fileList.forEach(function(fn){var info=parseEpisodeInfo(fn);if(info&&info.seriesName===seriesName&&allowedExts.indexOf(info.ext)!==-1) sf.push({fileName:fn,episode:info.episode,displayName:info.seriesName+'-'+info.episodeName,url:'https://luckynum.top/'+encodeURIComponent(fn)});});
         sf.sort(function(a,b){return a.episode-b.episode;});
@@ -575,11 +592,10 @@
     function startAutoSlide(){if(autoInterval)clearInterval(autoInterval);if(totalSlides>1)autoInterval=setInterval(nextSlide,5000);}
     function resetAutoSlide(){startAutoSlide();}
 
-    // ========== 加载配置（使用 raw 链接 + 缓存破坏） ==========
+    // ========== 加载配置 ==========
     async function loadConfigFile(silent) {
         if(!silent) document.getElementById('warningBanner').style.display='block';
         try{
-            // 使用 raw.githubusercontent.com（与积分同代理方式）+ 时间戳防止缓存
             var url=CONFIG_URL+'?t='+Date.now();
             var r=await fetch(url);
             if(!r.ok) throw new Error('HTTP '+r.status);
@@ -595,7 +611,6 @@
         }
     }
 
-    // 刷新按钮处理
     function refreshConfig(){
         var btn=document.getElementById('refreshBtn');
         btn.classList.add('spinning');
@@ -707,7 +722,7 @@
     window.deleteFile=async function(fn){if(!confirm('确定删除 '+fn+' 吗？'))return;try{var cr=await fetch('https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/'+encodeURIComponent(fn),{headers:{'Authorization':'Bearer '+currentToken}});var d=await cr.json();var r=await fetch('https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/'+encodeURIComponent(fn),{method:'DELETE',headers:{'Authorization':'Bearer '+currentToken},body:JSON.stringify({message:'删除 '+fn,sha:d.sha,branch:'main'})});if(r.ok){alert('删除成功');var m=document.querySelector('.modal-overlay');if(m)loadFileList(m);}else alert('删除失败');}catch(e){alert('删除失败');}};
 
     // ========== URL参数处理 ==========
-    async function handleUrlAppParameter(){var p=new URLSearchParams(window.location.search);var ap=p.get('app');if(!ap)return;try{ap=decodeURIComponent(ap);}catch(e){}var rc=0;while(appItems.length===0&&rc<30){await new Promise(function(r){setTimeout(r,200);});rc++;}var ta=appItems.find(function(a){return a.name===ap;});if(!ta)ta=appItems.find(function(a){return a.name.toLowerCase().indexOf(ap.toLowerCase())!==-1;});if(ta){setTimeout(function(){handleAppClick(ta.link,ta.name);},500);return;}if(isFileUrl(ap)){var ft=getFileTypeFromUrl(ap);var fn=ap.split('/').pop();if(ft==='image'||ft==='video'||ft==='document'){openFileWithFilereader(ap,fn);return;}var fu=ap.indexOf('http')===0?ap:'https://luckynum.top/'+ap;if(ft==='audio'){var sf=await findSeriesFiles(fn);openAudioViewer(fu,fn,sf);return;}downloadFile(fu,fn);return;}alert('❌ 应用/文件不存在或已被删除\n\n"'+ap+'"');}
+    async function handleUrlAppParameter(){var p=new URLSearchParams(window.location.search);var ap=p.get('app');if(!ap)return;try{ap=decodeURIComponent(ap);}catch(e){}var rc=0;while(appItems.length===0&&rc<30){await new Promise(function(r){setTimeout(r,200);});rc++;}var ta=appItems.find(function(a){return a.name===ap;});if(!ta)ta=appItems.find(function(a){return a.name.toLowerCase().indexOf(ap.toLowerCase())!==-1;});if(ta){setTimeout(function(){handleAppClick(ta.link,ta.name);},500);return;}if(!isWebLink(ap)){if(isAudioFile(ap)){var fu=ap.indexOf('http')===0?ap:'https://luckynum.top/'+ap;var fn=ap.split('/').pop();var sf=await findSeriesFiles(fn);openAudioViewer(fu,fn,sf);return;}openFileWithFilehelper(ap);return;}var fu=ap.indexOf('http')===0?ap:'https://luckynum.top/'+ap;window.open(fu,'_blank');}
 
     // ========== 事件绑定 ==========
     document.getElementById('refreshBtn').addEventListener('click',refreshConfig);
