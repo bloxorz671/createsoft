@@ -422,7 +422,7 @@
         return link.split('/').pop().split('?')[0];
     }
 
-    // ========== 打开文件：跳转到 /filehelper.html?file=完整URL ==========
+    // ========== 打开文件：跳转到 /filereader.html?file=完整URL ==========
     function openFileWithFilehelper(link) {
         // 构建完整URL
         var fullUrl = link;
@@ -430,7 +430,7 @@
             fullUrl = 'https://luckynum.top/' + link;
         }
         // 使用绝对路径 /filehelper.html，确保跳转到根目录
-        var helperUrl = '/filehelper.html?file=' + encodeURIComponent(fullUrl);
+        var helperUrl = '/filereader.html?file=' + encodeURIComponent(fullUrl);
         console.log('跳转到文件助手:', helperUrl, '完整URL:', fullUrl);
         window.location.href = helperUrl;
     }
@@ -455,7 +455,7 @@
             return;
         }
 
-        // 所有其他文件 → /filehelper.html
+        // 所有其他文件 → /filereader.html
         openFileWithFilehelper(link);
     }
 
