@@ -8,7 +8,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
       background: #f0f2f5;
       display: flex;
       flex-direction: column;
@@ -89,38 +89,75 @@
       color: #999;
       background: #f5f5f5;
     }
-    .error-page {
+
+    /* 中转页样式 - 严格按照模板 */
+    .transfer-page {
       flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #ffffff;
+    }
+    .transfer-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      background: #f5f5f5;
-      padding: 30px;
-      text-align: center;
+      width: 100%;
+      max-width: 375px;
+      padding: 20px;
     }
-    .error-icon { font-size: 64px; margin-bottom: 16px; }
-    .error-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 8px; }
-    .error-detail {
-      background: #fff3f3;
-      border: 1px solid #ffcdd2;
-      color: #c62828;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      margin-bottom: 20px;
-      max-width: 500px;
+    .transfer-icon-wrapper {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .transfer-icon-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .transfer-file-name {
+      font-size: 28px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #000;
+      letter-spacing: 1px;
+      text-align: center;
       word-break: break-all;
     }
-    .error-download-btn {
-      background: #1a73e8;
-      color: white;
+    .transfer-file-size {
+      font-size: 16px;
+      color: #999999;
+      font-weight: 400;
+      margin-bottom: 50px;
+    }
+    .transfer-button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+      max-width: 200px;
+    }
+    .transfer-button-group button {
+      width: 100%;
       border: none;
-      padding: 12px 28px;
-      border-radius: 24px;
-      font-size: 15px;
-      cursor: pointer;
+      border-radius: 8px;
+      font-size: 20px;
       font-weight: 500;
+      cursor: pointer;
+      aspect-ratio: 4 / 1;
+      outline: none;
+    }
+    .btn-preview {
+      background-color: #0e8c10;
+      color: #ffffff;
+    }
+    .btn-download {
+      background-color: #cccccc;
+      color: #000000;
     }
 
     .zoom-stage {
@@ -164,6 +201,47 @@
       border: none;
       background: #f5f5f5;
     }
+
+    .error-page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f5f5f5;
+      padding: 30px;
+      text-align: center;
+    }
+    .error-icon { font-size: 64px; margin-bottom: 16px; }
+    .error-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 8px; }
+    .error-detail {
+      background: #fff3f3;
+      border: 1px solid #ffcdd2;
+      color: #c62828;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      max-width: 500px;
+      word-break: break-all;
+    }
+    .error-download-btn {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 24px;
+      font-size: 15px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    @media (max-width: 400px) {
+      .transfer-file-name { font-size: 24px; }
+      .transfer-button-group button { font-size: 18px; }
+      .transfer-icon-wrapper { width: 80px; height: 80px; }
+      .transfer-button-group { max-width: 160px; }
+    }
   </style>
 </head>
 <body>
@@ -193,6 +271,9 @@
       let currentFileURL = null;
       let currentFileName = '文件预览';
       let remoteSourceURL = null;
+      let waitingForPreview = false;
+      let pendingSourceURL = null;
+      let pendingFileName = null;
 
       const BASE_DOMAIN = 'https://luckynum.top';
 
@@ -210,7 +291,7 @@
         setTimeout(() => toast.classList.remove('show'), 2000);
       }
 
-      function showPreview() {
+      function showTopBar() {
         loadingPage.classList.add('hidden');
         previewWrapper.classList.remove('hidden');
         topBar.classList.remove('hidden');
@@ -228,12 +309,55 @@
         return 'unknown';
       }
 
+      function getIconForType(type) {
+        switch (type) {
+          case 'pdf': return 'pdf.jpg';
+          case 'docx': return 'word.jpg';
+          case 'xlsx': return 'excel.jpg';
+          case 'ppt': return 'ppt.jpg';
+          default: return 'null.jpg';
+        }
+      }
+
       function goBack() {
         if (document.referrer && document.referrer !== window.location.href) {
           window.history.back();
         } else {
           window.close();
         }
+      }
+
+      function showTransferPage(sourceURL, fileName) {
+        loadingPage.classList.add('hidden');
+        previewWrapper.classList.remove('hidden');
+        topBar.classList.add('hidden');
+        
+        const ext = getExt(fileName);
+        const type = getType(ext);
+        const iconFile = getIconForType(type);
+
+        previewWrapper.innerHTML = `
+          <div class="transfer-page">
+            <div class="transfer-container">
+              <div class="transfer-icon-wrapper">
+                <img src="${iconFile}" alt="文件图标" onerror="this.src='null.jpg'">
+              </div>
+              <div class="transfer-file-name">${decodeURIComponent(fileName)}</div>
+              <div class="transfer-file-size">文件大小：未知</div>
+              <div class="transfer-button-group">
+                <button class="btn-preview" id="btnTransferPreview">预览</button>
+                <button class="btn-download" id="btnTransferDownload">下载</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('btnTransferPreview').addEventListener('click', () => {
+          doPreview(sourceURL, fileName);
+        });
+        document.getElementById('btnTransferDownload').addEventListener('click', () => {
+          window.open(toAbsoluteURL(sourceURL), '_blank');
+        });
       }
 
       function showErrorPage(errorMessage) {
@@ -402,12 +526,45 @@
         previewWrapper.appendChild(container);
       }
 
+      function doPreview(sourceURL, fileName) {
+        currentFileName = fileName;
+        remoteSourceURL = sourceURL;
+        fileNameDisplay.textContent = decodeURIComponent(fileName);
+        showTopBar();
+        previewWrapper.innerHTML = '';
+
+        const type = getType(getExt(fileName));
+        const absoluteURL = toAbsoluteURL(sourceURL);
+
+        switch (type) {
+          case 'image':
+            renderImage(absoluteURL);
+            break;
+          case 'video':
+            renderVideo(absoluteURL);
+            break;
+          case 'audio':
+            renderAudio(absoluteURL);
+            break;
+          case 'pdf':
+            renderPDF(absoluteURL);
+            break;
+          case 'docx':
+          case 'xlsx':
+          case 'ppt':
+            renderOfficeOnline(sourceURL);
+            break;
+          default:
+            showErrorPage('不支持的文件格式');
+        }
+      }
+
       function renderPreview(fileURL, fileName, sourceURL) {
         currentFileURL = fileURL;
         currentFileName = fileName;
         remoteSourceURL = sourceURL || null;
         fileNameDisplay.textContent = decodeURIComponent(fileName);
-        showPreview();
+        showTopBar();
         previewWrapper.innerHTML = '';
 
         const type = getType(getExt(fileName));
@@ -433,20 +590,16 @@
       async function loadRemote(remoteUrl) {
         try {
           const absoluteURL = toAbsoluteURL(remoteUrl);
-          // 先获取文件名
           let name = remoteUrl.split('/').pop().split('?')[0] || 'file';
           const ext = getExt(name);
           const type = getType(ext);
 
-          if (type === 'pdf' || type === 'image' || type === 'video' || type === 'audio') {
-            // PDF和媒体文件直接传原始URL，不转Blob
+          // 图片、视频、音频直接预览
+          if (type === 'image' || type === 'video' || type === 'audio') {
             renderPreview(absoluteURL, name, remoteUrl);
           } else {
-            // Office文件用Blob URL预览
-            const resp = await fetch(absoluteURL);
-            if (!resp.ok) throw new Error('网络错误');
-            const blob = await resp.blob();
-            renderPreview(URL.createObjectURL(blob), name, remoteUrl);
+            // Office文档和PDF显示中转页
+            showTransferPage(remoteUrl, name);
           }
         } catch (err) {
           showErrorPage('无法加载文件：' + err.message);
