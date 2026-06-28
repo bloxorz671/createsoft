@@ -90,7 +90,6 @@
       background: #f5f5f5;
     }
 
-    /* 中转页样式 - 严格按照模板 */
     .transfer-page {
       flex: 1;
       display: flex;
@@ -271,9 +270,6 @@
       let currentFileURL = null;
       let currentFileName = '文件预览';
       let remoteSourceURL = null;
-      let waitingForPreview = false;
-      let pendingSourceURL = null;
-      let pendingFileName = null;
 
       const BASE_DOMAIN = 'https://luckynum.top';
 
@@ -283,6 +279,18 @@
         if (url.startsWith('//')) return 'https:' + url;
         if (url.startsWith('/')) return BASE_DOMAIN + url;
         return BASE_DOMAIN + '/' + url;
+      }
+
+      function formatFileSize(bytes) {
+        if (!bytes || bytes === 0) return '未知大小';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        let i = 0;
+        let size = bytes;
+        while (size >= 1024 && i < units.length - 1) {
+          size /= 1024;
+          i++;
+        }
+        return size.toFixed(1) + units[i];
       }
 
       function showToast(text) {
@@ -327,7 +335,7 @@
         }
       }
 
-      function showTransferPage(sourceURL, fileName) {
+      function showTransferPage(sourceURL, fileName, fileSize) {
         loadingPage.classList.add('hidden');
         previewWrapper.classList.remove('hidden');
         topBar.classList.add('hidden');
@@ -343,7 +351,7 @@
                 <img src="${iconFile}" alt="文件图标" onerror="this.src='null.jpg'">
               </div>
               <div class="transfer-file-name">${decodeURIComponent(fileName)}</div>
-              <div class="transfer-file-size">文件大小：未知</div>
+              <div class="transfer-file-size">文件大小：${fileSize}</div>
               <div class="transfer-button-group">
                 <button class="btn-preview" id="btnTransferPreview">预览</button>
                 <button class="btn-download" id="btnTransferDownload">下载</button>
@@ -587,6 +595,17 @@
         }
       }
 
+      async function getFileSize(url) {
+        try {
+          const resp = await fetch(url, { method: 'HEAD' });
+          if (resp.ok) {
+            const length = resp.headers.get('content-length');
+            if (length) return formatFileSize(parseInt(length));
+          }
+        } catch (e) {}
+        return '未知大小';
+      }
+
       async function loadRemote(remoteUrl) {
         try {
           const absoluteURL = toAbsoluteURL(remoteUrl);
@@ -594,12 +613,11 @@
           const ext = getExt(name);
           const type = getType(ext);
 
-          // 图片、视频、音频直接预览
           if (type === 'image' || type === 'video' || type === 'audio') {
             renderPreview(absoluteURL, name, remoteUrl);
           } else {
-            // Office文档和PDF显示中转页
-            showTransferPage(remoteUrl, name);
+            const fileSize = await getFileSize(absoluteURL);
+            showTransferPage(remoteUrl, name, fileSize);
           }
         } catch (err) {
           showErrorPage('无法加载文件：' + err.message);
