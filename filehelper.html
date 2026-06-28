@@ -773,7 +773,7 @@
             copyLinkBtn.addEventListener('click', async () => {
                 if (remoteSourceURL) {
                     await navigator.clipboard.writeText(
-                        `${BASE_DOMAIN}/filereader?file=${encodeURIComponent(remoteSourceURL)}`);
+                        `${BASE_DOMAIN}/filehelper?file=${encodeURIComponent(remoteSourceURL)}`);
                     showToast('链接已复制');
                 } else {
                     showToast('无法复制链接');
