@@ -1,428 +1,924 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>超声波数据交互 · 服务端/客户端演示</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>考试信息</title>
     <style>
-        * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
-        body {
-            background: linear-gradient(145deg, #f6f9fc 0%, #eef2f7 100%);
-            min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center;
-            padding: 16px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-touch-callout: none;
         }
-        .card {
-            max-width: 700px; width: 100%; background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border-radius: 48px; box-shadow: 0 20px 40px rgba(0,20,40,0.2), 0 4px 12px rgba(0,0,0,0.05);
-            padding: 32px; border: 1px solid rgba(255,255,255,0.6);
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #1e3b2f;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            touch-action: none;
         }
-        h1 { font-size: 2rem; font-weight: 600; margin: 0 0 8px 0; background: linear-gradient(135deg, #1a2a4f, #2c3e6e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .sub { color: #4a5b7a; margin-bottom: 28px; font-weight: 400; border-left: 4px solid #3b82f6; padding-left: 16px; background: #f0f4fe60; border-radius: 0 20px 20px 0; }
-        .compat-panel {
-            background: #ffffffc0; border-radius: 32px; padding: 20px; margin-bottom: 28px;
-            border: 1px solid #ffffff; box-shadow: inset 0 1px 4px #0000000a, 0 8px 18px -8px #1e293b30;
+
+        .canvas-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
-        .badge { display: inline-block; padding: 6px 14px; border-radius: 40px; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.3px; }
-        .badge.ok { background: #e6f7e6; color: #1e7e34; border: 1px solid #a3e0a3; }
-        .badge.warn { background: #fff3d1; color: #9b6f0b; border: 1px solid #f7d98c; }
-        .badge.issue { background: #ffe2dd; color: #b83e2b; border: 1px solid #fbb8aa; }
-        .role-row { display: flex; gap: 16px; margin: 28px 0 20px; flex-wrap: wrap; }
-        .role-btn {
-            flex: 1 1 200px; background: white; border: none; padding: 22px 12px; border-radius: 36px;
-            font-size: 1.3rem; font-weight: 600; color: #1f2b48; box-shadow: 0 8px 18px -8px #1e293b50;
-            cursor: pointer; transition: 0.2s; border: 2px solid transparent; display: flex; flex-direction: column;
-            align-items: center; gap: 8px; backdrop-filter: blur(4px);
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            cursor: crosshair;
         }
-        .role-btn small { font-size: 0.85rem; font-weight: 400; color: #5a6b89; }
-        .role-btn.active { border-color: #3b82f6; background: #eef4ff; transform: scale(1.02); box-shadow: 0 12px 24px -12px #2563eb; }
-        .role-btn:first-child .emoji-big { font-size: 2.4rem; }
-        .role-btn:last-child .emoji-big { font-size: 2.4rem; }
-        .hint-box {
-            background: #dbeafe; border-radius: 28px; padding: 18px 22px; margin: 24px 0 18px;
-            border-left: 6px solid #2563eb; font-weight: 500; color: #1e3a8a;
+
+        /* 考试信息覆盖层 */
+        .exam-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 120px);
+            z-index: 2;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2vh 3vw;
         }
-        .tx-box, .rx-box { background: white; border-radius: 24px; padding: 20px; margin: 16px 0; }
-        input, textarea { width: 100%; padding: 16px 18px; font-size: 1rem; border-radius: 44px; border: 2px solid #e2e8f0; background: #fafdff; margin: 8px 0; }
-        button.action {
-            background: #1e293b; color: white; border: none; padding: 14px 28px; border-radius: 60px;
-            font-weight: 600; font-size: 1.1rem; cursor: pointer; transition: 0.15s; box-shadow: 0 6px 14px #0f172a40;
-            border: 1px solid #334155; width: 100%;
+
+        .exam-content {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            letter-spacing: 3px;
+            pointer-events: none;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3vh;
         }
-        button.action:active { transform: scale(0.97); background: #0f172a; }
-        button.action:disabled { opacity: 0.3; transform: none; pointer-events: none; }
-        .log-panel {
-            background: #1a2639; color: #b0e0ff; border-radius: 24px; padding: 18px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;
-            max-height: 160px; overflow-y: auto; margin-top: 24px; border: 2px solid #00a6ff40; box-shadow: inset 0 0 10px #00000060;
+
+        .exam-content .clock-row {
+            font-weight: 700;
+            color: #ffffff;
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum";
+            letter-spacing: 6px;
+            font-size: clamp(24px, 7vh, 48px);
         }
-        .footnote { font-size: 0.8rem; color: #656f88; margin-top: 24px; text-align: center; border-top: 1px dashed #a0b8d0; padding-top: 20px; }
-        .flex { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-        .hl { background: #fef9c3; color: #854d0e; padding: 2px 8px; border-radius: 40px; font-size: 0.8rem; }
+
+        .exam-content .line {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+            width: 100%;
+            font-size: clamp(20px, 5vh, 36px);
+            line-height: 1.3;
+        }
+
+        .exam-content .line span {
+            color: rgba(255, 255, 255, 0.9);
+            white-space: nowrap;
+            font-size: inherit;
+        }
+
+        .exam-content .line .underscore {
+            color: rgba(255, 255, 255, 0.75);
+            white-space: nowrap;
+            letter-spacing: 0;
+            font-size: inherit;
+            line-height: 1;
+        }
+
+        @media (max-width: 600px) {
+            .exam-content {
+                gap: 2vh;
+                letter-spacing: 2px;
+            }
+            .exam-content .clock-row {
+                letter-spacing: 4px;
+            }
+            .exam-content .line {
+                gap: 4px;
+            }
+            .exam-overlay {
+                height: calc(100% - 100px);
+            }
+        }
+
+        /* 预设按钮 */
+        .preset-btn {
+            position: fixed;
+            left: 20px;
+            bottom: 50px;
+            z-index: 100;
+            background: #EEEEEE;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 18px;
+            color: #666A7A;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+        .preset-btn:hover {
+            background: #e0e0e0;
+        }
+        .preset-btn:active {
+            transform: scale(0.95);
+        }
+        .preset-btn.hidden {
+            display: none;
+        }
+        .preset-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: #666A7A;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 300;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: #2a3a44;
+            border-radius: 16px;
+            padding: 28px 32px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            min-width: 320px;
+            max-width: 420px;
+            text-align: center;
+        }
+        .modal h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .modal .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .modal button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+        .modal .btn-primary {
+            background: #00C853;
+            color: #fff;
+        }
+        .modal .btn-primary:hover {
+            background: #00e060;
+        }
+        .modal .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        .modal .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .modal .btn-close {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+        }
+        .modal input[type="file"] {
+            display: none;
+        }
+
+        /* 计时器显示 */
+        .timer-badge {
+            position: fixed;
+            top: 10px;
+            right: 20px;
+            z-index: 50;
+            background: rgba(0, 0, 0, 0.5);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: none;
+        }
+        .timer-badge.show {
+            display: block;
+        }
+
+        .base-toolbar-container {
+            position: fixed;
+            left: 50%;
+            bottom: 40px;
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+
+        .base-toolbar-bg {
+            display: flex;
+            align-items: stretch;
+            background-color: #EEEEEE;
+            border-radius: 12px;
+            padding: 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            width: 420px;
+            height: 86px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+        }
+
+        .divider {
+            width: 1px;
+            height: 50%;
+            background-color: #D0D0D0;
+            position: absolute;
+            top: 25%;
+        }
+        .divider.d1 { left: 25%; }
+        .divider.d2 { left: 50%; }
+        .divider.d3 { left: 75%; }
+
+        .buttons-container {
+            position: relative;
+            width: 420px;
+            height: 86px;
+        }
+
+        .btn-item {
+            position: absolute;
+            top: 0;
+            width: 105px;
+            height: 86px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #666A7A;
+            cursor: pointer;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .btn-item:nth-child(1) { left: 0px; border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+        .btn-item:nth-child(2) { left: 105px; }
+        .btn-item:nth-child(3) { left: 210px; }
+        .btn-item:nth-child(4) { left: 315px; border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
+
+        .btn-item.active {
+            background-color: #00C853;
+            color: #FFFFFF;
+        }
+
+        .btn-item svg {
+            display: block;
+            fill: #666A7A;
+            stroke: #666A7A;
+            width: 40px;
+            height: 40px;
+            transform-origin: center;
+            margin-bottom: 0px;
+            transition: fill 0.15s ease, stroke 0.15s ease;
+        }
+
+        .btn-item.active svg {
+            fill: #FFFFFF;
+            stroke: #FFFFFF;
+        }
+
+        .btn-item span {
+            font-size: 13px;
+            margin-top: 10px;
+            transition: color 0.15s ease;
+        }
+
+        .color-menu {
+            position: fixed;
+            bottom: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 40, 50, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 16px 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            display: none;
+            z-index: 200;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .color-menu.show { display: flex; }
+
+        .color-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .color-dot.active { border-color: white; box-shadow: 0 0 0 4px rgba(255,255,255,0.25); }
+
+        .size-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.7);
+            width: 100%;
+        }
+        .size-row input[type="range"] { flex: 1; accent-color: white; }
+        .size-preview {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            flex-shrink: 0;
+        }
+
+        .eraser-slider {
+            position: fixed;
+            bottom: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 40, 50, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 12px 22px;
+            display: none;
+            align-items: center;
+            gap: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            z-index: 200;
+        }
+        .eraser-slider.show { display: flex; }
+
+        .slider-track {
+            width: 160px;
+            height: 6px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+            touch-action: none;
+        }
+        .slider-thumb {
+            position: absolute;
+            top: 50%;
+            left: 0%;
+            transform: translate(-50%,-50%);
+            width: 24px;
+            height: 24px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(255,107,107,0.6);
+            pointer-events: none;
+        }
+        .slider-hint { color: rgba(255,255,255,0.5); font-size: 12px; white-space: nowrap; }
+
+        @media (max-width: 500px) {
+            .base-toolbar-bg { width: 340px; height: 72px; }
+            .buttons-container { width: 340px; height: 72px; }
+            .btn-item { width: 85px; height: 72px; }
+            .btn-item:nth-child(1) { left: 0px; }
+            .btn-item:nth-child(2) { left: 85px; }
+            .btn-item:nth-child(3) { left: 170px; }
+            .btn-item:nth-child(4) { left: 255px; }
+            .divider.d1 { left: 25%; }
+            .divider.d2 { left: 50%; }
+            .divider.d3 { left: 75%; }
+            .btn-item svg { width: 30px; height: 30px; }
+            .btn-item span { font-size: 11px; margin-top: 6px; }
+            .preset-btn { left: 10px; bottom: 40px; padding: 8px 14px; font-size: 12px; }
+        }
     </style>
-    <!-- 加载 ggwave 核心库 (WebAssembly) 和辅助 -->
-    <script src="https://cdn.jsdelivr.net/npm/ggwave@0.4.0/dist/ggwave.js"></script>
-    <!-- 用于 fallback 提示的简单浏览器检测函数 (内置在代码中) -->
 </head>
 <body>
-<div class="card" id="app">
-    <h1>📡 超声波数据链路</h1>
-    <div class="sub">通过扬声器 · 麦克风 · WebAudio 实现设备间轻交互</div>
 
-    <!-- 兼容性面板 (动态填充) -->
-    <div class="compat-panel" id="compatibilityPanel">
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;" id="compatIcons">
-            <span class="badge">🔍 检测中...</span>
+<canvas id="drawCanvas" class="canvas-fullscreen"></canvas>
+
+<!-- 考试信息覆盖层 -->
+<div class="exam-overlay" id="examOverlay">
+    <div class="exam-content" id="examContent">
+        <div class="clock-row" id="clockDisplay">00:00:00</div>
+        <div class="line">
+            <span>考试科目：</span><span class="underscore" id="subject">____________________</span>
         </div>
-        <div id="compatDetails" style="margin-top: 12px; font-size: 0.9rem; color: #2d3a5e;"></div>
+        <div class="line">
+            <span>考试时间：</span><span class="underscore" id="timeStart">______</span><span>:</span><span class="underscore" id="timeStartMin">______</span><span>~</span><span class="underscore" id="timeEnd">______</span><span>:</span><span class="underscore" id="timeEndMin">______</span>
+        </div>
+        <div class="line">
+            <span>试卷共</span><span class="underscore" id="paperSheets">____</span><span>张</span><span class="underscore" id="paperPages">____</span><span>页</span>
+        </div>
+        <div class="line">
+            <span>答卷共</span><span class="underscore" id="answerSheets">____</span><span>张</span><span class="underscore" id="answerPages">____</span><span>页</span>
+        </div>
     </div>
+</div>
 
-    <!-- 角色选择按钮 -->
-    <div class="role-row">
-        <button class="role-btn" id="btnSender" data-role="sender">
-            <span class="emoji-big">📢</span>
-            作为服务端
-            <small>需要扬声器 · 发送数据</small>
-        </button>
-        <button class="role-btn" id="btnReceiver" data-role="receiver">
-            <span class="emoji-big">🎤</span>
-            作为客户端
-            <small>需要麦克风 · 接收数据</small>
-        </button>
+<!-- 计时器 -->
+<div class="timer-badge" id="timerBadge"></div>
+
+<!-- 预设按钮 -->
+<button class="preset-btn" id="presetBtn">
+    <svg viewBox="0 0 24 24">
+        <rect x="3" y="3" width="18" height="18" rx="3" ry="3"/>
+        <line x1="3" y1="9" x2="21" y2="9"/>
+        <line x1="9" y1="21" x2="9" y2="9"/>
+    </svg>
+    <span>预设</span>
+</button>
+
+<!-- 弹窗 -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <h3>考试预设</h3>
+        <div class="modal-buttons">
+            <button class="btn-primary" id="btnImport">导入预设</button>
+            <button class="btn-secondary" id="btnDownload">下载格式文件</button>
+            <button class="btn-close" id="btnCloseModal">取消</button>
+        </div>
+        <input type="file" id="fileInput" accept=".txt">
     </div>
+</div>
 
-    <!-- 根据角色动态显示内容 -->
-    <div id="rolePanel"></div>
-
-    <!-- 统一的日志/数据展示区 -->
-    <div class="log-panel" id="log">
-        ⚡ 准备就绪，请选择角色并允许设备权限
+<div class="color-menu" id="colorMenu">
+    <div class="color-dot active" data-color="#F5F5F5" style="background:#F5F5F5;"></div>
+    <div class="color-dot" data-color="#E8E0D0" style="background:#E8E0D0;"></div>
+    <div class="color-dot" data-color="#D4C5B9" style="background:#D4C5B9;"></div>
+    <div class="color-dot" data-color="#C9D6C8" style="background:#C9D6C8;"></div>
+    <div class="color-dot" data-color="#B8C9D8" style="background:#B8C9D8;"></div>
+    <div class="color-dot" data-color="#D8C8D0" style="background:#D8C8D0;"></div>
+    <div class="color-dot" data-color="#E8D5B0" style="background:#E8D5B0;"></div>
+    <div class="color-dot" data-color="#B0C8D8" style="background:#B0C8D8;"></div>
+    <div class="size-row">
+        <span style="font-size:11px;">细</span>
+        <input type="range" id="penSizeSlider" min="1" max="16" value="4" step="0.5">
+        <span style="font-size:11px;">粗</span>
+        <div class="size-preview" id="penSizePreview"></div>
     </div>
+</div>
 
-    <div class="footnote">
-        ⚠️ Firefox 接收端限制：仅支持可听声 (~16kHz)  <br>
-        ✅ 推荐使用 Chrome / Edge / 安卓 Chrome · 需要 HTTPS 或 localhost
+<div class="eraser-slider" id="eraserSlider">
+    <span class="slider-hint">← 滑动清屏 →</span>
+    <div class="slider-track" id="sliderTrack"><div class="slider-thumb" id="sliderThumb"></div></div>
+    <span class="slider-hint">滑至最右清屏</span>
+</div>
+
+<div class="base-toolbar-container" id="toolbar">
+    <div class="base-toolbar-bg">
+        <div class="divider d1"></div>
+        <div class="divider d2"></div>
+        <div class="divider d3"></div>
+    </div>
+    <div class="buttons-container">
+        <div class="btn-item active" id="btn-select">
+            <svg viewBox="0 0 100 100" style="width:30px;height:30px;transform:rotate(347deg) scale(1.2);margin-left:-2px;">
+                <path d="M 28,15 L 75,45 L 55,50 L 70,85 L 58,88 L 44,57 L 28,80 Z" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+            </svg>
+            <span>选择</span>
+        </div>
+        <div class="btn-item" id="btn-pen">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="5 14 235 100" style="transform:rotate(315deg) scale(1.0);margin-left:0px;">
+                <polygon points="10,50  55,20  55,80" fill="currentColor" stroke="currentColor" stroke-width="8" stroke-linejoin="round"/>
+                <rect x="65" y="15" width="140" height="70" rx="10" ry="10" fill="currentColor"/>
+            </svg>
+            <span>笔</span>
+        </div>
+        <div class="btn-item" id="btn-eraser">
+            <svg viewBox="0 0 200 400" style="transform:rotate(315deg) scale(1.8);margin-left:-10px;">
+                <g transform="translate(25, 140)">
+                    <defs>
+                        <mask id="eraserMask">
+                            <rect x="0" y="0" width="180" height="120" fill="white" />
+                            <rect x="30" y="30" width="40" height="60" rx="6" ry="6" fill="black" />
+                        </mask>
+                    </defs>
+                    <rect x="15" y="10" width="150" height="100" rx="12" ry="12" mask="url(#eraserMask)"/>
+                </g>
+            </svg>
+            <span>橡皮</span>
+        </div>
+        <div class="btn-item" id="btn-undo">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="19 30 62 53" style="transform:rotate(0deg) scale(0.9);margin-left:-2px;">
+                <path d="M 20,50 L 45,25 L 45,40 C 55,40 65,45 80,65 C 70,58 62,54 55,54 C 50,54 47,54.5 45,55 L 45,75 Z" fill="currentColor" />
+                <path d="M 21,50 L 44,27.5 L 44,72.5 Z" fill="currentColor" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
+            </svg>
+            <span>撤消</span>
+        </div>
     </div>
 </div>
 
 <script>
 (function() {
-    // --- 核心变量 ---
-    const logDiv = document.getElementById('log');
-    const compatIcons = document.getElementById('compatIcons');
-    const compatDetails = document.getElementById('compatDetails');
-    const rolePanel = document.getElementById('rolePanel');
-    const btnSender = document.getElementById('btnSender');
-    const btnReceiver = document.getElementById('btnReceiver');
+    const canvas = document.getElementById('drawCanvas');
+    const ctx = canvas.getContext('2d');
+    const BOARD_COLOR = '#1e3b2f';
 
-    let currentRole = null;               // 'sender' 或 'receiver'
-    let ggInstance = null;                // GGWave 实例
-    let audioCtx = null;                  // AudioContext (用户手势后激活)
-    let mediaStream = null;                // 麦克风流 (仅 receiver)
-    let isListening = false;               // 接收标志
-    let isSending = false;                 // 发送标志
-    let sourceNode = null;                 // 发送用 BufferSource
-    let intervalId = null;
+    let mode = 'select';
+    let penColor = '#F5F5F5';
+    let penSize = 4;
+    let drawing = false;
+    let lastX = 0, lastY = 0;
+    let history = [];
 
-    // --- 辅助: 日志追加 ---
-    function log(message, isWarning = false) {
-        const prefix = isWarning ? '⚠️' : '🔹';
-        logDiv.innerHTML = prefix + ' ' + message + '<br>' + logDiv.innerHTML;
-        if (logDiv.children.length > 6) {
-            logDiv.removeChild(logDiv.lastChild);
-        }
+    // 预设相关
+    let presets = [];
+    let currentPresetIndex = -1;
+    let switchInterval = null;
+    let switchTimer = null;
+
+    const presetBtn = document.getElementById('presetBtn');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const fileInput = document.getElementById('fileInput');
+    const timerBadge = document.getElementById('timerBadge');
+
+    // 显示元素
+    const elSubject = document.getElementById('subject');
+    const elTimeStart = document.getElementById('timeStart');
+    const elTimeStartMin = document.getElementById('timeStartMin');
+    const elTimeEnd = document.getElementById('timeEnd');
+    const elTimeEndMin = document.getElementById('timeEndMin');
+    const elPaperSheets = document.getElementById('paperSheets');
+    const elPaperPages = document.getElementById('paperPages');
+    const elAnswerSheets = document.getElementById('answerSheets');
+    const elAnswerPages = document.getElementById('answerPages');
+
+    function fillUnderscore(el, count) {
+        el.textContent = '_'.repeat(count);
     }
 
-    // --- 浏览器兼容性检测 (基于真实设备和 known issues) ---
-    function detectCompatibility() {
-        const ua = navigator.userAgent;
-        const isFirefox = ua.includes('Firefox');
-        const isSafari = /^((?!chrome|android).)*safari/i.test(ua) && !/crios|fxios/i.test(ua);
-        const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        const isAndroid = /Android/.test(ua);
-        const isChrome = /Chrome/.test(ua) && !isFirefox && !isSafari;
-        const isEdge = /Edg/.test(ua);
-
-        let hasWebAudio = !!(window.AudioContext || window.webkitAudioContext);
-        let hasUserMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-        let isHttpsOrLocal = (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1');
-
-        let browserName = '未知';
-        if (isFirefox) browserName = 'Firefox';
-        else if (isSafari) browserName = 'Safari';
-        else if (isChrome) browserName = 'Chrome';
-        else if (isEdge) browserName = 'Edge';
-        else if (isIOS) browserName = 'iOS Safari';
-
-        // 整理兼容性摘要
-        let txOk = true;    // 发送理论上大多数都支持
-        let rxOk = true;    // 接收有很多限制
-
-        let rxIssues = [];
-        if (isFirefox) {
-            rxOk = false;   // 无法接收超声波 [citation:3][citation:5]
-            rxIssues.push('Firefox 接收超声波受限 (只能收可听声)');
+    function applyPreset(preset) {
+        if (!preset) {
+            fillUnderscore(elSubject, 20);
+            fillUnderscore(elTimeStart, 6);
+            fillUnderscore(elTimeStartMin, 6);
+            fillUnderscore(elTimeEnd, 6);
+            fillUnderscore(elTimeEndMin, 6);
+            fillUnderscore(elPaperSheets, 4);
+            fillUnderscore(elPaperPages, 4);
+            fillUnderscore(elAnswerSheets, 4);
+            fillUnderscore(elAnswerPages, 4);
+            return;
         }
-        if (isSafari && isIOS) {
-            rxOk = false;   // iOS Safari 麦克风不可用 [citation:3]
-            rxIssues.push('iOS Safari 不支持麦克风输入');
-        } else if (isSafari) {
-            rxOk = false;
-            rxIssues.push('macOS Safari 麦克风支持有限');
-        }
-        if (!hasUserMedia) {
-            rxOk = false;
-            rxIssues.push('浏览器无麦克风API');
-        }
-        if (!isHttpsOrLocal) {
-            log('⚠️ 非 HTTPS 环境: 麦克风可能被浏览器阻止', true);
-        }
-
-        // 生成界面
-        compatIcons.innerHTML = '';
-        const addBadge = (text, cls) => {
-            const b = document.createElement('span');
-            b.className = `badge ${cls}`;
-            b.innerText = text;
-            compatIcons.appendChild(b);
-        };
-        addBadge(`🖥️ ${browserName}`, 'ok');
-        addBadge(txOk ? '🔊 发送可用' : '🔇 发送可能受限', txOk ? 'ok' : 'warn');
-        addBadge(rxOk ? '🎤 接收可用' : '🎤 接收受限', rxOk ? 'ok' : 'issue');
-
-        let detailMsg = '';
-        if (rxIssues.length) {
-            detailMsg = '⚠️ 接收限制: ' + rxIssues.join('; ');
-        } else {
-            detailMsg = '✅ 全功能支持 (建议 Chrome/Edge)';
-        }
-        compatDetails.innerText = detailMsg;
-
-        return { browserName, isFirefox, isSafari, isIOS, rxOk, txOk: true, hasUserMedia };
+        elSubject.textContent = preset['考试科目'] || '_'.repeat(20);
+        elTimeStart.textContent = preset['考试时间起点'] || '_'.repeat(6);
+        elTimeStartMin.textContent = '';
+        elTimeEnd.textContent = preset['考试时间终点'] || '_'.repeat(6);
+        elTimeEndMin.textContent = '';
+        elPaperSheets.textContent = preset['问卷张数'] || '_'.repeat(4);
+        elPaperPages.textContent = preset['问卷页数'] || '_'.repeat(4);
+        elAnswerSheets.textContent = preset['答卷张数'] || '_'.repeat(4);
+        elAnswerPages.textContent = preset['答卷页数'] || '_'.repeat(4);
     }
 
-    const compat = detectCompatibility();
+    function startPresetSwitch(intervalMinutes) {
+        stopPresetSwitch();
+        currentPresetIndex = 0;
+        applyPreset(presets[0]);
+        presetBtn.classList.add('hidden');
+        timerBadge.classList.add('show');
+        updateTimerBadge();
 
-    // --- 初始化 ggwave (单例) ---
-    async function initGGWave() {
-        if (ggInstance) return ggInstance;
-        try {
-            log('🔄 加载超声波协议库 (ggwave-wasm)...');
-            // 等待全局 GGWave 就绪 (从 script src 加载)
-            if (typeof window.GGWave === 'undefined') {
-                throw new Error('ggwave库加载失败，请刷新');
+        switchTimer = setInterval(() => {
+            currentPresetIndex++;
+            if (currentPresetIndex >= presets.length) {
+                currentPresetIndex = 0; // 循环
             }
-            ggInstance = await window.GGWave(); // 初始化 wasm
-            log('✅ 音频协议库就绪');
-            return ggInstance;
-        } catch (e) {
-            log('❌ 初始化库失败: ' + e.message, true);
-            throw e;
+            applyPreset(presets[currentPresetIndex]);
+            updateTimerBadge();
+        }, intervalMinutes * 60 * 1000);
+    }
+
+    function stopPresetSwitch() {
+        if (switchTimer) clearInterval(switchTimer);
+        switchTimer = null;
+        currentPresetIndex = -1;
+        presetBtn.classList.remove('hidden');
+        timerBadge.classList.remove('show');
+        applyPreset(null);
+    }
+
+    function updateTimerBadge() {
+        if (presets.length > 0 && currentPresetIndex >= 0) {
+            timerBadge.textContent = '科目 ' + (currentPresetIndex + 1) + '/' + presets.length;
         }
     }
 
-    // --- 获取或创建 AudioContext (必须由用户手势触发) ---
-    async function getAudioContext() {
-        if (audioCtx && audioCtx.state !== 'closed') {
-            if (audioCtx.state === 'suspended') await audioCtx.resume();
-            return audioCtx;
+    function parsePresetText(text) {
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+        const result = { presets: [], intervalMinutes: 5 };
+
+        let i = 0;
+        // 第一行：结束后切换下一科的时间
+        if (lines[0] && lines[0].includes('结束后切换下一科的时间')) {
+            const match = lines[0].match(/(\d+)/);
+            if (match) result.intervalMinutes = parseInt(match[1]) || 5;
+            i = 1;
         }
-        const Ctor = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new Ctor({ sampleRate: 48000, latencyHint: 'interactive' });
-        return audioCtx;
+
+        let currentPreset = null;
+        for (; i < lines.length; i++) {
+            const line = lines[i];
+            if (line === '{') {
+                currentPreset = {};
+            } else if (line === '}') {
+                if (currentPreset) {
+                    result.presets.push(currentPreset);
+                    currentPreset = null;
+                }
+            } else if (currentPreset && line.includes('：')) {
+                const [key, ...valueParts] = line.split('：');
+                const value = valueParts.join('：').trim();
+                currentPreset[key.trim()] = value;
+            }
+        }
+        return result;
     }
 
-    // --- 清理接收资源 ---
-    function stopReceiving() {
-        if (mediaStream) {
-            mediaStream.getTracks().forEach(t => t.stop());
-            mediaStream = null;
-        }
-        if (sourceNode) {
-            try { sourceNode.disconnect(); } catch(e) {}
-            sourceNode = null;
-        }
-        isListening = false;
-        if (intervalId) clearInterval(intervalId);
-        intervalId = null;
-        log('🛑 接收已停止');
+    // 弹窗
+    presetBtn.addEventListener('click', () => {
+        modalOverlay.classList.add('show');
+    });
+
+    document.getElementById('btnCloseModal').addEventListener('click', () => {
+        modalOverlay.classList.remove('show');
+    });
+
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) modalOverlay.classList.remove('show');
+    });
+
+    document.getElementById('btnImport').addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const text = ev.target.result;
+            const parsed = parsePresetText(text);
+            presets = parsed.presets;
+            modalOverlay.classList.remove('show');
+            if (presets.length > 0) {
+                startPresetSwitch(parsed.intervalMinutes);
+            }
+        };
+        reader.readAsText(file);
+        fileInput.value = '';
+    });
+
+    document.getElementById('btnDownload').addEventListener('click', () => {
+        const sample = `结束后切换下一科的时间（min）：
+{
+    考试科目：
+    考试时间起点：
+    考试时间终点：
+    问卷张数：
+    问卷页数：
+    答卷张数：
+    答卷页数：
+}
+{
+    考试科目：
+    考试时间起点：
+    考试时间终点：
+    问卷张数：
+    问卷页数：
+    答卷张数：
+    答卷页数：
+}`;
+        const blob = new Blob([sample], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '考试预设格式.txt';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    // Canvas
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('clockDisplay').textContent = [
+            String(now.getHours()).padStart(2, '0'),
+            String(now.getMinutes()).padStart(2, '0'),
+            String(now.getSeconds()).padStart(2, '0')
+        ].join(':');
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    function resizeCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        redraw();
     }
 
-    // --- 清理发送资源 ---
-    function stopSending() {
-        if (sourceNode) {
-            try { sourceNode.stop(); sourceNode.disconnect(); } catch(e) {}
-            sourceNode = null;
-        }
-        isSending = false;
-        log('🔇 发送已停止');
-    }
-
-    // --- 渲染界面: 根据角色 ---
-    function renderRole(role) {
-        currentRole = role;
-        btnSender.classList.remove('active');
-        btnReceiver.classList.remove('active');
-        if (role === 'sender') btnSender.classList.add('active');
-        else btnReceiver.classList.add('active');
-
-        if (role === 'sender') {
-            rolePanel.innerHTML = `
-                <div class="tx-box">
-                    <div style="font-weight:600; margin-bottom:8px;">📨 待发送的消息</div>
-                    <input type="text" id="messageInput" placeholder="输入文字（如: Hello, 超声波）" value="Ping 🎙️">
-                    <div class="flex" style="margin: 12px 0;">
-                        <button class="action" id="startSendBtn">▶ 持续发送 (每秒2次)</button>
-                        <button class="action" id="stopSendBtn" style="background:#475569;">■ 停止发送</button>
-                    </div>
-                    <div style="background:#e2f0fa; border-radius: 40px; padding:12px; font-size:0.9rem">
-                        🔊 确保扬声器开启 · 建议音量 70% · 手机不要静音
-                    </div>
-                </div>
-            `;
-            // 绑定发送事件
-            document.getElementById('startSendBtn').addEventListener('click', startSending);
-            document.getElementById('stopSendBtn').addEventListener('click', stopSending);
+    function redraw() {
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.restore();
+        if (history.length) {
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.putImageData(history[history.length - 1], 0, 0);
+            ctx.restore();
         } else {
-            rolePanel.innerHTML = `
-                <div class="rx-box">
-                    <div style="font-weight:600; margin-bottom:12px;">🎧 超声波接收器</div>
-                    <button class="action" id="startListenBtn" style="background:#0f3b5e;">🎤 开始监听 (请求麦克风)</button>
-                    <button class="action" id="stopListenBtn" style="background:#4b5563; margin-top:8px;">⏹️ 停止监听</button>
-                    <p style="margin:16px 0 0; font-size:0.9rem; background:#eef4ff; border-radius:24px; padding:12px;">
-                    🧪 将发送端设备靠近本机麦克风<br>解码消息会显示在下方日志区
-                    </p>
-                </div>
-            `;
-            document.getElementById('startListenBtn').addEventListener('click', startListening);
-            document.getElementById('stopListenBtn').addEventListener('click', stopReceiving);
+            ctx.fillStyle = BOARD_COLOR;
+            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
         }
     }
 
-    // --- 发送逻辑 (基于 ggwave 编码, 使用扬声器) ---
-    async function startSending() {
-        if (isSending) { log('⏳ 已经在发送中'); return; }
-        const msgInput = document.getElementById('messageInput');
-        if (!msgInput) return;
-        const text = msgInput.value.trim() || "data";
-        try {
-            const gg = await initGGWave();
-            const ctx = await getAudioContext();
-            if (ctx.state === 'suspended') await ctx.resume();
-
-            // 编码: 使用默认协议 (可听/近超声 兼顾)
-            const waveform = gg.encode(text, { protocol: window.GGWave.PROTOCOL.AUDIBLE_FAST });
-            if (!waveform || waveform.length === 0) throw new Error('编码失败');
-
-            // 循环发送 (每次发送重新创建 source, 因为source只能start一次)
-            isSending = true;
-            log(`🔊 开始循环发送: "${text}" (间隔500ms)`);
-
-            const playOnce = () => {
-                if (!isSending) return;
-                const buffer = ctx.createBuffer(1, waveform.length, 48000);
-                buffer.copyToChannel(waveform, 0);
-                const src = ctx.createBufferSource();
-                src.buffer = buffer;
-                src.connect(ctx.destination);
-                src.onended = () => { src.disconnect(); };
-                src.start();
-                sourceNode = src; // 保留最近一个用于stop
-            };
-
-            playOnce(); // 立即发一次
-            intervalId = setInterval(() => {
-                if (isSending) playOnce();
-            }, 500); // 每秒2次提高被接收概率
-
-        } catch (e) {
-            log('❌ 发送失败: ' + e.message, true);
-            isSending = false;
-        }
+    function saveState() {
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        ctx.restore();
+        if (history.length > 30) history.shift();
     }
 
-    // --- 接收逻辑 (麦克风 + ggwave 解码) ---
-    async function startListening() {
-        if (isListening) return;
-        if (!compat.hasUserMedia) {
-            log('❌ 当前浏览器不支持麦克风', true); return;
-        }
-        if (compat.isFirefox) {
-            log('ℹ️ Firefox 接收可能仅限可听声 (~16kHz以下) 请确保发送端使用兼容频率', true);
-        }
-        try {
-            const gg = await initGGWave();
-            const ctx = await getAudioContext();
-            await ctx.resume();
-
-            // 请求麦克风 (关闭降噪以便捕捉高频)
-            mediaStream = await navigator.mediaDevices.getUserMedia({
-                audio: {
-                    echoCancellation: false,
-                    noiseSuppression: false,
-                    autoGainControl: false,
-                    channelCount: 1,
-                    sampleRate: { ideal: 48000 }
-                }
-            });
-
-            const source = ctx.createMediaStreamSource(mediaStream);
-            const node = ctx.createScriptProcessor(4096, 1, 1);
-            source.connect(node);
-            node.connect(ctx.destination); // 静音输出防止自激
-
-            isListening = true;
-            log('🎧 正在监听麦克风，等待超声波数据...');
-
-            node.onaudioprocess = (e) => {
-                if (!isListening) return;
-                const inputData = e.inputBuffer.getChannelData(0);
-                // ggwave 解码
-                const res = gg.decode(inputData);
-                if (res && res.length > 0) {
-                    // 转换为文本 (去除末尾空白)
-                    let msg = '';
-                    for (let i = 0; i < res.length; i++) {
-                        if (res[i] === 0) break;
-                        msg += String.fromCharCode(res[i]);
-                    }
-                    if (msg.trim()) {
-                        log(`📥 收到消息: "${msg}"`);
-                    }
-                }
-            };
-
-            // 保存便于停止
-            sourceNode = source; // 复用变量
-
-        } catch (err) {
-            log('❌ 麦克风错误: ' + err.message, true);
-            console.error(err);
-            stopReceiving();
-        }
+    function clearCanvas() {
+        ctx.fillStyle = BOARD_COLOR;
+        ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+        saveState();
     }
 
-    // --- 事件绑定 ---
-    btnSender.addEventListener('click', () => {
-        if (currentRole === 'sender') return;
-        stopReceiving();  // 切换时停止另一边
-        stopSending();
-        renderRole('sender');
-    });
-    btnReceiver.addEventListener('click', () => {
-        if (currentRole === 'receiver') return;
-        stopSending();
-        stopReceiving();
-        renderRole('receiver');
-    });
+    function undo() {
+        if (history.length <= 1) { history = []; clearCanvas(); return; }
+        history.pop();
+        redraw();
+    }
 
-    // 初始默认 sender 界面
-    renderRole('sender');
-    log('🟢 演示就绪 · 请点击对应按钮操作');
+    function switchToPen() {
+        mode = 'pen';
+        updateUI();
+        closeAllMenus();
+    }
 
-    // 防止页面关闭时继续占用麦克风
-    window.addEventListener('beforeunload', () => {
-        if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+    const btnSelect = document.getElementById('btn-select');
+    const btnPen = document.getElementById('btn-pen');
+    const btnEraser = document.getElementById('btn-eraser');
+    const btnUndo = document.getElementById('btn-undo');
+    const colorMenu = document.getElementById('colorMenu');
+    const eraserSlider = document.getElementById('eraserSlider');
+    const penSizeSlider = document.getElementById('penSizeSlider');
+    const penSizePreview = document.getElementById('penSizePreview');
+    const sliderTrack = document.getElementById('sliderTrack');
+    const sliderThumb = document.getElementById('sliderThumb');
+
+    function updateUI() {
+        btnSelect.classList.toggle('active', mode === 'select');
+        btnPen.classList.toggle('active', mode === 'pen');
+        btnEraser.classList.toggle('active', mode === 'eraser');
+        document.querySelectorAll('.color-dot').forEach(d => d.classList.toggle('active', d.dataset.color === penColor));
+        penSizeSlider.value = penSize;
+        penSizePreview.style.width = (penSize * 2) + 'px';
+        penSizePreview.style.height = (penSize * 2) + 'px';
+        penSizePreview.style.background = penColor;
+        canvas.style.cursor = mode === 'select' ? 'default' : 'crosshair';
+    }
+
+    function closeAllMenus() {
+        colorMenu.classList.remove('show');
+        eraserSlider.classList.remove('show');
+        sliderThumb.style.left = '0%';
+    }
+
+    function getPos(e) {
+        const r = canvas.getBoundingClientRect();
+        return { x: e.clientX - r.left, y: e.clientY - r.top };
+    }
+
+    function penDot(x, y) { ctx.fillStyle = penColor; ctx.beginPath(); ctx.arc(x, y, penSize / 2, 0, Math.PI * 2); ctx.fill(); }
+    function penLine(x1, y1, x2, y2) { ctx.strokeStyle = penColor; ctx.lineWidth = penSize; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+    function eraseDot(x, y) { ctx.fillStyle = BOARD_COLOR; ctx.beginPath(); ctx.arc(x, y, penSize * 2, 0, Math.PI * 2); ctx.fill(); }
+    function eraseLine(x1, y1, x2, y2) {
+        const dist = Math.hypot(x2 - x1, y2 - y1);
+        if (dist < 1) { eraseDot(x1, y1); return; }
+        const step = penSize * 1.5;
+        const n = Math.max(1, Math.ceil(dist / step));
+        for (let i = 0; i <= n; i++) { const t = i / n; eraseDot(x1 + (x2 - x1) * t, y1 + (y2 - y1) * t); }
+    }
+
+    function handleDown(e) {
+        if (mode === 'select') return;
+        const p = getPos(e);
+        if (mode === 'pen') penDot(p.x, p.y);
+        else if (mode === 'eraser') eraseDot(p.x, p.y);
+        drawing = true; lastX = p.x; lastY = p.y;
+        closeAllMenus();
+    }
+
+    function handleMove(e) {
+        if (!drawing || mode === 'select') return;
+        const p = getPos(e);
+        if (mode === 'pen') penLine(lastX, lastY, p.x, p.y);
+        else if (mode === 'eraser') eraseLine(lastX, lastY, p.x, p.y);
+        lastX = p.x; lastY = p.y;
+    }
+
+    function handleUp() { if (drawing && mode !== 'select') saveState(); drawing = false; }
+
+    canvas.addEventListener('mousedown', e => { e.preventDefault(); handleDown(e); });
+    canvas.addEventListener('mousemove', e => { handleMove(e); });
+    canvas.addEventListener('mouseup', () => { handleUp(); });
+    canvas.addEventListener('mouseleave', () => { handleUp(); });
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); handleDown(e.changedTouches[0]); }, { passive: false });
+    canvas.addEventListener('touchmove', e => { e.preventDefault(); handleMove(e.changedTouches[0]); }, { passive: false });
+    canvas.addEventListener('touchend', e => { e.preventDefault(); handleUp(); });
+    canvas.addEventListener('touchcancel', e => { e.preventDefault(); handleUp(); });
+
+    btnSelect.addEventListener('click', e => { e.stopPropagation(); mode = 'select'; updateUI(); closeAllMenus(); });
+    btnPen.addEventListener('click', e => {
+        e.stopPropagation();
+        if (mode === 'pen') { if (colorMenu.classList.contains('show')) closeAllMenus(); else { eraserSlider.classList.remove('show'); colorMenu.classList.add('show'); } }
+        else { mode = 'pen'; updateUI(); closeAllMenus(); }
     });
+    btnEraser.addEventListener('click', e => {
+        e.stopPropagation();
+        if (mode === 'eraser') { if (eraserSlider.classList.contains('show')) closeAllMenus(); else { colorMenu.classList.remove('show'); eraserSlider.classList.add('show'); sliderThumb.style.left = '0%'; } }
+        else { mode = 'eraser'; updateUI(); closeAllMenus(); }
+    });
+    btnUndo.addEventListener('click', e => { e.stopPropagation(); undo(); closeAllMenus(); });
+
+    document.querySelectorAll('.color-dot').forEach(d => d.addEventListener('click', function(e) { e.stopPropagation(); penColor = d.dataset.color; updateUI(); }));
+    penSizeSlider.addEventListener('input', e => { penSize = parseFloat(e.target.value); updateUI(); });
+    document.addEventListener('click', e => { if (!e.target.closest('.base-toolbar-container') && !e.target.closest('.color-menu') && !e.target.closest('.eraser-slider') && !e.target.closest('.modal-overlay') && !e.target.closest('.preset-btn')) closeAllMenus(); });
+
+    let sliderDragging = false;
+    function updateSlider(cx) { const r = sliderTrack.getBoundingClientRect(); sliderThumb.style.left = Math.max(0, Math.min(100, ((cx - r.left) / r.width) * 100)) + '%'; }
+    sliderTrack.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); sliderDragging = true; updateSlider(e.clientX); });
+    document.addEventListener('mousemove', e => { if (sliderDragging) updateSlider(e.clientX); });
+    document.addEventListener('mouseup', () => { if (!sliderDragging) return; sliderDragging = false; if (parseFloat(sliderThumb.style.left) >= 90) { clearCanvas(); switchToPen(); } sliderThumb.style.left = '0%'; });
+    sliderTrack.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); sliderDragging = true; updateSlider(e.touches[0].clientX); }, { passive: false });
+    document.addEventListener('touchmove', e => { if (sliderDragging) { e.preventDefault(); updateSlider(e.touches[0].clientX); } }, { passive: false });
+    document.addEventListener('touchend', () => { if (!sliderDragging) return; sliderDragging = false; if (parseFloat(sliderThumb.style.left) >= 90) { clearCanvas(); switchToPen(); } sliderThumb.style.left = '0%'; });
+
+    resizeCanvas();
+    clearCanvas();
+    updateUI();
+    applyPreset(null);
+    window.addEventListener('resize', resizeCanvas);
 })();
 </script>
 </body>
