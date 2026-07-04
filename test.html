@@ -42,7 +42,6 @@
             cursor: crosshair;
         }
 
-        /* 考试信息覆盖层 */
         .exam-overlay {
             position: fixed;
             top: 0;
@@ -78,7 +77,7 @@
             font-variant-numeric: tabular-nums;
             font-feature-settings: "tnum";
             letter-spacing: 6px;
-            font-size: clamp(24px, 7vh, 48px);
+            font-size: var(--exam-font-xl, clamp(24px, 7vh, 48px));
         }
 
         .exam-content .line {
@@ -88,7 +87,7 @@
             gap: 8px;
             white-space: nowrap;
             width: 100%;
-            font-size: clamp(20px, 5vh, 36px);
+            font-size: var(--exam-font-lg, clamp(20px, 5vh, 36px));
             line-height: 1.3;
         }
 
@@ -107,23 +106,13 @@
         }
 
         @media (max-width: 600px) {
-            .exam-content {
-                gap: 2vh;
-                letter-spacing: 2px;
-            }
-            .exam-content .clock-row {
-                letter-spacing: 4px;
-            }
-            .exam-content .line {
-                gap: 4px;
-            }
-            .exam-overlay {
-                height: calc(100% - 100px);
-            }
+            .exam-content { gap: 2vh; letter-spacing: 2px; }
+            .exam-content .clock-row { letter-spacing: 4px; }
+            .exam-content .line { gap: 4px; }
+            .exam-overlay { height: calc(100% - 100px); }
         }
 
-        /* 预设按钮 */
-        .preset-btn {
+        .settings-btn {
             position: fixed;
             left: 20px;
             bottom: 50px;
@@ -143,65 +132,65 @@
             transition: all 0.15s ease;
             font-family: inherit;
         }
-        .preset-btn:hover {
-            background: #e0e0e0;
-        }
-        .preset-btn:active {
-            transform: scale(0.95);
-        }
-        .preset-btn.hidden {
-            display: none;
-        }
-        .preset-btn svg {
-            width: 20px;
-            height: 20px;
-            stroke: #666A7A;
-            fill: none;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+        .settings-btn:hover { background: #e0e0e0; }
+        .settings-btn:active { transform: scale(0.95); }
+        .settings-btn .dots-icon {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            line-height: 1;
+            color: #666A7A;
         }
 
-        /* 弹窗 */
-        .modal-overlay {
+        .settings-modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
             z-index: 300;
             display: none;
             align-items: center;
             justify-content: center;
         }
-        .modal-overlay.show {
-            display: flex;
-        }
+        .settings-modal-overlay.show { display: flex; }
 
-        .modal {
+        .settings-modal {
             background: #2a3a44;
             border-radius: 16px;
             padding: 28px 32px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
             color: #fff;
-            min-width: 320px;
+            min-width: 340px;
             max-width: 420px;
             text-align: center;
         }
-        .modal h3 {
+        .settings-modal h3 {
             font-size: 18px;
             margin-bottom: 20px;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255,255,255,0.9);
         }
-        .modal .modal-buttons {
+        .settings-modal .modal-row {
             display: flex;
+            align-items: center;
+            justify-content: space-between;
             gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
+            margin: 12px 0;
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
         }
-        .modal button {
+        .settings-modal .modal-row label { white-space: nowrap; }
+        .settings-modal .modal-row input[type="range"] {
+            flex: 1;
+            accent-color: #00C853;
+        }
+        .settings-modal .modal-row .size-val {
+            min-width: 36px;
+            text-align: right;
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+        }
+        .settings-modal button {
             padding: 10px 20px;
             border-radius: 8px;
             border: none;
@@ -210,46 +199,50 @@
             font-weight: 500;
             transition: all 0.15s ease;
             font-family: inherit;
+            margin: 6px;
         }
-        .modal .btn-primary {
-            background: #00C853;
+        .settings-modal .btn-primary { background: #00C853; color: #fff; }
+        .settings-modal .btn-primary:hover { background: #00e060; }
+        .settings-modal .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; }
+        .settings-modal .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+        .settings-modal .btn-close { background: transparent; color: rgba(255,255,255,0.5); font-size: 13px; }
+        .settings-modal input[type="file"] { display: none; }
+
+        .error-toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e53935;
             color: #fff;
-        }
-        .modal .btn-primary:hover {
-            background: #00e060;
-        }
-        .modal .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-        }
-        .modal .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        .modal .btn-close {
-            background: transparent;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 13px;
-        }
-        .modal input[type="file"] {
+            padding: 12px 24px;
+            border-radius: 10px;
+            z-index: 400;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
             display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .error-toast.show { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
 
-        /* 计时器显示 */
         .timer-badge {
             position: fixed;
             top: 10px;
             right: 20px;
             z-index: 50;
-            background: rgba(0, 0, 0, 0.5);
-            color: rgba(255, 255, 255, 0.7);
+            background: rgba(0,0,0,0.5);
+            color: rgba(255,255,255,0.7);
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 13px;
             display: none;
         }
-        .timer-badge.show {
-            display: block;
-        }
+        .timer-badge.show { display: block; }
 
         .base-toolbar-container {
             position: fixed;
@@ -265,37 +258,28 @@
             background-color: #EEEEEE;
             border-radius: 12px;
             padding: 0;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             width: 420px;
             height: 86px;
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             overflow: hidden;
         }
 
         .divider {
-            width: 1px;
-            height: 50%;
+            width: 1px; height: 50%;
             background-color: #D0D0D0;
-            position: absolute;
-            top: 25%;
+            position: absolute; top: 25%;
         }
         .divider.d1 { left: 25%; }
         .divider.d2 { left: 50%; }
         .divider.d3 { left: 75%; }
 
-        .buttons-container {
-            position: relative;
-            width: 420px;
-            height: 86px;
-        }
+        .buttons-container { position: relative; width: 420px; height: 86px; }
 
         .btn-item {
-            position: absolute;
-            top: 0;
-            width: 105px;
-            height: 86px;
+            position: absolute; top: 0;
+            width: 105px; height: 86px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -304,125 +288,69 @@
             cursor: pointer;
             transition: background-color 0.15s ease, color 0.15s ease;
         }
-
         .btn-item:nth-child(1) { left: 0px; border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
         .btn-item:nth-child(2) { left: 105px; }
         .btn-item:nth-child(3) { left: 210px; }
         .btn-item:nth-child(4) { left: 315px; border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
-
-        .btn-item.active {
-            background-color: #00C853;
-            color: #FFFFFF;
-        }
-
+        .btn-item.active { background-color: #00C853; color: #FFFFFF; }
         .btn-item svg {
             display: block;
-            fill: #666A7A;
-            stroke: #666A7A;
-            width: 40px;
-            height: 40px;
+            fill: #666A7A; stroke: #666A7A;
+            width: 40px; height: 40px;
             transform-origin: center;
             margin-bottom: 0px;
             transition: fill 0.15s ease, stroke 0.15s ease;
         }
-
-        .btn-item.active svg {
-            fill: #FFFFFF;
-            stroke: #FFFFFF;
-        }
-
-        .btn-item span {
-            font-size: 13px;
-            margin-top: 10px;
-            transition: color 0.15s ease;
-        }
+        .btn-item.active svg { fill: #FFFFFF; stroke: #FFFFFF; }
+        .btn-item span { font-size: 13px; margin-top: 10px; transition: color 0.15s ease; }
 
         .color-menu {
-            position: fixed;
-            bottom: 140px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(30, 40, 50, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 16px 20px;
+            position: fixed; bottom: 140px; left: 50%; transform: translateX(-50%);
+            background: rgba(30,40,50,0.95);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px; padding: 16px 20px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.5);
             border: 1px solid rgba(255,255,255,0.1);
-            display: none;
-            z-index: 200;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
+            display: none; z-index: 200;
+            gap: 12px; flex-wrap: wrap; justify-content: center;
         }
         .color-menu.show { display: flex; }
 
         .color-dot {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 3px solid transparent;
-            cursor: pointer;
-            transition: 0.2s;
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 3px solid transparent; cursor: pointer; transition: 0.2s;
         }
         .color-dot.active { border-color: white; box-shadow: 0 0 0 4px rgba(255,255,255,0.25); }
 
         .size-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: rgba(255,255,255,0.7);
-            width: 100%;
+            display: flex; align-items: center; gap: 8px;
+            color: rgba(255,255,255,0.7); width: 100%;
         }
         .size-row input[type="range"] { flex: 1; accent-color: white; }
         .size-preview {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background: white;
-            border: 2px solid rgba(255,255,255,0.3);
-            flex-shrink: 0;
+            width: 22px; height: 22px; border-radius: 50%;
+            background: white; border: 2px solid rgba(255,255,255,0.3); flex-shrink: 0;
         }
 
         .eraser-slider {
-            position: fixed;
-            bottom: 140px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(30, 40, 50, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 30px;
-            padding: 12px 22px;
-            display: none;
-            align-items: center;
-            gap: 14px;
+            position: fixed; bottom: 140px; left: 50%; transform: translateX(-50%);
+            background: rgba(30,40,50,0.95);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px; padding: 12px 22px;
+            display: none; align-items: center; gap: 14px;
             border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-            z-index: 200;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5); z-index: 200;
         }
         .eraser-slider.show { display: flex; }
 
         .slider-track {
-            width: 160px;
-            height: 6px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 3px;
-            position: relative;
-            cursor: pointer;
-            touch-action: none;
+            width: 160px; height: 6px; background: rgba(255,255,255,0.15);
+            border-radius: 3px; position: relative; cursor: pointer; touch-action: none;
         }
         .slider-thumb {
-            position: absolute;
-            top: 50%;
-            left: 0%;
-            transform: translate(-50%,-50%);
-            width: 24px;
-            height: 24px;
-            background: #ff6b6b;
-            border-radius: 50%;
-            box-shadow: 0 0 12px rgba(255,107,107,0.6);
-            pointer-events: none;
+            position: absolute; top: 50%; left: 0%; transform: translate(-50%,-50%);
+            width: 24px; height: 24px; background: #ff6b6b; border-radius: 50%;
+            box-shadow: 0 0 12px rgba(255,107,107,0.6); pointer-events: none;
         }
         .slider-hint { color: rgba(255,255,255,0.5); font-size: 12px; white-space: nowrap; }
 
@@ -434,12 +362,10 @@
             .btn-item:nth-child(2) { left: 85px; }
             .btn-item:nth-child(3) { left: 170px; }
             .btn-item:nth-child(4) { left: 255px; }
-            .divider.d1 { left: 25%; }
-            .divider.d2 { left: 50%; }
-            .divider.d3 { left: 75%; }
+            .divider.d1 { left: 25%; } .divider.d2 { left: 50%; } .divider.d3 { left: 75%; }
             .btn-item svg { width: 30px; height: 30px; }
             .btn-item span { font-size: 11px; margin-top: 6px; }
-            .preset-btn { left: 10px; bottom: 40px; padding: 8px 14px; font-size: 12px; }
+            .settings-btn { left: 10px; bottom: 40px; padding: 8px 14px; font-size: 12px; }
         }
     </style>
 </head>
@@ -447,7 +373,6 @@
 
 <canvas id="drawCanvas" class="canvas-fullscreen"></canvas>
 
-<!-- 考试信息覆盖层 -->
 <div class="exam-overlay" id="examOverlay">
     <div class="exam-content" id="examContent">
         <div class="clock-row" id="clockDisplay">00:00:00</div>
@@ -455,7 +380,7 @@
             <span>考试科目：</span><span class="underscore" id="subject">____________________</span>
         </div>
         <div class="line">
-            <span>考试时间：</span><span class="underscore" id="timeStart">______</span><span>:</span><span class="underscore" id="timeStartMin">______</span><span>~</span><span class="underscore" id="timeEnd">______</span><span>:</span><span class="underscore" id="timeEndMin">______</span>
+            <span>考试时间：</span><span class="underscore" id="examTimeRange">____________________</span>
         </div>
         <div class="line">
             <span>试卷共</span><span class="underscore" id="paperSheets">____</span><span>张</span><span class="underscore" id="paperPages">____</span><span>页</span>
@@ -466,41 +391,42 @@
     </div>
 </div>
 
-<!-- 计时器 -->
 <div class="timer-badge" id="timerBadge"></div>
+<div class="error-toast" id="errorToast"></div>
 
-<!-- 预设按钮 -->
-<button class="preset-btn" id="presetBtn">
-    <svg viewBox="0 0 24 24">
-        <rect x="3" y="3" width="18" height="18" rx="3" ry="3"/>
-        <line x1="3" y1="9" x2="21" y2="9"/>
-        <line x1="9" y1="21" x2="9" y2="9"/>
-    </svg>
-    <span>预设</span>
+<button class="settings-btn" id="settingsBtn">
+    <span class="dots-icon">•••</span>
+    <span>设置</span>
 </button>
 
-<!-- 弹窗 -->
-<div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
-        <h3>考试预设</h3>
-        <div class="modal-buttons">
-            <button class="btn-primary" id="btnImport">导入预设</button>
-            <button class="btn-secondary" id="btnDownload">下载格式文件</button>
-            <button class="btn-close" id="btnCloseModal">取消</button>
+<div class="settings-modal-overlay" id="settingsModalOverlay">
+    <div class="settings-modal">
+        <h3>设置</h3>
+        <div class="modal-row">
+            <label>文字大小</label>
+            <input type="range" id="fontSizeSlider" min="50" max="150" value="100" step="5">
+            <span class="size-val" id="fontSizeVal">100%</span>
+        </div>
+        <div style="margin-top:16px;">
+            <button class="btn-primary" id="btnOpenPreset">打开预设文件</button>
+            <button class="btn-secondary" id="btnDownloadFormat">下载格式文件</button>
+        </div>
+        <div style="margin-top:12px;">
+            <button class="btn-close" id="btnCloseSettings">关闭</button>
         </div>
         <input type="file" id="fileInput" accept=".txt">
     </div>
 </div>
 
 <div class="color-menu" id="colorMenu">
-    <div class="color-dot active" data-color="#F5F5F5" style="background:#F5F5F5;"></div>
-    <div class="color-dot" data-color="#E8E0D0" style="background:#E8E0D0;"></div>
-    <div class="color-dot" data-color="#D4C5B9" style="background:#D4C5B9;"></div>
-    <div class="color-dot" data-color="#C9D6C8" style="background:#C9D6C8;"></div>
-    <div class="color-dot" data-color="#B8C9D8" style="background:#B8C9D8;"></div>
-    <div class="color-dot" data-color="#D8C8D0" style="background:#D8C8D0;"></div>
-    <div class="color-dot" data-color="#E8D5B0" style="background:#E8D5B0;"></div>
-    <div class="color-dot" data-color="#B0C8D8" style="background:#B0C8D8;"></div>
+    <div class="color-dot active" data-color="#ffffff" style="background:#ffffff;"></div>
+    <div class="color-dot" data-color="#b0c4de" style="background:#b0c4de;"></div>
+    <div class="color-dot" data-color="#ff0000" style="background:#ff0000;"></div>
+    <div class="color-dot" data-color="#00ff00" style="background:#00ff00;"></div>
+    <div class="color-dot" data-color="#0000ff" style="background:#0000ff;"></div>
+    <div class="color-dot" data-color="#ffff00" style="background:#ffff00;"></div>
+    <div class="color-dot" data-color="#9b59b6" style="background:#9b59b6;"></div>
+    <div class="color-dot" data-color="#000000" style="background:#000000;"></div>
     <div class="size-row">
         <span style="font-size:11px;">细</span>
         <input type="range" id="penSizeSlider" min="1" max="16" value="4" step="0.5">
@@ -566,142 +492,177 @@
     const BOARD_COLOR = '#1e3b2f';
 
     let mode = 'select';
-    let penColor = '#F5F5F5';
+    let penColor = '#ffffff';
     let penSize = 4;
     let drawing = false;
-    let lastX = 0, lastY = 0;
-    let history = [];
+    let strokesHistory = [];
+    const activeTouches = {};
 
-    // 预设相关
+    // 预设系统
     let presets = [];
-    let currentPresetIndex = -1;
-    let switchInterval = null;
-    let switchTimer = null;
+    let switchInterval = 2;
+    let currentIndex = -1;
+    let checkTimer = null;
 
-    const presetBtn = document.getElementById('presetBtn');
-    const modalOverlay = document.getElementById('modalOverlay');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsModalOverlay = document.getElementById('settingsModalOverlay');
     const fileInput = document.getElementById('fileInput');
     const timerBadge = document.getElementById('timerBadge');
+    const errorToast = document.getElementById('errorToast');
+    const fontSizeSlider = document.getElementById('fontSizeSlider');
+    const fontSizeVal = document.getElementById('fontSizeVal');
 
-    // 显示元素
     const elSubject = document.getElementById('subject');
-    const elTimeStart = document.getElementById('timeStart');
-    const elTimeStartMin = document.getElementById('timeStartMin');
-    const elTimeEnd = document.getElementById('timeEnd');
-    const elTimeEndMin = document.getElementById('timeEndMin');
+    const elExamTimeRange = document.getElementById('examTimeRange');
     const elPaperSheets = document.getElementById('paperSheets');
     const elPaperPages = document.getElementById('paperPages');
     const elAnswerSheets = document.getElementById('answerSheets');
     const elAnswerPages = document.getElementById('answerPages');
 
-    function fillUnderscore(el, count) {
-        el.textContent = '_'.repeat(count);
+    function showError(msg) {
+        errorToast.textContent = msg;
+        errorToast.classList.add('show');
+        setTimeout(() => errorToast.classList.remove('show'), 4000);
+    }
+
+    function timeToMinutes(timeStr) {
+        if (!timeStr || !timeStr.trim()) return null;
+        const parts = timeStr.trim().split(':');
+        if (parts.length !== 2) return null;
+        const h = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return null;
+        return h * 60 + m;
     }
 
     function applyPreset(preset) {
         if (!preset) {
-            fillUnderscore(elSubject, 20);
-            fillUnderscore(elTimeStart, 6);
-            fillUnderscore(elTimeStartMin, 6);
-            fillUnderscore(elTimeEnd, 6);
-            fillUnderscore(elTimeEndMin, 6);
-            fillUnderscore(elPaperSheets, 4);
-            fillUnderscore(elPaperPages, 4);
-            fillUnderscore(elAnswerSheets, 4);
-            fillUnderscore(elAnswerPages, 4);
+            elSubject.textContent = '_'.repeat(20);
+            elExamTimeRange.textContent = '_'.repeat(20);
+            elPaperSheets.textContent = '_'.repeat(4);
+            elPaperPages.textContent = '_'.repeat(4);
+            elAnswerSheets.textContent = '_'.repeat(4);
+            elAnswerPages.textContent = '_'.repeat(4);
+            timerBadge.classList.remove('show');
             return;
         }
         elSubject.textContent = preset['考试科目'] || '_'.repeat(20);
-        elTimeStart.textContent = preset['考试时间起点'] || '_'.repeat(6);
-        elTimeStartMin.textContent = '';
-        elTimeEnd.textContent = preset['考试时间终点'] || '_'.repeat(6);
-        elTimeEndMin.textContent = '';
+        const ts = preset['考试时间起点'] || '';
+        const te = preset['考试时间终点'] || '';
+        elExamTimeRange.textContent = ts + ' ~ ' + te;
         elPaperSheets.textContent = preset['问卷张数'] || '_'.repeat(4);
         elPaperPages.textContent = preset['问卷页数'] || '_'.repeat(4);
         elAnswerSheets.textContent = preset['答卷张数'] || '_'.repeat(4);
         elAnswerPages.textContent = preset['答卷页数'] || '_'.repeat(4);
     }
 
-    function startPresetSwitch(intervalMinutes) {
-        stopPresetSwitch();
-        currentPresetIndex = 0;
-        applyPreset(presets[0]);
-        presetBtn.classList.add('hidden');
-        timerBadge.classList.add('show');
-        updateTimerBadge();
-
-        switchTimer = setInterval(() => {
-            currentPresetIndex++;
-            if (currentPresetIndex >= presets.length) {
-                currentPresetIndex = 0; // 循环
+    function getActiveIndex(nowMinutes) {
+        for (let i = 0; i < presets.length; i++) {
+            const switchTime = presets[i]._endMin + switchInterval;
+            if (nowMinutes < switchTime) {
+                return i;
             }
-            applyPreset(presets[currentPresetIndex]);
-            updateTimerBadge();
-        }, intervalMinutes * 60 * 1000);
-    }
-
-    function stopPresetSwitch() {
-        if (switchTimer) clearInterval(switchTimer);
-        switchTimer = null;
-        currentPresetIndex = -1;
-        presetBtn.classList.remove('hidden');
-        timerBadge.classList.remove('show');
-        applyPreset(null);
-    }
-
-    function updateTimerBadge() {
-        if (presets.length > 0 && currentPresetIndex >= 0) {
-            timerBadge.textContent = '科目 ' + (currentPresetIndex + 1) + '/' + presets.length;
         }
+        return presets.length - 1;
+    }
+
+    function updateDisplay() {
+        if (presets.length === 0) return;
+        const now = new Date();
+        const nowMin = now.getHours() * 60 + now.getMinutes();
+        const newIndex = getActiveIndex(nowMin);
+        if (newIndex !== currentIndex) {
+            currentIndex = newIndex;
+            applyPreset(presets[currentIndex]);
+            const isLast = (currentIndex >= presets.length - 1);
+            if (isLast) {
+                timerBadge.classList.remove('show');
+            } else {
+                timerBadge.classList.add('show');
+                timerBadge.textContent = '科目 ' + (currentIndex + 1) + '/' + presets.length;
+            }
+        }
+    }
+
+    function startLoop() {
+        stopLoop();
+        currentIndex = -1;
+        updateDisplay();
+        checkTimer = setInterval(updateDisplay, 3000);
+    }
+
+    function stopLoop() {
+        if (checkTimer) { clearInterval(checkTimer); checkTimer = null; }
+        currentIndex = -1;
+        timerBadge.classList.remove('show');
+    }
+
+    function validatePresets(list) {
+        const parsed = [];
+        for (let i = 0; i < list.length; i++) {
+            const p = list[i];
+            const startStr = p['考试时间起点'];
+            const endStr = p['考试时间终点'];
+            if (!startStr || !startStr.trim() || !endStr || !endStr.trim()) {
+                return { valid: false, error: '第' + (i + 1) + '科缺少考试时间起点或终点' };
+            }
+            const startMin = timeToMinutes(startStr);
+            const endMin = timeToMinutes(endStr);
+            if (startMin === null || endMin === null) {
+                return { valid: false, error: '第' + (i + 1) + '科时间格式错误，应为 HH:MM' };
+            }
+            if (endMin <= startMin) {
+                return { valid: false, error: '第' + (i + 1) + '科考试时间终点必须晚于起点' };
+            }
+            parsed.push({ ...p, _startMin: startMin, _endMin: endMin });
+        }
+        parsed.sort((a, b) => a._startMin - b._startMin);
+        for (let i = 0; i < parsed.length - 1; i++) {
+            if (parsed[i]._endMin > parsed[i + 1]._startMin) {
+                return { valid: false, error: '第' + (i + 1) + '科与第' + (i + 2) + '科考试时间重叠' };
+            }
+        }
+        return { valid: true, sorted: parsed };
     }
 
     function parsePresetText(text) {
         const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-        const result = { presets: [], intervalMinutes: 5 };
-
+        const result = { presets: [], intervalMinutes: 2 };
         let i = 0;
-        // 第一行：结束后切换下一科的时间
         if (lines[0] && lines[0].includes('结束后切换下一科的时间')) {
             const match = lines[0].match(/(\d+)/);
-            if (match) result.intervalMinutes = parseInt(match[1]) || 5;
+            if (match) result.intervalMinutes = parseInt(match[1], 10) || 2;
             i = 1;
         }
-
         let currentPreset = null;
         for (; i < lines.length; i++) {
             const line = lines[i];
-            if (line === '{') {
-                currentPreset = {};
-            } else if (line === '}') {
-                if (currentPreset) {
-                    result.presets.push(currentPreset);
-                    currentPreset = null;
-                }
-            } else if (currentPreset && line.includes('：')) {
-                const [key, ...valueParts] = line.split('：');
-                const value = valueParts.join('：').trim();
-                currentPreset[key.trim()] = value;
+            if (line === '{') { currentPreset = {}; }
+            else if (line === '}') { if (currentPreset) { result.presets.push(currentPreset); currentPreset = null; } }
+            else if (currentPreset && line.includes('：')) {
+                const idx = line.indexOf('：');
+                const key = line.substring(0, idx).trim();
+                const value = line.substring(idx + 1).trim();
+                currentPreset[key] = value;
             }
         }
         return result;
     }
 
-    // 弹窗
-    presetBtn.addEventListener('click', () => {
-        modalOverlay.classList.add('show');
-    });
+    function updateFontSize(val) {
+        const pct = val / 100;
+        document.documentElement.style.setProperty('--exam-font-xl', `clamp(${24*pct}px, ${7*pct}vh, ${48*pct}px)`);
+        document.documentElement.style.setProperty('--exam-font-lg', `clamp(${20*pct}px, ${5*pct}vh, ${36*pct}px)`);
+        fontSizeVal.textContent = val + '%';
+    }
 
-    document.getElementById('btnCloseModal').addEventListener('click', () => {
-        modalOverlay.classList.remove('show');
-    });
+    fontSizeSlider.addEventListener('input', () => updateFontSize(parseInt(fontSizeSlider.value)));
 
-    modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) modalOverlay.classList.remove('show');
-    });
+    settingsBtn.addEventListener('click', () => settingsModalOverlay.classList.add('show'));
+    document.getElementById('btnCloseSettings').addEventListener('click', () => settingsModalOverlay.classList.remove('show'));
+    settingsModalOverlay.addEventListener('click', (e) => { if (e.target === settingsModalOverlay) settingsModalOverlay.classList.remove('show'); });
 
-    document.getElementById('btnImport').addEventListener('click', () => {
-        fileInput.click();
-    });
+    document.getElementById('btnOpenPreset').addEventListener('click', () => fileInput.click());
 
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -710,17 +671,27 @@
         reader.onload = function(ev) {
             const text = ev.target.result;
             const parsed = parsePresetText(text);
-            presets = parsed.presets;
-            modalOverlay.classList.remove('show');
-            if (presets.length > 0) {
-                startPresetSwitch(parsed.intervalMinutes);
+            if (parsed.presets.length === 0) {
+                showError('文件中未找到有效科目');
+                fileInput.value = '';
+                return;
             }
+            const validation = validatePresets(parsed.presets);
+            if (!validation.valid) {
+                showError(validation.error);
+                fileInput.value = '';
+                return;
+            }
+            presets = validation.sorted;
+            switchInterval = parsed.intervalMinutes;
+            settingsModalOverlay.classList.remove('show');
+            startLoop();
         };
         reader.readAsText(file);
         fileInput.value = '';
     });
 
-    document.getElementById('btnDownload').addEventListener('click', () => {
+    document.getElementById('btnDownloadFormat').addEventListener('click', () => {
         const sample = `结束后切换下一科的时间（min）：
 {
     考试科目：
@@ -749,7 +720,6 @@
         URL.revokeObjectURL(url);
     });
 
-    // Canvas
     function updateClock() {
         const now = new Date();
         document.getElementById('clockDisplay').textContent = [
@@ -778,10 +748,10 @@
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.restore();
-        if (history.length) {
+        if (strokesHistory.length) {
             ctx.save();
             ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.putImageData(history[history.length - 1], 0, 0);
+            ctx.putImageData(strokesHistory[strokesHistory.length - 1], 0, 0);
             ctx.restore();
         } else {
             ctx.fillStyle = BOARD_COLOR;
@@ -792,9 +762,9 @@
     function saveState() {
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        strokesHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
         ctx.restore();
-        if (history.length > 30) history.shift();
+        if (strokesHistory.length > 30) strokesHistory.shift();
     }
 
     function clearCanvas() {
@@ -804,8 +774,8 @@
     }
 
     function undo() {
-        if (history.length <= 1) { history = []; clearCanvas(); return; }
-        history.pop();
+        if (strokesHistory.length <= 1) { strokesHistory = []; clearCanvas(); return; }
+        strokesHistory.pop();
         redraw();
     }
 
@@ -821,7 +791,7 @@
     const btnUndo = document.getElementById('btn-undo');
     const colorMenu = document.getElementById('colorMenu');
     const eraserSlider = document.getElementById('eraserSlider');
-    const penSizeSlider = document.getElementById('penSizeSlider');
+    const penSizeSliderEl = document.getElementById('penSizeSlider');
     const penSizePreview = document.getElementById('penSizePreview');
     const sliderTrack = document.getElementById('sliderTrack');
     const sliderThumb = document.getElementById('sliderThumb');
@@ -831,7 +801,7 @@
         btnPen.classList.toggle('active', mode === 'pen');
         btnEraser.classList.toggle('active', mode === 'eraser');
         document.querySelectorAll('.color-dot').forEach(d => d.classList.toggle('active', d.dataset.color === penColor));
-        penSizeSlider.value = penSize;
+        penSizeSliderEl.value = penSize;
         penSizePreview.style.width = (penSize * 2) + 'px';
         penSizePreview.style.height = (penSize * 2) + 'px';
         penSizePreview.style.background = penColor;
@@ -844,9 +814,9 @@
         sliderThumb.style.left = '0%';
     }
 
-    function getPos(e) {
+    function getPos(touch) {
         const r = canvas.getBoundingClientRect();
-        return { x: e.clientX - r.left, y: e.clientY - r.top };
+        return { x: touch.clientX - r.left, y: touch.clientY - r.top };
     }
 
     function penDot(x, y) { ctx.fillStyle = penColor; ctx.beginPath(); ctx.arc(x, y, penSize / 2, 0, Math.PI * 2); ctx.fill(); }
@@ -860,33 +830,74 @@
         for (let i = 0; i <= n; i++) { const t = i / n; eraseDot(x1 + (x2 - x1) * t, y1 + (y2 - y1) * t); }
     }
 
-    function handleDown(e) {
-        if (mode === 'select') return;
-        const p = getPos(e);
-        if (mode === 'pen') penDot(p.x, p.y);
-        else if (mode === 'eraser') eraseDot(p.x, p.y);
-        drawing = true; lastX = p.x; lastY = p.y;
+    canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        for (let i = 0; i < e.changedTouches.length; i++) {
+            const touch = e.changedTouches[i];
+            const pos = getPos(touch);
+            activeTouches[touch.identifier] = { x: pos.x, y: pos.y };
+            if (mode === 'pen') penDot(pos.x, pos.y);
+            else if (mode === 'eraser') eraseDot(pos.x, pos.y);
+        }
+        if (mode !== 'select' && e.changedTouches.length > 0) drawing = true;
         closeAllMenus();
-    }
+    }, { passive: false });
 
-    function handleMove(e) {
-        if (!drawing || mode === 'select') return;
-        const p = getPos(e);
-        if (mode === 'pen') penLine(lastX, lastY, p.x, p.y);
-        else if (mode === 'eraser') eraseLine(lastX, lastY, p.x, p.y);
-        lastX = p.x; lastY = p.y;
-    }
+    canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        for (let i = 0; i < e.changedTouches.length; i++) {
+            const touch = e.changedTouches[i];
+            const prev = activeTouches[touch.identifier];
+            if (!prev) continue;
+            const pos = getPos(touch);
+            if (mode === 'pen') penLine(prev.x, prev.y, pos.x, pos.y);
+            else if (mode === 'eraser') eraseLine(prev.x, prev.y, pos.x, pos.y);
+            activeTouches[touch.identifier] = { x: pos.x, y: pos.y };
+        }
+    }, { passive: false });
 
-    function handleUp() { if (drawing && mode !== 'select') saveState(); drawing = false; }
+    canvas.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        for (let i = 0; i < e.changedTouches.length; i++) delete activeTouches[e.changedTouches[i].identifier];
+        if (Object.keys(activeTouches).length === 0) { if (drawing && mode !== 'select') saveState(); drawing = false; }
+    });
 
-    canvas.addEventListener('mousedown', e => { e.preventDefault(); handleDown(e); });
-    canvas.addEventListener('mousemove', e => { handleMove(e); });
-    canvas.addEventListener('mouseup', () => { handleUp(); });
-    canvas.addEventListener('mouseleave', () => { handleUp(); });
-    canvas.addEventListener('touchstart', e => { e.preventDefault(); handleDown(e.changedTouches[0]); }, { passive: false });
-    canvas.addEventListener('touchmove', e => { e.preventDefault(); handleMove(e.changedTouches[0]); }, { passive: false });
-    canvas.addEventListener('touchend', e => { e.preventDefault(); handleUp(); });
-    canvas.addEventListener('touchcancel', e => { e.preventDefault(); handleUp(); });
+    canvas.addEventListener('touchcancel', function(e) {
+        e.preventDefault();
+        for (let i = 0; i < e.changedTouches.length; i++) delete activeTouches[e.changedTouches[i].identifier];
+        if (Object.keys(activeTouches).length === 0) { if (drawing && mode !== 'select') saveState(); drawing = false; }
+    });
+
+    canvas.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        const pos = getPos(e);
+        if (mode === 'pen') penDot(pos.x, pos.y);
+        else if (mode === 'eraser') eraseDot(pos.x, pos.y);
+        if (mode !== 'select') drawing = true;
+        activeTouches['mouse'] = { x: pos.x, y: pos.y };
+        closeAllMenus();
+    });
+
+    canvas.addEventListener('mousemove', function(e) {
+        const prev = activeTouches['mouse'];
+        if (!prev || !drawing) return;
+        const pos = getPos(e);
+        if (mode === 'pen') penLine(prev.x, prev.y, pos.x, pos.y);
+        else if (mode === 'eraser') eraseLine(prev.x, prev.y, pos.x, pos.y);
+        activeTouches['mouse'] = { x: pos.x, y: pos.y };
+    });
+
+    canvas.addEventListener('mouseup', function() {
+        if (drawing && mode !== 'select') saveState();
+        drawing = false;
+        delete activeTouches['mouse'];
+    });
+
+    canvas.addEventListener('mouseleave', function() {
+        if (drawing && mode !== 'select') saveState();
+        drawing = false;
+        delete activeTouches['mouse'];
+    });
 
     btnSelect.addEventListener('click', e => { e.stopPropagation(); mode = 'select'; updateUI(); closeAllMenus(); });
     btnPen.addEventListener('click', e => {
@@ -902,8 +913,13 @@
     btnUndo.addEventListener('click', e => { e.stopPropagation(); undo(); closeAllMenus(); });
 
     document.querySelectorAll('.color-dot').forEach(d => d.addEventListener('click', function(e) { e.stopPropagation(); penColor = d.dataset.color; updateUI(); }));
-    penSizeSlider.addEventListener('input', e => { penSize = parseFloat(e.target.value); updateUI(); });
-    document.addEventListener('click', e => { if (!e.target.closest('.base-toolbar-container') && !e.target.closest('.color-menu') && !e.target.closest('.eraser-slider') && !e.target.closest('.modal-overlay') && !e.target.closest('.preset-btn')) closeAllMenus(); });
+    penSizeSliderEl.addEventListener('input', e => { penSize = parseFloat(e.target.value); updateUI(); });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.base-toolbar-container') && !e.target.closest('.color-menu') && !e.target.closest('.eraser-slider') && !e.target.closest('.settings-modal-overlay') && !e.target.closest('.settings-btn')) {
+            closeAllMenus();
+        }
+    });
 
     let sliderDragging = false;
     function updateSlider(cx) { const r = sliderTrack.getBoundingClientRect(); sliderThumb.style.left = Math.max(0, Math.min(100, ((cx - r.left) / r.width) * 100)) + '%'; }
@@ -918,6 +934,7 @@
     clearCanvas();
     updateUI();
     applyPreset(null);
+    updateFontSize(100);
     window.addEventListener('resize', resizeCanvas);
 })();
 </script>
