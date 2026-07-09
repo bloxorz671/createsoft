@@ -24,3 +24,4 @@ app
 [n=八下英语单词听力 p=audio.jpg l=单词.mp3 g=英语（学科）资料]
 [n=物理知识点过关测试题.doc p=docx.jpg l=物理知识点过关测试题.doc g=物理（学科）资料]
 [n=物理知识结构（初二下）原版.pdf p=pdf.jpg l=物理知识结构（初二下）原版.pdf g=物理（学科）资料]
+[n=初二下散学典礼直播 p=null.jpg l=https://meeting.tencent.com/p/8650173887 g=本周调课]
