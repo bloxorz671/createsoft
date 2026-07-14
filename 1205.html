@@ -208,8 +208,11 @@
     var GITHUB_OWNER = 'bloxorz671';
     var GITHUB_REPO = 'createsoft';
     var GITHUB_PATH = '5app.txt';
-    var APP_DOWNLOAD_URL = 'https://luckynum.top/fiveclassapp1.02.apk';
-    var APP_NEW_UA = 'fiveapp';
+    var APP_DOWNLOAD_URL = 'https://luckynum.top/fiveclassapp1.03.apk';
+    // 当前最新版本 UA 标识
+    var APP_LATEST_UA = 'fiveapp1.03';
+    // 旧版 UA 标识（需要强制更新）
+    var APP_OLD_UAS = ['fiveapp', 'ClassApp/1.0 (Grade8Class5)', 'ClassApp/1.0 (Grade9Class5)'];
 
     var slidesData = [], appItems = [], groupOrder = ['其他应用'];
     var currentIndex = 0, autoInterval = null, totalSlides = 0;
@@ -217,9 +220,13 @@
     var isAddingApp = false, isAddingCarousel = false;
     var cachedFileList = null, fileListLoading = false;
     var currentUA = navigator.userAgent;
-    var isFiveApp = currentUA.indexOf(APP_NEW_UA) !== -1;
-    var isOldApp = currentUA.indexOf('ClassApp/1.0 (Grade8Class5)') !== -1 || currentUA.indexOf('ClassApp/1.0 (Grade9Class5)') !== -1;
     var draggedGroupIndex = null, draggedAppData = null;
+
+    // 判断是否是旧版 App（包含旧UA标识但不是最新版）
+    var isLatestApp = currentUA.indexOf(APP_LATEST_UA) !== -1;
+    var isOldApp = !isLatestApp && APP_OLD_UAS.some(function(oldUA) {
+        return currentUA.indexOf(oldUA) !== -1;
+    });
 
     function escapeHtml(str) { if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function copyShareLink(appName) { var u=window.location.origin+window.location.pathname; if(appName) u+='?app='+encodeURIComponent(appName); navigator.clipboard.writeText(u).then(function(){var t=document.createElement('div');t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:white;padding:12px 24px;border-radius:30px;z-index:30000;font-size:14px;';t.textContent='✅ 网址已复制';document.body.appendChild(t);setTimeout(function(){t.remove();},1500);}).catch(function(){alert('复制失败');}); }
@@ -318,8 +325,11 @@
     async function init(){
         await loadConfigFile();
         showHome();
+        // 旧版App（包括旧的 fiveapp、ClassApp 等）→ 强制更新，不可关闭
         if(isOldApp){ document.getElementById('forceUpdateModal').classList.add('show'); return; }
-        if(isFiveApp){ console.log('五班应用平台 App 已启动'); return; }
+        // 最新版App → 正常使用
+        if(isLatestApp){ console.log('五班应用平台 1.03 已启动'); return; }
+        // 浏览器 → 显示下载顶栏 + 弹窗
         document.getElementById('downloadTopBar').style.display = 'flex';
         setTimeout(function(){ document.getElementById('appDownloadModal').classList.add('show'); }, 1500);
     }
