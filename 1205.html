@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>初二五班智慧应用平台</title>
+    <title>初三五班智慧应用平台</title>
     <link rel="icon" href="41.jpg" type="image/jpeg">
     <link rel="shortcut icon" href="41.jpg" type="image/jpeg">
     <link rel="apple-touch-icon" href="41.jpg">
-    <meta property="og:title" content="初二五班智慧应用平台">
-    <meta property="og:description" content="欢迎使用初二五班智慧应用平台">
+    <meta property="og:title" content="初三五班智慧应用平台">
+    <meta property="og:description" content="欢迎使用初三五班智慧应用平台">
     <meta property="og:image" content="https://luckynum.top/41.jpg">
     <meta property="og:image:secure_url" content="https://luckynum.top/41.jpg">
     <meta property="og:url" content="https://luckynum.top/1205">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="初二五班智慧应用平台">
+    <meta property="og:site_name" content="初三五班智慧应用平台">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="初二五班智慧应用平台">
-    <meta name="twitter:description" content="欢迎使用初二五班智慧应用平台">
+    <meta name="twitter:title" content="初三五班智慧应用平台">
+    <meta name="twitter:description" content="欢迎使用初三五班智慧应用平台">
     <meta name="twitter:image" content="https://luckynum.top/41.jpg">
-    <meta name="description" content="欢迎使用初二五班智慧应用平台">
+    <meta name="description" content="欢迎使用初三五班智慧应用平台">
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -32,67 +32,32 @@
         .refresh-btn.spinning { animation: spin 0.8s linear infinite; }
         @keyframes spin { from { transform: translateY(-50%) rotate(0deg); } to { transform: translateY(-50%) rotate(360deg); } }
         .warning-banner { background: #fff3cd; color: #856404; text-align: center; padding: 8px; font-size: 0.8rem; border-bottom: 1px solid #ffeeba; }
-        .greeting-section { padding: 12px 20px 0 20px; background: white; }
-        .greeting-wrapper { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; cursor: pointer; }
-        .greeting-text { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; }
-        .logout-btn { background: #e74c3c; color: white; border: none; border-radius: 20px; padding: 6px 16px; font-size: 0.8rem; font-weight: 500; cursor: pointer; margin-left: 12px; }
-        .logout-btn:hover { background: #c0392b; }
-        .unlogged-section { padding: 12px 20px 0 20px; background: white; }
-        .unlogged-wrapper { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; }
-        .unlogged-text { font-size: 1rem; font-weight: 500; color: #e67e22; background: #fff3e0; padding: 10px 16px; border-radius: 12px; text-align: center; }
-        .scan-login-btn { background: #2b4c8a; color: white; border: none; border-radius: 12px; padding: 10px 20px; font-size: 0.9rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
-        .scan-login-btn:hover { background: #1e3c72; transform: scale(1.02); }
-        .rating-box { display: inline-flex; align-items: center; justify-content: center; padding: 4px 14px; font-size: 1rem; font-weight: 600; color: white; border: 2px solid; border-radius: 8px; white-space: nowrap; }
-        .rating-box.level-0 { background: #e74c3c; border-color: #c0392b; }
-        .rating-box.level-1 { background: #f39c12; border-color: #e67e22; }
-        .rating-box.level-2 { background: #f1c40f; border-color: #d4ac0d; color: #8B6914; }
-        .rating-box.level-3 { background: #fdebd0; border-color: #e6b0aa; color: #c0392b; }
-        .rating-box.level-4 { background: #95a5a6; border-color: #7f8c8d; }
-        .score-wrapper { display: inline-flex; align-items: baseline; gap: 4px; margin-left: 4px; }
-        .score-label { font-size: 0.9rem; color: #666; }
-        .score-number { font-size: 1.2rem; font-weight: 700; color: #2b4c8a; }
-        .edit-mode .carousel-slide, .edit-mode .app-card { position: relative; }
-        .delete-btn { position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
-        .edit-app-btn { position: absolute; top: 5px; left: 5px; background: #3498db; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
-        .drag-handle { position: absolute; top: 5px; left: 35px; background: #95a5a6; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: grab; z-index: 10; display: flex; align-items: center; justify-content: center; }
-        .add-fab { position: fixed; bottom: 80px; right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 100; }
-        .add-btn, .file-manager-btn, .add-carousel-btn, .upload-only-btn { background: #27ae60; color: white; border: none; border-radius: 50%; width: 56px; height: 56px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .add-carousel-btn { background: #3498db; }
-        .upload-only-btn { background: #f39c12; font-size: 20px; }
-        .file-manager-btn { background: #9b59b6; font-size: 20px; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: all 0.2s; }
-        .modal-overlay.show { visibility: visible; opacity: 1; }
-        .modal-content { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto; }
-        .modal-content h3 { margin-bottom: 16px; }
-        .modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
-        .modal-buttons { display: flex; gap: 10px; margin-top: 16px; }
-        .confirm-btn { background: #2b4c8a; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
-        .cancel-btn { background: #95a5a6; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
-        .upload-area { border: 2px dashed #ddd; border-radius: 8px; padding: 15px; margin: 10px 0; text-align: center; cursor: pointer; background: #f9f9f9; }
-        .student-id-modal .modal-content { text-align: center; }
-        .student-id-modal h3 { color: #1e3c72; font-size: 1.4rem; margin-bottom: 8px; }
-        .student-id-modal .subtitle { color: #666; font-size: 0.85rem; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
-        .student-id-modal input { text-align: center; font-size: 1.2rem; letter-spacing: 2px; }
-        .student-id-modal .warning-text { color: #e74c3c; font-size: 0.8rem; margin-top: 12px; display: none; }
-        .scan-modal .modal-content { padding: 0; overflow: hidden; max-width: 100%; width: 100%; height: 100%; max-height: 100%; border-radius: 0; background: #000; display: flex; flex-direction: column; }
-        .scan-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; background: #1a1a2e; color: white; flex-shrink: 0; }
-        .scan-header h3 { margin: 0; font-size: 1.2rem; }
-        .scan-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0 8px; }
-        .scan-video-container { flex: 1; position: relative; background: #000; overflow: hidden; }
-        #scanVideo { width: 100%; height: 100%; object-fit: cover; }
-        .scan-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 280px; height: 280px; border: 2px solid rgba(255,255,255,0.8); border-radius: 24px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.6); z-index: 10; }
-        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg,transparent 0%,rgba(0,255,0,0.3) 20%,#00ff00 45%,#00ff00 55%,rgba(0,255,0,0.3) 80%,transparent 100%); box-shadow: 0 0 8px #00ff00; animation: scanMove 2.5s ease-in-out infinite; pointer-events: none; }
-        @keyframes scanMove { 0% { top: 0; opacity: 1; } 45% { opacity: 1; } 55% { opacity: 0.8; } 100% { top: 100%; opacity: 0.3; } }
-        .corner { position: absolute; width: 30px; height: 30px; border-color: #00ff00; border-style: solid; border-width: 0; }
-        .corner-tl { top: -2px; left: -2px; border-top-width: 4px; border-left-width: 4px; border-radius: 8px 0 0 0; }
-        .corner-tr { top: -2px; right: -2px; border-top-width: 4px; border-right-width: 4px; border-radius: 0 8px 0 0; }
-        .corner-bl { bottom: -2px; left: -2px; border-bottom-width: 4px; border-left-width: 4px; border-radius: 0 0 0 8px; }
-        .corner-br { bottom: -2px; right: -2px; border-bottom-width: 4px; border-right-width: 4px; border-radius: 0 0 8px 0; }
-        .scan-tip { position: absolute; bottom: 20%; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.8); font-size: 14px; z-index: 20; background: rgba(0,0,0,0.5); padding: 8px 16px; width: fit-content; margin: 0 auto; border-radius: 20px; backdrop-filter: blur(4px); pointer-events: none; }
-        .album-btn { position: absolute; bottom: 40px; right: 20px; width: 56px; height: 56px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.3); cursor: pointer; z-index: 30; }
-        .album-btn svg { width: 28px; height: 28px; fill: white; }
-        .album-btn input { display: none; }
-        .scan-status { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; z-index: 30; backdrop-filter: blur(4px); }
+
+        /* 顶部下载条 */
+        .download-top-bar { background: linear-gradient(135deg, #2b4c8a, #1e3c72); color: white; display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; gap: 12px; }
+        .download-top-bar .bar-icon { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; background: #f0f2f5; flex-shrink: 0; }
+        .download-top-bar .bar-text { flex: 1; font-size: 0.85rem; font-weight: 500; }
+        .download-top-bar .bar-btn { background: white; color: #2b4c8a; border: none; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+        .download-top-bar .bar-btn:active { transform: scale(0.95); }
+
+        /* 下载弹窗 */
+        .app-download-modal .modal-content { text-align: center; max-width: 340px; padding: 28px 20px 20px; }
+        .app-download-modal .app-icon-large { width: 72px; height: 72px; border-radius: 16px; object-fit: cover; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .app-download-modal .app-name { font-size: 1.2rem; font-weight: 700; color: #1e3c72; margin-bottom: 4px; }
+        .app-download-modal .app-subtitle { font-size: 0.8rem; color: #666; margin-bottom: 20px; }
+        .app-download-modal .download-btn { display: block; width: 100%; background: #2b4c8a; color: white; border: none; padding: 14px; border-radius: 30px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 12px; transition: background 0.2s; }
+        .app-download-modal .download-btn:hover { background: #1e3c72; }
+        .app-download-modal .download-btn:active { transform: scale(0.97); }
+        .app-download-modal .later-btn { background: none; border: none; color: #999; font-size: 0.8rem; cursor: pointer; padding: 8px; }
+
+        /* 强制更新弹窗 */
+        .force-update-modal .modal-content { text-align: center; max-width: 340px; padding: 28px 20px 20px; }
+        .force-update-modal .update-icon { font-size: 3rem; margin-bottom: 12px; }
+        .force-update-modal .update-title { font-size: 1.2rem; font-weight: 700; color: #e74c3c; margin-bottom: 8px; }
+        .force-update-modal .update-desc { font-size: 0.85rem; color: #666; margin-bottom: 20px; }
+        .force-update-modal .update-btn { display: block; width: 100%; background: #e74c3c; color: white; border: none; padding: 14px; border-radius: 30px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
+        .force-update-modal .update-btn:active { transform: scale(0.97); }
+
         .carousel-section { margin: 12px 16px 24px; background: #f0f2f6; overflow: hidden; }
         .carousel-wrapper { width: 100%; overflow: hidden; }
         .carousel-track { display: flex; transition: transform 0.4s; cursor: grab; }
@@ -112,6 +77,23 @@
         .app-name { font-size: 0.85rem; font-weight: 500; color: #1f2937; text-align: center; word-break: break-word; line-height: 1.3; }
         .loading-tip, .empty-tip { text-align: center; padding: 40px 20px; color: #6c757d; }
         .error-tip { color: #c62828; background: #fff5f5; margin: 20px; padding: 14px; text-align: center; border-radius: 12px; }
+        .edit-mode .carousel-slide, .edit-mode .app-card { position: relative; }
+        .delete-btn { position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .edit-app-btn { position: absolute; top: 5px; left: 5px; background: #3498db; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .drag-handle { position: absolute; top: 5px; left: 35px; background: #95a5a6; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: grab; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .add-fab { position: fixed; bottom: 80px; right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 100; }
+        .add-btn, .file-manager-btn, .add-carousel-btn, .upload-only-btn { background: #27ae60; color: white; border: none; border-radius: 50%; width: 56px; height: 56px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .add-carousel-btn { background: #3498db; }
+        .upload-only-btn { background: #f39c12; font-size: 20px; }
+        .file-manager-btn { background: #9b59b6; font-size: 20px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: all 0.2s; }
+        .modal-overlay.show { visibility: visible; opacity: 1; }
+        .modal-content { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto; }
+        .modal-content h3 { margin-bottom: 16px; }
+        .modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 16px; }
+        .confirm-btn { background: #2b4c8a; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+        .cancel-btn { background: #95a5a6; color: white; flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
         .file-viewer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; z-index: 20000; display: flex; flex-direction: column; }
         .viewer-header { background: #16213e; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; z-index: 10; flex-wrap: wrap; gap: 8px; }
         .viewer-title { font-size: 1rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; margin-right: 12px; min-width: 0; }
@@ -136,34 +118,7 @@
         .file-action-btn:hover { background: #e0e0e0; }
         .file-action-btn.delete { color: #e74c3c; }
         .current-path { padding: 8px; background: #f5f5f5; border-radius: 8px; margin-bottom: 10px; font-family: monospace; font-size: 12px; word-break: break-all; }
-        .profile-card { background: linear-gradient(135deg, #2b4c8a, #1e3c72); border-radius: 24px; padding: 24px; margin-bottom: 24px; display: flex; align-items: center; gap: 18px; color: white; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-        .avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); background: #f0f2f5; cursor: pointer; transition: transform 0.1s ease; }
-        .avatar:active { transform: scale(0.97); }
-        .profile-info { flex: 1; }
-        .profile-name { font-size: 1.4rem; font-weight: 600; margin-bottom: 4px; }
-        .profile-student-id { font-size: 0.85rem; opacity: 0.85; font-family: monospace; }
-        .profile-logout { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; padding: 8px 16px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
-        .profile-logout:hover { background: rgba(255,255,255,0.3); }
-        .menu-section { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eef2f8; }
-        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #f0f2f5; cursor: pointer; transition: background 0.2s; }
-        .menu-item:last-child { border-bottom: none; }
-        .menu-item:hover { background: #f8f9fc; }
-        .menu-left { display: flex; align-items: center; gap: 14px; }
-        .menu-icon { font-size: 1.4rem; }
-        .menu-title { font-size: 1rem; font-weight: 500; color: #1f2937; }
-        .menu-arrow { color: #94a3b8; font-size: 1.2rem; }
-        .record-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f2f5; }
-        .record-item:last-child { border-bottom: none; }
-        .record-date { font-size: 0.8rem; color: #64748b; min-width: 100px; }
-        .record-event { flex: 1; font-size: 0.9rem; color: #1e293b; margin: 0 12px; word-break: break-all; }
-        .record-score { font-weight: 600; font-size: 0.9rem; }
-        .record-score.plus { color: #10b981; }
-        .record-score.minus { color: #ef4444; }
-        .empty-records { text-align: center; padding: 40px; color: #94a3b8; }
-        .login-prompt { background: white; border-radius: 24px; padding: 48px 24px; text-align: center; margin: 40px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .login-prompt p { color: #64748b; margin-bottom: 20px; }
-        .login-btn { background: #2b4c8a; color: white; border: none; padding: 12px 32px; border-radius: 40px; font-size: 1rem; font-weight: 500; cursor: pointer; }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #eef2f8; display: flex; padding: 10px 30px 14px; justify-content: space-between; max-width: 550px; margin: 0 auto; z-index: 100; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #eef2f8; display: flex; padding: 10px 30px 14px; justify-content: space-around; max-width: 550px; margin: 0 auto; z-index: 100; }
         .bottom-nav-wrapper { max-width: 550px; margin: 0 auto; position: relative; }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; padding: 4px 16px; border-radius: 30px; transition: all 0.2s; }
         .nav-icon { font-size: 1.6rem; }
@@ -172,38 +127,21 @@
         .nav-item.active .nav-icon { color: #2b4c8a; }
         .page { display: none; }
         .page.active { display: block; }
+        .device-warning-modal .modal-content { text-align: center; max-width: 400px; }
+        .device-warning-icon { font-size: 3rem; margin-bottom: 12px; }
+        .device-warning-message { font-size: 1rem; color: #e67e22; line-height: 1.6; margin-bottom: 20px; padding: 0 10px; }
+        .device-warning-btn { background: #2b4c8a; color: white; border: none; padding: 12px 40px; border-radius: 30px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
         @media (max-width: 768px) {
             .apps-grid { gap: 12px; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
             .app-icon { width: 52px; height: 52px; }
             .app-name { font-size: 0.75rem; }
-            .greeting-text { font-size: 1.6rem; }
             .add-fab { bottom: 80px; right: 16px; }
             .add-btn, .file-manager-btn, .add-carousel-btn, .upload-only-btn { width: 48px; height: 48px; font-size: 20px; }
-            .profile-card { padding: 16px; }
-            .avatar { width: 60px; height: 60px; }
-            .profile-name { font-size: 1.1rem; }
             .bottom-nav { padding: 8px 20px 12px; }
             .nav-item { padding: 4px 12px; }
             .main-header h1 { font-size: 1.5rem; }
             .refresh-btn { width: 30px; height: 30px; font-size: 15px; right: 10px; }
         }
-        .login-options-modal .modal-content { text-align: center; }
-        .login-options { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
-        .login-option-btn { background: #2b4c8a; color: white; border: none; padding: 14px; border-radius: 40px; font-size: 1rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .login-option-btn:active { transform: scale(0.98); }
-        .login-option-cancel { background: #95a5a6; }
-        .device-warning-modal .modal-content { text-align: center; max-width: 400px; }
-        .device-warning-icon { font-size: 3rem; margin-bottom: 12px; }
-        .device-warning-message { font-size: 1rem; color: #e67e22; line-height: 1.6; margin-bottom: 20px; padding: 0 10px; }
-        .device-warning-btn { background: #2b4c8a; color: white; border: none; padding: 12px 40px; border-radius: 30px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
-        .subscribe-modal .modal-content { text-align: center; max-width: 320px; }
-        .subscribe-icon { font-size: 2rem; margin-bottom: 12px; }
-        .subscribe-message { font-size: 0.9rem; color: #666; margin-bottom: 20px; line-height: 1.5; }
-        .subscribe-buttons { display: flex; flex-direction: column; gap: 12px; }
-        .subscribe-btn-primary { background: #2b4c8a; color: white; border: none; padding: 12px; border-radius: 30px; font-size: 1rem; font-weight: 500; cursor: pointer; }
-        .subscribe-btn-secondary { background: #eef2f8; color: #333; border: none; padding: 12px; border-radius: 30px; font-size: 0.9rem; cursor: pointer; }
-        .subscribe-no-remind { margin-top: 8px; font-size: 0.8rem; color: #999; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
-        .subscribe-no-remind input { width: 16px; height: 16px; cursor: pointer; }
     </style>
     <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 </head>
@@ -212,21 +150,14 @@
     <div class="platform-container">
         <div class="warning-banner" id="warningBanner" style="display: none;">⏳ 正在加载平台数据...</div>
         <div class="main-header">
-            <h1 id="titleClickTarget">初二五班智慧应用平台</h1>
+            <h1 id="titleClickTarget">初三五班智慧应用平台</h1>
             <button class="refresh-btn" id="refreshBtn" title="刷新应用配置">⟳</button>
         </div>
-        <div id="greetingContainer" class="greeting-section" style="display: none;">
-            <div class="greeting-wrapper" id="greetingWrapper">
-                <div class="greeting-text"></div>
-                <div id="ratingContainer" style="display: inline-flex; align-items: center; gap: 4px;"></div>
-                <button id="logoutBtn" class="logout-btn" style="display: none;">退出登录</button>
-            </div>
-        </div>
-        <div id="unloggedContainer" class="unlogged-section" style="display: none;">
-            <div class="unlogged-wrapper">
-                <div class="unlogged-text">⚠️ 当前处于未登录状态</div>
-                <button id="showLoginOptionsBtn" class="scan-login-btn">立即登录</button>
-            </div>
+        <!-- 浏览器下载顶栏 -->
+        <div class="download-top-bar" id="downloadTopBar" style="display: none;">
+            <img class="bar-icon" src="41.jpg" alt="图标" onerror="this.style.display='none'">
+            <span class="bar-text">下载官方APP，功能更齐全</span>
+            <button class="bar-btn" id="topDownloadBtn">立即下载</button>
         </div>
         <div id="homePage" class="page active">
             <div class="carousel-section" id="carouselSection" style="display: none;">
@@ -235,12 +166,10 @@
             </div>
             <div id="groupsContainer" class="groups-container"><div class="loading-tip">⏳ 加载应用中...</div></div>
         </div>
-        <div id="profilePage" class="page"><div id="profileContent" style="padding: 16px;"></div></div>
     </div>
     <div class="bottom-nav-wrapper">
         <div class="bottom-nav">
             <button class="nav-item active" id="navHomeBtn"><div class="nav-icon">🏠</div><span class="nav-label">主页</span></button>
-            <button class="nav-item" id="navProfileBtn"><div class="nav-icon">👤</div><span class="nav-label">我的</span></button>
         </div>
     </div>
     <div class="add-fab" id="fabGroup" style="display: none;">
@@ -250,6 +179,8 @@
         <button class="add-btn" id="addAppFab" title="添加应用">+</button>
         <button class="add-btn" id="addGroupFab" title="添加分组" style="background:#9b59b6;">📂</button>
     </div>
+
+    <!-- 设备兼容性弹窗 -->
     <div id="deviceWarningModal" class="modal-overlay device-warning-modal" style="z-index: 30000;">
         <div class="modal-content">
             <div class="device-warning-icon" id="deviceWarningIcon"></div>
@@ -257,46 +188,25 @@
             <button class="device-warning-btn" id="deviceWarningCloseBtn">我知道了</button>
         </div>
     </div>
-    <div id="subscribeModal" class="modal-overlay subscribe-modal" style="z-index: 30003;">
+
+    <!-- 强制更新弹窗（旧版App） -->
+    <div id="forceUpdateModal" class="modal-overlay force-update-modal" style="z-index: 40000;">
         <div class="modal-content">
-            <div class="subscribe-icon">🔔</div>
-            <h3 style="margin-bottom:8px;">订阅通知</h3>
-            <div class="subscribe-message">订阅通知后，你可以第一时间收到智慧平台发出的通知，可随时取消。</div>
-            <div class="subscribe-buttons">
-                <button id="subscribeBtn" class="subscribe-btn-primary">去订阅</button>
-                <button id="cancelSubscribeBtn" class="subscribe-btn-secondary">取消</button>
-            </div>
-            <div id="noRemindContainer" style="display:none;margin-top:16px;">
-                <label class="subscribe-no-remind"><input type="checkbox" id="noRemindCheckbox"> 我已订阅不再提示</label>
-            </div>
+            <div class="update-icon">📱</div>
+            <div class="update-title">当前版本已过时</div>
+            <div class="update-desc">请下载最新版本以获得更好的体验</div>
+            <button class="update-btn" id="forceUpdateBtn">立即更新</button>
         </div>
     </div>
-    <div id="scanModal" class="modal-overlay scan-modal" style="z-index:10000;">
-        <div class="modal-content" style="padding:0;max-width:100%;width:100%;height:100%;border-radius:0;background:#000;display:flex;flex-direction:column;">
-            <div class="scan-header"><h3>扫码登录</h3><button id="closeScanModal" class="scan-close">✕</button></div>
-            <div class="scan-video-container">
-                <video id="scanVideo" autoplay playsinline muted></video>
-                <div class="scan-area"><div class="scan-line"></div><div class="corner corner-tl"></div><div class="corner corner-tr"></div><div class="corner corner-bl"></div><div class="corner corner-br"></div></div>
-                <div class="scan-tip">将二维码/条形码放入框内</div>
-                <div class="album-btn" id="scanAlbumBtn"><svg viewBox="0 0 24 24" width="28" height="28" fill="white"><path d="M18 3v2h2v14H4V5h2V3H2v18h20V3h-4zM9 9h2v2H9V9zm-2 4h2v2H7v-2zm4-4h2v2h-2V9zm-2 4h2v2H9v-2zm4-4h2v2h-2V9zm-2 4h2v2h-2v-2zm4-4h2v2h-2V9zM7 5h10V3H7v2z"/></svg><input type="file" id="scanAlbumInput" accept="image/*"></div>
-                <div id="scanStatus" class="scan-status">启动摄像头中...</div>
-            </div>
-        </div>
-    </div>
-    <div id="pointsModal" class="modal-overlay" style="z-index:10001;">
+
+    <!-- 下载弹窗（浏览器） -->
+    <div id="appDownloadModal" class="modal-overlay app-download-modal" style="z-index: 40001;">
         <div class="modal-content">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><h3>📊 积分明细</h3><button id="closePointsModal" style="background:none;border:none;font-size:1.5rem;cursor:pointer;">✕</button></div>
-            <div id="pointsModalBody" style="max-height:60vh;overflow-y:auto;"></div>
-        </div>
-    </div>
-    <div id="loginOptionsModal" class="modal-overlay" style="z-index:10002;">
-        <div class="modal-content login-options-modal">
-            <h3>请选择登录方式</h3>
-            <div class="login-options">
-                <button id="scanLoginOptionBtn" class="login-option-btn">扫码登录</button>
-                <button id="inputIdLoginOptionBtn" class="login-option-btn">输入学号登录</button>
-                <button id="cancelLoginOptionBtn" class="login-option-btn login-option-cancel">取消</button>
-            </div>
+            <img class="app-icon-large" src="41.jpg" alt="图标" onerror="this.style.display='none'">
+            <div class="app-name">五班应用平台</div>
+            <div class="app-subtitle">推荐下载官方APP</div>
+            <button class="download-btn" id="appDownloadBtn">立即下载</button>
+            <button class="later-btn" id="laterBtn">以后再说</button>
         </div>
     </div>
 
@@ -306,83 +216,21 @@
     var GITHUB_OWNER = 'bloxorz671';
     var GITHUB_REPO = 'createsoft';
     var GITHUB_PATH = '5app.txt';
-    var NAME_FILE_URL = 'https://luckynum.top/5name.txt';
-    var INTEGRAL_FILE_URL = 'https://cdn.jsdelivr.net/gh/bloxorz671/5class-system@main/student-integral.txt';
-    var JFFI_FILE_URL = 'https://cdn.jsdelivr.net/gh/bloxorz671/5class-system@main/jffi.txt';
-    var TARGET_UA = 'ClassApp/1.0 (Grade8Class5)';
-    var isTargetDevice = navigator.userAgent === TARGET_UA;
+    var APP_DOWNLOAD_URL = 'https://luckynum.top/fiveclassapp1.02.apk';
+    var APP_NEW_UA = 'fiveapp';
 
     var slidesData = [], appItems = [], groupOrder = ['其他应用'];
     var currentIndex = 0, autoInterval = null, totalSlides = 0;
     var isEditMode = false, currentToken = null, fileSha = null;
-    var currentStudentId = null;
-    var nameMapping = {}, integralMapping = {};
     var isAddingApp = false, isAddingCarousel = false;
-    var scanCodeReader = null, scanningActive = false, lastScanTime = 0;
-    var SCAN_COOLDOWN = 1000;
-    var defaultCameraId = null;
-    var draggedGroupIndex = null, draggedAppData = null;
     var cachedFileList = null, fileListLoading = false;
+    var currentUA = navigator.userAgent;
 
-    var RATING_CONFIG = [
-        { min: 12, max: Infinity, name: '夯爆了', colorClass: 'level-0' },
-        { min: 9, max: 11, name: '顶级', colorClass: 'level-1' },
-        { min: 5, max: 8, name: '人上人', colorClass: 'level-2' },
-        { min: 1, max: 4, name: 'Npc', colorClass: 'level-3' },
-        { min: -Infinity, max: 0, name: '拉完了', colorClass: 'level-4' }
-    ];
+    // ========== UA 检测 ==========
+    var isFiveApp = currentUA.indexOf(APP_NEW_UA) !== -1;
+    var isOldApp = currentUA.indexOf('ClassApp/1.0 (Grade8Class5)') !== -1 || currentUA.indexOf('ClassApp/1.0 (Grade9Class5)') !== -1;
 
     function escapeHtml(str) { if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-    function getRatingByIntegral(v) { var s=parseInt(v); if(isNaN(s)) return RATING_CONFIG[4]; for(var i=0;i<RATING_CONFIG.length;i++) if(s>=RATING_CONFIG[i].min&&s<=RATING_CONFIG[i].max) return RATING_CONFIG[i]; return RATING_CONFIG[4]; }
-    function saveStudentId(id) { if(!id) return; try{localStorage.setItem('studentId',id);sessionStorage.setItem('studentId',id);document.cookie='studentId='+id+';path=/;max-age='+(7*24*60*60);}catch(e){} }
-    function getStudentId() { var p=new URLSearchParams(window.location.search).get('p'); if(p&&/^\d{5}$/.test(p)){saveStudentId(p);return p;} try{p=localStorage.getItem('studentId');if(p&&/^\d{5}$/.test(p))return p;}catch(e){} try{p=sessionStorage.getItem('studentId');if(p)return p;}catch(e){} try{var m=document.cookie.match(/studentId=([^;]+)/);if(m&&/^\d{5}$/.test(m[1]))return m[1];}catch(e){} return null; }
-    function clearStudentId() { try{localStorage.removeItem('studentId');sessionStorage.removeItem('studentId');document.cookie='studentId=;path=/;expires=Thu,01 Jan 1970 00:00:00 GMT';}catch(e){} currentStudentId=null; }
-    function saveDefaultCamera(deviceId) { if(deviceId){try{localStorage.setItem('scan_defaultCameraId',deviceId);}catch(e){} defaultCameraId=deviceId;} }
-    function loadDefaultCamera() { try{defaultCameraId=localStorage.getItem('scan_defaultCameraId');}catch(e){} return defaultCameraId; }
-
-    var audioContext=null;
-    function playBeep() { try{if(!audioContext)audioContext=new(window.AudioContext||window.webkitAudioContext)();if(audioContext.state==='suspended')audioContext.resume().then(function(){playBeepSound();});else playBeepSound();}catch(e){} }
-    function playBeepSound() { try{var n=audioContext.currentTime;var o=audioContext.createOscillator(),g=audioContext.createGain();o.connect(g);g.connect(audioContext.destination);o.frequency.value=600;o.type='square';g.gain.setValueAtTime(0.4,n);g.gain.exponentialRampToValueAtTime(0.001,n+0.12);o.start(n);o.stop(n+0.12);}catch(e){} }
-
-    function extractLastFiveDigits(fc) { var n=fc.match(/\d/g); if(n&&n.length>=5) return n.slice(-5).join(''); var l=fc.slice(-5); if(/^\d{5}$/.test(l)) return l; return fc; }
-
-    function onScanSuccess(fc) { var n=Date.now(); if(n-lastScanTime<SCAN_COOLDOWN) return; lastScanTime=n; playBeep(); var sid=extractLastFiveDigits(fc); if(/^\d{5}$/.test(sid)){saveStudentId(sid);stopScanCamera();document.getElementById('scanModal').classList.remove('show');window.location.href='?p='+sid;}else{document.getElementById('scanStatus').textContent='识别失败，请重试';setTimeout(function(){var s=document.getElementById('scanStatus');if(s)s.textContent='扫描中...';},2000);} }
-
-    async function startScanCamera() {
-        if(!scanCodeReader){try{scanCodeReader=new ZXing.BrowserMultiFormatReader();}catch(e){document.getElementById('scanStatus').textContent='扫码库加载失败';return;}}
-        if(document.getElementById('scanVideo').srcObject) try{stopScanCamera();}catch(e){}
-        document.getElementById('scanStatus').textContent='获取摄像头列表...'; scanningActive=true;
-        try{var devices=[]; try{devices=await scanCodeReader.listVideoInputDevices();}catch(e){var ts=await navigator.mediaDevices.getUserMedia({video:true});ts.getTracks().forEach(function(t){t.stop();});devices=await scanCodeReader.listVideoInputDevices();}
-        if(devices.length===0) throw new Error('未找到摄像头');
-        var selectedId=loadDefaultCamera();
-        if(!selectedId||!devices.find(function(d){return d.deviceId===selectedId;})){var bc=devices.find(function(d){var l=(d.label||'').toLowerCase();return l.includes('back')||l.includes('rear')||l.includes('后置')||l.includes('environment');});selectedId=bc?bc.deviceId:devices[0].deviceId;saveDefaultCamera(selectedId);}
-        var sel=devices.find(function(d){return d.deviceId===selectedId;});
-        document.getElementById('scanStatus').textContent='使用: '+(sel?.label?.slice(0,30)||'摄像头');
-        await scanCodeReader.decodeFromVideoDevice(selectedId,'scanVideo',function(r,err){if(r&&scanningActive)onScanSuccess(r.getText());if(err&&!(err instanceof ZXing.NotFoundException))console.warn(err);});}
-        catch(err){document.getElementById('scanStatus').textContent='摄像头启动失败';console.error(err);}
-    }
-
-    function stopScanCamera() { scanningActive=false; if(scanCodeReader) try{scanCodeReader.reset();}catch(e){} var v=document.getElementById('scanVideo'); if(v&&v.srcObject){try{var s=v.srcObject;if(s&&s.getTracks)s.getTracks().forEach(function(t){t.stop();});v.srcObject=null;}catch(e){}} }
-
-    async function scanFromImage(file) {
-        if(!file) return; document.getElementById('scanStatus').textContent='处理图片中...';
-        try{if(scanCodeReader) try{scanCodeReader.reset();}catch(e){}
-        var v=document.getElementById('scanVideo'); if(v&&v.srcObject){var os=v.srcObject;if(os&&os.getTracks)os.getTracks().forEach(function(t){t.stop();});v.srcObject=null;}
-        var img=new Image(); var iurl=URL.createObjectURL(file);
-        await new Promise(function(r,rej){img.onload=r;img.onerror=rej;img.src=iurl;});
-        var c=document.createElement('canvas');c.width=img.width;c.height=img.height;
-        c.getContext('2d').drawImage(img,0,0,img.width,img.height); URL.revokeObjectURL(iurl);
-        v.srcObject=c.captureStream(30); await v.play(); await new Promise(function(r){setTimeout(r,200);});
-        document.getElementById('scanStatus').textContent='识别中...';
-        var tr=null; try{tr=new ZXing.BrowserMultiFormatReader();}catch(e){document.getElementById('scanStatus').textContent='扫码库加载失败';alert('扫码库加载失败');startScanCamera();return;}
-        var result=await tr.decodeFromVideoElement(v);
-        if(result&&result.text){playBeep();var sid=extractLastFiveDigits(result.text);if(/^\d{5}$/.test(sid)){saveStudentId(sid);stopScanCamera();document.getElementById('scanModal').classList.remove('show');window.location.href='?p='+sid;}else{document.getElementById('scanStatus').textContent='未识别到有效学号';alert('识别到的内容不是5位数学号：'+sid);startScanCamera();}}
-        else{document.getElementById('scanStatus').textContent='未识别到二维码';alert('未识别到二维码');startScanCamera();}}
-        catch(err){console.error(err);document.getElementById('scanStatus').textContent='识别失败';alert('识别失败');startScanCamera();}
-    }
-
-    function showScanModalFunc() { document.getElementById('scanModal').classList.add('show'); setTimeout(function(){startScanCamera();},100); }
-    function closeScanModalFunc() { stopScanCamera(); document.getElementById('scanModal').classList.remove('show'); }
 
     function copyShareLink(appName) {
         var u=window.location.origin+window.location.pathname; if(appName) u+='?app='+encodeURIComponent(appName);
@@ -390,6 +238,8 @@
     }
 
     function downloadFile(url,fileName) { var a=document.createElement('a');a.href=url;a.download=fileName.split('?')[0];a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();document.body.removeChild(a); }
+
+    function downloadApp() { window.location.href = APP_DOWNLOAD_URL; }
 
     var AUDIO_EXTS = ['mp3','m4a','wav','flac','aac','ogg','wma','opus'];
     var WEB_EXTS = ['html','htm','php','asp','jsp','aspx','cgi','pl','py','rb','do','action'];
@@ -417,9 +267,7 @@
     function openFileWithFilehelper(link) {
         var fullUrl=link;
         if(fullUrl.indexOf('http')!==0&&fullUrl.indexOf('//')!==0) fullUrl='https://luckynum.top/'+link;
-        var helperUrl='/filehelper.html?file='+encodeURIComponent(fullUrl);
-        console.log('跳转到文件助手:',helperUrl,'完整URL:',fullUrl);
-        window.location.href=helperUrl;
+        window.location.href='/filehelper.html?file='+encodeURIComponent(fullUrl);
     }
 
     async function handleAppClick(link, name) {
@@ -430,7 +278,6 @@
         openFileWithFilehelper(link);
     }
 
-    // ========== 音频查看器（独立播放/原生播放） ==========
     function openAudioViewer(url, fileName, seriesFiles) {
         var overlay=document.createElement('div'); overlay.className='file-viewer-overlay';
         var header=document.createElement('div'); header.className='viewer-header';
@@ -464,15 +311,13 @@
         }
 
         content.innerHTML=buildAudioList('independent');
-        function bindPlayButtons(){var btns=content.querySelectorAll('.audio-play-btn');btns.forEach(function(b){b.onclick=function(){var au=this.dataset.url;console.log('独立播放，跳转filehelper:',au);window.location.href='/filehelper.html?file='+encodeURIComponent(au);};});}
+        function bindPlayButtons(){var btns=content.querySelectorAll('.audio-play-btn');btns.forEach(function(b){b.onclick=function(){var au=this.dataset.url;window.location.href='/filehelper.html?file='+encodeURIComponent(au);};});}
         bindPlayButtons();
-
         header.querySelector('#audioPlayMode').onchange=function(){var mode=this.value;content.innerHTML=buildAudioList(mode);if(mode==='independent')bindPlayButtons();};
         header.querySelector('.close-btn').onclick=function(){overlay.remove();};
         overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
     }
 
-    // ========== 文件列表相关 ==========
     async function fetchFileList() {
         if(cachedFileList) return cachedFileList;
         if(fileListLoading){await new Promise(function(r){setTimeout(r,500);});return cachedFileList;}
@@ -495,7 +340,6 @@
         return sf;
     }
 
-    // ========== 解析配置文件 ==========
     function parseAppTxt(raw) {
         var lines=raw.split(/\r?\n/); var mode=null; var groups=[],pics=[],apps=[];
         lines.forEach(function(line){line=line.trim();if(!line)return;
@@ -556,41 +400,18 @@
     function resetAutoSlide(){startAutoSlide();}
 
     async function loadConfigFile(silent) { if(!silent) document.getElementById('warningBanner').style.display='block';
-        try{var url=CONFIG_URL+'?t='+Date.now();var r=await fetch(url);if(!r.ok) throw new Error('HTTP '+r.status);var text=await r.text();parseAppTxt(text);console.log('✅ 应用配置加载成功 (raw)');}
+        try{var url=CONFIG_URL+'?t='+Date.now();var r=await fetch(url);if(!r.ok) throw new Error('HTTP '+r.status);var text=await r.text();parseAppTxt(text);console.log('✅ 应用配置加载成功');}
         catch(e){console.error('❌ 加载失败:',e.message);if(!silent){document.getElementById('groupsContainer').innerHTML='<div class="error-tip">❌ 加载失败，请点击右上角刷新按钮重试</div>';document.getElementById('warningBanner').style.display='none';}}
     }
 
     function refreshConfig(){var btn=document.getElementById('refreshBtn');btn.classList.add('spinning');document.getElementById('warningBanner').style.display='block';document.getElementById('warningBanner').textContent='🔄 正在刷新应用配置...';document.getElementById('groupsContainer').innerHTML='<div class="loading-tip">⏳ 加载应用中...</div>';loadConfigFile(false).then(function(){btn.classList.remove('spinning');document.getElementById('warningBanner').style.display='none';}).catch(function(){btn.classList.remove('spinning');document.getElementById('warningBanner').textContent='⚠️ 刷新失败，请重试';});}
 
-    async function loadPointsRecords(studentId) { try{var r=await fetch(JFFI_FILE_URL+'?t='+Date.now());if(!r.ok)return{records:[],total:0};var t=await r.text();var lines=t.split(/\r?\n/);var recs=[],total=0;lines.forEach(function(line){line=line.trim();if(!line)return;var m=line.match(/^(\d{4}\/\d{2}\/\d{2})\s+(\d{2}:\d{2})\s+(\d{5})\s+(.+?)\s+([+-]\d+)$/);if(m){var date=m[1],time=m[2],sid=m[3],event=m[4],scoreStr=m[5];var score=parseInt(scoreStr);if(sid===studentId){recs.push({datetime:date+' '+time,event:event,score:score,isPlus:score>0});total+=score;}}});recs.sort(function(a,b){return new Date(b.datetime)-new Date(a.datetime);});return{records:recs,total:total};}catch(e){return{records:[],total:0};}}
+    function showHome(){document.getElementById('homePage').classList.add('active');document.getElementById('navHomeBtn').classList.add('active');}
 
-    async function showPointsDetail() { if(!currentStudentId){alert('请先登录');return;}document.getElementById('pointsModal').classList.add('show');document.getElementById('pointsModalBody').innerHTML='<div class="loading-tip">📡 加载积分记录中...</div>';var result=await loadPointsRecords(currentStudentId);if(result.records.length===0){document.getElementById('pointsModalBody').innerHTML='<div class="empty-records">暂无积分记录</div>';return;}var html='';result.records.forEach(function(r){var sc=r.isPlus?'plus':'minus';var ss=r.isPlus?'+'+r.score:''+r.score;html+='<div class="record-item"><span class="record-date">'+escapeHtml(r.datetime)+'</span><span class="record-event">'+escapeHtml(r.event)+'</span><span class="record-score '+sc+'">'+ss+'</span></div>';});document.getElementById('pointsModalBody').innerHTML=html;}
-
-    function closePointsModalFunc(){document.getElementById('pointsModal').classList.remove('show');}
-    function setAvatarImage(imgEl,sid){if(!imgEl||!sid)return;var ts=Date.now();imgEl.src=sid+'pic.jpg?t='+ts;imgEl.onerror=function(){this.onerror=null;this.src='41.jpg?t='+ts;};}
-
-    async function renderProfilePage() { var pc=document.getElementById('profileContent');if(!pc)return;if(!currentStudentId){pc.innerHTML='<div class="login-prompt"><p>👤 您还未登录</p><button class="login-btn" onclick="showLoginOptions()">立即登录</button></div>';return;}var sn=nameMapping[currentStudentId]||currentStudentId;var ct=integralMapping[currentStudentId]||0;pc.innerHTML='<div class="profile-card"><img class="avatar" id="profileAvatar" src="41.jpg" alt="头像"><div class="profile-info"><div class="profile-name">'+escapeHtml(sn)+'</div><div class="profile-student-id">学号：'+currentStudentId+'</div><div class="profile-student-id" style="margin-top:4px;">⭐ 当前积分：'+ct+'</div></div><button class="profile-logout" id="profileLogoutBtn">退出登录</button></div><div class="menu-section"><div class="menu-item" id="pointsMenuItem"><div class="menu-left"><span class="menu-icon">📊</span><span class="menu-title">积分明细</span></div><span class="menu-arrow">›</span></div><div class="menu-item" id="rankMenuItem"><div class="menu-left"><span class="menu-icon">🏆</span><span class="menu-title">积分排行榜</span></div><span class="menu-arrow">›</span></div></div>';var av=document.getElementById('profileAvatar');if(av&&currentStudentId){setAvatarImage(av,currentStudentId);av.onclick=function(){window.location.href='https://wj.qq.com/s2/26860993/0922/';};}document.getElementById('profileLogoutBtn').onclick=function(){clearStudentId();window.location.href=window.location.pathname;};document.getElementById('pointsMenuItem').onclick=function(){showPointsDetail();};document.getElementById('rankMenuItem').onclick=function(){window.location.href='/5pm';};}
-
-    function showHome(){document.getElementById('homePage').classList.add('active');document.getElementById('profilePage').classList.remove('active');document.getElementById('navHomeBtn').classList.add('active');document.getElementById('navProfileBtn').classList.remove('active');}
-    async function showProfile(){document.getElementById('homePage').classList.remove('active');document.getElementById('profilePage').classList.add('active');document.getElementById('navProfileBtn').classList.add('active');document.getElementById('navHomeBtn').classList.remove('active');await renderProfilePage();}
-
-    async function loadNameMapping() { try{var r=await fetch(NAME_FILE_URL+'?t='+Date.now());if(r.ok){var t=await r.text();nameMapping={};t.split(/\r?\n/).forEach(function(l){l=l.trim();if(!l)return;var s=l.indexOf(' ');if(s!==-1)nameMapping[l.substring(0,s)]=l.substring(s+1).trim();});return true;}}catch(e){}return false;}
-    async function loadIntegralData() { try{var r=await fetch(INTEGRAL_FILE_URL+'?t='+Date.now());if(r.ok){var t=await r.text();integralMapping={};t.split(/\r?\n/).forEach(function(l){l=l.trim();if(!l)return;var p=l.split(/\s+/);if(p.length>=2)integralMapping[p[0].trim()]=p[1].trim();});return true;}}catch(e){}return false;}
-
-    async function showGreeting() { currentStudentId=getStudentId();var gc=document.getElementById('greetingContainer'),uc=document.getElementById('unloggedContainer');if(!currentStudentId){if(gc)gc.style.display='none';if(uc)uc.style.display='block';return;}if(uc)uc.style.display='none';var te=gc?gc.querySelector('.greeting-text'):null;if(Object.keys(nameMapping).length===0)await loadNameMapping();var sn=nameMapping[currentStudentId]||currentStudentId;if(gc&&te){te.textContent=sn;gc.style.display='block';if(Object.keys(integralMapping).length===0)await loadIntegralData();var rc=document.getElementById('ratingContainer');if(integralMapping[currentStudentId]){var v=integralMapping[currentStudentId],r=getRatingByIntegral(v);rc.innerHTML='';var rb=document.createElement('div');rb.className='rating-box '+r.colorClass;rb.textContent=r.name;var sw=document.createElement('div');sw.className='score-wrapper';sw.innerHTML='<span class="score-label">分数</span><span class="score-number">'+v+'</span>';rc.appendChild(rb);rc.appendChild(sw);rc.style.display='inline-flex';}else rc.style.display='none';}var lb=document.getElementById('logoutBtn');if(lb){lb.style.display='inline-block';lb.onclick=function(){clearStudentId();window.location.href=window.location.pathname;};}var gw=document.getElementById('greetingWrapper');if(gw){gw.style.cursor='pointer';gw.onclick=function(e){if(e.target===lb||(lb&&lb.contains(e.target)))return;window.location.href='/5pm';};}}
-
-    function showStudentIdPrompt(){return new Promise(function(resolve){var m=document.createElement('div');m.className='modal-overlay student-id-modal';m.innerHTML='<div class="modal-content"><h3>🔐 初二五班专用系统</h3><div class="subtitle">请验证身份以继续使用</div><input type="number" id="studentIdInput" placeholder="请输入5位数学号" maxlength="5" autocomplete="off"><div class="warning-text" id="warningText">❌ 学号必须是5位数字，请重新输入</div><div class="modal-buttons"><button class="confirm-btn" id="confirmBtn">确定</button><button class="cancel-btn" id="cancelBtn">取消</button></div></div>';document.body.appendChild(m);m.classList.add('show');var inp=m.querySelector('#studentIdInput');inp.focus();var wt=m.querySelector('#warningText');var hc=function(){var v=inp.value.trim();if(/^\d{5}$/.test(v)){m.remove();resolve(v);}else{wt.style.display='block';inp.style.borderColor='#e74c3c';inp.value='';inp.focus();}};m.querySelector('#confirmBtn').onclick=hc;m.querySelector('#cancelBtn').onclick=function(){m.remove();resolve(null);};inp.onkeypress=function(e){if(e.key==='Enter')hc();};m.onclick=function(e){if(e.target===m){m.remove();resolve(null);}};});}
-
-    async function checkUserAgentAndPrompt(){if(!isTargetDevice)return;var ei=getStudentId();if(ei){currentStudentId=ei;await showGreeting();return;}var sid=await showStudentIdPrompt();if(sid){saveStudentId(sid);window.location.href='?p='+sid;}else{var wb=document.getElementById('warningBanner');wb.style.display='block';wb.innerHTML='⚠️ 请输入学号以使用完整功能 | <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">点击重试</span>';}}
-
-    function showLoginOptions(){document.getElementById('loginOptionsModal').classList.add('show');}
-    function hideLoginOptions(){document.getElementById('loginOptionsModal').classList.remove('show');}
-    function showManualIdInput(){hideLoginOptions();showStudentIdPrompt().then(function(sid){if(sid){saveStudentId(sid);window.location.href='?p='+sid;}});}
-
-    function checkAndShowSubscribeModal(){var nr=localStorage.getItem('subscribe_no_remind');if(nr==='true')return;var m=document.getElementById('subscribeModal');if(!m)return;var sb=document.getElementById('subscribeBtn'),cb=document.getElementById('cancelSubscribeBtn'),nrc=document.getElementById('noRemindContainer'),ncb=document.getElementById('noRemindCheckbox');if(ncb)ncb.checked=false;if(localStorage.getItem('has_clicked_subscribe')==='true'){if(nrc)nrc.style.display='block';}else{if(nrc)nrc.style.display='none';}setTimeout(function(){m.classList.add('show');},500);sb.onclick=function(){localStorage.setItem('has_clicked_subscribe','true');window.location.href='notwec';};cb.onclick=function(){m.classList.remove('show');};m.onclick=function(e){if(e.target===m)m.classList.remove('show');};if(ncb){ncb.onchange=function(e){if(e.target.checked)localStorage.setItem('subscribe_no_remind','true');else localStorage.removeItem('subscribe_no_remind');};}}
-
+    // ========== 设备检测 ==========
     (function(){var ua=navigator.userAgent;var isIOS=/iPhone|iPad|iPod/i.test(ua);var isMac=/Macintosh/i.test(ua)&&!isIOS;var m=document.getElementById('deviceWarningModal'),icon=document.getElementById('deviceWarningIcon'),msg=document.getElementById('deviceWarningMessage'),cb=document.getElementById('deviceWarningCloseBtn');var wm=null;if(isIOS){wm='当前设备访问本平台可能出现问题，建议更换安卓或鸿蒙设备访问';icon.textContent='⚠️';}else if(isMac){wm='当前设备访问本平台可能出现问题，建议更换Windows或Linux设备访问';icon.textContent='⚠️';}if(wm&&m&&msg){msg.textContent=wm;m.classList.add('show');cb.addEventListener('click',function(){m.classList.remove('show');});m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('show');});}})();
 
+    // ========== 编辑模式 ==========
     function showTokenModal(){var m=document.createElement('div');m.className='modal-overlay';m.innerHTML='<div class="modal-content"><h3>验证Token</h3><input type="password" id="tokenInput" placeholder="GitHub Token" autocomplete="off"><div class="modal-buttons"><button class="confirm-btn" id="confirmBtn">验证</button><button class="cancel-btn" id="cancelBtn">取消</button></div></div>';document.body.appendChild(m);m.classList.add('show');m.querySelector('#confirmBtn').onclick=async function(){var t=m.querySelector('#tokenInput').value.trim();if(!t){alert('请输入Token');return;}var btn=m.querySelector('#confirmBtn');btn.disabled=true;btn.textContent='验证中...';try{var tr=await fetch('https://api.github.com/user',{headers:{'Authorization':'Bearer '+t}});if(!tr.ok)throw new Error('Token无效');currentToken=t;isEditMode=true;document.body.classList.add('edit-mode');document.getElementById('fabGroup').style.display='flex';renderGroups();renderCarousel();m.remove();alert('✅ 编辑模式已启用！');}catch(e){alert('❌ Token验证失败：'+e.message);btn.disabled=false;btn.textContent='验证';}};m.querySelector('#cancelBtn').onclick=function(){m.remove();};m.onclick=function(e){if(e.target===m)m.remove();};}
 
     window.deleteSlide=function(idx){if(!isEditMode){alert('请先开启编辑模式');return;}if(confirm('确定删除这张轮播图吗？')){slidesData.splice(idx,1);renderCarousel();saveToGitHub(generateFileContent());}};
@@ -622,29 +443,51 @@
 
     async function handleUrlAppParameter(){var p=new URLSearchParams(window.location.search);var ap=p.get('app');if(!ap)return;try{ap=decodeURIComponent(ap);}catch(e){}var rc=0;while(appItems.length===0&&rc<30){await new Promise(function(r){setTimeout(r,200);});rc++;}var ta=appItems.find(function(a){return a.name===ap;});if(!ta)ta=appItems.find(function(a){return a.name.toLowerCase().indexOf(ap.toLowerCase())!==-1;});if(ta){setTimeout(function(){handleAppClick(ta.link,ta.name);},500);return;}if(!isWebLink(ap)){if(isAudioFile(ap)){var fu=ap.indexOf('http')===0?ap:'https://luckynum.top/'+ap;var fn=ap.split('/').pop();var sf=await findSeriesFiles(fn);openAudioViewer(fu,fn,sf);return;}openFileWithFilehelper(ap);return;}var fu=ap.indexOf('http')===0?ap:'https://luckynum.top/'+ap;window.open(fu,'_blank');}
 
+    // ========== 事件绑定 ==========
     document.getElementById('refreshBtn').addEventListener('click',refreshConfig);
-    document.getElementById('showLoginOptionsBtn').onclick=isTargetDevice?function(){showStudentIdPrompt().then(function(sid){if(sid){saveStudentId(sid);window.location.href='?p='+sid;}});}:showLoginOptions;
-    document.getElementById('scanLoginOptionBtn').onclick=function(){hideLoginOptions();showScanModalFunc();};
-    document.getElementById('inputIdLoginOptionBtn').onclick=function(){hideLoginOptions();showManualIdInput();};
-    document.getElementById('cancelLoginOptionBtn').onclick=hideLoginOptions;
-    document.getElementById('loginOptionsModal').onclick=function(e){if(e.target===document.getElementById('loginOptionsModal'))hideLoginOptions();};
-    document.getElementById('closeScanModal').addEventListener('click',closeScanModalFunc);
-    document.getElementById('scanAlbumBtn').addEventListener('click',function(){document.getElementById('scanAlbumInput').click();});
-    document.getElementById('scanAlbumInput').addEventListener('change',function(e){if(e.target.files&&e.target.files[0]){scanFromImage(e.target.files[0]);e.target.value='';}});
     document.getElementById('navHomeBtn').addEventListener('click',showHome);
-    document.getElementById('navProfileBtn').addEventListener('click',showProfile);
-    document.getElementById('closePointsModal').addEventListener('click',closePointsModalFunc);
-    document.getElementById('pointsModal').addEventListener('click',function(e){if(e.target===document.getElementById('pointsModal'))closePointsModalFunc();});
+    document.getElementById('topDownloadBtn').addEventListener('click',downloadApp);
+    document.getElementById('appDownloadBtn').addEventListener('click',downloadApp);
+    document.getElementById('laterBtn').addEventListener('click',function(){document.getElementById('appDownloadModal').classList.remove('show');});
+    document.getElementById('appDownloadModal').addEventListener('click',function(e){if(e.target===document.getElementById('appDownloadModal'))this.classList.remove('show');});
+    document.getElementById('forceUpdateBtn').addEventListener('click',downloadApp);
     document.getElementById('addAppFab').addEventListener('click',addApp);
     document.getElementById('addCarouselFab').addEventListener('click',addCarousel);
     document.getElementById('uploadOnlyBtn').addEventListener('click',uploadFileToRoot);
     document.getElementById('fileManagerBtn').addEventListener('click',openFileManager);
     document.getElementById('addGroupFab').addEventListener('click',addGroup);
 
+    // 标题点击3次开启编辑模式
     var tc=0,tt=null;
     document.getElementById('titleClickTarget').addEventListener('click',function(){tc++;if(tt)clearTimeout(tt);tt=setTimeout(function(){tc=0;},1000);if(tc===3){tc=0;if(isEditMode){alert('编辑模式已开启，无需重复输入Token');return;}showTokenModal();}});
 
-    async function init(){await Promise.all([loadConfigFile(),loadNameMapping(),loadIntegralData()]);if(isTargetDevice){await checkUserAgentAndPrompt();await showGreeting();}else{await showGreeting();}showHome();checkAndShowSubscribeModal();}
+    // ========== 初始化 ==========
+    async function init(){
+        await loadConfigFile();
+        showHome();
+
+        // 旧版App → 强制更新（不可关闭）
+        if(isOldApp){
+            document.getElementById('forceUpdateModal').classList.add('show');
+            return;
+        }
+
+        // fiveapp → 正常使用
+        if(isFiveApp){
+            console.log('五班应用平台 App 已启动');
+            return;
+        }
+
+        // 浏览器 → 显示下载顶栏 + 弹窗
+        document.getElementById('downloadTopBar').style.display = 'flex';
+        setTimeout(function(){
+            var storageKey = 'app_download_shown_' + new Date().toDateString();
+            if(!sessionStorage.getItem(storageKey)){
+                document.getElementById('appDownloadModal').classList.add('show');
+                sessionStorage.setItem(storageKey, '1');
+            }
+        }, 1500);
+    }
     init();
     </script>
 </body>
