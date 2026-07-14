@@ -6,7 +6,6 @@ group
 [g=政治（学科）资料]
 pic
 app
-[n=新课表 p=mmexport1779630111840.jpg l=mmexport1779630111840.jpg g=班级应用]
 [n=系统问题反馈 p=help.jpg l=help.jpg g=班级应用]
 [n=电子作业提交平台（已弃用） p=homeworkapp.jpg l=homeworkapp g=班级应用]
 [n=电子值日码 p=ezr.jpg l=ezr g=班级应用]
