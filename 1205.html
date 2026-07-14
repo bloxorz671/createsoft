@@ -283,7 +283,6 @@
 
     var isLatestApp = currentUA.indexOf(APP_LATEST_UA) !== -1;
     var isOldApp = !isLatestApp && APP_OLD_UAS.some(function(oldUA) { return currentUA.indexOf(oldUA) !== -1; });
-    // 任何App UA（包括新旧）
     var isAnyApp = isLatestApp || isOldApp || currentUA.indexOf('ClassApp') !== -1 || currentUA.indexOf('fiveapp') !== -1;
 
     function escapeHtml(str) { if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -374,8 +373,8 @@
             el.addEventListener('click', function() {
                 var id = this.dataset.id, link = this.dataset.link;
                 markAsRead(id);
+                // 在新窗口打开，不关闭主页
                 window.open(link, '_blank');
-                document.getElementById('notifyModal').classList.remove('show');
             });
         });
     }
@@ -475,7 +474,6 @@
         } catch(e) { alert('删除失败: ' + e.message); }
     }
 
-    // ========== 退出编辑模式 ==========
     function exitEditMode() {
         isEditMode = false;
         currentToken = null;
@@ -504,7 +502,7 @@
     async function loadConfigFile(silent) { if(!silent) document.getElementById('warningBanner').style.display='block'; try{var url=CONFIG_URL+'?t='+Date.now();var r=await fetch(url);if(!r.ok) throw new Error('HTTP '+r.status);var text=await r.text();parseAppTxt(text);console.log('✅ 应用配置加载成功');} catch(e){console.error('❌ 加载失败:',e.message);if(!silent){document.getElementById('groupsContainer').innerHTML='<div class="error-tip">❌ 加载失败，请点击右上角刷新按钮重试</div>';document.getElementById('warningBanner').style.display='none';}} }
     function refreshConfig(){var btn=document.getElementById('refreshBtn');btn.classList.add('spinning');document.getElementById('warningBanner').style.display='block';document.getElementById('warningBanner').textContent='🔄 正在刷新应用配置...';document.getElementById('groupsContainer').innerHTML='<div class="loading-tip">⏳ 加载应用中...</div>';loadConfigFile(false).then(function(){btn.classList.remove('spinning');document.getElementById('warningBanner').style.display='none';}).catch(function(){btn.classList.remove('spinning');document.getElementById('warningBanner').textContent='⚠️ 刷新失败，请重试';});}
     function showHome(){document.getElementById('homePage').classList.add('active');document.getElementById('navHomeBtn').classList.add('active');document.getElementById('navNotifyBtn').classList.remove('active');}
-    function showNotify(){document.getElementById('homePage').classList.remove('active');document.getElementById('navHomeBtn').classList.remove('active');document.getElementById('navNotifyBtn').classList.add('active');showNotifyModal();}
+    function showNotify(){document.getElementById('navNotifyBtn').classList.add('active');showNotifyModal();}
 
     (function(){var ua=navigator.userAgent;var isIOS=/iPhone|iPad|iPod/i.test(ua);var isMac=/Macintosh/i.test(ua)&&!isIOS;var m=document.getElementById('deviceWarningModal'),icon=document.getElementById('deviceWarningIcon'),msg=document.getElementById('deviceWarningMessage'),cb=document.getElementById('deviceWarningCloseBtn');var wm=null;if(isIOS){wm='当前设备访问本平台可能出现问题，建议更换安卓或鸿蒙设备访问';icon.textContent='⚠️';}else if(isMac){wm='当前设备访问本平台可能出现问题，建议更换Windows或Linux设备访问';icon.textContent='⚠️';}if(wm&&m&&msg){msg.textContent=wm;m.classList.add('show');cb.addEventListener('click',function(){m.classList.remove('show');});m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('show');});}})();
 
@@ -521,7 +519,6 @@
     function addGroup(){if(!isEditMode){alert('请先开启编辑模式');return;}var nn=prompt('请输入分组名称');if(nn&&groupOrder.indexOf(nn)===-1){groupOrder.push(nn);renderGroups();}else if(nn)alert('分组名称已存在');}
     function generateFileContent(){var c='group\n';for(var i=0;i<groupOrder.length;i++)c+='[g='+groupOrder[i]+']\n';c+='pic\n';for(var i=0;i<slidesData.length;i++)c+='[p='+slidesData[i].imgUrl+' l='+slidesData[i].linkUrl+']\n';c+='app\n';for(var i=0;i<appItems.length;i++)c+='[n='+appItems[i].name+' p='+appItems[i].icon+' l='+appItems[i].link+(appItems[i].group?' g='+appItems[i].group:'')+']\n';return c;}
 
-    // 保存按钮：保存配置并退出编辑模式
     async function saveAndExit() {
         if (!isEditMode) return;
         if (!currentToken) { alert('Token 未验证'); return; }
@@ -580,13 +577,9 @@
         await Promise.all([loadConfigFile(), loadNotifyList()]);
         updateNotifyBadge();
         showHome();
-        // App自动跳转
+        // App不弹订阅/下载弹窗
         if (isAnyApp) {
-            if (isLatestApp) {
-                console.log('五班应用平台 1.03 已启动');
-                return;
-            }
-            // 旧版App强制更新
+            if (isLatestApp) { console.log('五班应用平台 1.03 已启动'); return; }
             document.getElementById('forceUpdateModal').classList.add('show');
             return;
         }
