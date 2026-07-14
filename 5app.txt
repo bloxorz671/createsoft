@@ -12,7 +12,6 @@ app
 [n=2025年中学美术素养模拟命题（最终版）.pptx p=ppt.jpg l=https://www.kdocs.cn/l/cpTKNPp1DpPL g=美术（学科）资料]
 [n=附件3：2026年广州市初中学业水平考试生物学实验操作考试范围.pdf p=pdf.jpg l=https://www.kdocs.cn/l/cafIxRqs4p44 g=生物（学科）资料]
 [n=七上期末复习课件-2025-2026学年人教版生物七年级上册 p=ppt.jpg l=https://www.kdocs.cn/l/cdjOM643677l g=生物（学科）资料]
-[n=八下英语Speaking听力 p=audio.jpg l=Speaking.mp3 g=英语（学科）资料]
 [n=八下英语Focusing on culture听力 p=audio.jpg l=Focusing on culture.mp3 g=英语（学科）资料]
 [n=八下英语Cross-curricular connection听力 p=audio.jpg l=Cross-curricular connection.mp3 g=英语（学科）资料]
 [n=八下英语单词听力 p=audio.jpg l=单词.mp3 g=英语（学科）资料]
