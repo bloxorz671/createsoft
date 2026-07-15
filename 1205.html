@@ -269,8 +269,7 @@
     var NOTIFY_PATH = 'fiveapppush.txt';
     var APP_DOWNLOAD_URL = 'https://luckynum.top/fiveclassapp1.12.apk';
     var APP_URL_SCHEME = 'fiveapp://';
-    var APP_MIN_VERSION = 103; // 低于1.03强制更新
-    var APP_LATEST_VERSION = 112; // 1.12+ 支持URL Scheme
+    var APP_MIN_VERSION = 112; // 低于1.12强制更新
 
     var slidesData = [], appItems = [], groupOrder = ['其他应用'];
     var currentIndex = 0, autoInterval = null, totalSlides = 0;
@@ -282,7 +281,7 @@
     var notifyList = [];
     var readNotifyIds = JSON.parse(localStorage.getItem('read_notify_ids') || '[]');
 
-    // 版本号提取：fiveapp1.12 → 112, fiveapp → 0
+    // 版本号提取：fiveapp1.12 → 112, fiveapp → 0, 非App → -1
     function getAppVersion(ua) {
         var m = ua.match(/fiveapp(\d+)\.?(\d*)/);
         if (m) {
@@ -290,13 +289,13 @@
             var minor = parseInt(m[2]) || 0;
             return major * 100 + minor;
         }
-        if (ua.indexOf('ClassApp') !== -1) return 1; // ClassApp旧版
-        return -1; // 非App
+        if (ua.indexOf('ClassApp') !== -1) return 1;
+        return -1;
     }
 
     var appVersion = getAppVersion(currentUA);
-    var isLatestApp = appVersion >= APP_LATEST_VERSION;
-    var isOldApp = appVersion >= 0 && appVersion < APP_MIN_VERSION;
+    var isLatestApp = appVersion >= APP_MIN_VERSION;  // ≥1.12放行
+    var isOldApp = appVersion >= 0 && appVersion < APP_MIN_VERSION; // 有App但<1.12强制更新
     var isAnyApp = appVersion >= 0;
 
     function escapeHtml(str) { if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -592,17 +591,13 @@
         updateNotifyBadge();
         showHome();
 
-        // App内处理
         if (isAnyApp) {
-            if (isLatestApp) { console.log('五班应用平台 1.12+ 已启动'); return; }
-            if (isOldApp) { document.getElementById('forceUpdateModal').classList.add('show'); return; }
-            // 1.03~1.11之间的版本，不强制更新但也不弹下载窗
+            if (isLatestApp) { console.log('五班应用平台已启动, 版本:', appVersion); return; }
+            document.getElementById('forceUpdateModal').classList.add('show');
             return;
         }
 
-        // 浏览器：先尝试唤起App
         tryOpenApp();
-        // 2秒后如果还在页面上，说明App没安装，弹下载窗
         setTimeout(function() {
             if (!document.hidden) {
                 document.getElementById('downloadTopBar').style.display = 'flex';
