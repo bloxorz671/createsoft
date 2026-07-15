@@ -2,6 +2,7 @@ group
 [g=本周调课]
 [g=班级应用]
 pic
+[p=IMG_20260715_162549.jpg l=IMG_20260715_162549.jpg]
 app
 [n=系统问题反馈 p=help.jpg l=help.jpg g=班级应用]
 [n=电子作业提交平台（已弃用） p=homeworkapp.jpg l=homeworkapp g=班级应用]
