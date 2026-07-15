@@ -267,9 +267,10 @@
     var GITHUB_REPO = 'createsoft';
     var GITHUB_PATH = '5app.txt';
     var NOTIFY_PATH = 'fiveapppush.txt';
-    var APP_DOWNLOAD_URL = 'https://luckynum.top/fiveclassapp1.03.apk';
-    var APP_LATEST_UA = 'fiveapp1.03';
-    var APP_OLD_UAS = ['fiveapp', 'ClassApp/1.0 (Grade8Class5)', 'ClassApp/1.0 (Grade9Class5)'];
+    var APP_DOWNLOAD_URL = 'https://luckynum.top/fiveclassapp1.12.apk';
+    var APP_URL_SCHEME = 'fiveapp://';
+    var APP_MIN_VERSION = 103; // 低于1.03强制更新
+    var APP_LATEST_VERSION = 112; // 1.12+ 支持URL Scheme
 
     var slidesData = [], appItems = [], groupOrder = ['其他应用'];
     var currentIndex = 0, autoInterval = null, totalSlides = 0;
@@ -281,14 +282,28 @@
     var notifyList = [];
     var readNotifyIds = JSON.parse(localStorage.getItem('read_notify_ids') || '[]');
 
-    var isLatestApp = currentUA.indexOf(APP_LATEST_UA) !== -1;
-    var isOldApp = !isLatestApp && APP_OLD_UAS.some(function(oldUA) { return currentUA.indexOf(oldUA) !== -1; });
-    var isAnyApp = isLatestApp || isOldApp || currentUA.indexOf('ClassApp') !== -1 || currentUA.indexOf('fiveapp') !== -1;
+    // 版本号提取：fiveapp1.12 → 112, fiveapp → 0
+    function getAppVersion(ua) {
+        var m = ua.match(/fiveapp(\d+)\.?(\d*)/);
+        if (m) {
+            var major = parseInt(m[1]) || 0;
+            var minor = parseInt(m[2]) || 0;
+            return major * 100 + minor;
+        }
+        if (ua.indexOf('ClassApp') !== -1) return 1; // ClassApp旧版
+        return -1; // 非App
+    }
+
+    var appVersion = getAppVersion(currentUA);
+    var isLatestApp = appVersion >= APP_LATEST_VERSION;
+    var isOldApp = appVersion >= 0 && appVersion < APP_MIN_VERSION;
+    var isAnyApp = appVersion >= 0;
 
     function escapeHtml(str) { if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function copyShareLink(appName) { var u=window.location.origin+window.location.pathname; if(appName) u+='?app='+encodeURIComponent(appName); navigator.clipboard.writeText(u).then(function(){var t=document.createElement('div');t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:white;padding:12px 24px;border-radius:30px;z-index:30000;font-size:14px;';t.textContent='✅ 网址已复制';document.body.appendChild(t);setTimeout(function(){t.remove();},1500);}).catch(function(){alert('复制失败');}); }
     function downloadFile(url,fileName) { var a=document.createElement('a');a.href=url;a.download=fileName.split('?')[0];a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();document.body.removeChild(a); }
     function downloadApp() { window.location.href = APP_DOWNLOAD_URL; }
+    function tryOpenApp() { window.location.href = APP_URL_SCHEME; }
 
     var AUDIO_EXTS = ['mp3','m4a','wav','flac','aac','ogg','wma','opus'];
     var WEB_EXTS = ['html','htm','php','asp','jsp','aspx','cgi','pl','py','rb','do','action'];
@@ -373,7 +388,6 @@
             el.addEventListener('click', function() {
                 var id = this.dataset.id, link = this.dataset.link;
                 markAsRead(id);
-                // 在新窗口打开，不关闭主页
                 window.open(link, '_blank');
             });
         });
@@ -508,7 +522,7 @@
 
     function showTokenModal(){var m=document.createElement('div');m.className='modal-overlay';m.innerHTML='<div class="modal-content"><h3>验证Token</h3><input type="password" id="tokenInput" placeholder="GitHub Token" autocomplete="off"><div class="modal-buttons"><button class="confirm-btn" id="confirmBtn">验证</button><button class="cancel-btn" id="cancelBtn">取消</button></div></div>';document.body.appendChild(m);m.classList.add('show');m.querySelector('#confirmBtn').onclick=async function(){var t=m.querySelector('#tokenInput').value.trim();if(!t){alert('请输入Token');return;}var btn=m.querySelector('#confirmBtn');btn.disabled=true;btn.textContent='验证中...';try{var tr=await fetch('https://api.github.com/user',{headers:{'Authorization':'Bearer '+t}});if(!tr.ok)throw new Error('Token无效');currentToken=t;isEditMode=true;document.body.classList.add('edit-mode');document.getElementById('fabGroup').style.display='flex';document.getElementById('saveBtn').style.display='flex';renderGroups();renderCarousel();m.remove();alert('✅ 编辑模式已启用！点击右上角💾保存并退出');}catch(e){alert('❌ Token验证失败：'+e.message);btn.disabled=false;btn.textContent='验证';}};m.querySelector('#cancelBtn').onclick=function(){m.remove();};m.onclick=function(e){if(e.target===m)m.remove();};}
 
-    window.deleteSlide=function(idx){if(!isEditMode){alert('请先开启编辑模式');return;}if(confirm('确定删除这张轮播图吗？')){slidesData.splice(idx,1);renderCarousel();}}
+    window.deleteSlide=function(idx){if(!isEditMode){alert('请先开启编辑模式');return;}if(confirm('确定删除这张轮播图吗？')){slidesData.splice(idx,1);renderCarousel();}};
     window.editGroup=function(gn){if(!isEditMode){alert('请先开启编辑模式');return;}var nn=prompt('请输入新的分组名称',gn);if(nn&&nn!==gn){var i=groupOrder.indexOf(gn);if(i!==-1){groupOrder[i]=nn;appItems.forEach(function(a){if(a.group===gn)a.group=nn;});renderGroups();}}};
     window.deleteGroup=function(gn){if(!isEditMode){alert('请先开启编辑模式');return;}if(gn==='其他应用'){alert('不能删除"其他应用"分组');return;}if(confirm('确定删除分组"'+gn+'"？')){var i=groupOrder.indexOf(gn);if(i!==-1){groupOrder.splice(i,1);appItems.forEach(function(a){if(a.group===gn)a.group='其他应用';});renderGroups();}}};
     window.editApp=function(name,link,icon,group){if(!isEditMode){alert('请先开启编辑模式');return;}var m=document.createElement('div');m.className='modal-overlay';var opts=groupOrder.map(function(g){return'<option value="'+escapeHtml(g)+'"'+(g===group?' selected':'')+'>'+escapeHtml(g)+'</option>';}).join('');m.innerHTML='<div class="modal-content"><h3>编辑应用</h3><label>应用名称</label><input id="appName" value="'+escapeHtml(name)+'"><label>图标链接</label><input id="appIcon" value="'+escapeHtml(icon)+'"><label>跳转链接</label><input id="appLink" value="'+escapeHtml(link)+'"><label>所属分组</label><select id="appGroup">'+opts+'</select><div class="modal-buttons"><button class="confirm-btn">保存</button><button class="cancel-btn">取消</button></div></div>';document.body.appendChild(m);m.classList.add('show');m.querySelector('.confirm-btn').onclick=function(){var nn=m.querySelector('#appName').value.trim(),ni=m.querySelector('#appIcon').value.trim()||'null.jpg',nl=m.querySelector('#appLink').value.trim(),ng=m.querySelector('#appGroup').value;if(!nn||!nl){alert('请填写完整');return;}var app=appItems.find(function(a){return a.name===name&&a.link===link;});if(app){app.name=nn;app.icon=ni;app.link=nl;app.group=ng;renderGroups();m.remove();}};m.querySelector('.cancel-btn').onclick=function(){m.remove();};m.onclick=function(e){if(e.target===m)m.remove();};};
@@ -577,15 +591,24 @@
         await Promise.all([loadConfigFile(), loadNotifyList()]);
         updateNotifyBadge();
         showHome();
-        // App不弹订阅/下载弹窗
+
+        // App内处理
         if (isAnyApp) {
-            if (isLatestApp) { console.log('五班应用平台 1.03 已启动'); return; }
-            document.getElementById('forceUpdateModal').classList.add('show');
+            if (isLatestApp) { console.log('五班应用平台 1.12+ 已启动'); return; }
+            if (isOldApp) { document.getElementById('forceUpdateModal').classList.add('show'); return; }
+            // 1.03~1.11之间的版本，不强制更新但也不弹下载窗
             return;
         }
-        // 浏览器下载提示
-        document.getElementById('downloadTopBar').style.display = 'flex';
-        setTimeout(function(){ document.getElementById('appDownloadModal').classList.add('show'); }, 1500);
+
+        // 浏览器：先尝试唤起App
+        tryOpenApp();
+        // 2秒后如果还在页面上，说明App没安装，弹下载窗
+        setTimeout(function() {
+            if (!document.hidden) {
+                document.getElementById('downloadTopBar').style.display = 'flex';
+                document.getElementById('appDownloadModal').classList.add('show');
+            }
+        }, 2000);
     }
     init();
     </script>
