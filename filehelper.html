@@ -618,10 +618,8 @@
 
             const BASE_DOMAIN = 'https://luckynum.top';
 
-            // 检测是否为 FiveApp 环境（UA 中包含 fiveapp 即可）
             const IS_FIVEAPP = /fiveapp/i.test(navigator.userAgent);
 
-            // 根据环境设置按钮文字
             if (IS_FIVEAPP) {
                 shareCopyBtn.textContent = '📤 分享';
             }
@@ -997,7 +995,7 @@
                 } catch (err) { showErrorPage('无法加载文件：' + err.message); }
             }
 
-            function handleShareOrCopy() {
+            async function handleShareOrCopy() {
                 if (!remoteSourceURL) {
                     showToast('无法分享');
                     return;
@@ -1005,7 +1003,17 @@
                 const shareURL = `${BASE_DOMAIN}/filehelper?file=${encodeURIComponent(remoteSourceURL)}`;
 
                 if (IS_FIVEAPP) {
-                    window.location.href = `fiveapp://share?url=${encodeURIComponent(shareURL)}`;
+                    // 先复制到剪贴板
+                    try {
+                        await navigator.clipboard.writeText(shareURL);
+                        showToast('链接已复制');
+                    } catch (e) {
+                        // 剪贴板失败也继续
+                    }
+                    // 延迟一下再触发分享
+                    setTimeout(() => {
+                        window.location.href = `fiveapp://share?url=${encodeURIComponent(shareURL)}`;
+                    }, 300);
                 } else {
                     navigator.clipboard.writeText(shareURL).then(() => {
                         showToast('链接已复制');
