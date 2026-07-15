@@ -430,7 +430,6 @@
             cursor: pointer;
         }
 
-        /* 倍速弹窗 */
         .speed-popup {
             position: absolute;
             bottom: calc(100% + 8px);
@@ -469,7 +468,6 @@
             color: white;
         }
 
-        /* PDF/DOCX/PPT/XLSX 预览 */
         .zoom-stage {
             flex: 1;
             overflow: hidden;
@@ -583,7 +581,7 @@
     <div id="topBar" class="top-bar hidden">
         <button class="back-btn" id="backBtn">← 返回</button>
         <span class="file-name" id="fileNameDisplay">文件名称</span>
-        <button class="action-btn" id="copyLinkBtn">🔗 复制链接</button>
+        <button class="action-btn" id="shareCopyBtn">🔗 复制链接</button>
         <button class="action-btn" id="downloadBtn">⬇️ 下载</button>
     </div>
     <div class="main-container" id="mainContainer">
@@ -611,7 +609,7 @@
             const fileNameDisplay = document.getElementById('fileNameDisplay');
             const backBtn = document.getElementById('backBtn');
             const downloadBtn = document.getElementById('downloadBtn');
-            const copyLinkBtn = document.getElementById('copyLinkBtn');
+            const shareCopyBtn = document.getElementById('shareCopyBtn');
             const toast = document.getElementById('toast');
 
             let currentFileURL = null;
@@ -619,6 +617,22 @@
             let remoteSourceURL = null;
 
             const BASE_DOMAIN = 'https://luckynum.top';
+
+            // 检测是否为 FiveApp 环境
+            function isFiveApp() {
+                const ua = navigator.userAgent;
+                const match = ua.match(/fiveapp\/([\d.]+)/i);
+                if (!match) return false;
+                const version = parseFloat(match[1]);
+                return version >= 1.12;
+            }
+
+            const IS_FIVEAPP = isFiveApp();
+
+            // 根据环境设置按钮文字
+            if (IS_FIVEAPP) {
+                shareCopyBtn.textContent = '📤 分享';
+            }
 
             function toAbsoluteURL(url) {
                 if (!url) return url;
@@ -991,12 +1005,29 @@
                 } catch (err) { showErrorPage('无法加载文件：' + err.message); }
             }
 
+            function handleShareOrCopy() {
+                if (!remoteSourceURL) {
+                    showToast('无法分享');
+                    return;
+                }
+                const shareURL = `${BASE_DOMAIN}/filehelper?file=${encodeURIComponent(remoteSourceURL)}`;
+
+                if (IS_FIVEAPP) {
+                    // FiveApp 环境：调用分享
+                    window.location.href = `fiveapp://share?url=${encodeURIComponent(shareURL)}`;
+                } else {
+                    // 普通浏览器：复制链接
+                    navigator.clipboard.writeText(shareURL).then(() => {
+                        showToast('链接已复制');
+                    }).catch(() => {
+                        showToast('复制失败');
+                    });
+                }
+            }
+
             backBtn.addEventListener('click', goBack);
             downloadBtn.addEventListener('click', () => { if (remoteSourceURL) window.open(toAbsoluteURL(remoteSourceURL), '_blank'); });
-            copyLinkBtn.addEventListener('click', async () => {
-                if (remoteSourceURL) { await navigator.clipboard.writeText(`${BASE_DOMAIN}/filehelper?file=${encodeURIComponent(remoteSourceURL)}`); showToast('链接已复制'); }
-                else showToast('无法复制链接');
-            });
+            shareCopyBtn.addEventListener('click', handleShareOrCopy);
 
             const p = new URL(location.href).searchParams.get('file');
             if (p) loadRemote(p);
