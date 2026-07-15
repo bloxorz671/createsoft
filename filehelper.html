@@ -1002,7 +1002,7 @@
 
                 if (IS_FIVEAPP) {
                     try { await navigator.clipboard.writeText(shareURL); } catch (e) {}
-                    window.location.href = 'fiveapp://';
+                    window.location.href = 'fiveapp://share';
                 } else {
                     navigator.clipboard.writeText(shareURL).then(() => {
                         showToast('链接已复制');
