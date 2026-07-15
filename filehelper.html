@@ -618,16 +618,8 @@
 
             const BASE_DOMAIN = 'https://luckynum.top';
 
-            // 检测是否为 FiveApp 环境
-            function isFiveApp() {
-                const ua = navigator.userAgent;
-                const match = ua.match(/fiveapp\/([\d.]+)/i);
-                if (!match) return false;
-                const version = parseFloat(match[1]);
-                return version >= 1.12;
-            }
-
-            const IS_FIVEAPP = isFiveApp();
+            // 检测是否为 FiveApp 环境（UA 中包含 fiveapp 即可）
+            const IS_FIVEAPP = /fiveapp/i.test(navigator.userAgent);
 
             // 根据环境设置按钮文字
             if (IS_FIVEAPP) {
@@ -1013,10 +1005,8 @@
                 const shareURL = `${BASE_DOMAIN}/filehelper?file=${encodeURIComponent(remoteSourceURL)}`;
 
                 if (IS_FIVEAPP) {
-                    // FiveApp 环境：调用分享
                     window.location.href = `fiveapp://share?url=${encodeURIComponent(shareURL)}`;
                 } else {
-                    // 普通浏览器：复制链接
                     navigator.clipboard.writeText(shareURL).then(() => {
                         showToast('链接已复制');
                     }).catch(() => {
