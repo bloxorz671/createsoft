@@ -216,7 +216,6 @@
             color: #000000;
         }
 
-        /* 音频播放器 */
         .audio-player {
             width: 100%;
             max-width: 375px;
@@ -617,7 +616,6 @@
             let remoteSourceURL = null;
 
             const BASE_DOMAIN = 'https://luckynum.top';
-
             const IS_FIVEAPP = /fiveapp/i.test(navigator.userAgent);
 
             if (IS_FIVEAPP) {
@@ -1003,17 +1001,8 @@
                 const shareURL = `${BASE_DOMAIN}/filehelper?file=${encodeURIComponent(remoteSourceURL)}`;
 
                 if (IS_FIVEAPP) {
-                    // 先复制到剪贴板
-                    try {
-                        await navigator.clipboard.writeText(shareURL);
-                        showToast('链接已复制');
-                    } catch (e) {
-                        // 剪贴板失败也继续
-                    }
-                    // 延迟一下再触发分享
-                    setTimeout(() => {
-                        window.location.href = `fiveapp://share?url=${encodeURIComponent(shareURL)}`;
-                    }, 300);
+                    try { await navigator.clipboard.writeText(shareURL); } catch (e) {}
+                    window.location.href = 'fiveapp://';
                 } else {
                     navigator.clipboard.writeText(shareURL).then(() => {
                         showToast('链接已复制');
