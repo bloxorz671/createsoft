@@ -11,3 +11,5 @@ app
 [n=2025年中学美术素养模拟命题（最终版）.pptx p=ppt.jpg l=https://www.kdocs.cn/l/cpTKNPp1DpPL g=美术（学科）资料]
 [n=附件3：2026年广州市初中学业水平考试生物学实验操作考试范围.pdf p=pdf.jpg l=https://www.kdocs.cn/l/cafIxRqs4p44 g=生物（学科）资料]
 [n=七上期末复习课件-2025-2026学年人教版生物七年级上册 p=ppt.jpg l=https://www.kdocs.cn/l/cdjOM643677l g=生物（学科）资料]
+[n=化学-九年级上册-电子教材预习（可下载可预览） p=pdf.jpg l=化学-九年级上册-电子教材预习.pdf g=暑假专区]
+[n=物理-九年级-电子教材预习（可预览下载） p=pdf.jpg l=九年级物理课本-全一册.pdf g=暑假专区]
