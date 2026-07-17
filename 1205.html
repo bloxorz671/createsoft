@@ -159,8 +159,7 @@
         .toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
         .about-section { text-align: center; padding: 50px 20px 40px; }
         .about-icon-wrap { display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-        .about-icon-circle { width: 84px; height: 84px; border-radius: 50%; background: #2b4c8a; display: flex; align-items: center; justify-content: center; }
-        .about-icon-char { color: white; font-size: 48px; font-weight: 700; line-height: 1; }
+        .about-icon-sq { width: 84px; height: 84px; border-radius: 18px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .about-name { font-size: 1.3rem; font-weight: 700; color: #1e3c72; margin-bottom: 6px; }
         .about-version { font-size: 0.88rem; color: #6b7280; margin-bottom: 20px; }
         .about-latest { display: inline-block; font-size: 0.82rem; color: #16a34a; font-weight: 500; background: #f0fdf4; padding: 6px 16px; border-radius: 20px; }
@@ -216,7 +215,6 @@
             </div>
             <div id="groupsContainer" class="groups-container"><div class="loading-tip">⏳ 加载应用中...</div></div>
         </div>
-        <!-- 设置页面 -->
         <div id="settingsPage" class="setting-page">
             <div class="settings-menu-item" id="menuNotifySettings">
                 <div class="settings-menu-left">
@@ -235,7 +233,6 @@
                 <span class="settings-menu-arrow">&gt;</span>
             </div>
         </div>
-        <!-- 通知设置子页面 -->
         <div id="pushSettingsPage" class="setting-page" style="display:none;">
             <div class="viewer-header" style="position:sticky;top:0;z-index:10;">
                 <button class="viewer-btn" id="pushSettingsBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button>
@@ -252,21 +249,13 @@
             <div class="setting-group">
                 <div class="setting-row">
                     <span class="setting-label">WiFi下通知检查频率</span>
-                    <span class="setting-select-wrap">
-                        每
-                        <select class="setting-select" id="wifiInterval"></select>
-                        分钟一次
-                    </span>
+                    <span class="setting-select-wrap">每<select class="setting-select" id="wifiInterval"></select>分钟一次</span>
                 </div>
             </div>
             <div class="setting-group">
                 <div class="setting-row">
                     <span class="setting-label">移动数据下通知检查频率</span>
-                    <span class="setting-select-wrap">
-                        每
-                        <select class="setting-select" id="mdInterval"></select>
-                        分钟一次
-                    </span>
+                    <span class="setting-select-wrap">每<select class="setting-select" id="mdInterval"></select>分钟一次</span>
                 </div>
             </div>
             <div class="setting-group">
@@ -277,7 +266,6 @@
                 <div class="setting-hint">打开后将不能及时收到最新通知</div>
             </div>
         </div>
-        <!-- 关于子页面 -->
         <div id="aboutPage" class="setting-page" style="display:none;">
             <div class="viewer-header" style="position:sticky;top:0;z-index:10;">
                 <button class="viewer-btn" id="aboutBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button>
@@ -286,9 +274,7 @@
             </div>
             <div class="about-section">
                 <div class="about-icon-wrap">
-                    <div class="about-icon-circle">
-                        <span class="about-icon-char">&#9432;</span>
-                    </div>
+                    <img class="about-icon-sq" src="41.jpg" alt="图标" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2284%22 height=%2284%22%3E%3Crect width=%2284%22 height=%2284%22 rx=%2218%22 fill=%22%232b4c8a%22/%3E%3Ctext x=%2242%22 y=%2254%22 font-size=%2236%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22system-ui%22%3E5%3C/text%3E%3C/svg%3E'">
                 </div>
                 <div class="about-name" id="aboutAppName">五班应用平台</div>
                 <div class="about-version" id="aboutVersion">版本：1.15</div>
@@ -394,13 +380,7 @@
     var notifyList = [];
     var readNotifyIds = JSON.parse(localStorage.getItem('read_notify_ids') || '[]');
 
-    function getAppVersion(ua) {
-        var m = ua.match(/fiveapp(\d+)\.?(\d*)/);
-        if (m) { var major = parseInt(m[1]) || 0; var minor = parseInt(m[2]) || 0; return major * 100 + minor; }
-        if (ua.indexOf('ClassApp') !== -1) return 1;
-        return -1;
-    }
-
+    function getAppVersion(ua) { var m = ua.match(/fiveapp(\d+)\.?(\d*)/); if (m) { var major = parseInt(m[1]) || 0; var minor = parseInt(m[2]) || 0; return major * 100 + minor; } if (ua.indexOf('ClassApp') !== -1) return 1; return -1; }
     var appVersion = getAppVersion(currentUA);
     var isLatestApp = appVersion >= APP_MIN_VERSION;
     var isOldApp = appVersion >= 0 && appVersion < APP_MIN_VERSION;
@@ -443,96 +423,32 @@
 
     async function findSeriesFiles(currentFileName,allowedExts) { if(!allowedExts) allowedExts=['mp3','m4a','wav','flac','aac','mp4','webm','ogg','mov','avi','mkv']; var fileList=await fetchFileList(); if(!fileList||fileList.length===0) return []; var seriesName=null; var ci=parseEpisodeInfo(currentFileName); if(ci) seriesName=ci.seriesName; else seriesName=currentFileName.replace(/\.(mp3|m4a|wav|flac|aac|mp4|webm|ogg|mov|avi|mkv|ogg|wma|opus)$/i,''); if(!seriesName) return [{fileName:currentFileName,episode:0,displayName:currentFileName,url:'https://luckynum.top/'+encodeURIComponent(currentFileName)}]; var sf=[]; fileList.forEach(function(fn){var info=parseEpisodeInfo(fn);if(info&&info.seriesName===seriesName&&allowedExts.indexOf(info.ext)!==-1) sf.push({fileName:fn,episode:info.episode,displayName:info.seriesName+'-'+info.episodeName,url:'https://luckynum.top/'+encodeURIComponent(fn)});}); sf.sort(function(a,b){return a.episode-b.episode;}); if(sf.length===0) return [{fileName:currentFileName,episode:0,displayName:currentFileName,url:'https://luckynum.top/'+encodeURIComponent(currentFileName)}]; return sf; }
 
-    // ========== 通知功能 ==========
-    async function loadNotifyList() {
-        try { var r = await fetch(NOTIFY_URL + '?t=' + Date.now()); if (!r.ok) { notifyList = []; return; } var text = await r.text(); var lines = text.split(/\r?\n/); notifyList = [];
-            lines.forEach(function(line) { line = line.trim(); if (!line) return; var m = line.match(/^(\d{12})\s+(.+?)\s+(https?:\/\/\S+)$/); if (m) { var ts = m[1], content = m[2], link = m[3]; var formattedTime = ts.substring(0,4) + '-' + ts.substring(4,6) + '-' + ts.substring(6,8) + ' ' + ts.substring(8,10) + ':' + ts.substring(10,12); notifyList.push({ id: ts, time: formattedTime, content: content, link: link, raw: line }); } });
-            notifyList.sort(function(a, b) { return b.id.localeCompare(a.id); });
-        } catch(e) { notifyList = []; }
-    }
-
+    async function loadNotifyList() { try { var r = await fetch(NOTIFY_URL + '?t=' + Date.now()); if (!r.ok) { notifyList = []; return; } var text = await r.text(); var lines = text.split(/\r?\n/); notifyList = []; lines.forEach(function(line) { line = line.trim(); if (!line) return; var m = line.match(/^(\d{12})\s+(.+?)\s+(https?:\/\/\S+)$/); if (m) { var ts = m[1], content = m[2], link = m[3]; var formattedTime = ts.substring(0,4) + '-' + ts.substring(4,6) + '-' + ts.substring(6,8) + ' ' + ts.substring(8,10) + ':' + ts.substring(10,12); notifyList.push({ id: ts, time: formattedTime, content: content, link: link, raw: line }); } }); notifyList.sort(function(a, b) { return b.id.localeCompare(a.id); }); } catch(e) { notifyList = []; } }
     function getUnreadCount() { var count = 0; notifyList.forEach(function(item) { if (readNotifyIds.indexOf(item.id) === -1) count++; }); return count; }
     function updateNotifyBadge() { var badge = document.getElementById('notifyBadge'); var count = getUnreadCount(); if (count > 0) { badge.textContent = count > 99 ? '99+' : count; badge.style.display = 'flex'; } else { badge.style.display = 'none'; } }
-
-    function renderNotifyList() {
-        var body = document.getElementById('notifyListBody');
-        if (notifyList.length === 0) { body.innerHTML = '<div class="notify-list-empty">暂无通知</div>'; return; }
-        var html = '';
-        notifyList.forEach(function(item) { var isRead = readNotifyIds.indexOf(item.id) !== -1; html += '<div class="notify-item' + (isRead ? '' : ' unread') + '" data-id="' + item.id + '" data-link="' + escapeHtml(item.link) + '"><div class="notify-dot' + (isRead ? ' read' : '') + '"></div><div class="notify-content"><div class="notify-time">' + item.time + '</div><div class="notify-text">' + escapeHtml(item.content) + '</div></div><div class="notify-arrow">&gt;</div></div>'; });
-        body.innerHTML = html;
-        body.querySelectorAll('.notify-item').forEach(function(el) { el.addEventListener('click', function() { var id = this.dataset.id, link = this.dataset.link; markAsRead(id); window.open(link, '_blank'); }); });
-    }
-
+    function renderNotifyList() { var body = document.getElementById('notifyListBody'); if (notifyList.length === 0) { body.innerHTML = '<div class="notify-list-empty">暂无通知</div>'; return; } var html = ''; notifyList.forEach(function(item) { var isRead = readNotifyIds.indexOf(item.id) !== -1; html += '<div class="notify-item' + (isRead ? '' : ' unread') + '" data-id="' + item.id + '" data-link="' + escapeHtml(item.link) + '"><div class="notify-dot' + (isRead ? ' read' : '') + '"></div><div class="notify-content"><div class="notify-time">' + item.time + '</div><div class="notify-text">' + escapeHtml(item.content) + '</div></div><div class="notify-arrow">&gt;</div></div>'; }); body.innerHTML = html; body.querySelectorAll('.notify-item').forEach(function(el) { el.addEventListener('click', function() { var id = this.dataset.id, link = this.dataset.link; markAsRead(id); window.open(link, '_blank'); }); }); }
     function markAsRead(id) { if (readNotifyIds.indexOf(id) === -1) { readNotifyIds.push(id); localStorage.setItem('read_notify_ids', JSON.stringify(readNotifyIds)); } updateNotifyBadge(); renderNotifyList(); }
     function markAllAsRead() { notifyList.forEach(function(item) { if (readNotifyIds.indexOf(item.id) === -1) readNotifyIds.push(item.id); }); localStorage.setItem('read_notify_ids', JSON.stringify(readNotifyIds)); updateNotifyBadge(); renderNotifyList(); }
     function showNotifyModal() { renderNotifyList(); document.getElementById('notifyModal').classList.add('show'); }
 
-    // ========== 设置功能 ==========
-    function getPushSettings() {
-        var settings = { switchOn: true, wifi: 1, md: 15, mdDisabled: false };
-        try { var saved = JSON.parse(localStorage.getItem('push_settings')); if (saved) { settings = saved; } } catch(e) {}
-        return settings;
-    }
+    // 设置功能
+    function getPushSettings() { var settings = { switchOn: true, wifi: 1, md: 15, mdDisabled: false }; try { var saved = JSON.parse(localStorage.getItem('push_settings')); if (saved) { settings = saved; } } catch(e) {} return settings; }
     function savePushSettings(settings) { localStorage.setItem('push_settings', JSON.stringify(settings)); }
-    function applyPushSettingsToUI() {
-        var s = getPushSettings();
-        var sw = document.getElementById('pushSwitch'); if (sw) sw.checked = s.switchOn;
-        var md = document.getElementById('mdDisabled'); if (md) md.checked = s.mdDisabled;
-        var ws = document.getElementById('wifiInterval'); if (ws) ws.value = s.wifi;
-        var ms = document.getElementById('mdInterval'); if (ms) ms.value = s.md;
-    }
-    function sendPushSettings() {
-        var s = getPushSettings();
-        var sw = s.switchOn ? 'on' : 'off';
-        var wifi = s.wifi;
-        var md = s.mdDisabled ? 0 : s.md;
-        var url = 'fiveapp://pushset?switch=' + sw + '&wifi=' + wifi + '&md=' + md;
-        window.location.href = url;
-    }
+    function applyPushSettingsToUI() { var s = getPushSettings(); document.getElementById('pushSwitch').checked = s.switchOn; document.getElementById('mdDisabled').checked = s.mdDisabled; document.getElementById('wifiInterval').value = s.wifi; document.getElementById('mdInterval').value = s.md; }
+    function sendPushSettings() { var s = getPushSettings(); var sw = s.switchOn ? 'on' : 'off'; var wifi = s.wifi; var md = s.mdDisabled ? 0 : s.md; window.location.href = 'fiveapp://pushset?switch=' + sw + '&wifi=' + wifi + '&md=' + md; }
 
-    function showSettingsPage() {
-        document.getElementById('homePage').classList.remove('active');
-        document.getElementById('settingsPage').classList.add('active');
-        document.getElementById('pushSettingsPage').style.display = 'none';
-        document.getElementById('aboutPage').style.display = 'none';
-        document.getElementById('navHomeBtn').classList.remove('active');
-        document.getElementById('navNotifyBtn').classList.remove('active');
-        document.getElementById('navSettingsBtn').classList.add('active');
-    }
+    function showSettingsPage() { document.getElementById('homePage').classList.remove('active'); document.getElementById('settingsPage').classList.add('active'); document.getElementById('pushSettingsPage').style.display = 'none'; document.getElementById('aboutPage').style.display = 'none'; document.getElementById('navHomeBtn').classList.remove('active'); document.getElementById('navNotifyBtn').classList.remove('active'); document.getElementById('navSettingsBtn').classList.add('active'); }
+    function showPushSettingsPage() { document.getElementById('settingsPage').classList.remove('active'); document.getElementById('pushSettingsPage').style.display = 'block'; applyPushSettingsToUI(); }
+    function showAboutPage() { document.getElementById('settingsPage').classList.remove('active'); document.getElementById('aboutPage').style.display = 'block'; var appName = isAnyApp ? '五班应用平台' : '初三五班智慧应用平台'; var versionText = isAnyApp ? ('版本：' + APP_DISPLAY_VERSION) : '网页版'; document.getElementById('aboutAppName').textContent = appName; document.getElementById('aboutVersion').textContent = versionText; document.getElementById('aboutFooter').textContent = appName + (isAnyApp ? (' v' + APP_DISPLAY_VERSION) : ' 网页版'); document.getElementById('aboutLatest').style.display = isAnyApp ? '' : 'none'; }
+    function backToSettings() { document.getElementById('pushSettingsPage').style.display = 'none'; document.getElementById('aboutPage').style.display = 'none'; document.getElementById('settingsPage').classList.add('active'); }
 
-    function showPushSettingsPage() {
-        document.getElementById('settingsPage').classList.remove('active');
-        document.getElementById('pushSettingsPage').style.display = 'block';
-        applyPushSettingsToUI();
-    }
-
-    function showAboutPage() {
-        document.getElementById('settingsPage').classList.remove('active');
-        document.getElementById('aboutPage').style.display = 'block';
-        var appName = isAnyApp ? '五班应用平台' : '初三五班智慧应用平台';
-        var versionText = isAnyApp ? ('版本：' + APP_DISPLAY_VERSION) : '网页版';
-        document.getElementById('aboutAppName').textContent = appName;
-        document.getElementById('aboutVersion').textContent = versionText;
-        document.getElementById('aboutFooter').textContent = appName + (isAnyApp ? (' v' + APP_DISPLAY_VERSION) : ' 网页版');
-    }
-
-    function backToSettings() {
-        document.getElementById('pushSettingsPage').style.display = 'none';
-        document.getElementById('aboutPage').style.display = 'none';
-        document.getElementById('settingsPage').classList.add('active');
-    }
-
-    // ========== 发布通知 ==========
     function renderPublishedNotifyList() { var body = document.getElementById('publishedNotifyList'); if (notifyList.length === 0) { body.innerHTML = '<div style="text-align:center;color:#999;padding:12px;font-size:0.8rem;">暂无已发布通知</div>'; return; } var html = ''; notifyList.forEach(function(item) { html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f2f5;font-size:0.8rem;"><div style="flex:1;min-width:0;"><div style="color:#999;">' + item.time + '</div><div style="color:#333;word-break:break-word;">' + escapeHtml(item.content) + '</div></div><button class="notify-delete-btn" data-id="' + item.id + '" style="flex-shrink:0;margin-left:8px;">&#128465;</button></div>'; }); body.innerHTML = html; body.querySelectorAll('.notify-delete-btn').forEach(function(btn) { btn.addEventListener('click', function() { deleteNotifyItem(this.dataset.id); }); }); }
     function showPushNotifyModal() { renderPublishedNotifyList(); document.getElementById('pushContent').value = ''; document.getElementById('pushLink').value = ''; document.getElementById('pushNotifyModal').classList.add('show'); }
-    async function pushNotify() { var content = document.getElementById('pushContent').value.trim(); var link = document.getElementById('pushLink').value.trim(); if (!content) { alert('请输入通知内容'); return; } if (!link) { alert('请输入跳转网址'); return; } if (link.indexOf('http') !== 0) { alert('网址需以 http:// 或 https:// 开头'); return; } var now = new Date(); var ts = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0'); var newLine = ts + ' ' + content + ' ' + link; var currentText = notifyList.map(function(item) { return item.raw; }).join('\n'); if (currentText) currentText += '\n'; currentText += newLine;
-        try { var sha = notifySha; if (!sha) { var cr = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + NOTIFY_PATH, { headers: { 'Authorization': 'Bearer ' + currentToken } }); if (cr.ok) sha = (await cr.json()).sha; } var r = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + NOTIFY_PATH, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + currentToken }, body: JSON.stringify({ message: '发布通知', content: btoa(unescape(encodeURIComponent(currentText))), branch: 'main', sha: sha }) }); if (!r.ok) throw new Error('保存失败'); notifySha = (await r.json()).content.sha; alert('通知发布成功！'); document.getElementById('pushNotifyModal').classList.remove('show'); await loadNotifyList(); updateNotifyBadge(); } catch(e) { alert('发布失败: ' + e.message); } }
-    async function deleteNotifyItem(id) { if (!confirm('确定删除这条通知吗？')) return; var newList = notifyList.filter(function(item) { return item.id !== id; }); var newText = newList.map(function(item) { return item.raw; }).join('\n');
-        try { var sha = notifySha; if (!sha) { var cr = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + NOTIFY_PATH, { headers: { 'Authorization': 'Bearer ' + currentToken } }); if (cr.ok) sha = (await cr.json()).sha; } var r = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + NOTIFY_PATH, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + currentToken }, body: JSON.stringify({ message: '删除通知', content: btoa(unescape(encodeURIComponent(newText))), branch: 'main', sha: sha }) }); if (!r.ok) throw new Error('删除失败'); notifySha = (await r.json()).content.sha; alert('通知已删除'); await loadNotifyList(); updateNotifyBadge(); renderPublishedNotifyList(); } catch(e) { alert('删除失败: ' + e.message); } }
+    async function pushNotify() { var content = document.getElementById('pushContent').value.trim(); var link = document.getElementById('pushLink').value.trim(); if (!content) { alert('请输入通知内容'); return; } if (!link) { alert('请输入跳转网址'); return; } if (link.indexOf('http') !== 0) { alert('网址需以 http:// 或 https:// 开头'); return; } var now = new Date(); var ts = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0'); var newLine = ts + ' ' + content + ' ' + link; var currentText = notifyList.map(function(item) { return item.raw; }).join('\n'); if (currentText) currentText += '\n'; currentText += newLine; try { var sha = notifySha; if (!sha) { var cr = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + NOTIFY_PATH, { headers: { 'Authorization': 'Bearer ' + currentToken } }); if (cr.ok) sha = (await cr.json()).sha; } var r = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + NOTIFY_PATH, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + currentToken }, body: JSON.stringify({ message: '发布通知', content: btoa(unescape(encodeURIComponent(currentText))), branch: 'main', sha: sha }) }); if (!r.ok) throw new Error('保存失败'); notifySha = (await r.json()).content.sha; alert('通知发布成功！'); document.getElementById('pushNotifyModal').classList.remove('show'); await loadNotifyList(); updateNotifyBadge(); } catch(e) { alert('发布失败: ' + e.message); } }
+    async function deleteNotifyItem(id) { if (!confirm('确定删除这条通知吗？')) return; var newList = notifyList.filter(function(item) { return item.id !== id; }); var newText = newList.map(function(item) { return item.raw; }).join('\n'); try { var sha = notifySha; if (!sha) { var cr = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + NOTIFY_PATH, { headers: { 'Authorization': 'Bearer ' + currentToken } }); if (cr.ok) sha = (await cr.json()).sha; } var r = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + NOTIFY_PATH, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + currentToken }, body: JSON.stringify({ message: '删除通知', content: btoa(unescape(encodeURIComponent(newText))), branch: 'main', sha: sha }) }); if (!r.ok) throw new Error('删除失败'); notifySha = (await r.json()).content.sha; alert('通知已删除'); await loadNotifyList(); updateNotifyBadge(); renderPublishedNotifyList(); } catch(e) { alert('删除失败: ' + e.message); } }
 
     function exitEditMode() { isEditMode = false; currentToken = null; document.body.classList.remove('edit-mode'); document.getElementById('fabGroup').style.display = 'none'; document.getElementById('saveBtn').style.display = 'none'; renderGroups(); renderCarousel(); alert('已保存并退出编辑模式'); }
 
-    // ========== 解析配置文件 ==========
     function parseAppTxt(raw) { var lines=raw.split(/\r?\n/); var mode=null; var groups=[],pics=[],apps=[]; lines.forEach(function(line){line=line.trim();if(!line)return; if(line.toLowerCase()==='group'){mode='group';return;} if(line.toLowerCase()==='pic'){mode='pic';return;} if(line.toLowerCase()==='app'){mode='app';return;} if(mode==='group'){var m=line.match(/\[g=([^\]]+)\]/);if(m)groups.push(m[1].trim());} else if(mode==='pic'){var m=line.match(/\[p=([^\s\]]+)\s+l=([^\s\]]+)\]/);if(m)pics.push({imgUrl:m[1].trim(),linkUrl:m[2].trim()});} else if(mode==='app'){var m=line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)(?:\s+g=([^\s\]]+))?\]/);if(!m)m=line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)(?:\s+g=(.+?))?\]/);if(m)apps.push({name:m[1].trim(),icon:m[2].trim(),link:m[3].trim(),group:m[4]?m[4].trim():null});}}); groupOrder=groups.length?groups:['其他应用']; slidesData=pics; appItems=apps; renderGroups(); if(slidesData.length){renderCarousel();startAutoSlide();}else{document.getElementById('carouselSection').style.display='none';} document.getElementById('warningBanner').style.display='none'; handleUrlAppParameter(); }
 
     function renderGroups() { var gc=document.getElementById('groupsContainer'); if(!gc) return; var abg={}; groupOrder.forEach(function(g){abg[g]=[];}); appItems.forEach(function(a){var g=a.group||'其他应用';if(!abg[g])abg[g]=[];abg[g].push(a);}); var html=''; for(var i=0;i<groupOrder.length;i++){var gn=groupOrder[i];var apps=abg[gn]||[]; html+='<div class="group-section" data-group-index="'+i+'"><div class="group-header'+(isEditMode?' draggable':'')+'" data-group="'+escapeHtml(gn)+'"><span class="group-title">'+escapeHtml(gn)+'</span>'+(isEditMode?'<div><button onclick="editGroup(\''+escapeHtml(gn)+'\')">&#9998;</button><button onclick="deleteGroup(\''+escapeHtml(gn)+'\')">&#128465;</button></div>':'')+'</div><div class="apps-grid" data-group="'+escapeHtml(gn)+'" data-group-index="'+i+'">'; if(apps.length===0) html+='<div class="empty-group">暂无应用</div>'; else apps.forEach(function(a){var icon=a.icon;if(icon&&icon.indexOf('http')!==0)icon='https://luckynum.top/'+icon; var fb='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2248%22 height=%2248%22%3E%3Crect width=%2248%22 height=%2248%22 fill=%22%23ddd%22/%3E%3C/svg%3E'; html+='<div class="app-card" data-app-name="'+escapeHtml(a.name)+'" data-app-link="'+escapeHtml(a.link)+'" data-app-icon="'+escapeHtml(a.icon)+'" data-app-group="'+escapeHtml(gn)+'">'+(isEditMode?'<button class="edit-app-btn" onclick="editApp(\''+escapeHtml(a.name)+'\',\''+escapeHtml(a.link)+'\',\''+escapeHtml(a.icon)+'\',\''+escapeHtml(gn)+'\')">&#9998;</button><button class="delete-btn" onclick="deleteApp(\''+escapeHtml(a.name)+'\',\''+escapeHtml(a.link)+'\')">&#10005;</button><div class="drag-handle" draggable="true">&#8942;&#8942;</div>':'')+'<img class="app-icon" src="'+escapeHtml(icon)+'" onerror="this.src=\''+fb+'\'"><span class="app-name">'+escapeHtml(a.name)+'</span></div>';}); html+='</div></div>';} gc.innerHTML=html; document.querySelectorAll('.app-card').forEach(function(card){card.addEventListener('click',function(e){if(e.target.classList.contains('edit-app-btn')||e.target.classList.contains('delete-btn')||e.target.classList.contains('drag-handle')) return;handleAppClick(card.dataset.appLink,card.dataset.appName);});}); if(isEditMode) initDragSort(); }
@@ -567,8 +483,7 @@
     function addGroup(){if(!isEditMode){alert('请先开启编辑模式');return;}var nn=prompt('请输入分组名称');if(nn&&groupOrder.indexOf(nn)===-1){groupOrder.push(nn);renderGroups();}else if(nn)alert('分组名称已存在');}
     function generateFileContent(){var c='group\n';for(var i=0;i<groupOrder.length;i++)c+='[g='+groupOrder[i]+']\n';c+='pic\n';for(var i=0;i<slidesData.length;i++)c+='[p='+slidesData[i].imgUrl+' l='+slidesData[i].linkUrl+']\n';c+='app\n';for(var i=0;i<appItems.length;i++)c+='[n='+appItems[i].name+' p='+appItems[i].icon+' l='+appItems[i].link+(appItems[i].group?' g='+appItems[i].group:'')+']\n';return c;}
 
-    async function saveAndExit() { if (!isEditMode) return; if (!currentToken) { alert('Token 未验证'); return; } var content = generateFileContent();
-        try { var sha = fileSha; if (!sha) { var cr = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + GITHUB_PATH, { headers: { 'Authorization': 'Bearer ' + currentToken } }); if (cr.ok) sha = (await cr.json()).sha; } var r = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + GITHUB_PATH, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + currentToken }, body: JSON.stringify({ message: '更新配置', content: btoa(unescape(encodeURIComponent(content))), branch: 'main', sha: sha }) }); if (!r.ok) throw new Error('保存失败'); fileSha = (await r.json()).content.sha; exitEditMode(); } catch(e) { alert('保存失败: ' + e.message); } }
+    async function saveAndExit() { if (!isEditMode) return; if (!currentToken) { alert('Token 未验证'); return; } var content = generateFileContent(); try { var sha = fileSha; if (!sha) { var cr = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + GITHUB_PATH, { headers: { 'Authorization': 'Bearer ' + currentToken } }); if (cr.ok) sha = (await cr.json()).sha; } var r = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + GITHUB_PATH, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + currentToken }, body: JSON.stringify({ message: '更新配置', content: btoa(unescape(encodeURIComponent(content))), branch: 'main', sha: sha }) }); if (!r.ok) throw new Error('保存失败'); fileSha = (await r.json()).content.sha; exitEditMode(); } catch(e) { alert('保存失败: ' + e.message); } }
 
     async function saveToGitHub(content){if(!currentToken){alert('请先输入Token（点击标题3次）');return false;}try{var sha=fileSha;if(!sha){var cr=await fetch('https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/'+GITHUB_PATH,{headers:{'Authorization':'Bearer '+currentToken}});if(cr.ok)sha=(await cr.json()).sha;}var r=await fetch('https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/'+GITHUB_PATH,{method:'PUT',headers:{'Authorization':'Bearer '+currentToken},body:JSON.stringify({message:'更新配置',content:btoa(unescape(encodeURIComponent(content))),branch:'main',sha:sha})});if(!r.ok)throw new Error();fileSha=(await r.json()).content.sha;return true;}catch(e){alert('保存失败: '+e.message);return false;}}
     async function uploadToRoot(file){if(!currentToken){alert('请先输入Token');return null;}try{var reader=new FileReader();var base64=await new Promise(function(r){reader.onload=function(e){r(e.target.result.split(',')[1]);};reader.readAsDataURL(file);});var fn=file.name;var r=await fetch('https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/'+encodeURIComponent(fn),{method:'PUT',headers:{'Authorization':'Bearer '+currentToken},body:JSON.stringify({message:'上传 '+fn,content:base64,branch:'main'})});if(!r.ok)throw new Error();alert('上传成功：'+fn);return fn;}catch(e){alert('上传失败');return null;}}
@@ -580,7 +495,6 @@
 
     async function handleUrlAppParameter(){var p=new URLSearchParams(window.location.search);var ap=p.get('app');if(!ap)return;try{ap=decodeURIComponent(ap);}catch(e){}var rc=0;while(appItems.length===0&&rc<30){await new Promise(function(r){setTimeout(r,200);});rc++;}var ta=appItems.find(function(a){return a.name===ap;});if(!ta)ta=appItems.find(function(a){return a.name.toLowerCase().indexOf(ap.toLowerCase())!==-1;});if(ta){setTimeout(function(){handleAppClick(ta.link,ta.name);},500);return;}if(!isWebLink(ap)){if(isAudioFile(ap)){var fu=ap.indexOf('http')===0?ap:'https://luckynum.top/'+ap;var fn=ap.split('/').pop();var sf=await findSeriesFiles(fn);openAudioViewer(fu,fn,sf);return;}openFileWithFilehelper(ap);return;}var fu=ap.indexOf('http')===0?ap:'https://luckynum.top/'+ap;window.open(fu,'_blank');}
 
-    // ========== 事件绑定 ==========
     document.getElementById('refreshBtn').addEventListener('click',refreshConfig);
     document.getElementById('saveBtn').addEventListener('click',saveAndExit);
     document.getElementById('navHomeBtn').addEventListener('click',showHome);
@@ -603,38 +517,22 @@
     document.getElementById('fileManagerBtn').addEventListener('click',openFileManager);
     document.getElementById('addGroupFab').addEventListener('click',addGroup);
 
-    // 设置页面事件
     document.getElementById('menuNotifySettings').addEventListener('click', showPushSettingsPage);
     document.getElementById('menuAbout').addEventListener('click', showAboutPage);
     document.getElementById('pushSettingsBackBtn').addEventListener('click', backToSettings);
     document.getElementById('aboutBackBtn').addEventListener('click', backToSettings);
 
-    // 通知设置开关事件
-    document.getElementById('pushSwitch').addEventListener('change', function() {
-        var s = getPushSettings(); s.switchOn = this.checked; savePushSettings(s); sendPushSettings();
-    });
-    document.getElementById('mdDisabled').addEventListener('change', function() {
-        var s = getPushSettings(); s.mdDisabled = this.checked; savePushSettings(s); sendPushSettings();
-    });
-    document.getElementById('wifiInterval').addEventListener('change', function() {
-        var s = getPushSettings(); s.wifi = parseInt(this.value); savePushSettings(s); sendPushSettings();
-    });
-    document.getElementById('mdInterval').addEventListener('change', function() {
-        var s = getPushSettings(); s.md = parseInt(this.value); savePushSettings(s); sendPushSettings();
-    });
+    document.getElementById('pushSwitch').addEventListener('change', function() { var s = getPushSettings(); s.switchOn = this.checked; savePushSettings(s); sendPushSettings(); });
+    document.getElementById('mdDisabled').addEventListener('change', function() { var s = getPushSettings(); s.mdDisabled = this.checked; savePushSettings(s); sendPushSettings(); });
+    document.getElementById('wifiInterval').addEventListener('change', function() { var s = getPushSettings(); s.wifi = parseInt(this.value); savePushSettings(s); sendPushSettings(); });
+    document.getElementById('mdInterval').addEventListener('change', function() { var s = getPushSettings(); s.md = parseInt(this.value); savePushSettings(s); sendPushSettings(); });
 
-    // 初始化下拉框
     (function() {
-        var ws = document.getElementById('wifiInterval');
-        var ms = document.getElementById('mdInterval');
-        var opts = '';
+        var ws = document.getElementById('wifiInterval'), ms = document.getElementById('mdInterval'), opts = '';
         for (var i = 1; i <= 20; i++) { opts += '<option value="' + i + '">' + i + '</option>'; }
         ws.innerHTML = opts; ms.innerHTML = opts;
         var s = getPushSettings(); ws.value = s.wifi; ms.value = s.md;
-        // 网页端隐藏通知设置入口
-        if (!isAnyApp) {
-            document.getElementById('menuNotifySettings').style.display = 'none';
-        }
+        if (!isAnyApp) { document.getElementById('menuNotifySettings').style.display = 'none'; }
     })();
 
     var tc=0,tt=null;
@@ -644,7 +542,6 @@
         await Promise.all([loadConfigFile(), loadNotifyList()]);
         updateNotifyBadge();
         showHome();
-        // 关于页显示正确版本
         if (isAnyApp) {
             document.getElementById('aboutAppName').textContent = '五班应用平台';
             document.getElementById('aboutVersion').textContent = '版本：' + APP_DISPLAY_VERSION;
@@ -656,20 +553,13 @@
             document.getElementById('aboutFooter').textContent = '初三五班智慧应用平台 网页版';
             document.getElementById('aboutLatest').style.display = 'none';
         }
-
         if (isAnyApp) {
             if (isLatestApp) { console.log('五班应用平台已启动, 版本:', appVersion); return; }
             document.getElementById('forceUpdateModal').classList.add('show');
             return;
         }
-
         tryOpenApp();
-        setTimeout(function() {
-            if (!document.hidden) {
-                document.getElementById('downloadTopBar').style.display = 'flex';
-                document.getElementById('appDownloadModal').classList.add('show');
-            }
-        }, 2000);
+        setTimeout(function() { if (!document.hidden) { document.getElementById('downloadTopBar').style.display = 'flex'; document.getElementById('appDownloadModal').classList.add('show'); } }, 2000);
     }
     init();
     </script>
