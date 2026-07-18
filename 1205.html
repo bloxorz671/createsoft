@@ -277,11 +277,11 @@
                     <img class="about-icon-sq" src="41.jpg" alt="图标" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2284%22 height=%2284%22%3E%3Crect width=%2284%22 height=%2284%22 rx=%2218%22 fill=%22%232b4c8a%22/%3E%3Ctext x=%2242%22 y=%2254%22 font-size=%2236%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22system-ui%22%3E5%3C/text%3E%3C/svg%3E'">
                 </div>
                 <div class="about-name" id="aboutAppName">五班应用平台</div>
-                <div class="about-version" id="aboutVersion">版本：1.15</div>
+                <div class="about-version" id="aboutVersion">版本：1.16</div>
                 <div class="about-latest" id="aboutLatest">当前已是最新版本</div>
             </div>
             <hr class="about-divider">
-            <div class="about-info" id="aboutFooter">五班应用平台 v1.15</div>
+            <div class="about-info" id="aboutFooter">五班应用平台 v1.16</div>
         </div>
     </div>
     <div class="bottom-nav-wrapper">
@@ -365,10 +365,10 @@
     var GITHUB_REPO = 'createsoft';
     var GITHUB_PATH = '5app.txt';
     var NOTIFY_PATH = 'fiveapppush.txt';
-    var APP_DOWNLOAD_URL = 'https://luckynum.top/fiveclassapp1.15.apk';
+    var APP_DOWNLOAD_URL = 'https://luckynum.top/fiveclassapp1.16.apk';
     var APP_URL_SCHEME = 'fiveapp://';
-    var APP_MIN_VERSION = 115;
-    var APP_DISPLAY_VERSION = '1.15';
+    var APP_MIN_VERSION = 116;
+    var APP_DISPLAY_VERSION = '1.16';
 
     var slidesData = [], appItems = [], groupOrder = ['其他应用'];
     var currentIndex = 0, autoInterval = null, totalSlides = 0;
@@ -431,7 +431,6 @@
     function markAllAsRead() { notifyList.forEach(function(item) { if (readNotifyIds.indexOf(item.id) === -1) readNotifyIds.push(item.id); }); localStorage.setItem('read_notify_ids', JSON.stringify(readNotifyIds)); updateNotifyBadge(); renderNotifyList(); }
     function showNotifyModal() { renderNotifyList(); document.getElementById('notifyModal').classList.add('show'); }
 
-    // 设置功能
     function getPushSettings() { var settings = { switchOn: true, wifi: 1, md: 15, mdDisabled: false }; try { var saved = JSON.parse(localStorage.getItem('push_settings')); if (saved) { settings = saved; } } catch(e) {} return settings; }
     function savePushSettings(settings) { localStorage.setItem('push_settings', JSON.stringify(settings)); }
     function applyPushSettingsToUI() { var s = getPushSettings(); document.getElementById('pushSwitch').checked = s.switchOn; document.getElementById('mdDisabled').checked = s.mdDisabled; document.getElementById('wifiInterval').value = s.wifi; document.getElementById('mdInterval').value = s.md; }
