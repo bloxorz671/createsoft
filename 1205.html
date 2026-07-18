@@ -52,11 +52,11 @@
         .app-download-modal .later-btn { background: none; border: none; color: #999; font-size: 0.8rem; cursor: pointer; padding: 8px; }
 
         .force-update-modal .modal-content { text-align: center; max-width: 340px; padding: 28px 20px 20px; }
-        .force-update-modal .update-icon { font-size: 3rem; margin-bottom: 12px; }
-        .force-update-modal .update-title { font-size: 1.2rem; font-weight: 700; color: #e74c3c; margin-bottom: 8px; }
-        .force-update-modal .update-desc { font-size: 0.85rem; color: #666; margin-bottom: 20px; }
-        .force-update-modal .update-btn { display: block; width: 100%; background: #e74c3c; color: white; border: none; padding: 14px; border-radius: 30px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
+        .force-update-modal .update-icon-img { width: 72px; height: 72px; border-radius: 16px; object-fit: cover; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .force-update-modal .update-title { font-size: 1.2rem; font-weight: 700; color: #e74c3c; margin-bottom: 16px; }
+        .force-update-modal .update-btn { display: block; width: 100%; background: #e74c3c; color: white; border: none; padding: 14px; border-radius: 30px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
         .force-update-modal .update-btn:active { transform: scale(0.97); }
+        .force-update-modal .skip-btn { background: none; border: none; color: #999; font-size: 0.8rem; cursor: pointer; padding: 8px; display: none; }
 
         .carousel-section { margin: 12px 16px 24px; background: #f0f2f6; overflow: hidden; }
         .carousel-wrapper { width: 100%; overflow: hidden; }
@@ -224,82 +224,39 @@
         </div>
         <div id="settingsPage" class="setting-page">
             <div class="settings-menu-item" id="menuNotifySettings">
-                <div class="settings-menu-left">
-                    <div class="settings-menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2b4c8a" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-                    <span>通知设置</span>
-                </div>
-                <span class="settings-menu-arrow">&gt;</span>
+                <div class="settings-menu-left"><div class="settings-menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2b4c8a" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><span>通知设置</span></div><span class="settings-menu-arrow">&gt;</span>
             </div>
             <div class="settings-menu-item" id="menuAbout">
-                <div class="settings-menu-left">
-                    <div class="settings-menu-icon" style="color:#2b4c8a;font-size:1.2rem;">&#9432;</div>
-                    <span>关于</span>
-                </div>
-                <span class="settings-menu-arrow">&gt;</span>
+                <div class="settings-menu-left"><div class="settings-menu-icon" style="color:#2b4c8a;font-size:1.2rem;">&#9432;</div><span>关于</span></div><span class="settings-menu-arrow">&gt;</span>
             </div>
             <div class="settings-menu-item" id="menuDevSettings" style="display:none;">
-                <div class="settings-menu-left"><span>开发人员设置</span></div>
-                <span class="settings-menu-arrow">&gt;</span>
+                <div class="settings-menu-left"><span>开发人员设置</span></div><span class="settings-menu-arrow">&gt;</span>
             </div>
         </div>
         <div id="pushSettingsPage" class="setting-page" style="display:none;">
-            <div class="viewer-header" style="position:sticky;top:0;z-index:10;">
-                <button class="viewer-btn" id="pushSettingsBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button>
-                <span style="flex:1;text-align:center;font-weight:600;">通知设置</span><span style="width:40px;"></span>
-            </div>
-            <div class="setting-group">
-                <div class="setting-row"><span class="setting-label">通知开关</span><label class="toggle"><input type="checkbox" id="pushSwitch" checked><span class="toggle-slider"></span></label></div>
-                <div class="setting-hint">关闭后将无法接收到消息推送</div>
-            </div>
-            <div class="setting-group">
-                <div class="setting-row"><span class="setting-label">WiFi下通知检查频率</span><span class="setting-select-wrap">每<select class="setting-select" id="wifiInterval"></select>分钟一次</span></div>
-            </div>
-            <div class="setting-group">
-                <div class="setting-row"><span class="setting-label">移动数据下通知检查频率</span><span class="setting-select-wrap">每<select class="setting-select" id="mdInterval"></select>分钟一次</span></div>
-            </div>
-            <div class="setting-group" id="mdGroup">
-                <div class="setting-row"><span class="setting-label">移动数据下不接收通知</span><label class="toggle"><input type="checkbox" id="mdDisabled"><span class="toggle-slider"></span></label></div>
-                <div class="setting-hint">打开后将不能及时收到最新通知</div>
-            </div>
+            <div class="viewer-header" style="position:sticky;top:0;z-index:10;"><button class="viewer-btn" id="pushSettingsBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button><span style="flex:1;text-align:center;font-weight:600;">通知设置</span><span style="width:40px;"></span></div>
+            <div class="setting-group"><div class="setting-row"><span class="setting-label">通知开关</span><label class="toggle"><input type="checkbox" id="pushSwitch" checked><span class="toggle-slider"></span></label></div><div class="setting-hint">关闭后将无法接收到消息推送</div></div>
+            <div class="setting-group"><div class="setting-row"><span class="setting-label">WiFi下通知检查频率</span><span class="setting-select-wrap">每<select class="setting-select" id="wifiInterval"></select>分钟一次</span></div></div>
+            <div class="setting-group"><div class="setting-row"><span class="setting-label">移动数据下通知检查频率</span><span class="setting-select-wrap">每<select class="setting-select" id="mdInterval"></select>分钟一次</span></div></div>
+            <div class="setting-group" id="mdGroup"><div class="setting-row"><span class="setting-label">移动数据下不接收通知</span><label class="toggle"><input type="checkbox" id="mdDisabled"><span class="toggle-slider"></span></label></div><div class="setting-hint">打开后将不能及时收到最新通知</div></div>
         </div>
         <div id="aboutPage" class="setting-page" style="display:none;">
-            <div class="viewer-header" style="position:sticky;top:0;z-index:10;">
-                <button class="viewer-btn" id="aboutBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button>
-                <span style="flex:1;text-align:center;font-weight:600;">关于</span><span style="width:40px;"></span>
-            </div>
+            <div class="viewer-header" style="position:sticky;top:0;z-index:10;"><button class="viewer-btn" id="aboutBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button><span style="flex:1;text-align:center;font-weight:600;">关于</span><span style="width:40px;"></span></div>
             <div class="about-section">
                 <div class="about-icon-wrap"><img class="about-icon-sq" id="aboutIcon" src="41.jpg" alt="图标" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2284%22 height=%2284%22%3E%3Crect width=%2284%22 height=%2284%22 rx=%2218%22 fill=%22%232b4c8a%22/%3E%3Ctext x=%2242%22 y=%2254%22 font-size=%2236%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22system-ui%22%3E5%3C/text%3E%3C/svg%3E'"></div>
                 <div class="about-name" id="aboutAppName">五班应用平台</div>
                 <div class="about-version" id="aboutVersion">版本：1.16</div>
                 <div class="about-latest" id="aboutLatest">当前已是最新版本</div>
             </div>
-            <hr class="about-divider">
-            <div class="about-info" id="aboutFooter">五班应用平台 v1.16</div>
+            <hr class="about-divider"><div class="about-info" id="aboutFooter">五班应用平台 v1.16</div>
         </div>
         <div id="devSettingsPage" class="setting-page" style="display:none;">
-            <div class="viewer-header" style="position:sticky;top:0;z-index:10;">
-                <button class="viewer-btn" id="devSettingsBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button>
-                <span style="flex:1;text-align:center;font-weight:600;">开发人员设置</span><span style="width:40px;"></span>
-            </div>
-            <div class="setting-group">
-                <div class="setting-row"><span class="setting-label">开发人员设置</span><label class="toggle"><input type="checkbox" id="devEnabled"><span class="toggle-slider"></span></label></div>
-                <div class="setting-hint">关闭后隐藏开发人员设置入口</div>
-            </div>
+            <div class="viewer-header" style="position:sticky;top:0;z-index:10;"><button class="viewer-btn" id="devSettingsBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button><span style="flex:1;text-align:center;font-weight:600;">开发人员设置</span><span style="width:40px;"></span></div>
+            <div class="setting-group"><div class="setting-row"><span class="setting-label">开发人员设置</span><label class="toggle"><input type="checkbox" id="devEnabled"><span class="toggle-slider"></span></label></div><div class="setting-hint">关闭后隐藏开发人员设置入口</div></div>
             <div id="devOptionsContainer" style="display:none;">
-                <div class="setting-group">
-                    <div class="setting-row"><span class="setting-label">停用更新</span><label class="toggle"><input type="checkbox" id="disableUpdate"><span class="toggle-slider"></span></label></div>
-                    <div class="setting-hint">停用版本更新检查</div>
-                </div>
-                <div class="setting-group">
-                    <button class="dev-menu-btn" id="viewLogsBtn">查看日志</button>
-                </div>
-                <div class="setting-group">
-                    <div style="font-size:0.9rem;color:#1f2937;margin-bottom:8px;">使用指令</div>
-                    <div class="dev-input-row">
-                        <input type="text" id="devCommandInput" placeholder="输入指令内容">
-                        <button id="devCommandBtn">执行</button>
-                    </div>
-                </div>
+                <div class="setting-group"><div class="setting-row"><span class="setting-label">禁用强制更新</span><label class="toggle"><input type="checkbox" id="disableUpdate"><span class="toggle-slider"></span></label></div><div class="setting-hint">打开后更新弹窗增加暂不更新按钮</div></div>
+                <div class="setting-group"><button class="dev-menu-btn" id="viewLogsBtn">查看日志</button></div>
+                <div class="setting-group"><div style="font-size:0.9rem;color:#1f2937;margin-bottom:8px;">使用指令</div><div class="dev-input-row"><input type="text" id="devCommandInput" placeholder="输入指令内容"><button id="devCommandBtn">执行</button></div></div>
             </div>
         </div>
     </div>
@@ -319,21 +276,18 @@
         <button class="add-btn" id="addGroupFab" title="添加分组" style="background:#9b59b6;">📂</button>
     </div>
 
-    <div id="deviceWarningModal" class="modal-overlay device-warning-modal" style="z-index: 30000;">
-        <div class="modal-content"><div class="device-warning-icon" id="deviceWarningIcon"></div><div class="device-warning-message" id="deviceWarningMessage"></div><button class="device-warning-btn" id="deviceWarningCloseBtn">我知道了</button></div>
-    </div>
+    <div id="deviceWarningModal" class="modal-overlay device-warning-modal" style="z-index: 30000;"><div class="modal-content"><div class="device-warning-icon" id="deviceWarningIcon"></div><div class="device-warning-message" id="deviceWarningMessage"></div><button class="device-warning-btn" id="deviceWarningCloseBtn">我知道了</button></div></div>
     <div id="forceUpdateModal" class="modal-overlay force-update-modal" style="z-index: 40000;">
-        <div class="modal-content"><div class="update-icon">📱</div><div class="update-title">当前版本已过时</div><div class="update-desc">请下载最新版本以获得更好的体验</div><button class="update-btn" id="forceUpdateBtn">立即更新</button></div>
+        <div class="modal-content">
+            <img class="update-icon-img" id="updateIcon" src="41.jpg" alt="图标" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2272%22 height=%2272%22%3E%3Crect width=%2272%22 height=%2272%22 rx=%2216%22 fill=%22%232b4c8a%22/%3E%3Ctext x=%2236%22 y=%2246%22 font-size=%2230%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22system-ui%22%3E5%3C/text%3E%3C/svg%3E'">
+            <div class="update-title">已推出新版本</div>
+            <button class="update-btn" id="forceUpdateBtn">立即更新</button>
+            <button class="skip-btn" id="skipUpdateBtn">暂不更新</button>
+        </div>
     </div>
-    <div id="appDownloadModal" class="modal-overlay app-download-modal" style="z-index: 40001;">
-        <div class="modal-content"><img class="app-icon-large" src="41.jpg" alt="图标" onerror="this.style.display='none'"><div class="app-name">五班应用平台</div><div class="app-subtitle">推荐下载官方APP</div><button class="download-btn" id="appDownloadBtn">立即下载</button><button class="later-btn" id="laterBtn">以后再说</button></div>
-    </div>
-    <div id="notifyModal" class="modal-overlay" style="z-index: 40002;">
-        <div class="modal-content" style="max-width:500px;"><div class="notify-header-bar"><h3 style="margin:0;">📧 通知中心</h3><button class="notify-mark-all" id="markAllReadBtn">全部已读</button></div><div id="notifyListBody" style="max-height:60vh;overflow-y:auto;"></div></div>
-    </div>
-    <div id="pushNotifyModal" class="modal-overlay" style="z-index: 40003;">
-        <div class="modal-content" style="max-width:500px;"><h3>📢 发布通知</h3><label style="font-size:0.85rem;color:#666;">通知内容</label><textarea id="pushContent" placeholder="请输入通知内容"></textarea><label style="font-size:0.85rem;color:#666;">跳转网址</label><input id="pushLink" placeholder="https://..." value=""><div class="modal-buttons"><button class="confirm-btn" id="pushConfirmBtn">发布</button><button class="cancel-btn" id="pushCancelBtn">取消</button></div><div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px;"><h4 style="font-size:0.9rem;color:#666;margin-bottom:8px;">已发布的通知</h4><div id="publishedNotifyList" style="max-height:200px;overflow-y:auto;"></div></div></div>
-    </div>
+    <div id="appDownloadModal" class="modal-overlay app-download-modal" style="z-index: 40001;"><div class="modal-content"><img class="app-icon-large" src="41.jpg" alt="图标" onerror="this.style.display='none'"><div class="app-name">五班应用平台</div><div class="app-subtitle">推荐下载官方APP</div><button class="download-btn" id="appDownloadBtn">立即下载</button><button class="later-btn" id="laterBtn">以后再说</button></div></div>
+    <div id="notifyModal" class="modal-overlay" style="z-index: 40002;"><div class="modal-content" style="max-width:500px;"><div class="notify-header-bar"><h3 style="margin:0;">📧 通知中心</h3><button class="notify-mark-all" id="markAllReadBtn">全部已读</button></div><div id="notifyListBody" style="max-height:60vh;overflow-y:auto;"></div></div></div>
+    <div id="pushNotifyModal" class="modal-overlay" style="z-index: 40003;"><div class="modal-content" style="max-width:500px;"><h3>📢 发布通知</h3><label style="font-size:0.85rem;color:#666;">通知内容</label><textarea id="pushContent" placeholder="请输入通知内容"></textarea><label style="font-size:0.85rem;color:#666;">跳转网址</label><input id="pushLink" placeholder="https://..." value=""><div class="modal-buttons"><button class="confirm-btn" id="pushConfirmBtn">发布</button><button class="cancel-btn" id="pushCancelBtn">取消</button></div><div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px;"><h4 style="font-size:0.9rem;color:#666;margin-bottom:8px;">已发布的通知</h4><div id="publishedNotifyList" style="max-height:200px;overflow-y:auto;"></div></div></div></div>
 
     <script>
     var CONFIG_URL = 'https://raw.githubusercontent.com/bloxorz671/createsoft/main/5app.txt';
@@ -354,11 +308,29 @@
     function getAppVersion(ua) { var m = ua.match(/fiveapp(\d+)\.?(\d*)/); if (m) { var major = parseInt(m[1]) || 0; var minor = parseInt(m[2]) || 0; return major * 100 + minor; } if (ua.indexOf('ClassApp') !== -1) return 1; return -1; }
     var appVersion = getAppVersion(currentUA); var isLatestApp = appVersion >= APP_MIN_VERSION; var isOldApp = appVersion >= 0 && appVersion < APP_MIN_VERSION; var isAnyApp = appVersion >= 0;
 
-    // 开发人员设置
     function isDevEnabled() { return localStorage.getItem('dev_enabled') === 'true'; }
     function setDevEnabled(v) { localStorage.setItem('dev_enabled', v ? 'true' : 'false'); updateDevMenuVisibility(); }
-    function updateDevMenuVisibility() { var menu = document.getElementById('menuDevSettings'); if (menu) menu.style.display = isDevEnabled() ? '' : 'none'; }
-    function isUpdateDisabled() { return localStorage.getItem('disable_update') === 'true'; }
+    function updateDevMenuVisibility() { var menu = document.getElementById('menuDevSettings'); if (menu) menu.style.display = (isAnyApp && isDevEnabled()) ? '' : 'none'; }
+    function isUpdateSkipEnabled() { return localStorage.getItem('disable_force_update') === 'true'; }
+
+    // 更新弹窗的开发人员触发
+    var updateIconClicks = 0; var updateIconTimer = null;
+    function initUpdateDevTrigger() {
+        updateIconClicks = 0;
+        var icon = document.getElementById('updateIcon');
+        if (!icon || !isAnyApp) return;
+        icon.onclick = function() {
+            updateIconClicks++;
+            if (updateIconTimer) clearTimeout(updateIconTimer);
+            updateIconTimer = setTimeout(function() { updateIconClicks = 0; }, 3000);
+            if (updateIconClicks >= 10) {
+                updateIconClicks = 0;
+                setDevEnabled(true);
+                document.getElementById('forceUpdateModal').classList.remove('show');
+                showDevSettingsPage();
+            }
+        };
+    }
 
     function escapeHtml(str) { if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function copyShareLink(appName) { var u=window.location.origin+window.location.pathname; if(appName) u+='?app='+encodeURIComponent(appName); navigator.clipboard.writeText(u).then(function(){var t=document.createElement('div');t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:white;padding:12px 24px;border-radius:30px;z-index:30000;font-size:14px;';t.textContent='已复制';document.body.appendChild(t);setTimeout(function(){t.remove();},1500);}).catch(function(){alert('复制失败');}); }
@@ -400,7 +372,6 @@
     function markAllAsRead() { notifyList.forEach(function(item) { if (readNotifyIds.indexOf(item.id) === -1) readNotifyIds.push(item.id); }); localStorage.setItem('read_notify_ids', JSON.stringify(readNotifyIds)); updateNotifyBadge(); renderNotifyList(); }
     function showNotifyModal() { renderNotifyList(); document.getElementById('notifyModal').classList.add('show'); }
 
-    // 通知设置
     function getPushSettings() { var s = { switchOn: true, wifi: 1, md: 15, mdDisabled: false }; try { var saved = JSON.parse(localStorage.getItem('push_settings')); if (saved) s = saved; } catch(e) {} return s; }
     function savePushSettings(s) { localStorage.setItem('push_settings', JSON.stringify(s)); }
     function applyPushSettingsToUI() { var s = getPushSettings(); document.getElementById('pushSwitch').checked = s.switchOn; document.getElementById('mdDisabled').checked = s.mdDisabled; document.getElementById('wifiInterval').value = s.wifi; document.getElementById('mdInterval').value = s.md; toggleMdIntervalVisibility(); }
@@ -410,7 +381,7 @@
     function showSettingsPage() { hideAllPages(); document.getElementById('settingsPage').classList.add('active'); document.getElementById('navSettingsBtn').classList.add('active'); updateDevMenuVisibility(); }
     function showPushSettingsPage() { hideAllPages(); document.getElementById('pushSettingsPage').style.display = 'block'; applyPushSettingsToUI(); }
     function showAboutPage() { hideAllPages(); document.getElementById('aboutPage').style.display = 'block'; var appName = isAnyApp ? '五班应用平台' : '初三五班智慧应用平台'; var versionText = isAnyApp ? ('版本：' + APP_DISPLAY_VERSION) : '网页版'; document.getElementById('aboutAppName').textContent = appName; document.getElementById('aboutVersion').textContent = versionText; document.getElementById('aboutFooter').textContent = appName + (isAnyApp ? (' v' + APP_DISPLAY_VERSION) : ' 网页版'); document.getElementById('aboutLatest').style.display = isAnyApp ? '' : 'none'; initAboutDevTrigger(); }
-    function showDevSettingsPage() { hideAllPages(); document.getElementById('devSettingsPage').style.display = 'block'; document.getElementById('devEnabled').checked = isDevEnabled(); document.getElementById('disableUpdate').checked = isUpdateDisabled(); document.getElementById('devOptionsContainer').style.display = isDevEnabled() ? '' : 'none'; }
+    function showDevSettingsPage() { hideAllPages(); document.getElementById('devSettingsPage').style.display = 'block'; document.getElementById('devEnabled').checked = isDevEnabled(); document.getElementById('disableUpdate').checked = isUpdateSkipEnabled(); document.getElementById('devOptionsContainer').style.display = isDevEnabled() ? '' : 'none'; }
     function backToSettings() { hideAllPages(); document.getElementById('settingsPage').classList.add('active'); updateDevMenuVisibility(); }
 
     function hideAllPages() {
@@ -420,7 +391,6 @@
         document.getElementById('navHomeBtn').classList.remove('active'); document.getElementById('navNotifyBtn').classList.remove('active'); document.getElementById('navSettingsBtn').classList.remove('active');
     }
 
-    // 关于页面开发人员触发
     var aboutIconClicks = 0; var aboutIconTimer = null; var aboutNameLongPress = false;
     function initAboutDevTrigger() {
         aboutIconClicks = 0; aboutNameLongPress = false;
@@ -446,10 +416,8 @@
     function exitEditMode() { isEditMode = false; currentToken = null; document.body.classList.remove('edit-mode'); document.getElementById('fabGroup').style.display = 'none'; document.getElementById('saveBtn').style.display = 'none'; renderGroups(); renderCarousel(); alert('已保存并退出编辑模式'); }
 
     function parseAppTxt(raw) { var lines=raw.split(/\r?\n/); var mode=null; var groups=[],pics=[],apps=[]; lines.forEach(function(line){line=line.trim();if(!line)return; if(line.toLowerCase()==='group'){mode='group';return;} if(line.toLowerCase()==='pic'){mode='pic';return;} if(line.toLowerCase()==='app'){mode='app';return;} if(mode==='group'){var m=line.match(/\[g=([^\]]+)\]/);if(m)groups.push(m[1].trim());} else if(mode==='pic'){var m=line.match(/\[p=([^\s\]]+)\s+l=([^\s\]]+)\]/);if(m)pics.push({imgUrl:m[1].trim(),linkUrl:m[2].trim()});} else if(mode==='app'){var m=line.match(/\[n=([^\s\]]+)\s+p=([^\s\]]+)\s+l=([^\s\]]+)(?:\s+g=([^\s\]]+))?\]/);if(!m)m=line.match(/\[n=(.+?)\s+p=(.+?)\s+l=(.+?)(?:\s+g=(.+?))?\]/);if(m)apps.push({name:m[1].trim(),icon:m[2].trim(),link:m[3].trim(),group:m[4]?m[4].trim():null});}}); groupOrder=groups.length?groups:['其他应用']; slidesData=pics; appItems=apps; renderGroups(); if(slidesData.length){renderCarousel();startAutoSlide();}else{document.getElementById('carouselSection').style.display='none';} document.getElementById('warningBanner').style.display='none'; handleUrlAppParameter(); }
-
     function renderGroups() { var gc=document.getElementById('groupsContainer'); if(!gc) return; var abg={}; groupOrder.forEach(function(g){abg[g]=[];}); appItems.forEach(function(a){var g=a.group||'其他应用';if(!abg[g])abg[g]=[];abg[g].push(a);}); var html=''; for(var i=0;i<groupOrder.length;i++){var gn=groupOrder[i];var apps=abg[gn]||[]; html+='<div class="group-section" data-group-index="'+i+'"><div class="group-header'+(isEditMode?' draggable':'')+'" data-group="'+escapeHtml(gn)+'"><span class="group-title">'+escapeHtml(gn)+'</span>'+(isEditMode?'<div><button onclick="editGroup(\''+escapeHtml(gn)+'\')">&#9998;</button><button onclick="deleteGroup(\''+escapeHtml(gn)+'\')">&#128465;</button></div>':'')+'</div><div class="apps-grid" data-group="'+escapeHtml(gn)+'" data-group-index="'+i+'">'; if(apps.length===0) html+='<div class="empty-group">暂无应用</div>'; else apps.forEach(function(a){var icon=a.icon;if(icon&&icon.indexOf('http')!==0)icon='https://luckynum.top/'+icon; var fb='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2248%22 height=%2248%22%3E%3Crect width=%2248%22 height=%2248%22 fill=%22%23ddd%22/%3E%3C/svg%3E'; html+='<div class="app-card" data-app-name="'+escapeHtml(a.name)+'" data-app-link="'+escapeHtml(a.link)+'" data-app-icon="'+escapeHtml(a.icon)+'" data-app-group="'+escapeHtml(gn)+'">'+(isEditMode?'<button class="edit-app-btn" onclick="editApp(\''+escapeHtml(a.name)+'\',\''+escapeHtml(a.link)+'\',\''+escapeHtml(a.icon)+'\',\''+escapeHtml(gn)+'\')">&#9998;</button><button class="delete-btn" onclick="deleteApp(\''+escapeHtml(a.name)+'\',\''+escapeHtml(a.link)+'\')">&#10005;</button><div class="drag-handle" draggable="true">&#8942;&#8942;</div>':'')+'<img class="app-icon" src="'+escapeHtml(icon)+'" onerror="this.src=\''+fb+'\'"><span class="app-name">'+escapeHtml(a.name)+'</span></div>';}); html+='</div></div>';} gc.innerHTML=html; document.querySelectorAll('.app-card').forEach(function(card){card.addEventListener('click',function(e){if(e.target.classList.contains('edit-app-btn')||e.target.classList.contains('delete-btn')||e.target.classList.contains('drag-handle')) return;handleAppClick(card.dataset.appLink,card.dataset.appName);});}); if(isEditMode) initDragSort(); }
     function initDragSort() { document.querySelectorAll('.group-header.draggable').forEach(function(header){header.setAttribute('draggable','true'); header.ondragstart=function(e){var gd=header.closest('.group-section');draggedGroupIndex=parseInt(gd.dataset.groupIndex);e.dataTransfer.setData('text/plain',draggedGroupIndex);e.dataTransfer.effectAllowed='move';}; header.ondragover=function(e){e.preventDefault();e.dataTransfer.dropEffect='move';}; header.ondrop=async function(e){e.preventDefault();var tg=header.closest('.group-section');var ti=parseInt(tg.dataset.groupIndex);if(draggedGroupIndex!==null&&draggedGroupIndex!==ti){var mg=groupOrder[draggedGroupIndex];groupOrder.splice(draggedGroupIndex,1);groupOrder.splice(ti,0,mg);if(await saveToGitHub(generateFileContent()))renderGroups();}draggedGroupIndex=null;};}); document.querySelectorAll('.app-card .drag-handle').forEach(function(handle){handle.setAttribute('draggable','true'); handle.ondragstart=function(e){var card=handle.closest('.app-card');draggedAppData={name:card.dataset.appName,link:card.dataset.appLink,icon:card.dataset.appIcon,group:card.dataset.appGroup};e.dataTransfer.setData('text/plain',JSON.stringify(draggedAppData));e.dataTransfer.effectAllowed='move';card.classList.add('dragging');}; handle.ondragend=function(e){e.target.closest('.app-card').classList.remove('dragging');draggedAppData=null;};}); document.querySelectorAll('.apps-grid').forEach(function(grid){grid.ondragover=function(e){e.preventDefault();e.dataTransfer.dropEffect='move';}; grid.ondrop=async function(e){e.preventDefault();if(draggedAppData){var tg=grid.dataset.group;var app=appItems.find(function(a){return a.name===draggedAppData.name&&a.link===draggedAppData.link;});if(app&&app.group!==tg){app.group=tg;if(await saveToGitHub(generateFileContent()))renderGroups();}draggedAppData=null;}};}); }
-
     function renderCarousel() { var ct=document.getElementById('carouselTrack'); if(!ct) return; totalSlides=slidesData.length; if(totalSlides===0){document.getElementById('carouselSection').style.display='none';return;} document.getElementById('carouselSection').style.display='block'; var html=''; for(var i=0;i<slidesData.length;i++){var img=slidesData[i].imgUrl,link=slidesData[i].linkUrl;if(img&&img.indexOf('http')!==0)img='https://luckynum.top/'+img;if(link&&link.indexOf('http')!==0)link='https://luckynum.top/'+link;html+='<div class="carousel-slide">'+(isEditMode?'<button class="delete-btn" onclick="deleteSlide('+i+')">&#10005;</button>':'')+'<a href="'+escapeHtml(link)+'" target="_blank"><img src="'+escapeHtml(img)+'" onerror="this.src=\'https://luckynum.top/41.jpg\'"></a></div>';} ct.innerHTML=html; var dots=''; for(var i=0;i<totalSlides;i++) dots+='<div class="dot'+(i===currentIndex?' active':'')+'" data-index="'+i+'"></div>'; document.getElementById('carouselDots').innerHTML=dots; updateCarouselPosition(); document.querySelectorAll('.dot').forEach(function(dot){dot.onclick=function(){currentIndex=parseInt(dot.dataset.index);updateCarouselPosition();updateDotsActive();resetAutoSlide();};}); }
     function updateCarouselPosition(){document.getElementById('carouselTrack').style.transform='translateX('+(-currentIndex*100)+'%)';}
     function updateDotsActive(){document.querySelectorAll('.dot').forEach(function(d,i){d.classList.toggle('active',i===currentIndex);});}
@@ -488,7 +456,6 @@
 
     async function handleUrlAppParameter(){var p=new URLSearchParams(window.location.search);var ap=p.get('app');if(!ap)return;try{ap=decodeURIComponent(ap);}catch(e){}var rc=0;while(appItems.length===0&&rc<30){await new Promise(function(r){setTimeout(r,200);});rc++;}var ta=appItems.find(function(a){return a.name===ap;});if(!ta)ta=appItems.find(function(a){return a.name.toLowerCase().indexOf(ap.toLowerCase())!==-1;});if(ta){setTimeout(function(){handleAppClick(ta.link,ta.name);},500);return;}if(!isWebLink(ap)){if(isAudioFile(ap)){var fu=ap.indexOf('http')===0?ap:'https://luckynum.top/'+ap;var fn=ap.split('/').pop();var sf=await findSeriesFiles(fn);openAudioViewer(fu,fn,sf);return;}openFileWithFilehelper(ap);return;}var fu=ap.indexOf('http')===0?ap:'https://luckynum.top/'+ap;window.open(fu,'_blank');}
 
-    // 事件绑定
     document.getElementById('refreshBtn').addEventListener('click',refreshConfig);
     document.getElementById('saveBtn').addEventListener('click',saveAndExit);
     document.getElementById('navHomeBtn').addEventListener('click',showHome);
@@ -499,6 +466,7 @@
     document.getElementById('laterBtn').addEventListener('click',function(){document.getElementById('appDownloadModal').classList.remove('show');});
     document.getElementById('appDownloadModal').addEventListener('click',function(e){if(e.target===document.getElementById('appDownloadModal'))this.classList.remove('show');});
     document.getElementById('forceUpdateBtn').addEventListener('click',downloadApp);
+    document.getElementById('skipUpdateBtn').addEventListener('click',function(){document.getElementById('forceUpdateModal').classList.remove('show');});
     document.getElementById('notifyModal').addEventListener('click',function(e){if(e.target===document.getElementById('notifyModal'))this.classList.remove('show');});
     document.getElementById('markAllReadBtn').addEventListener('click',markAllAsRead);
     document.getElementById('pushNotifyFab').addEventListener('click',showPushNotifyModal);
@@ -523,9 +491,8 @@
     document.getElementById('wifiInterval').addEventListener('change', function() { var s = getPushSettings(); s.wifi = parseInt(this.value); savePushSettings(s); sendPushSettings(); });
     document.getElementById('mdInterval').addEventListener('change', function() { var s = getPushSettings(); s.md = parseInt(this.value); savePushSettings(s); sendPushSettings(); });
 
-    // 开发人员设置事件
     document.getElementById('devEnabled').addEventListener('change', function() { setDevEnabled(this.checked); document.getElementById('devOptionsContainer').style.display = this.checked ? '' : 'none'; });
-    document.getElementById('disableUpdate').addEventListener('change', function() { localStorage.setItem('disable_update', this.checked ? 'true' : 'false'); });
+    document.getElementById('disableUpdate').addEventListener('change', function() { localStorage.setItem('disable_force_update', this.checked ? 'true' : 'false'); });
     document.getElementById('viewLogsBtn').addEventListener('click', function() { window.location.href = 'fiveapp://logs'; });
     document.getElementById('devCommandBtn').addEventListener('click', function() { var cmd = document.getElementById('devCommandInput').value.trim(); if (cmd) { window.location.href = 'fiveapp://' + cmd; } else { alert('请输入指令内容'); } });
 
@@ -556,8 +523,11 @@
             document.getElementById('menuDevSettings').style.display = 'none';
         }
         if (isAnyApp) {
-            if (isLatestApp || isUpdateDisabled()) { console.log('五班应用平台已启动, 版本:', appVersion); return; }
-            document.getElementById('forceUpdateModal').classList.add('show'); return;
+            if (isLatestApp) { console.log('五班应用平台已启动, 版本:', appVersion); return; }
+            document.getElementById('forceUpdateModal').classList.add('show');
+            if (isUpdateSkipEnabled()) { document.getElementById('skipUpdateBtn').style.display = ''; }
+            initUpdateDevTrigger();
+            return;
         }
         tryOpenApp();
         setTimeout(function() { if (!document.hidden) { document.getElementById('downloadTopBar').style.display = 'flex'; document.getElementById('appDownloadModal').classList.add('show'); } }, 2000);
