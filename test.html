@@ -1,942 +1,224 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>考试信息</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-touch-callout: none;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
+  <title></title>
+  <style>
+    /* 基础重置，确保页面完全无空白、无边距 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #1e3b2f;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            touch-action: none;
-        }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;            /* 禁止页面滚动，防止缩放干扰 */
+      background-color: #f0f0f0;  /* 浅灰色背景，与网络错误氛围协调 */
+      font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+    }
 
-        .canvas-fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
+    /* 主容器：使用flex居中图片，并接管所有点击区域 */
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      /* 触摸操作优化：确保点击响应不延迟 */
+      touch-action: manipulation;
+    }
 
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-            touch-action: none;
-            cursor: crosshair;
-        }
+    /* 图片容器：精确控制图片显示，不允许任何缩放行为 */
+    .image-wrapper {
+      /* 设置为inline-block或flex子项，让图片原始尺寸呈现 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      /* 关键：禁止所有用户触发的缩放、拖动等操作 */
+      touch-action: manipulation;
+      /* 确保点击事件能正常触发，不被其他样式阻断 */
+      cursor: pointer;
+      /* 可选：轻微视觉反馈，但为了纯净，不加额外阴影，保留交互提示 */
+      -webkit-tap-highlight-color: transparent; /* 移除移动端点击高亮 */
+      user-select: none;            /* 禁止选中图片（避免长按菜单） */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
 
-        .exam-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: calc(100% - 120px);
-            z-index: 2;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2vh 3vw;
-        }
+    /* 图片本身样式：绝对禁止缩放，保持原始尺寸 */
+    .network-error-img {
+      display: block;
+      /* 核心：设置宽高为auto，确保图片以原始像素显示，不进行任何缩放 */
+      width: auto;
+      height: auto;
+      max-width: none;   /* 覆盖可能的全局样式，防止被限制最大宽度 */
+      max-height: none;  /* 防止高度被限制 */
+      /* 禁止用户通过手势或控件缩放图片（针对某些浏览器） */
+      touch-action: manipulation;
+      /* 禁止图片拖拽（部分浏览器会默认允许拖拽图片） */
+      -webkit-user-drag: none;
+      -khtml-user-drag: none;
+      -moz-user-drag: none;
+      -o-user-drag: none;
+      user-drag: none;
+      /* 保证图片可点击区域就是图片本身可见区域 */
+      pointer-events: auto;
+      /* 图片加载失败时，不显示默认边框或破裂图标，依靠alt属性（此处不设置alt以保持干净） */
+      border: none;
+      outline: none;
+      /* 可选：若图片背景透明，可添加极淡的阴影仅为了区分，但遵循简洁原则不加额外样式 */
+    }
 
-        .exam-content {
-            text-align: center;
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 500;
-            letter-spacing: 3px;
-            pointer-events: none;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 3vh;
-        }
-
-        .exam-content .clock-row {
-            font-weight: 700;
-            color: #ffffff;
-            font-variant-numeric: tabular-nums;
-            font-feature-settings: "tnum";
-            letter-spacing: 6px;
-            font-size: var(--exam-font-xl, clamp(24px, 7vh, 48px));
-        }
-
-        .exam-content .line {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            white-space: nowrap;
-            width: 100%;
-            font-size: var(--exam-font-lg, clamp(20px, 5vh, 36px));
-            line-height: 1.3;
-        }
-
-        .exam-content .line span {
-            color: rgba(255, 255, 255, 0.9);
-            white-space: nowrap;
-            font-size: inherit;
-        }
-
-        .exam-content .line .underscore {
-            color: rgba(255, 255, 255, 0.75);
-            white-space: nowrap;
-            letter-spacing: 0;
-            font-size: inherit;
-            line-height: 1;
-        }
-
-        @media (max-width: 600px) {
-            .exam-content { gap: 2vh; letter-spacing: 2px; }
-            .exam-content .clock-row { letter-spacing: 4px; }
-            .exam-content .line { gap: 4px; }
-            .exam-overlay { height: calc(100% - 100px); }
-        }
-
-        .settings-btn {
-            position: fixed;
-            left: 20px;
-            bottom: 50px;
-            z-index: 100;
-            background: #EEEEEE;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 18px;
-            color: #666A7A;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            transition: all 0.15s ease;
-            font-family: inherit;
-        }
-        .settings-btn:hover { background: #e0e0e0; }
-        .settings-btn:active { transform: scale(0.95); }
-        .settings-btn .dots-icon {
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            line-height: 1;
-            color: #666A7A;
-        }
-
-        .settings-modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 300;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        .settings-modal-overlay.show { display: flex; }
-
-        .settings-modal {
-            background: #2a3a44;
-            border-radius: 16px;
-            padding: 28px 32px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #fff;
-            min-width: 340px;
-            max-width: 420px;
-            text-align: center;
-        }
-        .settings-modal h3 {
-            font-size: 18px;
-            margin-bottom: 20px;
-            color: rgba(255,255,255,0.9);
-        }
-        .settings-modal .modal-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin: 12px 0;
-            color: rgba(255,255,255,0.8);
-            font-size: 14px;
-        }
-        .settings-modal .modal-row label { white-space: nowrap; }
-        .settings-modal .modal-row input[type="range"] {
-            flex: 1;
-            accent-color: #00C853;
-        }
-        .settings-modal .modal-row .size-val {
-            min-width: 36px;
-            text-align: right;
-            font-size: 13px;
-            color: rgba(255,255,255,0.6);
-        }
-        .settings-modal button {
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.15s ease;
-            font-family: inherit;
-            margin: 6px;
-        }
-        .settings-modal .btn-primary { background: #00C853; color: #fff; }
-        .settings-modal .btn-primary:hover { background: #00e060; }
-        .settings-modal .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; }
-        .settings-modal .btn-secondary:hover { background: rgba(255,255,255,0.2); }
-        .settings-modal .btn-close { background: transparent; color: rgba(255,255,255,0.5); font-size: 13px; }
-        .settings-modal input[type="file"] { display: none; }
-
-        .error-toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #e53935;
-            color: #fff;
-            padding: 12px 24px;
-            border-radius: 10px;
-            z-index: 400;
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-        .error-toast.show { display: block; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-
-        .timer-badge {
-            position: fixed;
-            top: 10px;
-            right: 20px;
-            z-index: 50;
-            background: rgba(0,0,0,0.5);
-            color: rgba(255,255,255,0.7);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            display: none;
-        }
-        .timer-badge.show { display: block; }
-
-        .base-toolbar-container {
-            position: fixed;
-            left: 50%;
-            bottom: 40px;
-            transform: translateX(-50%);
-            z-index: 100;
-        }
-
-        .base-toolbar-bg {
-            display: flex;
-            align-items: stretch;
-            background-color: #EEEEEE;
-            border-radius: 12px;
-            padding: 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            width: 420px;
-            height: 86px;
-            position: absolute;
-            top: 0; left: 0;
-            overflow: hidden;
-        }
-
-        .divider {
-            width: 1px; height: 50%;
-            background-color: #D0D0D0;
-            position: absolute; top: 25%;
-        }
-        .divider.d1 { left: 25%; }
-        .divider.d2 { left: 50%; }
-        .divider.d3 { left: 75%; }
-
-        .buttons-container { position: relative; width: 420px; height: 86px; }
-
-        .btn-item {
-            position: absolute; top: 0;
-            width: 105px; height: 86px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #666A7A;
-            cursor: pointer;
-            transition: background-color 0.15s ease, color 0.15s ease;
-        }
-        .btn-item:nth-child(1) { left: 0px; border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
-        .btn-item:nth-child(2) { left: 105px; }
-        .btn-item:nth-child(3) { left: 210px; }
-        .btn-item:nth-child(4) { left: 315px; border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
-        .btn-item.active { background-color: #00C853; color: #FFFFFF; }
-        .btn-item svg {
-            display: block;
-            fill: #666A7A; stroke: #666A7A;
-            width: 40px; height: 40px;
-            transform-origin: center;
-            margin-bottom: 0px;
-            transition: fill 0.15s ease, stroke 0.15s ease;
-        }
-        .btn-item.active svg { fill: #FFFFFF; stroke: #FFFFFF; }
-        .btn-item span { font-size: 13px; margin-top: 10px; transition: color 0.15s ease; }
-
-        .color-menu {
-            position: fixed; bottom: 140px; left: 50%; transform: translateX(-50%);
-            background: rgba(30,40,50,0.95);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-radius: 16px; padding: 16px 20px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
-            display: none; z-index: 200;
-            gap: 12px; flex-wrap: wrap; justify-content: center;
-        }
-        .color-menu.show { display: flex; }
-
-        .color-dot {
-            width: 32px; height: 32px; border-radius: 50%;
-            border: 3px solid transparent; cursor: pointer; transition: 0.2s;
-        }
-        .color-dot.active { border-color: white; box-shadow: 0 0 0 4px rgba(255,255,255,0.25); }
-
-        .size-row {
-            display: flex; align-items: center; gap: 8px;
-            color: rgba(255,255,255,0.7); width: 100%;
-        }
-        .size-row input[type="range"] { flex: 1; accent-color: white; }
-        .size-preview {
-            width: 22px; height: 22px; border-radius: 50%;
-            background: white; border: 2px solid rgba(255,255,255,0.3); flex-shrink: 0;
-        }
-
-        .eraser-slider {
-            position: fixed; bottom: 140px; left: 50%; transform: translateX(-50%);
-            background: rgba(30,40,50,0.95);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-radius: 30px; padding: 12px 22px;
-            display: none; align-items: center; gap: 14px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5); z-index: 200;
-        }
-        .eraser-slider.show { display: flex; }
-
-        .slider-track {
-            width: 160px; height: 6px; background: rgba(255,255,255,0.15);
-            border-radius: 3px; position: relative; cursor: pointer; touch-action: none;
-        }
-        .slider-thumb {
-            position: absolute; top: 50%; left: 0%; transform: translate(-50%,-50%);
-            width: 24px; height: 24px; background: #ff6b6b; border-radius: 50%;
-            box-shadow: 0 0 12px rgba(255,107,107,0.6); pointer-events: none;
-        }
-        .slider-hint { color: rgba(255,255,255,0.5); font-size: 12px; white-space: nowrap; }
-
-        @media (max-width: 500px) {
-            .base-toolbar-bg { width: 340px; height: 72px; }
-            .buttons-container { width: 340px; height: 72px; }
-            .btn-item { width: 85px; height: 72px; }
-            .btn-item:nth-child(1) { left: 0px; }
-            .btn-item:nth-child(2) { left: 85px; }
-            .btn-item:nth-child(3) { left: 170px; }
-            .btn-item:nth-child(4) { left: 255px; }
-            .divider.d1 { left: 25%; } .divider.d2 { left: 50%; } .divider.d3 { left: 75%; }
-            .btn-item svg { width: 30px; height: 30px; }
-            .btn-item span { font-size: 11px; margin-top: 6px; }
-            .settings-btn { left: 10px; bottom: 40px; padding: 8px 14px; font-size: 12px; }
-        }
-    </style>
+    /* 针对小屏幕设备：如果图片原始尺寸大于视口，是否允许溢出？ 
+       根据需求“不要被缩放，也不允许缩放”，且要求显示原图。
+       如果图片过大超出屏幕，用户无法看到完整图片，但缩放被禁止。
+       这符合“原始尺寸、不可缩放”的意图。为了极端情况，不添加overflow:auto，
+       保持严格不缩放且无滚动条。同时父容器overflow:hidden确保无滚动条。
+       如果需要始终看到完整图片但又不缩放，本身是矛盾的。
+       所以严格遵循：图片多大就显示多大，不缩放，可能部分不可见，但符合指令。 */
+    
+    /* 如果图片尺寸小于视口，居中显示效果完美；大于视口则只显示中间部分。
+       这是一种合理的设计选择。 */
+  </style>
 </head>
 <body>
-
-<canvas id="drawCanvas" class="canvas-fullscreen"></canvas>
-
-<div class="exam-overlay" id="examOverlay">
-    <div class="exam-content" id="examContent">
-        <div class="clock-row" id="clockDisplay">00:00:00</div>
-        <div class="line">
-            <span>考试科目：</span><span class="underscore" id="subject">____________________</span>
-        </div>
-        <div class="line">
-            <span>考试时间：</span><span class="underscore" id="examTimeRange">____________________</span>
-        </div>
-        <div class="line">
-            <span>试卷共</span><span class="underscore" id="paperSheets">____</span><span>张</span><span class="underscore" id="paperPages">____</span><span>页</span>
-        </div>
-        <div class="line">
-            <span>答卷共</span><span class="underscore" id="answerSheets">____</span><span>张</span><span class="underscore" id="answerPages">____</span><span>页</span>
-        </div>
+  <div class="container">
+    <!-- 图片包裹层，用于更精确控制点击区域和样式隔离 -->
+    <div class="image-wrapper" id="imageTrigger">
+      <!-- 
+        图片源：network_error.jpg
+        注意：该图片应与HTML文件位于同一目录，或根据实际路径调整。
+        标签alt设置为空，符合“页面标签留空”的意图（title已为空）。
+        不设置width/height属性，完全依靠CSS控制原始尺寸。
+      -->
+      <img 
+        src="network_error.jpg" 
+        alt="" 
+        class="network-error-img"
+        id="errorImage"
+      >
     </div>
-</div>
+  </div>
 
-<div class="timer-badge" id="timerBadge"></div>
-<div class="error-toast" id="errorToast"></div>
-
-<button class="settings-btn" id="settingsBtn">
-    <span class="dots-icon">•••</span>
-    <span>设置</span>
-</button>
-
-<div class="settings-modal-overlay" id="settingsModalOverlay">
-    <div class="settings-modal">
-        <h3>设置</h3>
-        <div class="modal-row">
-            <label>文字大小</label>
-            <input type="range" id="fontSizeSlider" min="50" max="150" value="100" step="5">
-            <span class="size-val" id="fontSizeVal">100%</span>
-        </div>
-        <div style="margin-top:16px;">
-            <button class="btn-primary" id="btnOpenPreset">打开预设文件</button>
-            <button class="btn-secondary" id="btnDownloadFormat">下载格式文件</button>
-        </div>
-        <div style="margin-top:12px;">
-            <button class="btn-close" id="btnCloseSettings">关闭</button>
-        </div>
-        <input type="file" id="fileInput" accept=".txt">
-    </div>
-</div>
-
-<div class="color-menu" id="colorMenu">
-    <div class="color-dot active" data-color="#ffffff" style="background:#ffffff;"></div>
-    <div class="color-dot" data-color="#b0c4de" style="background:#b0c4de;"></div>
-    <div class="color-dot" data-color="#ff0000" style="background:#ff0000;"></div>
-    <div class="color-dot" data-color="#00ff00" style="background:#00ff00;"></div>
-    <div class="color-dot" data-color="#0000ff" style="background:#0000ff;"></div>
-    <div class="color-dot" data-color="#ffff00" style="background:#ffff00;"></div>
-    <div class="color-dot" data-color="#9b59b6" style="background:#9b59b6;"></div>
-    <div class="color-dot" data-color="#000000" style="background:#000000;"></div>
-    <div class="size-row">
-        <span style="font-size:11px;">细</span>
-        <input type="range" id="penSizeSlider" min="1" max="16" value="4" step="0.5">
-        <span style="font-size:11px;">粗</span>
-        <div class="size-preview" id="penSizePreview"></div>
-    </div>
-</div>
-
-<div class="eraser-slider" id="eraserSlider">
-    <span class="slider-hint">← 滑动清屏 →</span>
-    <div class="slider-track" id="sliderTrack"><div class="slider-thumb" id="sliderThumb"></div></div>
-    <span class="slider-hint">滑至最右清屏</span>
-</div>
-
-<div class="base-toolbar-container" id="toolbar">
-    <div class="base-toolbar-bg">
-        <div class="divider d1"></div>
-        <div class="divider d2"></div>
-        <div class="divider d3"></div>
-    </div>
-    <div class="buttons-container">
-        <div class="btn-item active" id="btn-select">
-            <svg viewBox="0 0 100 100" style="width:30px;height:30px;transform:rotate(347deg) scale(1.2);margin-left:-2px;">
-                <path d="M 28,15 L 75,45 L 55,50 L 70,85 L 58,88 L 44,57 L 28,80 Z" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
-            </svg>
-            <span>选择</span>
-        </div>
-        <div class="btn-item" id="btn-pen">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="5 14 235 100" style="transform:rotate(315deg) scale(1.0);margin-left:0px;">
-                <polygon points="10,50  55,20  55,80" fill="currentColor" stroke="currentColor" stroke-width="8" stroke-linejoin="round"/>
-                <rect x="65" y="15" width="140" height="70" rx="10" ry="10" fill="currentColor"/>
-            </svg>
-            <span>笔</span>
-        </div>
-        <div class="btn-item" id="btn-eraser">
-            <svg viewBox="0 0 200 400" style="transform:rotate(315deg) scale(1.8);margin-left:-10px;">
-                <g transform="translate(25, 140)">
-                    <defs>
-                        <mask id="eraserMask">
-                            <rect x="0" y="0" width="180" height="120" fill="white" />
-                            <rect x="30" y="30" width="40" height="60" rx="6" ry="6" fill="black" />
-                        </mask>
-                    </defs>
-                    <rect x="15" y="10" width="150" height="100" rx="12" ry="12" mask="url(#eraserMask)"/>
-                </g>
-            </svg>
-            <span>橡皮</span>
-        </div>
-        <div class="btn-item" id="btn-undo">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="19 30 62 53" style="transform:rotate(0deg) scale(0.9);margin-left:-2px;">
-                <path d="M 20,50 L 45,25 L 45,40 C 55,40 65,45 80,65 C 70,58 62,54 55,54 C 50,54 47,54.5 45,55 L 45,75 Z" fill="currentColor" />
-                <path d="M 21,50 L 44,27.5 L 44,72.5 Z" fill="currentColor" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
-            </svg>
-            <span>撤消</span>
-        </div>
-    </div>
-</div>
-
-<script>
-(function() {
-    const canvas = document.getElementById('drawCanvas');
-    const ctx = canvas.getContext('2d');
-    const BOARD_COLOR = '#1e3b2f';
-
-    let mode = 'select';
-    let penColor = '#ffffff';
-    let penSize = 4;
-    let drawing = false;
-    let strokesHistory = [];
-    const activeTouches = {};
-
-    // 预设系统
-    let presets = [];
-    let switchInterval = 2;
-    let currentIndex = -1;
-    let checkTimer = null;
-
-    const settingsBtn = document.getElementById('settingsBtn');
-    const settingsModalOverlay = document.getElementById('settingsModalOverlay');
-    const fileInput = document.getElementById('fileInput');
-    const timerBadge = document.getElementById('timerBadge');
-    const errorToast = document.getElementById('errorToast');
-    const fontSizeSlider = document.getElementById('fontSizeSlider');
-    const fontSizeVal = document.getElementById('fontSizeVal');
-
-    const elSubject = document.getElementById('subject');
-    const elExamTimeRange = document.getElementById('examTimeRange');
-    const elPaperSheets = document.getElementById('paperSheets');
-    const elPaperPages = document.getElementById('paperPages');
-    const elAnswerSheets = document.getElementById('answerSheets');
-    const elAnswerPages = document.getElementById('answerPages');
-
-    function showError(msg) {
-        errorToast.textContent = msg;
-        errorToast.classList.add('show');
-        setTimeout(() => errorToast.classList.remove('show'), 4000);
-    }
-
-    function timeToMinutes(timeStr) {
-        if (!timeStr || !timeStr.trim()) return null;
-        const parts = timeStr.trim().split(':');
-        if (parts.length !== 2) return null;
-        const h = parseInt(parts[0], 10);
-        const m = parseInt(parts[1], 10);
-        if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return null;
-        return h * 60 + m;
-    }
-
-    function applyPreset(preset) {
-        if (!preset) {
-            elSubject.textContent = '_'.repeat(20);
-            elExamTimeRange.textContent = '_'.repeat(20);
-            elPaperSheets.textContent = '_'.repeat(4);
-            elPaperPages.textContent = '_'.repeat(4);
-            elAnswerSheets.textContent = '_'.repeat(4);
-            elAnswerPages.textContent = '_'.repeat(4);
-            timerBadge.classList.remove('show');
-            return;
+  <script>
+    (function() {
+      // 确保DOM完全加载后再绑定事件，避免元素未找到
+      function setupClickHandler() {
+        // 获取包裹元素（也可直接使用图片，但包裹层更稳定，点击区域完全覆盖图片）
+        const triggerElement = document.getElementById('imageTrigger');
+        // 备用：如果图片包裹层不存在，直接使用图片本身
+        const imageElement = document.getElementById('errorImage');
+        
+        // 优先使用包裹层作为点击目标，因为其尺寸与图片一致且无额外内边距
+        const clickTarget = triggerElement || imageElement;
+        
+        if (!clickTarget) {
+          console.warn('未找到触发元素，无法绑定点击事件。');
+          return;
         }
-        elSubject.textContent = preset['考试科目'] || '_'.repeat(20);
-        const ts = preset['考试时间起点'] || '';
-        const te = preset['考试时间终点'] || '';
-        elExamTimeRange.textContent = ts + ' ~ ' + te;
-        elPaperSheets.textContent = preset['问卷张数'] || '_'.repeat(4);
-        elPaperPages.textContent = preset['问卷页数'] || '_'.repeat(4);
-        elAnswerSheets.textContent = preset['答卷张数'] || '_'.repeat(4);
-        elAnswerPages.textContent = preset['答卷页数'] || '_'.repeat(4);
-    }
 
-    function getActiveIndex(nowMinutes) {
-        for (let i = 0; i < presets.length; i++) {
-            const switchTime = presets[i]._endMin + switchInterval;
-            if (nowMinutes < switchTime) {
-                return i;
+        // 定义点击处理函数：执行自定义协议跳转
+        function handleClick(event) {
+          // 阻止事件冒泡，避免任何可能的意外行为（如链接跳转等）
+          event.preventDefault();
+          event.stopPropagation();
+          
+          // 执行指定的协议刷新操作
+          // 使用 window.location.href 直接跳转，这是最通用的方式
+          try {
+            // 某些环境可能需要尝试不同的方法，但 location.href 最标准
+            window.location.href = 'fiveapp://refresh';
+          } catch (e) {
+            // 静默处理错误，但在控制台记录以便调试
+            console.error('执行fiveapp://refresh时出错:', e);
+            // 备用方案：在某些严格环境下，尝试使用 location.assign
+            try {
+              window.location.assign('fiveapp://refresh');
+            } catch (assignError) {
+              console.error('备用location.assign也失败:', assignError);
             }
+          }
         }
-        return presets.length - 1;
-    }
 
-    function updateDisplay() {
-        if (presets.length === 0) return;
-        const now = new Date();
-        const nowMin = now.getHours() * 60 + now.getMinutes();
-        const newIndex = getActiveIndex(nowMin);
-        if (newIndex !== currentIndex) {
-            currentIndex = newIndex;
-            applyPreset(presets[currentIndex]);
-            const isLast = (currentIndex >= presets.length - 1);
-            if (isLast) {
-                timerBadge.classList.remove('show');
-            } else {
-                timerBadge.classList.add('show');
-                timerBadge.textContent = '科目 ' + (currentIndex + 1) + '/' + presets.length;
+        // 添加点击事件监听器
+        // 使用 'click' 事件，并且不设置 passive: false 因为不需要调用 preventDefault 来阻止滚动？
+        // 实际上我们调用了 preventDefault，所以需要明确设置 passive: false 以确保 preventDefault 生效。
+        clickTarget.addEventListener('click', handleClick, { passive: false });
+        
+        // 针对移动端，同时监听 'touchend' 可以避免某些设备上点击延迟，
+        // 但容易与click事件重复触发。这里只使用click并依赖 touch-action: manipulation 消除300ms延迟。
+        // 同时为了防止某些浏览器在图片上长按弹出菜单（保存图片等），通过CSS已设置 user-select: none，
+        // 并额外阻止 contextmenu 事件（右键菜单），提升体验。
+        clickTarget.addEventListener('contextmenu', function(e) {
+          // 阻止右键菜单弹出，保持页面纯净，同时避免干扰点击。
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        });
+
+        // 针对图片元素本身，也阻止拖拽事件（虽然CSS已处理，但JS加固）
+        if (imageElement) {
+          imageElement.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+          });
+          // 阻止图片被拖拽的默认行为
+          imageElement.addEventListener('mousedown', function(e) {
+            // 对于某些浏览器，mousedown时开始拖拽，额外阻止
+            if (e.button === 0) { // 左键
+              // 不阻止默认，但结合CSS user-drag: none 应该足够。
+              // 这里不做额外操作，保留以防万一。
             }
+          });
         }
-    }
 
-    function startLoop() {
-        stopLoop();
-        currentIndex = -1;
-        updateDisplay();
-        checkTimer = setInterval(updateDisplay, 3000);
-    }
+        // 额外安全措施：确保整个容器区域点击都有效，但只绑定一次。
+        // 因为包裹层覆盖图片，点击图片等同于点击包裹层。
+      }
 
-    function stopLoop() {
-        if (checkTimer) { clearInterval(checkTimer); checkTimer = null; }
-        currentIndex = -1;
-        timerBadge.classList.remove('show');
-    }
+      // 页面加载完成后执行设置
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        // DOM已就绪，立即执行
+        setTimeout(setupClickHandler, 0); // 使用微小的延迟确保元素完全可访问
+      } else {
+        // 等待DOM内容加载完成
+        document.addEventListener('DOMContentLoaded', function() {
+          setupClickHandler();
+        });
+      }
 
-    function validatePresets(list) {
-        const parsed = [];
-        for (let i = 0; i < list.length; i++) {
-            const p = list[i];
-            const startStr = p['考试时间起点'];
-            const endStr = p['考试时间终点'];
-            if (!startStr || !startStr.trim() || !endStr || !endStr.trim()) {
-                return { valid: false, error: '第' + (i + 1) + '科缺少考试时间起点或终点' };
-            }
-            const startMin = timeToMinutes(startStr);
-            const endMin = timeToMinutes(endStr);
-            if (startMin === null || endMin === null) {
-                return { valid: false, error: '第' + (i + 1) + '科时间格式错误，应为 HH:MM' };
-            }
-            if (endMin <= startMin) {
-                return { valid: false, error: '第' + (i + 1) + '科考试时间终点必须晚于起点' };
-            }
-            parsed.push({ ...p, _startMin: startMin, _endMin: endMin });
+      // 作为后备，如果上述事件未触发（极少数情况），使用window.onload再次尝试
+      window.addEventListener('load', function() {
+        // 确保设置函数只运行一次（通过检查元素是否已有监听器？简单起见，再调用一次但内部会覆盖？）
+        // 为避免重复绑定，使用标志位。
+        if (!window._clickHandlerBound) {
+          window._clickHandlerBound = true;
+          setupClickHandler();
         }
-        parsed.sort((a, b) => a._startMin - b._startMin);
-        for (let i = 0; i < parsed.length - 1; i++) {
-            if (parsed[i]._endMin > parsed[i + 1]._startMin) {
-                return { valid: false, error: '第' + (i + 1) + '科与第' + (i + 2) + '科考试时间重叠' };
-            }
-        }
-        return { valid: true, sorted: parsed };
-    }
+      });
 
-    function parsePresetText(text) {
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-        const result = { presets: [], intervalMinutes: 2 };
-        let i = 0;
-        if (lines[0] && lines[0].includes('结束后切换下一科的时间')) {
-            const match = lines[0].match(/(\d+)/);
-            if (match) result.intervalMinutes = parseInt(match[1], 10) || 2;
-            i = 1;
-        }
-        let currentPreset = null;
-        for (; i < lines.length; i++) {
-            const line = lines[i];
-            if (line === '{') { currentPreset = {}; }
-            else if (line === '}') { if (currentPreset) { result.presets.push(currentPreset); currentPreset = null; } }
-            else if (currentPreset && line.includes('：')) {
-                const idx = line.indexOf('：');
-                const key = line.substring(0, idx).trim();
-                const value = line.substring(idx + 1).trim();
-                currentPreset[key] = value;
-            }
-        }
-        return result;
-    }
-
-    function updateFontSize(val) {
-        const pct = val / 100;
-        document.documentElement.style.setProperty('--exam-font-xl', `clamp(${24*pct}px, ${7*pct}vh, ${48*pct}px)`);
-        document.documentElement.style.setProperty('--exam-font-lg', `clamp(${20*pct}px, ${5*pct}vh, ${36*pct}px)`);
-        fontSizeVal.textContent = val + '%';
-    }
-
-    fontSizeSlider.addEventListener('input', () => updateFontSize(parseInt(fontSizeSlider.value)));
-
-    settingsBtn.addEventListener('click', () => settingsModalOverlay.classList.add('show'));
-    document.getElementById('btnCloseSettings').addEventListener('click', () => settingsModalOverlay.classList.remove('show'));
-    settingsModalOverlay.addEventListener('click', (e) => { if (e.target === settingsModalOverlay) settingsModalOverlay.classList.remove('show'); });
-
-    document.getElementById('btnOpenPreset').addEventListener('click', () => fileInput.click());
-
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(ev) {
-            const text = ev.target.result;
-            const parsed = parsePresetText(text);
-            if (parsed.presets.length === 0) {
-                showError('文件中未找到有效科目');
-                fileInput.value = '';
-                return;
-            }
-            const validation = validatePresets(parsed.presets);
-            if (!validation.valid) {
-                showError(validation.error);
-                fileInput.value = '';
-                return;
-            }
-            presets = validation.sorted;
-            switchInterval = parsed.intervalMinutes;
-            settingsModalOverlay.classList.remove('show');
-            startLoop();
-        };
-        reader.readAsText(file);
-        fileInput.value = '';
-    });
-
-    document.getElementById('btnDownloadFormat').addEventListener('click', () => {
-        const sample = `结束后切换下一科的时间（min）：
-{
-    考试科目：
-    考试时间起点：
-    考试时间终点：
-    问卷张数：
-    问卷页数：
-    答卷张数：
-    答卷页数：
-}
-{
-    考试科目：
-    考试时间起点：
-    考试时间终点：
-    问卷张数：
-    问卷页数：
-    答卷张数：
-    答卷页数：
-}`;
-        const blob = new Blob([sample], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = '考试预设格式.txt';
-        a.click();
-        URL.revokeObjectURL(url);
-    });
-
-    function updateClock() {
-        const now = new Date();
-        document.getElementById('clockDisplay').textContent = [
-            String(now.getHours()).padStart(2, '0'),
-            String(now.getMinutes()).padStart(2, '0'),
-            String(now.getSeconds()).padStart(2, '0')
-        ].join(':');
-    }
-    updateClock();
-    setInterval(updateClock, 1000);
-
-    function resizeCanvas() {
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = window.innerWidth * dpr;
-        canvas.height = window.innerHeight * dpr;
-        canvas.style.width = window.innerWidth + 'px';
-        canvas.style.height = window.innerHeight + 'px';
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        redraw();
-    }
-
-    function redraw() {
-        ctx.save();
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.restore();
-        if (strokesHistory.length) {
-            ctx.save();
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.putImageData(strokesHistory[strokesHistory.length - 1], 0, 0);
-            ctx.restore();
-        } else {
-            ctx.fillStyle = BOARD_COLOR;
-            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
-        }
-    }
-
-    function saveState() {
-        ctx.save();
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        strokesHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
-        ctx.restore();
-        if (strokesHistory.length > 30) strokesHistory.shift();
-    }
-
-    function clearCanvas() {
-        ctx.fillStyle = BOARD_COLOR;
-        ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
-        saveState();
-    }
-
-    function undo() {
-        if (strokesHistory.length <= 1) { strokesHistory = []; clearCanvas(); return; }
-        strokesHistory.pop();
-        redraw();
-    }
-
-    function switchToPen() {
-        mode = 'pen';
-        updateUI();
-        closeAllMenus();
-    }
-
-    const btnSelect = document.getElementById('btn-select');
-    const btnPen = document.getElementById('btn-pen');
-    const btnEraser = document.getElementById('btn-eraser');
-    const btnUndo = document.getElementById('btn-undo');
-    const colorMenu = document.getElementById('colorMenu');
-    const eraserSlider = document.getElementById('eraserSlider');
-    const penSizeSliderEl = document.getElementById('penSizeSlider');
-    const penSizePreview = document.getElementById('penSizePreview');
-    const sliderTrack = document.getElementById('sliderTrack');
-    const sliderThumb = document.getElementById('sliderThumb');
-
-    function updateUI() {
-        btnSelect.classList.toggle('active', mode === 'select');
-        btnPen.classList.toggle('active', mode === 'pen');
-        btnEraser.classList.toggle('active', mode === 'eraser');
-        document.querySelectorAll('.color-dot').forEach(d => d.classList.toggle('active', d.dataset.color === penColor));
-        penSizeSliderEl.value = penSize;
-        penSizePreview.style.width = (penSize * 2) + 'px';
-        penSizePreview.style.height = (penSize * 2) + 'px';
-        penSizePreview.style.background = penColor;
-        canvas.style.cursor = mode === 'select' ? 'default' : 'crosshair';
-    }
-
-    function closeAllMenus() {
-        colorMenu.classList.remove('show');
-        eraserSlider.classList.remove('show');
-        sliderThumb.style.left = '0%';
-    }
-
-    function getPos(touch) {
-        const r = canvas.getBoundingClientRect();
-        return { x: touch.clientX - r.left, y: touch.clientY - r.top };
-    }
-
-    function penDot(x, y) { ctx.fillStyle = penColor; ctx.beginPath(); ctx.arc(x, y, penSize / 2, 0, Math.PI * 2); ctx.fill(); }
-    function penLine(x1, y1, x2, y2) { ctx.strokeStyle = penColor; ctx.lineWidth = penSize; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
-    function eraseDot(x, y) { ctx.fillStyle = BOARD_COLOR; ctx.beginPath(); ctx.arc(x, y, penSize * 2, 0, Math.PI * 2); ctx.fill(); }
-    function eraseLine(x1, y1, x2, y2) {
-        const dist = Math.hypot(x2 - x1, y2 - y1);
-        if (dist < 1) { eraseDot(x1, y1); return; }
-        const step = penSize * 1.5;
-        const n = Math.max(1, Math.ceil(dist / step));
-        for (let i = 0; i <= n; i++) { const t = i / n; eraseDot(x1 + (x2 - x1) * t, y1 + (y2 - y1) * t); }
-    }
-
-    canvas.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            const touch = e.changedTouches[i];
-            const pos = getPos(touch);
-            activeTouches[touch.identifier] = { x: pos.x, y: pos.y };
-            if (mode === 'pen') penDot(pos.x, pos.y);
-            else if (mode === 'eraser') eraseDot(pos.x, pos.y);
-        }
-        if (mode !== 'select' && e.changedTouches.length > 0) drawing = true;
-        closeAllMenus();
-    }, { passive: false });
-
-    canvas.addEventListener('touchmove', function(e) {
-        e.preventDefault();
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            const touch = e.changedTouches[i];
-            const prev = activeTouches[touch.identifier];
-            if (!prev) continue;
-            const pos = getPos(touch);
-            if (mode === 'pen') penLine(prev.x, prev.y, pos.x, pos.y);
-            else if (mode === 'eraser') eraseLine(prev.x, prev.y, pos.x, pos.y);
-            activeTouches[touch.identifier] = { x: pos.x, y: pos.y };
-        }
-    }, { passive: false });
-
-    canvas.addEventListener('touchend', function(e) {
-        e.preventDefault();
-        for (let i = 0; i < e.changedTouches.length; i++) delete activeTouches[e.changedTouches[i].identifier];
-        if (Object.keys(activeTouches).length === 0) { if (drawing && mode !== 'select') saveState(); drawing = false; }
-    });
-
-    canvas.addEventListener('touchcancel', function(e) {
-        e.preventDefault();
-        for (let i = 0; i < e.changedTouches.length; i++) delete activeTouches[e.changedTouches[i].identifier];
-        if (Object.keys(activeTouches).length === 0) { if (drawing && mode !== 'select') saveState(); drawing = false; }
-    });
-
-    canvas.addEventListener('mousedown', function(e) {
-        e.preventDefault();
-        const pos = getPos(e);
-        if (mode === 'pen') penDot(pos.x, pos.y);
-        else if (mode === 'eraser') eraseDot(pos.x, pos.y);
-        if (mode !== 'select') drawing = true;
-        activeTouches['mouse'] = { x: pos.x, y: pos.y };
-        closeAllMenus();
-    });
-
-    canvas.addEventListener('mousemove', function(e) {
-        const prev = activeTouches['mouse'];
-        if (!prev || !drawing) return;
-        const pos = getPos(e);
-        if (mode === 'pen') penLine(prev.x, prev.y, pos.x, pos.y);
-        else if (mode === 'eraser') eraseLine(prev.x, prev.y, pos.x, pos.y);
-        activeTouches['mouse'] = { x: pos.x, y: pos.y };
-    });
-
-    canvas.addEventListener('mouseup', function() {
-        if (drawing && mode !== 'select') saveState();
-        drawing = false;
-        delete activeTouches['mouse'];
-    });
-
-    canvas.addEventListener('mouseleave', function() {
-        if (drawing && mode !== 'select') saveState();
-        drawing = false;
-        delete activeTouches['mouse'];
-    });
-
-    btnSelect.addEventListener('click', e => { e.stopPropagation(); mode = 'select'; updateUI(); closeAllMenus(); });
-    btnPen.addEventListener('click', e => {
-        e.stopPropagation();
-        if (mode === 'pen') { if (colorMenu.classList.contains('show')) closeAllMenus(); else { eraserSlider.classList.remove('show'); colorMenu.classList.add('show'); } }
-        else { mode = 'pen'; updateUI(); closeAllMenus(); }
-    });
-    btnEraser.addEventListener('click', e => {
-        e.stopPropagation();
-        if (mode === 'eraser') { if (eraserSlider.classList.contains('show')) closeAllMenus(); else { colorMenu.classList.remove('show'); eraserSlider.classList.add('show'); sliderThumb.style.left = '0%'; } }
-        else { mode = 'eraser'; updateUI(); closeAllMenus(); }
-    });
-    btnUndo.addEventListener('click', e => { e.stopPropagation(); undo(); closeAllMenus(); });
-
-    document.querySelectorAll('.color-dot').forEach(d => d.addEventListener('click', function(e) { e.stopPropagation(); penColor = d.dataset.color; updateUI(); }));
-    penSizeSliderEl.addEventListener('input', e => { penSize = parseFloat(e.target.value); updateUI(); });
-
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.base-toolbar-container') && !e.target.closest('.color-menu') && !e.target.closest('.eraser-slider') && !e.target.closest('.settings-modal-overlay') && !e.target.closest('.settings-btn')) {
-            closeAllMenus();
-        }
-    });
-
-    let sliderDragging = false;
-    function updateSlider(cx) { const r = sliderTrack.getBoundingClientRect(); sliderThumb.style.left = Math.max(0, Math.min(100, ((cx - r.left) / r.width) * 100)) + '%'; }
-    sliderTrack.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); sliderDragging = true; updateSlider(e.clientX); });
-    document.addEventListener('mousemove', e => { if (sliderDragging) updateSlider(e.clientX); });
-    document.addEventListener('mouseup', () => { if (!sliderDragging) return; sliderDragging = false; if (parseFloat(sliderThumb.style.left) >= 90) { clearCanvas(); switchToPen(); } sliderThumb.style.left = '0%'; });
-    sliderTrack.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); sliderDragging = true; updateSlider(e.touches[0].clientX); }, { passive: false });
-    document.addEventListener('touchmove', e => { if (sliderDragging) { e.preventDefault(); updateSlider(e.touches[0].clientX); } }, { passive: false });
-    document.addEventListener('touchend', () => { if (!sliderDragging) return; sliderDragging = false; if (parseFloat(sliderThumb.style.left) >= 90) { clearCanvas(); switchToPen(); } sliderThumb.style.left = '0%'; });
-
-    resizeCanvas();
-    clearCanvas();
-    updateUI();
-    applyPreset(null);
-    updateFontSize(100);
-    window.addEventListener('resize', resizeCanvas);
-})();
-</script>
+      // 立即设置标志位防止load事件重复绑定（如果DOMContentLoaded已执行）
+      // 但为了代码清晰，将标志位检查放在setupClickHandler内部更合适。
+      // 改造setupClickHandler，使其幂等。
+      const originalSetup = setupClickHandler;
+      let isBound = false;
+      window.setupClickHandler = function() {
+        if (isBound) return;
+        isBound = true;
+        originalSetup();
+      };
+      // 替换原函数引用
+      setupClickHandler = window.setupClickHandler;
+      
+      // 立即尝试调用一次（如果脚本在元素之后执行）
+      if (document.getElementById('imageTrigger') || document.getElementById('errorImage')) {
+        setupClickHandler();
+      }
+    })();
+  </script>
 </body>
 </html>
