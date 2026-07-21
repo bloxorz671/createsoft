@@ -22,6 +22,9 @@
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        input, textarea, [contenteditable] { -webkit-touch-callout: default; -webkit-user-select: text; user-select: text; }
+        img { -webkit-touch-callout: default; }
         body { background: #f5f7fc; font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; min-height: 100vh; padding-bottom: 70px; }
         .platform-container { max-width: 550px; margin: 0 auto; background: #ffffff; min-height: calc(100vh - 70px); }
         .main-header { position: relative; text-align: center; padding: 20px 16px 12px; background: white; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; }
@@ -245,10 +248,10 @@
             <div class="about-section">
                 <div class="about-icon-wrap"><img class="about-icon-sq" id="aboutIcon" src="41.jpg" alt="图标" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2284%22 height=%2284%22%3E%3Crect width=%2284%22 height=%2284%22 rx=%2218%22 fill=%22%232b4c8a%22/%3E%3Ctext x=%2242%22 y=%2254%22 font-size=%2236%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22system-ui%22%3E5%3C/text%3E%3C/svg%3E'"></div>
                 <div class="about-name" id="aboutAppName">五班应用平台</div>
-                <div class="about-version" id="aboutVersion">版本：1.17</div>
+                <div class="about-version" id="aboutVersion">版本：1.18</div>
                 <div class="about-latest" id="aboutLatest">当前已是最新版本</div>
             </div>
-            <hr class="about-divider"><div class="about-info" id="aboutFooter">五班应用平台 v1.17</div>
+            <hr class="about-divider"><div class="about-info" id="aboutFooter">五班应用平台 v1.18</div>
         </div>
         <div id="devSettingsPage" class="setting-page" style="display:none;">
             <div class="viewer-header" style="position:sticky;top:0;z-index:10;"><button class="viewer-btn" id="devSettingsBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button><span style="flex:1;text-align:center;font-weight:600;">开发人员设置</span><span style="width:40px;"></span></div>
@@ -293,7 +296,7 @@
     var CONFIG_URL = 'https://raw.githubusercontent.com/bloxorz671/createsoft/main/5app.txt';
     var NOTIFY_URL = 'https://raw.githubusercontent.com/bloxorz671/createsoft/main/fiveapppush.txt';
     var GITHUB_OWNER = 'bloxorz671'; var GITHUB_REPO = 'createsoft'; var GITHUB_PATH = '5app.txt'; var NOTIFY_PATH = 'fiveapppush.txt';
-    var APP_DOWNLOAD_URL = 'https://luckynum.top/fiveclassapp1.17.apk'; var APP_URL_SCHEME = 'fiveapp://';
+    var APP_DOWNLOAD_URL = 'https://luckynum.top/fiveclassapp1.18.apk'; var APP_URL_SCHEME = 'fiveapp://';
     var APP_MIN_VERSION = 117; var APP_DISPLAY_VERSION = '1.17';
 
     var slidesData = [], appItems = [], groupOrder = ['其他应用'];
@@ -313,24 +316,8 @@
     function updateDevMenuVisibility() { var menu = document.getElementById('menuDevSettings'); if (menu) menu.style.display = (isAnyApp && isDevEnabled()) ? '' : 'none'; }
     function isUpdateSkipEnabled() { return localStorage.getItem('disable_force_update') === 'true'; }
 
-    // 更新弹窗的开发人员触发
     var updateIconClicks = 0; var updateIconTimer = null;
-    function initUpdateDevTrigger() {
-        updateIconClicks = 0;
-        var icon = document.getElementById('updateIcon');
-        if (!icon || !isAnyApp) return;
-        icon.onclick = function() {
-            updateIconClicks++;
-            if (updateIconTimer) clearTimeout(updateIconTimer);
-            updateIconTimer = setTimeout(function() { updateIconClicks = 0; }, 3000);
-            if (updateIconClicks >= 10) {
-                updateIconClicks = 0;
-                setDevEnabled(true);
-                document.getElementById('forceUpdateModal').classList.remove('show');
-                showDevSettingsPage();
-            }
-        };
-    }
+    function initUpdateDevTrigger() { updateIconClicks = 0; var icon = document.getElementById('updateIcon'); if (!icon || !isAnyApp) return; icon.onclick = function() { updateIconClicks++; if (updateIconTimer) clearTimeout(updateIconTimer); updateIconTimer = setTimeout(function() { updateIconClicks = 0; }, 3000); if (updateIconClicks >= 10) { updateIconClicks = 0; setDevEnabled(true); document.getElementById('forceUpdateModal').classList.remove('show'); showDevSettingsPage(); } }; }
 
     function escapeHtml(str) { if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function copyShareLink(appName) { var u=window.location.origin+window.location.pathname; if(appName) u+='?app='+encodeURIComponent(appName); navigator.clipboard.writeText(u).then(function(){var t=document.createElement('div');t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:white;padding:12px 24px;border-radius:30px;z-index:30000;font-size:14px;';t.textContent='已复制';document.body.appendChild(t);setTimeout(function(){t.remove();},1500);}).catch(function(){alert('复制失败');}); }
@@ -392,20 +379,7 @@
     }
 
     var aboutIconClicks = 0; var aboutIconTimer = null; var aboutNameLongPress = false;
-    function initAboutDevTrigger() {
-        aboutIconClicks = 0; aboutNameLongPress = false;
-        var icon = document.getElementById('aboutIcon'); var name = document.getElementById('aboutAppName');
-        if (!icon || !name || !isAnyApp) return;
-        icon.onclick = function() { aboutIconClicks++; if (aboutIconTimer) clearTimeout(aboutIconTimer); aboutIconTimer = setTimeout(function() { aboutIconClicks = 0; }, 3000); checkDevTrigger(); };
-        name.oncontextmenu = function(e) { e.preventDefault(); };
-        var pressTimer;
-        name.addEventListener('touchstart', function(e) { pressTimer = setTimeout(function() { aboutNameLongPress = true; checkDevTrigger(); }, 1500); });
-        name.addEventListener('touchend', function() { clearTimeout(pressTimer); });
-        name.addEventListener('touchmove', function() { clearTimeout(pressTimer); });
-        name.addEventListener('mousedown', function() { pressTimer = setTimeout(function() { aboutNameLongPress = true; checkDevTrigger(); }, 1500); });
-        name.addEventListener('mouseup', function() { clearTimeout(pressTimer); });
-        name.addEventListener('mouseleave', function() { clearTimeout(pressTimer); });
-    }
+    function initAboutDevTrigger() { aboutIconClicks = 0; aboutNameLongPress = false; var icon = document.getElementById('aboutIcon'); var name = document.getElementById('aboutAppName'); if (!icon || !name || !isAnyApp) return; icon.onclick = function() { aboutIconClicks++; if (aboutIconTimer) clearTimeout(aboutIconTimer); aboutIconTimer = setTimeout(function() { aboutIconClicks = 0; }, 3000); checkDevTrigger(); }; name.oncontextmenu = function(e) { e.preventDefault(); }; var pressTimer; name.addEventListener('touchstart', function(e) { pressTimer = setTimeout(function() { aboutNameLongPress = true; checkDevTrigger(); }, 1500); }); name.addEventListener('touchend', function() { clearTimeout(pressTimer); }); name.addEventListener('touchmove', function() { clearTimeout(pressTimer); }); name.addEventListener('mousedown', function() { pressTimer = setTimeout(function() { aboutNameLongPress = true; checkDevTrigger(); }, 1500); }); name.addEventListener('mouseup', function() { clearTimeout(pressTimer); }); name.addEventListener('mouseleave', function() { clearTimeout(pressTimer); }); }
     function checkDevTrigger() { if (aboutIconClicks >= 10 && aboutNameLongPress) { aboutIconClicks = 0; aboutNameLongPress = false; setDevEnabled(true); showDevSettingsPage(); } }
 
     function renderPublishedNotifyList() { var body = document.getElementById('publishedNotifyList'); if (notifyList.length === 0) { body.innerHTML = '<div style="text-align:center;color:#999;padding:12px;font-size:0.8rem;">暂无已发布通知</div>'; return; } var html = ''; notifyList.forEach(function(item) { html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f2f5;font-size:0.8rem;"><div style="flex:1;min-width:0;"><div style="color:#999;">' + item.time + '</div><div style="color:#333;word-break:break-word;">' + escapeHtml(item.content) + '</div></div><button class="notify-delete-btn" data-id="' + item.id + '" style="flex-shrink:0;margin-left:8px;">&#128465;</button></div>'; }); body.innerHTML = html; body.querySelectorAll('.notify-delete-btn').forEach(function(btn) { btn.addEventListener('click', function() { deleteNotifyItem(this.dataset.id); }); }); }
@@ -455,6 +429,9 @@
     window.deleteFile=async function(fn){if(!confirm('确定删除 '+fn+' 吗？'))return;try{var cr=await fetch('https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/'+encodeURIComponent(fn),{headers:{'Authorization':'Bearer '+currentToken}});var d=await cr.json();var r=await fetch('https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/'+encodeURIComponent(fn),{method:'DELETE',headers:{'Authorization':'Bearer '+currentToken},body:JSON.stringify({message:'删除 '+fn,sha:d.sha,branch:'main'})});if(r.ok){alert('删除成功');var m=document.querySelector('.modal-overlay');if(m)loadFileList(m);}else alert('删除失败');}catch(e){alert('删除失败');}};
 
     async function handleUrlAppParameter(){var p=new URLSearchParams(window.location.search);var ap=p.get('app');if(!ap)return;try{ap=decodeURIComponent(ap);}catch(e){}var rc=0;while(appItems.length===0&&rc<30){await new Promise(function(r){setTimeout(r,200);});rc++;}var ta=appItems.find(function(a){return a.name===ap;});if(!ta)ta=appItems.find(function(a){return a.name.toLowerCase().indexOf(ap.toLowerCase())!==-1;});if(ta){setTimeout(function(){handleAppClick(ta.link,ta.name);},500);return;}if(!isWebLink(ap)){if(isAudioFile(ap)){var fu=ap.indexOf('http')===0?ap:'https://luckynum.top/'+ap;var fn=ap.split('/').pop();var sf=await findSeriesFiles(fn);openAudioViewer(fu,fn,sf);return;}openFileWithFilehelper(ap);return;}var fu=ap.indexOf('http')===0?ap:'https://luckynum.top/'+ap;window.open(fu,'_blank');}
+
+    // 禁止非输入框的长按菜单
+    document.addEventListener('contextmenu', function(e) { var target = e.target; if (!target.closest('input') && !target.closest('textarea') && !target.closest('[contenteditable]')) { e.preventDefault(); return false; } });
 
     document.getElementById('refreshBtn').addEventListener('click',refreshConfig);
     document.getElementById('saveBtn').addEventListener('click',saveAndExit);
