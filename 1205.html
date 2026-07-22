@@ -43,22 +43,18 @@
         .download-top-bar .bar-icon { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; background: #f0f2f5; flex-shrink: 0; }
         .download-top-bar .bar-text { flex: 1; font-size: 0.85rem; font-weight: 500; }
         .download-top-bar .bar-btn { background: white; color: #2b4c8a; border: none; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
-        .download-top-bar .bar-btn:active { transform: scale(0.95); }
 
         .app-download-modal .modal-content { text-align: center; max-width: 340px; padding: 28px 20px 20px; }
         .app-download-modal .app-icon-large { width: 72px; height: 72px; border-radius: 16px; object-fit: cover; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .app-download-modal .app-name { font-size: 1.2rem; font-weight: 700; color: #1e3c72; margin-bottom: 4px; }
         .app-download-modal .app-subtitle { font-size: 0.8rem; color: #666; margin-bottom: 20px; }
-        .app-download-modal .download-btn { display: block; width: 100%; background: #2b4c8a; color: white; border: none; padding: 14px; border-radius: 30px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 12px; transition: background 0.2s; }
-        .app-download-modal .download-btn:hover { background: #1e3c72; }
-        .app-download-modal .download-btn:active { transform: scale(0.97); }
+        .app-download-modal .download-btn { display: block; width: 100%; background: #2b4c8a; color: white; border: none; padding: 14px; border-radius: 30px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 12px; }
         .app-download-modal .later-btn { background: none; border: none; color: #999; font-size: 0.8rem; cursor: pointer; padding: 8px; }
 
         .force-update-modal .modal-content { text-align: center; max-width: 340px; padding: 28px 20px 20px; }
         .force-update-modal .update-icon-img { width: 72px; height: 72px; border-radius: 16px; object-fit: cover; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .force-update-modal .update-title { font-size: 1.2rem; font-weight: 700; color: #e74c3c; margin-bottom: 16px; }
         .force-update-modal .update-btn { display: block; width: 100%; background: #e74c3c; color: white; border: none; padding: 14px; border-radius: 30px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
-        .force-update-modal .update-btn:active { transform: scale(0.97); }
         .force-update-modal .skip-btn { background: none; border: none; color: #999; font-size: 0.8rem; cursor: pointer; padding: 8px; display: none; }
 
         .carousel-section { margin: 12px 16px 24px; background: #f0f2f6; overflow: hidden; }
@@ -103,16 +99,13 @@
         .viewer-header { background: #16213e; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; z-index: 10; flex-wrap: wrap; gap: 8px; }
         .viewer-title { font-size: 1rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; margin-right: 12px; min-width: 0; }
         .viewer-controls { display: flex; gap: 12px; flex-shrink: 0; }
-        .viewer-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; white-space: nowrap; }
-        .viewer-btn:hover { background: rgba(255,255,255,0.4); }
+        .viewer-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; white-space: nowrap; }
         .viewer-content { flex: 1; background: #0f0f1a; overflow-y: auto; position: relative; padding: 16px; }
         .audio-list-container { width: 100%; max-width: 600px; margin: 0 auto; }
         .audio-list-item { background: #ffffff; border-radius: 16px; margin-bottom: 16px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .audio-item-title { font-size: 1rem; font-weight: 600; color: #1e293b; margin-bottom: 12px; word-break: break-word; padding-left: 4px; }
         .audio-item-controls audio { width: 100%; height: 44px; border-radius: 8px; }
-        .audio-play-btn { background: #2b4c8a; color: white; border: none; padding: 10px 24px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; width: 100%; transition: background 0.2s; }
-        .audio-play-btn:hover { background: #1e3c72; }
-        .audio-play-btn:active { transform: scale(0.97); }
+        .audio-play-btn { background: #2b4c8a; color: white; border: none; padding: 10px 24px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; width: 100%; }
         .file-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; }
         .file-item:hover { background: #f5f5f5; }
         .file-item.folder { color: #2b4c8a; font-weight: 500; }
@@ -142,9 +135,8 @@
 
         .setting-page { display: none; }
         .setting-page.active { display: block; }
-        .settings-menu-item { display: flex; align-items: center; justify-content: space-between; padding: 17px 20px; border-bottom: 1px solid #f0f2f5; cursor: pointer; font-size: 0.95rem; color: #1f2937; transition: background 0.15s; }
+        .settings-menu-item { display: flex; align-items: center; justify-content: space-between; padding: 17px 20px; border-bottom: 1px solid #f0f2f5; cursor: pointer; font-size: 0.95rem; color: #1f2937; }
         .settings-menu-item:hover { background: #f8f9fc; }
-        .settings-menu-item:active { background: #eef2f8; }
         .settings-menu-left { display: flex; align-items: center; gap: 12px; }
         .settings-menu-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
         .settings-menu-arrow { color: #c0c7d0; font-size: 1.3rem; }
@@ -168,13 +160,14 @@
         .about-latest { display: inline-block; font-size: 0.82rem; color: #16a34a; font-weight: 500; background: #f0fdf4; padding: 6px 16px; border-radius: 20px; }
         .about-divider { border: none; border-top: 1px solid #e5e7eb; margin: 0 20px 30px; }
         .about-info { text-align: center; padding: 0 20px 30px; font-size: 0.78rem; color: #9ca3af; }
-        .dev-menu-item { display: flex; align-items: center; justify-content: space-between; padding: 17px 20px; border-bottom: 1px solid #f0f2f5; cursor: pointer; font-size: 0.95rem; color: #1f2937; transition: background 0.15s; }
-        .dev-menu-item:hover { background: #f8f9fc; }
         .dev-menu-btn { padding: 10px 16px; background: #2b4c8a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; width: 100%; text-align: center; }
         .dev-menu-btn:active { background: #1e3c72; }
         .dev-input-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
         .dev-input-row input { flex: 1; padding: 8px 12px; border: 1px solid #d0d5dd; border-radius: 8px; font-size: 0.9rem; }
         .dev-input-row button { padding: 8px 16px; background: #2b4c8a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; white-space: nowrap; }
+        .perm-test-video { width: 100%; max-width: 100%; border-radius: 8px; background: #000; }
+        .perm-test-result { padding: 12px; background: #f0fdf4; border-radius: 8px; font-size: 0.85rem; color: #1f2937; word-break: break-all; margin-top: 8px; }
+        .perm-test-error { padding: 12px; background: #fef2f2; border-radius: 8px; font-size: 0.85rem; color: #dc2626; margin-top: 8px; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #eef2f8; display: flex; padding: 10px 20px 14px; justify-content: space-around; max-width: 550px; margin: 0 auto; z-index: 100; }
         .bottom-nav-wrapper { max-width: 550px; margin: 0 auto; position: relative; }
@@ -185,10 +178,6 @@
         .nav-item.active .nav-icon { color: #2b4c8a; }
         .page { display: none; }
         .page.active { display: block; }
-        .device-warning-modal .modal-content { text-align: center; max-width: 400px; }
-        .device-warning-icon { font-size: 3rem; margin-bottom: 12px; }
-        .device-warning-message { font-size: 1rem; color: #e67e22; line-height: 1.6; margin-bottom: 20px; padding: 0 10px; }
-        .device-warning-btn { background: #2b4c8a; color: white; border: none; padding: 12px 40px; border-radius: 30px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
         @media (max-width: 768px) {
             .apps-grid { gap: 12px; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
             .app-icon { width: 52px; height: 52px; }
@@ -202,12 +191,11 @@
             .save-btn { width: 30px; height: 30px; font-size: 14px; right: 48px; }
         }
     </style>
-    <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 </head>
 
 <body>
     <div class="platform-container">
-        <div class="warning-banner" id="warningBanner" style="display: none;">⏳ 正在加载平台数据...</div>
+        <div class="warning-banner" id="warningBanner" style="display: none;">正在加载平台数据...</div>
         <div class="main-header">
             <h1 id="titleClickTarget">初三五班智慧应用平台</h1>
             <button class="save-btn" id="saveBtn" title="保存并退出编辑模式">💾</button>
@@ -223,18 +211,12 @@
                 <div class="carousel-wrapper"><div class="carousel-track" id="carouselTrack"></div></div>
                 <div class="carousel-dots" id="carouselDots"></div>
             </div>
-            <div id="groupsContainer" class="groups-container"><div class="loading-tip">⏳ 加载应用中...</div></div>
+            <div id="groupsContainer" class="groups-container"><div class="loading-tip">加载应用中...</div></div>
         </div>
         <div id="settingsPage" class="setting-page">
-            <div class="settings-menu-item" id="menuNotifySettings">
-                <div class="settings-menu-left"><div class="settings-menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2b4c8a" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><span>通知设置</span></div><span class="settings-menu-arrow">&gt;</span>
-            </div>
-            <div class="settings-menu-item" id="menuAbout">
-                <div class="settings-menu-left"><div class="settings-menu-icon" style="color:#2b4c8a;font-size:1.2rem;">&#9432;</div><span>关于</span></div><span class="settings-menu-arrow">&gt;</span>
-            </div>
-            <div class="settings-menu-item" id="menuDevSettings" style="display:none;">
-                <div class="settings-menu-left"><span>开发人员设置</span></div><span class="settings-menu-arrow">&gt;</span>
-            </div>
+            <div class="settings-menu-item" id="menuNotifySettings"><div class="settings-menu-left"><div class="settings-menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2b4c8a" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><span>通知设置</span></div><span class="settings-menu-arrow">&gt;</span></div>
+            <div class="settings-menu-item" id="menuAbout"><div class="settings-menu-left"><div class="settings-menu-icon" style="color:#2b4c8a;font-size:1.2rem;">&#9432;</div><span>关于</span></div><span class="settings-menu-arrow">&gt;</span></div>
+            <div class="settings-menu-item" id="menuDevSettings" style="display:none;"><div class="settings-menu-left"><span>开发人员设置</span></div><span class="settings-menu-arrow">&gt;</span></div>
         </div>
         <div id="pushSettingsPage" class="setting-page" style="display:none;">
             <div class="viewer-header" style="position:sticky;top:0;z-index:10;"><button class="viewer-btn" id="pushSettingsBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button><span style="flex:1;text-align:center;font-weight:600;">通知设置</span><span style="width:40px;"></span></div>
@@ -247,11 +229,9 @@
             <div class="viewer-header" style="position:sticky;top:0;z-index:10;"><button class="viewer-btn" id="aboutBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button><span style="flex:1;text-align:center;font-weight:600;">关于</span><span style="width:40px;"></span></div>
             <div class="about-section">
                 <div class="about-icon-wrap"><img class="about-icon-sq" id="aboutIcon" src="41.jpg" alt="图标" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2284%22 height=%2284%22%3E%3Crect width=%2284%22 height=%2284%22 rx=%2218%22 fill=%22%232b4c8a%22/%3E%3Ctext x=%2242%22 y=%2254%22 font-size=%2236%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22system-ui%22%3E5%3C/text%3E%3C/svg%3E'"></div>
-                <div class="about-name" id="aboutAppName">五班应用平台</div>
-                <div class="about-version" id="aboutVersion">版本：1.18</div>
-                <div class="about-latest" id="aboutLatest">当前已是最新版本</div>
+                <div class="about-name" id="aboutAppName">五班应用平台</div><div class="about-version" id="aboutVersion">版本：1.19</div><div class="about-latest" id="aboutLatest">当前已是最新版本</div>
             </div>
-            <hr class="about-divider"><div class="about-info" id="aboutFooter">五班应用平台 v1.18</div>
+            <hr class="about-divider"><div class="about-info" id="aboutFooter">五班应用平台 v1.19</div>
         </div>
         <div id="devSettingsPage" class="setting-page" style="display:none;">
             <div class="viewer-header" style="position:sticky;top:0;z-index:10;"><button class="viewer-btn" id="devSettingsBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button><span style="flex:1;text-align:center;font-weight:600;">开发人员设置</span><span style="width:40px;"></span></div>
@@ -260,6 +240,44 @@
                 <div class="setting-group"><div class="setting-row"><span class="setting-label">禁用强制更新</span><label class="toggle"><input type="checkbox" id="disableUpdate"><span class="toggle-slider"></span></label></div><div class="setting-hint">打开后更新弹窗增加暂不更新按钮</div></div>
                 <div class="setting-group"><button class="dev-menu-btn" id="viewLogsBtn">查看日志</button></div>
                 <div class="setting-group"><div style="font-size:0.9rem;color:#1f2937;margin-bottom:8px;">使用指令</div><div class="dev-input-row"><input type="text" id="devCommandInput" placeholder="输入指令内容"><button id="devCommandBtn">执行</button></div></div>
+                <div class="settings-menu-item" id="menuPermTest" style="border-top:1px solid #f0f2f5;"><div class="settings-menu-left"><span>权限测试</span></div><span class="settings-menu-arrow">&gt;</span></div>
+            </div>
+        </div>
+        <div id="permTestPage" class="setting-page" style="display:none;">
+            <div class="viewer-header" style="position:sticky;top:0;z-index:10;"><button class="viewer-btn" id="permTestBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button><span style="flex:1;text-align:center;font-weight:600;">权限测试</span><span style="width:40px;"></span></div>
+            <div class="setting-group">
+                <div class="setting-row"><span class="setting-label">CAMERA - 摄像头</span></div>
+                <div class="setting-hint">网页调用摄像头（拍照/扫码）</div>
+                <button class="dev-menu-btn" id="testCameraBtn" style="margin-top:8px;">打开摄像头</button>
+                <div id="cameraContainer" style="margin-top:8px;display:none;">
+                    <video id="cameraVideo" class="perm-test-video" autoplay playsinline></video>
+                    <button class="dev-menu-btn" id="stopCameraBtn" style="margin-top:8px;background:#e74c3c;">关闭摄像头</button>
+                </div>
+                <div id="cameraError" class="perm-test-error" style="display:none;"></div>
+            </div>
+            <div class="setting-group">
+                <div class="setting-row"><span class="setting-label">RECORD_AUDIO - 麦克风</span></div>
+                <div class="setting-hint">网页调用麦克风（录音）</div>
+                <button class="dev-menu-btn" id="startRecordBtn" style="margin-top:8px;">开始录音</button>
+                <button class="dev-menu-btn" id="stopRecordBtn" style="margin-top:8px;background:#e74c3c;display:none;">停止录音</button>
+                <div id="audioPlaybackContainer" style="margin-top:8px;display:none;">
+                    <audio id="audioPlayback" controls style="width:100%;"></audio>
+                </div>
+                <div id="audioError" class="perm-test-error" style="display:none;"></div>
+            </div>
+            <div class="setting-group">
+                <div class="setting-row"><span class="setting-label">ACCESS_FINE_LOCATION - 精确位置</span></div>
+                <div class="setting-hint">网页获取精确位置（GPS）</div>
+                <button class="dev-menu-btn" id="testFineLocationBtn" style="margin-top:8px;">获取精确位置</button>
+                <div id="fineLocationResult" class="perm-test-result" style="display:none;"></div>
+                <div id="fineLocationError" class="perm-test-error" style="display:none;"></div>
+            </div>
+            <div class="setting-group">
+                <div class="setting-row"><span class="setting-label">ACCESS_COARSE_LOCATION - 粗略位置</span></div>
+                <div class="setting-hint">网页获取粗略位置（基站/WiFi）</div>
+                <button class="dev-menu-btn" id="testCoarseLocationBtn" style="margin-top:8px;">获取粗略位置</button>
+                <div id="coarseLocationResult" class="perm-test-result" style="display:none;"></div>
+                <div id="coarseLocationError" class="perm-test-error" style="display:none;"></div>
             </div>
         </div>
     </div>
@@ -279,25 +297,18 @@
         <button class="add-btn" id="addGroupFab" title="添加分组" style="background:#9b59b6;">📂</button>
     </div>
 
-    <div id="deviceWarningModal" class="modal-overlay device-warning-modal" style="z-index: 30000;"><div class="modal-content"><div class="device-warning-icon" id="deviceWarningIcon"></div><div class="device-warning-message" id="deviceWarningMessage"></div><button class="device-warning-btn" id="deviceWarningCloseBtn">我知道了</button></div></div>
-    <div id="forceUpdateModal" class="modal-overlay force-update-modal" style="z-index: 40000;">
-        <div class="modal-content">
-            <img class="update-icon-img" id="updateIcon" src="41.jpg" alt="图标" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2272%22 height=%2272%22%3E%3Crect width=%2272%22 height=%2272%22 rx=%2216%22 fill=%22%232b4c8a%22/%3E%3Ctext x=%2236%22 y=%2246%22 font-size=%2230%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22system-ui%22%3E5%3C/text%3E%3C/svg%3E'">
-            <div class="update-title">已推出新版本</div>
-            <button class="update-btn" id="forceUpdateBtn">立即更新</button>
-            <button class="skip-btn" id="skipUpdateBtn">暂不更新</button>
-        </div>
-    </div>
-    <div id="appDownloadModal" class="modal-overlay app-download-modal" style="z-index: 40001;"><div class="modal-content"><img class="app-icon-large" src="41.jpg" alt="图标" onerror="this.style.display='none'"><div class="app-name">五班应用平台</div><div class="app-subtitle">推荐下载APP</div><button class="download-btn" id="appDownloadBtn">立即下载</button><button class="later-btn" id="laterBtn">以后再说</button></div></div>
-    <div id="notifyModal" class="modal-overlay" style="z-index: 40002;"><div class="modal-content" style="max-width:500px;"><div class="notify-header-bar"><h3 style="margin:0;">📧 通知中心</h3><button class="notify-mark-all" id="markAllReadBtn">全部已读</button></div><div id="notifyListBody" style="max-height:60vh;overflow-y:auto;"></div></div></div>
-    <div id="pushNotifyModal" class="modal-overlay" style="z-index: 40003;"><div class="modal-content" style="max-width:500px;"><h3>📢 发布通知</h3><label style="font-size:0.85rem;color:#666;">通知内容</label><textarea id="pushContent" placeholder="请输入通知内容"></textarea><label style="font-size:0.85rem;color:#666;">跳转网址</label><input id="pushLink" placeholder="https://..." value=""><div class="modal-buttons"><button class="confirm-btn" id="pushConfirmBtn">发布</button><button class="cancel-btn" id="pushCancelBtn">取消</button></div><div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px;"><h4 style="font-size:0.9rem;color:#666;margin-bottom:8px;">已发布的通知</h4><div id="publishedNotifyList" style="max-height:200px;overflow-y:auto;"></div></div></div></div>
+    <div id="deviceWarningModal" class="modal-overlay device-warning-modal" style="z-index:30000;"><div class="modal-content"><div class="device-warning-icon" id="deviceWarningIcon"></div><div class="device-warning-message" id="deviceWarningMessage"></div><button class="device-warning-btn" id="deviceWarningCloseBtn">我知道了</button></div></div>
+    <div id="forceUpdateModal" class="modal-overlay force-update-modal" style="z-index:40000;"><div class="modal-content"><img class="update-icon-img" id="updateIcon" src="41.jpg" alt="图标" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2272%22 height=%2272%22%3E%3Crect width=%2272%22 height=%2272%22 rx=%2216%22 fill=%22%232b4c8a%22/%3E%3Ctext x=%2236%22 y=%2246%22 font-size=%2230%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22system-ui%22%3E5%3C/text%3E%3C/svg%3E'"><div class="update-title">已推出新版本</div><button class="update-btn" id="forceUpdateBtn">立即更新</button><button class="skip-btn" id="skipUpdateBtn">暂不更新</button></div></div>
+    <div id="appDownloadModal" class="modal-overlay app-download-modal" style="z-index:40001;"><div class="modal-content"><img class="app-icon-large" src="41.jpg" alt="图标" onerror="this.style.display='none'"><div class="app-name">五班应用平台</div><div class="app-subtitle">推荐下载APP</div><button class="download-btn" id="appDownloadBtn">立即下载</button><button class="later-btn" id="laterBtn">以后再说</button></div></div>
+    <div id="notifyModal" class="modal-overlay" style="z-index:40002;"><div class="modal-content" style="max-width:500px;"><div class="notify-header-bar"><h3 style="margin:0;">📧 通知中心</h3><button class="notify-mark-all" id="markAllReadBtn">全部已读</button></div><div id="notifyListBody" style="max-height:60vh;overflow-y:auto;"></div></div></div>
+    <div id="pushNotifyModal" class="modal-overlay" style="z-index:40003;"><div class="modal-content" style="max-width:500px;"><h3>📢 发布通知</h3><label style="font-size:0.85rem;color:#666;">通知内容</label><textarea id="pushContent" placeholder="请输入通知内容"></textarea><label style="font-size:0.85rem;color:#666;">跳转网址</label><input id="pushLink" placeholder="https://..." value=""><div class="modal-buttons"><button class="confirm-btn" id="pushConfirmBtn">发布</button><button class="cancel-btn" id="pushCancelBtn">取消</button></div><div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px;"><h4 style="font-size:0.9rem;color:#666;margin-bottom:8px;">已发布的通知</h4><div id="publishedNotifyList" style="max-height:200px;overflow-y:auto;"></div></div></div></div>
 
     <script>
     var CONFIG_URL = 'https://raw.githubusercontent.com/bloxorz671/createsoft/main/5app.txt';
     var NOTIFY_URL = 'https://raw.githubusercontent.com/bloxorz671/createsoft/main/fiveapppush.txt';
     var GITHUB_OWNER = 'bloxorz671'; var GITHUB_REPO = 'createsoft'; var GITHUB_PATH = '5app.txt'; var NOTIFY_PATH = 'fiveapppush.txt';
-    var APP_DOWNLOAD_URL = 'https://luckynum.top/fiveclassapp1.18.apk'; var APP_URL_SCHEME = 'fiveapp://';
-    var APP_MIN_VERSION = 118; var APP_DISPLAY_VERSION = '1.18';
+    var APP_DOWNLOAD_URL = 'https://luckynum.top/fiveclassapp1.19.apk'; var APP_URL_SCHEME = 'fiveapp://';
+    var APP_MIN_VERSION = 119; var APP_DISPLAY_VERSION = '1.19';
 
     var slidesData = [], appItems = [], groupOrder = ['其他应用'];
     var currentIndex = 0, autoInterval = null, totalSlides = 0;
@@ -307,6 +318,7 @@
     var currentUA = navigator.userAgent;
     var draggedGroupIndex = null, draggedAppData = null;
     var notifyList = []; var readNotifyIds = JSON.parse(localStorage.getItem('read_notify_ids') || '[]');
+    var cameraStream = null; var mediaRecorder = null; var audioChunks = [];
 
     function getAppVersion(ua) { var m = ua.match(/fiveapp(\d+)\.?(\d*)/); if (m) { var major = parseInt(m[1]) || 0; var minor = parseInt(m[2]) || 0; return major * 100 + minor; } if (ua.indexOf('ClassApp') !== -1) return 1; return -1; }
     var appVersion = getAppVersion(currentUA); var isLatestApp = appVersion >= APP_MIN_VERSION; var isOldApp = appVersion >= 0 && appVersion < APP_MIN_VERSION; var isAnyApp = appVersion >= 0;
@@ -338,8 +350,7 @@
         var overlay=document.createElement('div'); overlay.className='file-viewer-overlay';
         var header=document.createElement('div'); header.className='viewer-header';
         header.innerHTML='<div class="viewer-title" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span>播放列表</span><select id="audioPlayMode" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:white;padding:4px 8px;border-radius:6px;font-size:0.8rem;cursor:pointer;flex-shrink:0;"><option value="independent" selected>独立播放</option><option value="native">原生播放</option></select></div><div class="viewer-controls"><button class="viewer-btn close-btn">关闭</button></div>';
-        var content=document.createElement('div'); content.className='viewer-content';
-        overlay.appendChild(header); overlay.appendChild(content); document.body.appendChild(overlay);
+        var content=document.createElement('div'); content.className='viewer-content'; overlay.appendChild(header); overlay.appendChild(content); document.body.appendChild(overlay);
         function buildAudioList(mode) { var listHtml='<div class="audio-list-container">'; if(!seriesFiles||seriesFiles.length===0){ var dn=fileName.replace(/\.(mp3|m4a|wav|flac|aac|ogg|wma|opus)$/i,''); listHtml+='<div class="audio-list-item"><div class="audio-item-title">'+escapeHtml(dn)+'</div><div class="audio-item-controls">'; if(mode==='native'){listHtml+='<audio controls preload="metadata" src="'+escapeHtml(url)+'" style="width:100%;"></audio>';}else{listHtml+='<button class="audio-play-btn" data-url="'+escapeHtml(url)+'">播放</button>';} listHtml+='</div></div>'; }else{ for(var i=0;i<seriesFiles.length;i++){ var item=seriesFiles[i]; listHtml+='<div class="audio-list-item"><div class="audio-item-title">'+escapeHtml(item.displayName)+'</div><div class="audio-item-controls">'; if(mode==='native'){listHtml+='<audio controls preload="metadata" src="'+escapeHtml(item.url)+'" style="width:100%;"></audio>';}else{listHtml+='<button class="audio-play-btn" data-url="'+escapeHtml(item.url)+'">播放</button>';} listHtml+='</div></div>'; } } listHtml+='</div>'; return listHtml; }
         content.innerHTML=buildAudioList('independent');
         function bindPlayButtons(){var btns=content.querySelectorAll('.audio-play-btn');btns.forEach(function(b){b.onclick=function(){var au=this.dataset.url;window.location.href='/filehelper.html?file='+encodeURIComponent(au);};});}
@@ -369,18 +380,80 @@
     function showPushSettingsPage() { hideAllPages(); document.getElementById('pushSettingsPage').style.display = 'block'; applyPushSettingsToUI(); }
     function showAboutPage() { hideAllPages(); document.getElementById('aboutPage').style.display = 'block'; var appName = isAnyApp ? '五班应用平台' : '初三五班智慧应用平台'; var versionText = isAnyApp ? ('版本：' + APP_DISPLAY_VERSION) : '网页版'; document.getElementById('aboutAppName').textContent = appName; document.getElementById('aboutVersion').textContent = versionText; document.getElementById('aboutFooter').textContent = appName + (isAnyApp ? (' v' + APP_DISPLAY_VERSION) : ' 网页版'); document.getElementById('aboutLatest').style.display = isAnyApp ? '' : 'none'; initAboutDevTrigger(); }
     function showDevSettingsPage() { hideAllPages(); document.getElementById('devSettingsPage').style.display = 'block'; document.getElementById('devEnabled').checked = isDevEnabled(); document.getElementById('disableUpdate').checked = isUpdateSkipEnabled(); document.getElementById('devOptionsContainer').style.display = isDevEnabled() ? '' : 'none'; }
+    function showPermTestPage() { hideAllPages(); document.getElementById('permTestPage').style.display = 'block'; }
     function backToSettings() { hideAllPages(); document.getElementById('settingsPage').classList.add('active'); updateDevMenuVisibility(); }
+    function backToDevSettings() { hideAllPages(); document.getElementById('devSettingsPage').style.display = 'block'; document.getElementById('devEnabled').checked = isDevEnabled(); document.getElementById('disableUpdate').checked = isUpdateSkipEnabled(); document.getElementById('devOptionsContainer').style.display = isDevEnabled() ? '' : 'none'; }
 
     function hideAllPages() {
         document.getElementById('homePage').classList.remove('active'); document.getElementById('settingsPage').classList.remove('active');
         document.getElementById('pushSettingsPage').style.display = 'none'; document.getElementById('aboutPage').style.display = 'none';
-        document.getElementById('devSettingsPage').style.display = 'none';
+        document.getElementById('devSettingsPage').style.display = 'none'; document.getElementById('permTestPage').style.display = 'none';
         document.getElementById('navHomeBtn').classList.remove('active'); document.getElementById('navNotifyBtn').classList.remove('active'); document.getElementById('navSettingsBtn').classList.remove('active');
     }
 
     var aboutIconClicks = 0; var aboutIconTimer = null; var aboutNameLongPress = false;
     function initAboutDevTrigger() { aboutIconClicks = 0; aboutNameLongPress = false; var icon = document.getElementById('aboutIcon'); var name = document.getElementById('aboutAppName'); if (!icon || !name || !isAnyApp) return; icon.onclick = function() { aboutIconClicks++; if (aboutIconTimer) clearTimeout(aboutIconTimer); aboutIconTimer = setTimeout(function() { aboutIconClicks = 0; }, 3000); checkDevTrigger(); }; name.oncontextmenu = function(e) { e.preventDefault(); }; var pressTimer; name.addEventListener('touchstart', function(e) { pressTimer = setTimeout(function() { aboutNameLongPress = true; checkDevTrigger(); }, 1500); }); name.addEventListener('touchend', function() { clearTimeout(pressTimer); }); name.addEventListener('touchmove', function() { clearTimeout(pressTimer); }); name.addEventListener('mousedown', function() { pressTimer = setTimeout(function() { aboutNameLongPress = true; checkDevTrigger(); }, 1500); }); name.addEventListener('mouseup', function() { clearTimeout(pressTimer); }); name.addEventListener('mouseleave', function() { clearTimeout(pressTimer); }); }
     function checkDevTrigger() { if (aboutIconClicks >= 10 && aboutNameLongPress) { aboutIconClicks = 0; aboutNameLongPress = false; setDevEnabled(true); showDevSettingsPage(); } }
+
+    // 权限测试功能
+    async function testCamera() {
+        var container = document.getElementById('cameraContainer');
+        var video = document.getElementById('cameraVideo');
+        var errorDiv = document.getElementById('cameraError');
+        errorDiv.style.display = 'none';
+        try {
+            cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            video.srcObject = cameraStream;
+            container.style.display = 'block';
+            document.getElementById('testCameraBtn').style.display = 'none';
+        } catch(e) { errorDiv.textContent = '摄像头调用失败: ' + e.message; errorDiv.style.display = 'block'; }
+    }
+    function stopCamera() {
+        if (cameraStream) { cameraStream.getTracks().forEach(function(t) { t.stop(); }); cameraStream = null; }
+        document.getElementById('cameraContainer').style.display = 'none';
+        document.getElementById('testCameraBtn').style.display = '';
+        document.getElementById('cameraVideo').srcObject = null;
+    }
+
+    async function startRecording() {
+        var errorDiv = document.getElementById('audioError'); errorDiv.style.display = 'none'; audioChunks = [];
+        try {
+            var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) audioChunks.push(e.data); };
+            mediaRecorder.onstop = function() {
+                var blob = new Blob(audioChunks, { type: 'audio/webm' });
+                var url = URL.createObjectURL(blob);
+                var audio = document.getElementById('audioPlayback');
+                audio.src = url;
+                document.getElementById('audioPlaybackContainer').style.display = 'block';
+                stream.getTracks().forEach(function(t) { t.stop(); });
+            };
+            mediaRecorder.start();
+            document.getElementById('startRecordBtn').style.display = 'none';
+            document.getElementById('stopRecordBtn').style.display = '';
+        } catch(e) { errorDiv.textContent = '麦克风调用失败: ' + e.message; errorDiv.style.display = 'block'; }
+    }
+    function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') { mediaRecorder.stop(); }
+        document.getElementById('startRecordBtn').style.display = '';
+        document.getElementById('stopRecordBtn').style.display = 'none';
+    }
+
+    function testLocation(enableHighAccuracy, resultId, errorId) {
+        var resultDiv = document.getElementById(resultId);
+        var errorDiv = document.getElementById(errorId);
+        resultDiv.style.display = 'none'; errorDiv.style.display = 'none';
+        if (!navigator.geolocation) { errorDiv.textContent = '浏览器不支持地理位置'; errorDiv.style.display = 'block'; return; }
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                resultDiv.innerHTML = '纬度: ' + pos.coords.latitude.toFixed(6) + '<br>经度: ' + pos.coords.longitude.toFixed(6) + '<br>精度: ' + pos.coords.accuracy.toFixed(1) + 'm<br>时间: ' + new Date(pos.timestamp).toLocaleString();
+                resultDiv.style.display = 'block';
+            },
+            function(err) { errorDiv.textContent = '获取位置失败: ' + err.message; errorDiv.style.display = 'block'; },
+            { enableHighAccuracy: enableHighAccuracy, timeout: 15000, maximumAge: 0 }
+        );
+    }
 
     function renderPublishedNotifyList() { var body = document.getElementById('publishedNotifyList'); if (notifyList.length === 0) { body.innerHTML = '<div style="text-align:center;color:#999;padding:12px;font-size:0.8rem;">暂无已发布通知</div>'; return; } var html = ''; notifyList.forEach(function(item) { html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f2f5;font-size:0.8rem;"><div style="flex:1;min-width:0;"><div style="color:#999;">' + item.time + '</div><div style="color:#333;word-break:break-word;">' + escapeHtml(item.content) + '</div></div><button class="notify-delete-btn" data-id="' + item.id + '" style="flex-shrink:0;margin-left:8px;">&#128465;</button></div>'; }); body.innerHTML = html; body.querySelectorAll('.notify-delete-btn').forEach(function(btn) { btn.addEventListener('click', function() { deleteNotifyItem(this.dataset.id); }); }); }
     function showPushNotifyModal() { renderPublishedNotifyList(); document.getElementById('pushContent').value = ''; document.getElementById('pushLink').value = ''; document.getElementById('pushNotifyModal').classList.add('show'); }
@@ -430,7 +503,6 @@
 
     async function handleUrlAppParameter(){var p=new URLSearchParams(window.location.search);var ap=p.get('app');if(!ap)return;try{ap=decodeURIComponent(ap);}catch(e){}var rc=0;while(appItems.length===0&&rc<30){await new Promise(function(r){setTimeout(r,200);});rc++;}var ta=appItems.find(function(a){return a.name===ap;});if(!ta)ta=appItems.find(function(a){return a.name.toLowerCase().indexOf(ap.toLowerCase())!==-1;});if(ta){setTimeout(function(){handleAppClick(ta.link,ta.name);},500);return;}if(!isWebLink(ap)){if(isAudioFile(ap)){var fu=ap.indexOf('http')===0?ap:'https://luckynum.top/'+ap;var fn=ap.split('/').pop();var sf=await findSeriesFiles(fn);openAudioViewer(fu,fn,sf);return;}openFileWithFilehelper(ap);return;}var fu=ap.indexOf('http')===0?ap:'https://luckynum.top/'+ap;window.open(fu,'_blank');}
 
-    // 禁止非输入框的长按菜单
     document.addEventListener('contextmenu', function(e) { var target = e.target; if (!target.closest('input') && !target.closest('textarea') && !target.closest('[contenteditable]')) { e.preventDefault(); return false; } });
 
     document.getElementById('refreshBtn').addEventListener('click',refreshConfig);
@@ -459,9 +531,11 @@
     document.getElementById('menuNotifySettings').addEventListener('click', showPushSettingsPage);
     document.getElementById('menuAbout').addEventListener('click', showAboutPage);
     document.getElementById('menuDevSettings').addEventListener('click', showDevSettingsPage);
+    document.getElementById('menuPermTest').addEventListener('click', showPermTestPage);
     document.getElementById('pushSettingsBackBtn').addEventListener('click', backToSettings);
     document.getElementById('aboutBackBtn').addEventListener('click', backToSettings);
     document.getElementById('devSettingsBackBtn').addEventListener('click', backToSettings);
+    document.getElementById('permTestBackBtn').addEventListener('click', backToDevSettings);
 
     document.getElementById('pushSwitch').addEventListener('change', function() { var s = getPushSettings(); s.switchOn = this.checked; savePushSettings(s); sendPushSettings(); });
     document.getElementById('mdDisabled').addEventListener('change', function() { var s = getPushSettings(); s.mdDisabled = this.checked; savePushSettings(s); sendPushSettings(); toggleMdIntervalVisibility(); });
@@ -472,6 +546,13 @@
     document.getElementById('disableUpdate').addEventListener('change', function() { localStorage.setItem('disable_force_update', this.checked ? 'true' : 'false'); });
     document.getElementById('viewLogsBtn').addEventListener('click', function() { window.location.href = 'fiveapp://logs'; });
     document.getElementById('devCommandBtn').addEventListener('click', function() { var cmd = document.getElementById('devCommandInput').value.trim(); if (cmd) { window.location.href = 'fiveapp://' + cmd; } else { alert('请输入指令内容'); } });
+
+    document.getElementById('testCameraBtn').addEventListener('click', testCamera);
+    document.getElementById('stopCameraBtn').addEventListener('click', stopCamera);
+    document.getElementById('startRecordBtn').addEventListener('click', startRecording);
+    document.getElementById('stopRecordBtn').addEventListener('click', stopRecording);
+    document.getElementById('testFineLocationBtn').addEventListener('click', function() { testLocation(true, 'fineLocationResult', 'fineLocationError'); });
+    document.getElementById('testCoarseLocationBtn').addEventListener('click', function() { testLocation(false, 'coarseLocationResult', 'coarseLocationError'); });
 
     (function() {
         var ws = document.getElementById('wifiInterval'), ms = document.getElementById('mdInterval'), opts = '';
