@@ -91,6 +91,7 @@
             flex-direction: column;
             overflow: hidden;
             background: #e8eaed;
+            position: relative;
         }
 
         .hidden {
@@ -124,13 +125,24 @@
             background: #f5f5f5;
         }
 
-        /* PDF 加载动画容器 */
-        .pdf-loading-container {
-            flex: 1;
+        /* PDF 加载动画覆盖层 */
+        .pdf-loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f8f9fc;
+            background: rgba(82, 86, 89, 0.85);
+            transition: opacity 0.3s;
+        }
+
+        .pdf-loading-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .transfer-page {
@@ -787,53 +799,62 @@
                 img.onerror = () => showErrorPage('图片加载失败');
             }
 
-            function showPDFLoading() {
-                previewWrapper.innerHTML = `
-                    <div class="pdf-loading-container">
-                        <svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <animate attributeName="x1" values="0%;100%;0%" dur="3s" repeatCount="indefinite"/>
-                                    <animate attributeName="y1" values="0%;100%;0%" dur="3s" repeatCount="indefinite"/>
-                                    <stop offset="0%" stop-color="#4A90D9"/>
-                                    <stop offset="100%" stop-color="#7B68EE"/>
-                                </linearGradient>
-                                <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                                    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#4A90D9" flood-opacity="0.3"/>
-                                </filter>
-                            </defs>
-                            <rect width="400" height="200" fill="#f8f9fc" rx="12"/>
-                            <g transform="translate(200, 80)" filter="url(#shadow)">
-                                <circle cx="0" cy="0" r="38" fill="none" stroke="#E8EDF5" stroke-width="4"/>
-                                <circle cx="0" cy="0" r="38" fill="none" stroke="url(#grad)" stroke-width="4" stroke-dasharray="180 60" stroke-linecap="round">
-                                    <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="1.5s" repeatCount="indefinite"/>
-                                </circle>
-                                <g transform="translate(-16, -20)">
-                                    <path d="M8 0 L24 0 L32 8 L32 40 L8 40 Z" fill="white" stroke="#7B68EE" stroke-width="1.5" stroke-linejoin="round"/>
-                                    <path d="M24 0 L24 8 L32 8" fill="#F0EDFF" stroke="#7B68EE" stroke-width="1.5" stroke-linejoin="round"/>
-                                    <rect x="14" y="14" width="12" height="3" rx="1.5" fill="#7B68EE" opacity="0.9">
-                                        <animate attributeName="width" values="0;12;12;0" dur="2s" repeatCount="indefinite" keyTimes="0;0.25;0.75;1"/>
-                                    </rect>
-                                    <rect x="14" y="21" width="10" height="3" rx="1.5" fill="#A0A8D0" opacity="0.7">
-                                        <animate attributeName="width" values="0;10;10;0" dur="2s" repeatCount="indefinite" begin="0.2s" keyTimes="0;0.25;0.75;1"/>
-                                    </rect>
-                                    <rect x="14" y="28" width="8" height="3" rx="1.5" fill="#A0A8D0" opacity="0.5">
-                                        <animate attributeName="width" values="0;8;8;0" dur="2s" repeatCount="indefinite" begin="0.4s" keyTimes="0;0.25;0.75;1"/>
-                                    </rect>
-                                </g>
+            function showPDFLoadingOverlay() {
+                const overlay = document.createElement('div');
+                overlay.className = 'pdf-loading-overlay';
+                overlay.id = 'pdfLoadingOverlay';
+                overlay.innerHTML = `
+                    <svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <animate attributeName="x1" values="0%;100%;0%" dur="3s" repeatCount="indefinite"/>
+                                <animate attributeName="y1" values="0%;100%;0%" dur="3s" repeatCount="indefinite"/>
+                                <stop offset="0%" stop-color="#4A90D9"/>
+                                <stop offset="100%" stop-color="#7B68EE"/>
+                            </linearGradient>
+                            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#4A90D9" flood-opacity="0.3"/>
+                            </filter>
+                        </defs>
+                        <rect width="400" height="200" fill="#f8f9fc" rx="12"/>
+                        <g transform="translate(200, 80)" filter="url(#shadow)">
+                            <circle cx="0" cy="0" r="38" fill="none" stroke="#E8EDF5" stroke-width="4"/>
+                            <circle cx="0" cy="0" r="38" fill="none" stroke="url(#grad)" stroke-width="4" stroke-dasharray="180 60" stroke-linecap="round">
+                                <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="1.5s" repeatCount="indefinite"/>
+                            </circle>
+                            <g transform="translate(-16, -20)">
+                                <path d="M8 0 L24 0 L32 8 L32 40 L8 40 Z" fill="white" stroke="#7B68EE" stroke-width="1.5" stroke-linejoin="round"/>
+                                <path d="M24 0 L24 8 L32 8" fill="#F0EDFF" stroke="#7B68EE" stroke-width="1.5" stroke-linejoin="round"/>
+                                <rect x="14" y="14" width="12" height="3" rx="1.5" fill="#7B68EE" opacity="0.9">
+                                    <animate attributeName="width" values="0;12;12;0" dur="2s" repeatCount="indefinite" keyTimes="0;0.25;0.75;1"/>
+                                </rect>
+                                <rect x="14" y="21" width="10" height="3" rx="1.5" fill="#A0A8D0" opacity="0.7">
+                                    <animate attributeName="width" values="0;10;10;0" dur="2s" repeatCount="indefinite" begin="0.2s" keyTimes="0;0.25;0.75;1"/>
+                                </rect>
+                                <rect x="14" y="28" width="8" height="3" rx="1.5" fill="#A0A8D0" opacity="0.5">
+                                    <animate attributeName="width" values="0;8;8;0" dur="2s" repeatCount="indefinite" begin="0.4s" keyTimes="0;0.25;0.75;1"/>
+                                </rect>
                             </g>
-                            <text x="200" y="160" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" fill="#4A4A5A" letter-spacing="0.5">
-                                文件预览模块正在加载
-                                <tspan fill="#7B68EE" font-weight="500">...</tspan>
-                            </text>
-                        </svg>
-                    </div>`;
+                        </g>
+                        <text x="200" y="160" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" fill="#4A4A5A" letter-spacing="0.5">
+                            文件预览模块正在加载
+                            <tspan fill="#7B68EE" font-weight="500">...</tspan>
+                        </text>
+                    </svg>`;
+                previewWrapper.appendChild(overlay);
+            }
+
+            function hidePDFLoadingOverlay() {
+                const overlay = document.getElementById('pdfLoadingOverlay');
+                if (overlay) {
+                    overlay.classList.add('fade-out');
+                    setTimeout(() => { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 300);
+                }
             }
 
             async function renderPDF(url) {
-                showPDFLoading();
+                showPDFLoadingOverlay();
                 const { stage, content, fitToScreen } = createZoomStage(false);
-                previewWrapper.innerHTML = '';
                 previewWrapper.appendChild(stage);
                 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
                 try {
@@ -850,7 +871,12 @@
                         wrapper.appendChild(canvas); content.appendChild(wrapper);
                     }
                     fitToScreen();
-                } catch (err) { showErrorPage(err.message); }
+                    // 保证动画至少显示3秒
+                    setTimeout(() => { hidePDFLoadingOverlay(); }, 3000);
+                } catch (err) {
+                    hidePDFLoadingOverlay();
+                    showErrorPage(err.message);
+                }
             }
 
             function renderOfficeOnline(sourceURL) {
@@ -904,7 +930,6 @@
                 const audio = new Audio(url);
                 audio.volume = 1.0;
                 audio.loop = true;
-
                 const btnPlay = document.getElementById('btnPlay');
                 const iconPlay = document.getElementById('iconPlay');
                 const iconPause = document.getElementById('iconPause');
@@ -920,88 +945,38 @@
                 const volumeSlider = document.getElementById('volumeSlider');
                 const volumeNum = document.getElementById('volumeNum');
                 const vinylWrapper = document.getElementById('vinylWrapper');
-
                 let isPlaying = false;
                 let duration = 0;
                 let animationId = null;
 
-                function formatTime(seconds) {
-                    const m = Math.floor(seconds / 60);
-                    const s = Math.floor(seconds % 60);
-                    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-                }
+                function formatTime(seconds) { const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60); return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'); }
+                function updateProgressUI(value) { const p = duration > 0 ? (value / duration) * 100 : 0; progressSlider.style.setProperty('--progress', p + '%'); progressSlider.value = value; currentTimeEl.textContent = formatTime(value); }
+                function updateVolumeUI(value) { volumeSlider.style.setProperty('--vol-progress', value + '%'); volumeSlider.value = value; volumeNum.textContent = value; }
 
-                function updateProgressUI(value) {
-                    const percent = duration > 0 ? (value / duration) * 100 : 0;
-                    progressSlider.style.setProperty('--progress', percent + '%');
-                    progressSlider.value = value;
-                    currentTimeEl.textContent = formatTime(value);
-                }
-
-                function updateVolumeUI(value) {
-                    volumeSlider.style.setProperty('--vol-progress', value + '%');
-                    volumeSlider.value = value;
-                    volumeNum.textContent = value;
-                }
-
-                audio.addEventListener('loadedmetadata', () => {
-                    duration = audio.duration;
-                    progressSlider.max = duration;
-                    totalTimeEl.textContent = formatTime(duration);
-                    updateProgressUI(0);
-                });
-
-                function setPlaying(state) {
-                    isPlaying = state;
-                    if (state) { iconPlay.style.display = 'none'; iconPause.style.display = 'block'; vinylWrapper.classList.add('playing'); }
-                    else { iconPlay.style.display = 'block'; iconPause.style.display = 'none'; vinylWrapper.classList.remove('playing'); }
-                }
-
-                function animate() {
-                    updateProgressUI(audio.currentTime);
-                    if (!audio.paused) animationId = requestAnimationFrame(animate);
-                }
-
-                function togglePlay() {
-                    if (isPlaying) { audio.pause(); cancelAnimationFrame(animationId); setPlaying(false); }
-                    else { audio.play(); setPlaying(true); animationId = requestAnimationFrame(animate); }
-                }
+                audio.addEventListener('loadedmetadata', () => { duration = audio.duration; progressSlider.max = duration; totalTimeEl.textContent = formatTime(duration); updateProgressUI(0); });
+                function setPlaying(s) { isPlaying = s; if (s) { iconPlay.style.display = 'none'; iconPause.style.display = 'block'; vinylWrapper.classList.add('playing'); } else { iconPlay.style.display = 'block'; iconPause.style.display = 'none'; vinylWrapper.classList.remove('playing'); } }
+                function animate() { updateProgressUI(audio.currentTime); if (!audio.paused) animationId = requestAnimationFrame(animate); }
+                function togglePlay() { if (isPlaying) { audio.pause(); cancelAnimationFrame(animationId); setPlaying(false); } else { audio.play(); setPlaying(true); animationId = requestAnimationFrame(animate); } }
 
                 btnPlay.addEventListener('click', togglePlay);
                 btnRewind.addEventListener('click', () => { audio.currentTime = Math.max(0, audio.currentTime - 5); updateProgressUI(audio.currentTime); });
                 btnForward.addEventListener('click', () => { audio.currentTime = Math.min(duration, audio.currentTime + 5); updateProgressUI(audio.currentTime); });
-
                 btnSpeed.addEventListener('click', (e) => { e.stopPropagation(); speedPopup.classList.toggle('show'); });
-                speedPopup.querySelectorAll('.speed-option').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const sp = parseFloat(btn.dataset.speed);
-                        audio.playbackRate = sp;
-                        speedPopup.querySelectorAll('.speed-option').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        speedPopup.classList.remove('show');
-                    });
-                });
-
+                speedPopup.querySelectorAll('.speed-option').forEach(b => { b.addEventListener('click', (e) => { e.stopPropagation(); audio.playbackRate = parseFloat(b.dataset.speed); speedPopup.querySelectorAll('.speed-option').forEach(x => x.classList.remove('active')); b.classList.add('active'); speedPopup.classList.remove('show'); }); });
                 progressSlider.addEventListener('input', () => { audio.currentTime = parseFloat(progressSlider.value); updateProgressUI(audio.currentTime); });
-
                 volumeSlider.addEventListener('input', () => { audio.volume = parseInt(volumeSlider.value) / 100; updateVolumeUI(parseInt(volumeSlider.value)); });
                 volumeBtn.addEventListener('click', (e) => { e.stopPropagation(); volumePopup.classList.toggle('show'); });
                 document.addEventListener('click', () => { volumePopup.classList.remove('show'); speedPopup.classList.remove('show'); });
                 volumePopup.addEventListener('click', (e) => e.stopPropagation());
                 speedPopup.addEventListener('click', (e) => e.stopPropagation());
-
                 updateVolumeUI(100);
             }
 
             function doPreview(sourceURL, fileName) {
-                currentFileName = fileName;
-                remoteSourceURL = sourceURL;
+                currentFileName = fileName; remoteSourceURL = sourceURL;
                 const decodedName = decodeURIComponent(fileName);
-                fileNameDisplay.textContent = decodedName;
-                document.title = decodedName;
-                showTopBar();
-                previewWrapper.innerHTML = '';
+                fileNameDisplay.textContent = decodedName; document.title = decodedName;
+                showTopBar(); previewWrapper.innerHTML = '';
                 const type = getType(getExt(fileName));
                 const absoluteURL = toAbsoluteURL(sourceURL);
                 switch (type) {
@@ -1025,16 +1000,14 @@
                     case 'video': renderVideo(fileURL); break;
                     case 'audio': renderAudio(fileURL); break;
                     case 'pdf': renderPDF(sourceURL || fileURL); break;
-                    case 'docx': case 'xlsx': case 'ppt':
-                        if (sourceURL) renderOfficeOnline(sourceURL); else showErrorPage('Office 文件需要远程链接才能预览');
-                        break;
+                    case 'docx': case 'xlsx': case 'ppt': if (sourceURL) renderOfficeOnline(sourceURL); else showErrorPage('Office 文件需要远程链接才能预览'); break;
                     default: showErrorPage('不支持的文件格式');
                 }
             }
 
             async function getFileSize(url) {
-                try { const resp = await fetch(url, { method: 'HEAD' }); if (resp.ok) { const l = resp.headers.get('content-length'); if (l) return formatFileSize(parseInt(l)); } } catch (e) {}
-                try { const resp = await fetch(url); if (resp.ok) { const blob = await resp.blob(); if (blob.size > 0) return formatFileSize(blob.size); } } catch (e) {}
+                try { const r = await fetch(url, { method: 'HEAD' }); if (r.ok) { const l = r.headers.get('content-length'); if (l) return formatFileSize(parseInt(l)); } } catch (e) {}
+                try { const r = await fetch(url); if (r.ok) { const b = await r.blob(); if (b.size > 0) return formatFileSize(b.size); } } catch (e) {}
                 return '未知大小';
             }
 
@@ -1049,22 +1022,10 @@
             }
 
             async function handleShareOrCopy() {
-                if (!remoteSourceURL) {
-                    showToast('无法分享');
-                    return;
-                }
+                if (!remoteSourceURL) { showToast('无法分享'); return; }
                 const shareURL = `${BASE_DOMAIN}/filehelper?file=${encodeURIComponent(remoteSourceURL)}`;
-
-                if (IS_FIVEAPP) {
-                    try { await navigator.clipboard.writeText(shareURL); } catch (e) {}
-                    window.location.href = 'fiveapp://share';
-                } else {
-                    navigator.clipboard.writeText(shareURL).then(() => {
-                        showToast('链接已复制');
-                    }).catch(() => {
-                        showToast('复制失败');
-                    });
-                }
+                if (IS_FIVEAPP) { try { await navigator.clipboard.writeText(shareURL); } catch (e) {} window.location.href = 'fiveapp://share'; }
+                else { navigator.clipboard.writeText(shareURL).then(() => showToast('链接已复制')).catch(() => showToast('复制失败')); }
             }
 
             backBtn.addEventListener('click', goBack);
