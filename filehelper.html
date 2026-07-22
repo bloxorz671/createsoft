@@ -842,6 +842,8 @@
                         </text>
                     </svg>`;
                 previewWrapper.appendChild(overlay);
+                // 5秒后自动消失
+                setTimeout(() => { hidePDFLoadingOverlay(); }, 5000);
             }
 
             function hidePDFLoadingOverlay() {
@@ -871,8 +873,6 @@
                         wrapper.appendChild(canvas); content.appendChild(wrapper);
                     }
                     fitToScreen();
-                    // 保证动画至少显示3秒
-                    setTimeout(() => { hidePDFLoadingOverlay(); }, 3000);
                 } catch (err) {
                     hidePDFLoadingOverlay();
                     showErrorPage(err.message);
