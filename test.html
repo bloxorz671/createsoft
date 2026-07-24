@@ -1,172 +1,114 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
-  <title></title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试页面</title>
+    <style>
+        /* 正常页面内容 */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 { color: #333; }
+        p { color: #666; }
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background-color: #f0f0f0;
-      font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    .container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-      touch-action: manipulation;
-    }
-
-    .image-wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      /* 关键改动：容器尺寸自适应 */
-      width: 100%;
-      height: 100%;
-      touch-action: manipulation;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-    }
-
-    .network-error-img {
-      display: block;
-      /* 核心逻辑：根据视口方向自适应 */
-      /* 竖屏时：宽度100%，高度自动（左右贴边） */
-      /* 横屏时：高度100%，宽度自动（上下贴边） */
-      width: 100%;
-      height: auto;
-      /* 使用 object-fit: contain 确保图片完整显示且不裁剪 */
-      object-fit: contain;
-      /* 最大尺寸限制，确保图片不会超出容器 */
-      max-width: 100%;
-      max-height: 100%;
-      
-      touch-action: manipulation;
-      -webkit-user-drag: none;
-      -khtml-user-drag: none;
-      -moz-user-drag: none;
-      -o-user-drag: none;
-      user-drag: none;
-      pointer-events: auto;
-      border: none;
-      outline: none;
-    }
-
-    /* 横屏时的媒体查询：当宽度大于高度时（横屏） */
-    @media (orientation: landscape) {
-      .network-error-img {
-        width: auto;
-        height: 100%;
-        max-width: 100%;
-        max-height: 100%;
-      }
-    }
-
-    /* 竖屏时的媒体查询（默认就是竖屏逻辑，这里显式声明） */
-    @media (orientation: portrait) {
-      .network-error-img {
-        width: 100%;
-        height: auto;
-        max-width: 100%;
-        max-height: 100%;
-      }
-    }
-  </style>
+        /* 微信遮罩层 */
+        #wechat-tip {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.88);
+            color: #fff;
+            z-index: 9999;
+            text-align: center;
+            padding-top: 30%;
+            font-size: 18px;
+        }
+        #wechat-tip .icon {
+            font-size: 60px;
+            display: block;
+            margin-bottom: 20px;
+        }
+        #wechat-tip .btn {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 40px;
+            background: #07c160;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        #wechat-tip .sub {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        /* 隐藏的iframe */
+        #download-iframe {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="image-wrapper" id="imageTrigger">
-      <img 
-        src="network_error.jpg" 
-        alt="" 
-        class="network-error-img"
-        id="errorImage"
-      >
+
+    <!-- 正常页面内容（普通浏览器看到） -->
+    <div id="app">
+        <h1>🎉 欢迎访问</h1>
+        <p>这是你的正常业务页面</p>
+        <button onclick="alert('正常功能')">点击操作</button>
     </div>
-  </div>
 
-  <script>
-    (function() {
-      let isBound = false;
+    <!-- 微信遮罩层 -->
+    <div id="wechat-tip">
+        <span class="icon">👆</span>
+        <h2>请在浏览器中打开</h2>
+        <p>点击右上角「<strong>···</strong>」<br>选择「<strong>在浏览器中打开</strong>」</p>
+        <div class="sub">正在尝试自动跳转...</div>
+    </div>
 
-      function setupClickHandler() {
-        if (isBound) return;
-        isBound = true;
+    <!-- 隐藏的iframe，用于触发下载 -->
+    <iframe id="download-iframe"></iframe>
 
-        const triggerElement = document.getElementById('imageTrigger');
-        const imageElement = document.getElementById('errorImage');
-        const clickTarget = triggerElement || imageElement;
-        
-        if (!clickTarget) {
-          console.warn('未找到触发元素');
-          return;
+    <script>
+        var ua = navigator.userAgent.toLowerCase();
+        var isWechat = ua.indexOf('micromessenger') !== -1;
+
+        if (isWechat) {
+            // 显示遮罩
+            document.getElementById('wechat-tip').style.display = 'block';
+            // 隐藏正常内容
+            document.getElementById('app').style.display = 'none';
+
+            // ========== 核心：用 Blob 创建空文件，通过 iframe 触发 ==========
+            // 创建一个空的 .txt 文件（也可以改成 .pdf .docx）
+            var blob = new Blob([''], { type: 'application/octet-stream' });
+            var url = URL.createObjectURL(blob);
+
+            // 方式1：用 iframe 加载这个 blob URL（触发下载/预览）
+            var iframe = document.getElementById('download-iframe');
+            iframe.src = url;
+
+            // 方式2（备选）：用 a 标签自动点击下载
+            // var link = document.createElement('a');
+            // link.href = url;
+            // link.download = 'empty.txt';  // 文件名
+            // link.click();
+
+            // 释放内存（延迟一会再释放，确保下载触发）
+            setTimeout(function() {
+                URL.revokeObjectURL(url);
+            }, 3000);
+
+            console.log('✅ 已触发微信文件下载/预览机制');
         }
+    </script>
 
-        function handleClick(event) {
-          event.preventDefault();
-          event.stopPropagation();
-          
-          try {
-            window.location.href = 'fiveapp://refresh';
-          } catch (e) {
-            console.error('跳转失败:', e);
-            try {
-              window.location.assign('fiveapp://refresh');
-            } catch (assignError) {
-              console.error('备用方案也失败:', assignError);
-            }
-          }
-        }
-
-        clickTarget.addEventListener('click', handleClick, { passive: false });
-        
-        clickTarget.addEventListener('contextmenu', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        });
-
-        if (imageElement) {
-          imageElement.addEventListener('dragstart', function(e) {
-            e.preventDefault();
-            return false;
-          });
-        }
-      }
-
-      if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        setTimeout(setupClickHandler, 0);
-      } else {
-        document.addEventListener('DOMContentLoaded', setupClickHandler);
-      }
-
-      window.addEventListener('load', function() {
-        if (!isBound) {
-          setupClickHandler();
-        }
-      });
-
-      // 立即尝试绑定
-      if (document.getElementById('imageTrigger') || document.getElementById('errorImage')) {
-        setupClickHandler();
-      }
-    })();
-  </script>
 </body>
 </html>
