@@ -10,9 +10,25 @@
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 50px;
+            margin: 0;
+        }
+        #app {
+            max-width: 600px;
+            margin: 0 auto;
         }
         h1 { color: #333; }
         p { color: #666; }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #007aff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn:hover { background: #0055cc; }
 
         /* 微信遮罩层 */
         #wechat-tip {
@@ -34,46 +50,68 @@
             display: block;
             margin-bottom: 20px;
         }
-        #wechat-tip .btn {
-            display: inline-block;
-            margin-top: 30px;
-            padding: 12px 40px;
-            background: #07c160;
+        #wechat-tip h2 {
+            font-size: 22px;
+            margin: 0 0 15px 0;
+            font-weight: 500;
+        }
+        #wechat-tip p {
+            color: #ccc;
+            line-height: 1.8;
+            margin: 0;
+        }
+        #wechat-tip p strong {
             color: #fff;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 16px;
         }
         #wechat-tip .sub {
-            margin-top: 15px;
+            margin-top: 20px;
             font-size: 14px;
-            color: #aaa;
+            color: #888;
         }
-        
-        /* 隐藏的iframe */
+        #wechat-tip .sub .loading {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #888;
+            border-top-color: #07c160;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 隐藏iframe */
         #download-iframe {
             display: none;
+            width: 0;
+            height: 0;
         }
     </style>
 </head>
 <body>
 
-    <!-- 正常页面内容（普通浏览器看到） -->
+    <!-- 正常页面内容 -->
     <div id="app">
-        <h1>🎉 欢迎访问</h1>
+        <h1>📚 欢迎访问</h1>
         <p>这是你的正常业务页面</p>
-        <button onclick="alert('正常功能')">点击操作</button>
+        <button class="btn" onclick="alert('正常功能运行中')">点击操作</button>
     </div>
 
-    <!-- 微信遮罩层 -->
+    <!-- 微信遮罩 -->
     <div id="wechat-tip">
         <span class="icon">👆</span>
         <h2>请在浏览器中打开</h2>
         <p>点击右上角「<strong>···</strong>」<br>选择「<strong>在浏览器中打开</strong>」</p>
-        <div class="sub">正在尝试自动跳转...</div>
+        <div class="sub">
+            <span class="loading"></span>
+            正在尝试自动跳转...
+        </div>
     </div>
 
-    <!-- 隐藏的iframe，用于触发下载 -->
+    <!-- 隐藏iframe -->
     <iframe id="download-iframe"></iframe>
 
     <script>
@@ -81,32 +119,32 @@
         var isWechat = ua.indexOf('micromessenger') !== -1;
 
         if (isWechat) {
-            // 显示遮罩
+            // 显示遮罩，隐藏内容
             document.getElementById('wechat-tip').style.display = 'block';
-            // 隐藏正常内容
             document.getElementById('app').style.display = 'none';
 
-            // ========== 核心：用 Blob 创建空文件，通过 iframe 触发 ==========
-            // 创建一个空的 .txt 文件（也可以改成 .pdf .docx）
-            var blob = new Blob([''], { type: 'application/octet-stream' });
-            var url = URL.createObjectURL(blob);
+            // ========== 核心：用 iframe 加载真实 PDF ==========
+            // 相对路径（和HTML同域名）
+            var pdfUrl = './%E4%B9%9D%E5%B9%B4%E7%BA%A7%E7%89%A9%E7%90%86%E8%AF%BE%E6%9C%AC-%E5%85%A8%E4%B8%80%E5%86%8C.pdf';
+            
+            // 或者用绝对路径（也可以）
+            // var pdfUrl = '/%E4%B9%9D%E5%B9%B4%E7%BA%A7%E7%89%A9%E7%90%86%E8%AF%BE%E6%9C%AC-%E5%85%A8%E4%B8%80%E5%86%8C.pdf';
+            
+            // 或者直接用完整URL（但没必要）
+            // var pdfUrl = 'https://luckynum.top/%E4%B9%9D%E5%B9%B4%E7%BA%A7%E7%89%A9%E7%90%86%E8%AF%BE%E6%9C%AC-%E5%85%A8%E4%B8%80%E5%86%8C.pdf';
 
-            // 方式1：用 iframe 加载这个 blob URL（触发下载/预览）
             var iframe = document.getElementById('download-iframe');
-            iframe.src = url;
+            iframe.src = pdfUrl;
 
-            // 方式2（备选）：用 a 标签自动点击下载
-            // var link = document.createElement('a');
-            // link.href = url;
-            // link.download = 'empty.txt';  // 文件名
-            // link.click();
+            console.log('✅ 已加载PDF，触发微信预览机制');
 
-            // 释放内存（延迟一会再释放，确保下载触发）
+            // 可选：如果用户5秒后还没操作，提示更明确
             setTimeout(function() {
-                URL.revokeObjectURL(url);
-            }, 3000);
-
-            console.log('✅ 已触发微信文件下载/预览机制');
+                var sub = document.querySelector('.sub');
+                if (sub) {
+                    sub.innerHTML = '👆 如果未自动跳转，请点击右上角「···」选择「在浏览器中打开」';
+                }
+            }, 5000);
         }
     </script>
 
