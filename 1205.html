@@ -297,7 +297,6 @@
         <button class="add-btn" id="addGroupFab" title="添加分组" style="background:#9b59b6;">📂</button>
     </div>
 
-    <div id="deviceWarningModal" class="modal-overlay device-warning-modal" style="z-index:30000;"><div class="modal-content"><div class="device-warning-icon" id="deviceWarningIcon"></div><div class="device-warning-message" id="deviceWarningMessage"></div><button class="device-warning-btn" id="deviceWarningCloseBtn">我知道了</button></div></div>
     <div id="forceUpdateModal" class="modal-overlay force-update-modal" style="z-index:40000;"><div class="modal-content"><img class="update-icon-img" id="updateIcon" src="41.jpg" alt="图标" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2272%22 height=%2272%22%3E%3Crect width=%2272%22 height=%2272%22 rx=%2216%22 fill=%22%232b4c8a%22/%3E%3Ctext x=%2236%22 y=%2246%22 font-size=%2230%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22system-ui%22%3E5%3C/text%3E%3C/svg%3E'"><div class="update-title">已推出新版本</div><button class="update-btn" id="forceUpdateBtn">立即更新</button><button class="skip-btn" id="skipUpdateBtn">暂不更新</button></div></div>
     <div id="appDownloadModal" class="modal-overlay app-download-modal" style="z-index:40001;"><div class="modal-content"><img class="app-icon-large" src="41.jpg" alt="图标" onerror="this.style.display='none'"><div class="app-name">五班应用平台</div><div class="app-subtitle">推荐下载APP</div><button class="download-btn" id="appDownloadBtn">立即下载</button><button class="later-btn" id="laterBtn">以后再说</button></div></div>
     <div id="notifyModal" class="modal-overlay" style="z-index:40002;"><div class="modal-content" style="max-width:500px;"><div class="notify-header-bar"><h3 style="margin:0;">📧 通知中心</h3><button class="notify-mark-all" id="markAllReadBtn">全部已读</button></div><div id="notifyListBody" style="max-height:60vh;overflow-y:auto;"></div></div></div>
@@ -319,6 +318,12 @@
     var draggedGroupIndex = null, draggedAppData = null;
     var notifyList = []; var readNotifyIds = JSON.parse(localStorage.getItem('read_notify_ids') || '[]');
     var cameraStream = null; var mediaRecorder = null; var audioChunks = [];
+
+    // 平台检测
+    var isIOS = /iPhone|iPad|iPod/i.test(currentUA);
+    var isMac = /Macintosh/i.test(currentUA) && !isIOS;
+    var isPC = !/Android|iPhone|iPad|iPod|Mobile/i.test(currentUA);
+    var isNonAndroid = isIOS || isPC || isMac;
 
     function getAppVersion(ua) { var m = ua.match(/fiveapp(\d+)\.?(\d*)/); if (m) { var major = parseInt(m[1]) || 0; var minor = parseInt(m[2]) || 0; return major * 100 + minor; } if (ua.indexOf('ClassApp') !== -1) return 1; return -1; }
     var appVersion = getAppVersion(currentUA); var isLatestApp = appVersion >= APP_MIN_VERSION; var isOldApp = appVersion >= 0 && appVersion < APP_MIN_VERSION; var isAnyApp = appVersion >= 0;
@@ -395,61 +400,23 @@
     function initAboutDevTrigger() { aboutIconClicks = 0; aboutNameLongPress = false; var icon = document.getElementById('aboutIcon'); var name = document.getElementById('aboutAppName'); if (!icon || !name || !isAnyApp) return; icon.onclick = function() { aboutIconClicks++; if (aboutIconTimer) clearTimeout(aboutIconTimer); aboutIconTimer = setTimeout(function() { aboutIconClicks = 0; }, 3000); checkDevTrigger(); }; name.oncontextmenu = function(e) { e.preventDefault(); }; var pressTimer; name.addEventListener('touchstart', function(e) { pressTimer = setTimeout(function() { aboutNameLongPress = true; checkDevTrigger(); }, 1500); }); name.addEventListener('touchend', function() { clearTimeout(pressTimer); }); name.addEventListener('touchmove', function() { clearTimeout(pressTimer); }); name.addEventListener('mousedown', function() { pressTimer = setTimeout(function() { aboutNameLongPress = true; checkDevTrigger(); }, 1500); }); name.addEventListener('mouseup', function() { clearTimeout(pressTimer); }); name.addEventListener('mouseleave', function() { clearTimeout(pressTimer); }); }
     function checkDevTrigger() { if (aboutIconClicks >= 10 && aboutNameLongPress) { aboutIconClicks = 0; aboutNameLongPress = false; setDevEnabled(true); showDevSettingsPage(); } }
 
-    // 权限测试功能
     async function testCamera() {
-        var container = document.getElementById('cameraContainer');
-        var video = document.getElementById('cameraVideo');
-        var errorDiv = document.getElementById('cameraError');
+        var container = document.getElementById('cameraContainer'); var video = document.getElementById('cameraVideo'); var errorDiv = document.getElementById('cameraError');
         errorDiv.style.display = 'none';
-        try {
-            cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-            video.srcObject = cameraStream;
-            container.style.display = 'block';
-            document.getElementById('testCameraBtn').style.display = 'none';
-        } catch(e) { errorDiv.textContent = '摄像头调用失败: ' + e.message; errorDiv.style.display = 'block'; }
+        try { cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); video.srcObject = cameraStream; container.style.display = 'block'; document.getElementById('testCameraBtn').style.display = 'none'; }
+        catch(e) { errorDiv.textContent = '摄像头调用失败: ' + e.message; errorDiv.style.display = 'block'; }
     }
-    function stopCamera() {
-        if (cameraStream) { cameraStream.getTracks().forEach(function(t) { t.stop(); }); cameraStream = null; }
-        document.getElementById('cameraContainer').style.display = 'none';
-        document.getElementById('testCameraBtn').style.display = '';
-        document.getElementById('cameraVideo').srcObject = null;
-    }
+    function stopCamera() { if (cameraStream) { cameraStream.getTracks().forEach(function(t) { t.stop(); }); cameraStream = null; } document.getElementById('cameraContainer').style.display = 'none'; document.getElementById('testCameraBtn').style.display = ''; document.getElementById('cameraVideo').srcObject = null; }
 
-    async function startRecording() {
-        var errorDiv = document.getElementById('audioError'); errorDiv.style.display = 'none'; audioChunks = [];
-        try {
-            var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) audioChunks.push(e.data); };
-            mediaRecorder.onstop = function() {
-                var blob = new Blob(audioChunks, { type: 'audio/webm' });
-                var url = URL.createObjectURL(blob);
-                var audio = document.getElementById('audioPlayback');
-                audio.src = url;
-                document.getElementById('audioPlaybackContainer').style.display = 'block';
-                stream.getTracks().forEach(function(t) { t.stop(); });
-            };
-            mediaRecorder.start();
-            document.getElementById('startRecordBtn').style.display = 'none';
-            document.getElementById('stopRecordBtn').style.display = '';
-        } catch(e) { errorDiv.textContent = '麦克风调用失败: ' + e.message; errorDiv.style.display = 'block'; }
-    }
-    function stopRecording() {
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') { mediaRecorder.stop(); }
-        document.getElementById('startRecordBtn').style.display = '';
-        document.getElementById('stopRecordBtn').style.display = 'none';
-    }
+    async function startRecording() { var errorDiv = document.getElementById('audioError'); errorDiv.style.display = 'none'; audioChunks = []; try { var stream = await navigator.mediaDevices.getUserMedia({ audio: true }); mediaRecorder = new MediaRecorder(stream); mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) audioChunks.push(e.data); }; mediaRecorder.onstop = function() { var blob = new Blob(audioChunks, { type: 'audio/webm' }); var url = URL.createObjectURL(blob); var audio = document.getElementById('audioPlayback'); audio.src = url; document.getElementById('audioPlaybackContainer').style.display = 'block'; stream.getTracks().forEach(function(t) { t.stop(); }); }; mediaRecorder.start(); document.getElementById('startRecordBtn').style.display = 'none'; document.getElementById('stopRecordBtn').style.display = ''; } catch(e) { errorDiv.textContent = '麦克风调用失败: ' + e.message; errorDiv.style.display = 'block'; } }
+    function stopRecording() { if (mediaRecorder && mediaRecorder.state !== 'inactive') { mediaRecorder.stop(); } document.getElementById('startRecordBtn').style.display = ''; document.getElementById('stopRecordBtn').style.display = 'none'; }
 
     function testLocation(enableHighAccuracy, resultId, errorId) {
-        var resultDiv = document.getElementById(resultId);
-        var errorDiv = document.getElementById(errorId);
+        var resultDiv = document.getElementById(resultId); var errorDiv = document.getElementById(errorId);
         resultDiv.style.display = 'none'; errorDiv.style.display = 'none';
         if (!navigator.geolocation) { errorDiv.textContent = '浏览器不支持地理位置'; errorDiv.style.display = 'block'; return; }
         navigator.geolocation.getCurrentPosition(
-            function(pos) {
-                resultDiv.innerHTML = '纬度: ' + pos.coords.latitude.toFixed(6) + '<br>经度: ' + pos.coords.longitude.toFixed(6) + '<br>精度: ' + pos.coords.accuracy.toFixed(1) + 'm<br>时间: ' + new Date(pos.timestamp).toLocaleString();
-                resultDiv.style.display = 'block';
-            },
+            function(pos) { resultDiv.innerHTML = '纬度: ' + pos.coords.latitude.toFixed(6) + '<br>经度: ' + pos.coords.longitude.toFixed(6) + '<br>精度: ' + pos.coords.accuracy.toFixed(1) + 'm<br>时间: ' + new Date(pos.timestamp).toLocaleString(); resultDiv.style.display = 'block'; },
             function(err) { errorDiv.textContent = '获取位置失败: ' + err.message; errorDiv.style.display = 'block'; },
             { enableHighAccuracy: enableHighAccuracy, timeout: 15000, maximumAge: 0 }
         );
@@ -476,8 +443,6 @@
     function refreshConfig(){var btn=document.getElementById('refreshBtn');btn.classList.add('spinning');document.getElementById('warningBanner').style.display='block';document.getElementById('warningBanner').textContent='正在刷新应用配置...';document.getElementById('groupsContainer').innerHTML='<div class="loading-tip">加载应用中...</div>';loadConfigFile(false).then(function(){btn.classList.remove('spinning');document.getElementById('warningBanner').style.display='none';}).catch(function(){btn.classList.remove('spinning');document.getElementById('warningBanner').textContent='刷新失败，请重试';});}
     function showHome(){hideAllPages();document.getElementById('homePage').classList.add('active');document.getElementById('navHomeBtn').classList.add('active');}
     function showNotify(){hideAllPages();document.getElementById('navNotifyBtn').classList.add('active');showNotifyModal();}
-
-    (function(){var ua=navigator.userAgent;var isIOS=/iPhone|iPad|iPod/i.test(ua);var isMac=/Macintosh/i.test(ua)&&!isIOS;var m=document.getElementById('deviceWarningModal'),icon=document.getElementById('deviceWarningIcon'),msg=document.getElementById('deviceWarningMessage'),cb=document.getElementById('deviceWarningCloseBtn');var wm=null;if(isIOS){wm='当前设备访问本平台可能出现问题，建议更换安卓或鸿蒙设备访问';icon.textContent='!';}else if(isMac){wm='当前设备访问本平台可能出现问题，建议更换Windows或Linux设备访问';icon.textContent='!';}if(wm&&m&&msg){msg.textContent=wm;m.classList.add('show');cb.addEventListener('click',function(){m.classList.remove('show');});m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('show');});}})();
 
     function showTokenModal(){var m=document.createElement('div');m.className='modal-overlay';m.innerHTML='<div class="modal-content"><h3>验证Token</h3><input type="password" id="tokenInput" placeholder="GitHub Token" autocomplete="off"><div class="modal-buttons"><button class="confirm-btn" id="confirmBtn">验证</button><button class="cancel-btn" id="cancelBtn">取消</button></div></div>';document.body.appendChild(m);m.classList.add('show');m.querySelector('#confirmBtn').onclick=async function(){var t=m.querySelector('#tokenInput').value.trim();if(!t){alert('请输入Token');return;}var btn=m.querySelector('#confirmBtn');btn.disabled=true;btn.textContent='验证中...';try{var tr=await fetch('https://api.github.com/user',{headers:{'Authorization':'Bearer '+t}});if(!tr.ok)throw new Error('Token无效');currentToken=t;isEditMode=true;document.body.classList.add('edit-mode');document.getElementById('fabGroup').style.display='flex';document.getElementById('saveBtn').style.display='flex';renderGroups();renderCarousel();m.remove();alert('编辑模式已启用！点击右上角保存并退出');}catch(e){alert('Token验证失败：'+e.message);btn.disabled=false;btn.textContent='验证';}};m.querySelector('#cancelBtn').onclick=function(){m.remove();};m.onclick=function(e){if(e.target===m)m.remove();};}
 
@@ -587,6 +552,8 @@
             initUpdateDevTrigger();
             return;
         }
+        // iOS/PC不弹下载提示
+        if (isNonAndroid) return;
         tryOpenApp();
         setTimeout(function() { if (!document.hidden) { document.getElementById('downloadTopBar').style.display = 'flex'; document.getElementById('appDownloadModal').classList.add('show'); } }, 2000);
     }
