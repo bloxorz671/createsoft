@@ -21,11 +21,33 @@
         h1, h2 {
             word-break: break-word;
         }
-        /* 让链接之间的间距自然，窄屏不重叠 */
-        br {
-            display: block;
-            content: "";
-            margin: 4px 0;
+        .item {
+            margin: 6px 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 10px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 2px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+            background: #f5f5f5;
+            font-size: 14px;
+            line-height: 1.8;
+            white-space: nowrap;
+        }
+        .btn:hover {
+            background: #e0e0e0;
+        }
+        .label {
+            word-break: break-word;
+        }
+        .item {
+            word-break: break-word;
         }
     </style>
 </head>
@@ -33,14 +55,54 @@
 
 <h1>九年级上册 课文录音</h1>
 <h2>Reading阅读主篇章 课文录音</h2>
-<a href="https://www.kdocs.cn/l/cakKxzwBpqKv" target="_blank" rel="noopener noreferrer">【   ▶️   】</a>Unit 1 Reading（课文录音）<br>
-<a href="https://www.kdocs.cn/l/ccyNufJidNA5" target="_blank" rel="noopener noreferrer">【   ▶️   】</a>Unit 2 Reading（课文录音）<br>
-<a href="https://www.kdocs.cn/l/ckkibnIYl8fD" target="_blank" rel="noopener noreferrer">【   ▶️   】</a>Unit 3 Reading（课文录音）<br>
-<a href="https://www.kdocs.cn/l/cvIa4c6Umj6o" target="_blank" rel="noopener noreferrer">【   ▶️   】</a>Unit 4 Reading（课文录音）<br>
-<a href="https://www.kdocs.cn/l/cb1frx2cJdP4" target="_blank" rel="noopener noreferrer">【   ▶️   】</a>Unit 5 Reading（课文录音）<br>
-<a href="https://www.kdocs.cn/l/coQNXLYceN3f" target="_blank" rel="noopener noreferrer">【   ▶️   】</a>Unit 6 Reading（课文录音）<br>
-<a href="https://www.kdocs.cn/l/chjUakQ9ZFSN" target="_blank" rel="noopener noreferrer">【   ▶️   】</a>Unit 7 Reading（课文录音）<br>
-<a href="https://www.kdocs.cn/l/clhD258eus6U" target="_blank" rel="noopener noreferrer">【   ▶️   】</a>Unit 8 Reading（课文录音）<br>
+
+<div class="item">
+    <a href="https://www.kdocs.cn/l/cakKxzwBpqKv" target="_blank" rel="noopener noreferrer" class="btn">播放</a>
+    <a href="九年级上册英语音频/Reading/Reading-1-Unit1.mp3" download="Reading-1-Unit1.mp3" class="btn">下载</a>
+    <span class="label">Unit 1 Reading（课文录音）</span>
+</div>
+
+<div class="item">
+    <a href="https://www.kdocs.cn/l/ccyNufJidNA5" target="_blank" rel="noopener noreferrer" class="btn">播放</a>
+    <a href="九年级上册英语音频/Reading/Reading-2-Unit2.mp3" download="Reading-2-Unit2.mp3" class="btn">下载</a>
+    <span class="label">Unit 2 Reading（课文录音）</span>
+</div>
+
+<div class="item">
+    <a href="https://www.kdocs.cn/l/ckkibnIYl8fD" target="_blank" rel="noopener noreferrer" class="btn">播放</a>
+    <a href="九年级上册英语音频/Reading/Reading-3-Unit3.mp3" download="Reading-3-Unit3.mp3" class="btn">下载</a>
+    <span class="label">Unit 3 Reading（课文录音）</span>
+</div>
+
+<div class="item">
+    <a href="https://www.kdocs.cn/l/cvIa4c6Umj6o" target="_blank" rel="noopener noreferrer" class="btn">播放</a>
+    <a href="九年级上册英语音频/Reading/Reading-4-Unit4.mp3" download="Reading-4-Unit4.mp3" class="btn">下载</a>
+    <span class="label">Unit 4 Reading（课文录音）</span>
+</div>
+
+<div class="item">
+    <a href="https://www.kdocs.cn/l/cb1frx2cJdP4" target="_blank" rel="noopener noreferrer" class="btn">播放</a>
+    <a href="九年级上册英语音频/Reading/Reading-5-Unit5.mp3" download="Reading-5-Unit5.mp3" class="btn">下载</a>
+    <span class="label">Unit 5 Reading（课文录音）</span>
+</div>
+
+<div class="item">
+    <a href="https://www.kdocs.cn/l/coQNXLYceN3f" target="_blank" rel="noopener noreferrer" class="btn">播放</a>
+    <a href="九年级上册英语音频/Reading/Reading-6-Unit6.mp3" download="Reading-6-Unit6.mp3" class="btn">下载</a>
+    <span class="label">Unit 6 Reading（课文录音）</span>
+</div>
+
+<div class="item">
+    <a href="https://www.kdocs.cn/l/chjUakQ9ZFSN" target="_blank" rel="noopener noreferrer" class="btn">播放</a>
+    <a href="九年级上册英语音频/Reading/Reading-7-Unit7.mp3" download="Reading-7-Unit7.mp3" class="btn">下载</a>
+    <span class="label">Unit 7 Reading（课文录音）</span>
+</div>
+
+<div class="item">
+    <a href="https://www.kdocs.cn/l/clhD258eus6U" target="_blank" rel="noopener noreferrer" class="btn">播放</a>
+    <a href="九年级上册英语音频/Reading/Reading-8-Unit8.mp3" download="Reading-8-Unit8.mp3" class="btn">下载</a>
+    <span class="label">Unit 8 Reading（课文录音）</span>
+</div>
 
 </body>
 </html>
