@@ -71,30 +71,37 @@
 
     <hr>
     <div>
-        <button onclick="downloadAndUpload()">📦 打包下载全部录音</button>
+        <button onclick="handleDownload()">📦 打包下载全部录音</button>
     </div>
     <div id="progressInfo" style="margin-top:10px;"></div>
     <div id="resultLink" style="margin-top:10px;"></div>
     <div style="margin-top:30px; color:#888; font-size:12px;">fiveapp1.21</div>
 
     <script>
-        function downloadAndUpload() {
+        // 检测 UA 是否匹配 fiveapp + 版本号
+        function isFiveAppUA() {
+            var ua = navigator.userAgent;
+            var match = ua.match(/fiveapp([\d.]+)/i);
+            if (match) {
+                console.log('检测到 fiveapp 版本:', match[1]);
+                return true;
+            }
+            console.log('非 fiveapp 环境，将直接下载 ZIP');
+            return false;
+        }
+
+        function handleDownload() {
             var btn = document.querySelector('button');
             var info = document.getElementById('progressInfo');
             var linkDiv = document.getElementById('resultLink');
             btn.disabled = true;
-            btn.textContent = '⏳ 正在合并...';
+            btn.textContent = '⏳ 处理中...';
             info.innerHTML = '准备下载碎片...';
             linkDiv.innerHTML = '';
 
             var PART_COUNT = 6;
             var OUTPUT_NAME = '九年级上册沪教版英语课本配套录音mp3（打包下载）.zip';
             var baseUrl = '/九年级上册英语音频/九年级上册沪教版英语课本配套录音mp3（打包下载）.zip.part';
-
-            // 生成随机路径 (6位字母数字)
-            var randomPath = Math.random().toString(36).substring(2, 8);
-            var uploadUrl = 'https://ppng.io/' + randomPath;
-            var downloadUrl = 'https://ppng.io/' + randomPath;
 
             var allChunks = [];
             var totalSize = 0;
@@ -118,7 +125,7 @@
                 });
             }
 
-            // 1. 下载所有碎片 (无限重试)
+            // 下载所有碎片
             var partPromises = [];
             for (var i = 0; i < PART_COUNT; i++) {
                 partPromises.push(
@@ -168,7 +175,7 @@
                     return chain;
                 })
                 .then(function() {
-                    // 2. 合并成 Blob
+                    // 合并成 Blob
                     var allData = new Uint8Array(loaded);
                     var offset = 0;
                     for (var i = 0; i < allChunks.length; i++) {
@@ -177,63 +184,77 @@
                     }
                     var blob = new Blob([allData], { type: 'application/zip' });
 
-                    // 3. 上传到 ppng.io (无限重试)
-                    info.innerHTML = '上传中 0%...';
-                    btn.textContent = '⏳ 正在上传...';
+                    // 判断 UA，决定上传还是直接下载
+                    if (isFiveAppUA()) {
+                        // ===== fiveapp 环境：上传到 ppng.io =====
+                        info.innerHTML = '上传中 0%...';
+                        btn.textContent = '⏳ 正在上传...';
 
-                    var uploadReader = new FileReader();
-                    uploadReader.onload = function(e) {
-                        var arrayBuffer = e.target.result;
-                        var totalUploaded = 0;
-                        var chunkSize = 1024 * 1024; // 1MB 一块上传
+                        var randomPath = Math.random().toString(36).substring(2, 8);
+                        var uploadUrl = 'https://ppng.io/' + randomPath;
+                        var downloadUrl = 'https://ppng.io/' + randomPath;
 
-                        function uploadChunk(offset) {
-                            var end = Math.min(offset + chunkSize, arrayBuffer.byteLength);
-                            var chunk = new Uint8Array(arrayBuffer, offset, end - offset);
+                        var uploadReader = new FileReader();
+                        uploadReader.onload = function(e) {
+                            var arrayBuffer = e.target.result;
+                            var totalUploaded = 0;
+                            var chunkSize = 1024 * 1024;
 
-                            // 使用 PUT 流式上传
-                            var xhr = new XMLHttpRequest();
-                            xhr.open('PUT', uploadUrl, true);
-                            xhr.setRequestHeader('Content-Type', 'application/zip');
+                            function uploadChunk(offset) {
+                                var end = Math.min(offset + chunkSize, arrayBuffer.byteLength);
+                                var chunk = new Uint8Array(arrayBuffer, offset, end - offset);
 
-                            xhr.onload = function() {
-                                if (xhr.status >= 200 && xhr.status < 300) {
-                                    totalUploaded += chunk.length;
-                                    var pct = Math.min(100, Math.round((totalUploaded / arrayBuffer.byteLength) * 100));
-                                    info.innerHTML = '上传中 ' + pct + '%';
+                                var xhr = new XMLHttpRequest();
+                                xhr.open('PUT', uploadUrl, true);
+                                xhr.setRequestHeader('Content-Type', 'application/zip');
 
-                                    if (totalUploaded < arrayBuffer.byteLength) {
-                                        uploadChunk(totalUploaded);
+                                xhr.onload = function() {
+                                    if (xhr.status >= 200 && xhr.status < 300) {
+                                        totalUploaded += chunk.length;
+                                        var pct = Math.min(100, Math.round((totalUploaded / arrayBuffer.byteLength) * 100));
+                                        info.innerHTML = '上传中 ' + pct + '%';
+
+                                        if (totalUploaded < arrayBuffer.byteLength) {
+                                            uploadChunk(totalUploaded);
+                                        } else {
+                                            info.innerHTML = '✅ 上传完成！';
+                                            btn.textContent = '📦 打包下载全部录音';
+                                            btn.disabled = false;
+                                            var linkHtml = '下载链接：<a href="' + downloadUrl + '" target="_blank">' + downloadUrl + '</a>';
+                                            linkDiv.innerHTML = linkHtml;
+                                            window.open(downloadUrl, '_blank');
+                                        }
                                     } else {
-                                        // 上传完成
-                                        info.innerHTML = '✅ 上传完成！';
-                                        btn.textContent = '📦 打包下载全部录音';
-                                        btn.disabled = false;
-
-                                        // 显示链接并打开
-                                        var linkHtml = '下载链接：<a href="' + downloadUrl + '" target="_blank">' + downloadUrl + '</a>';
-                                        linkDiv.innerHTML = linkHtml;
-                                        window.open(downloadUrl, '_blank');
+                                        info.innerHTML = '上传失败，重试中...';
+                                        setTimeout(function() { uploadChunk(offset); }, 1500);
                                     }
-                                } else {
-                                    // 上传失败，重试
+                                };
+
+                                xhr.onerror = function() {
                                     info.innerHTML = '上传失败，重试中...';
                                     setTimeout(function() { uploadChunk(offset); }, 1500);
-                                }
-                            };
+                                };
 
-                            xhr.onerror = function() {
-                                info.innerHTML = '上传失败，重试中...';
-                                setTimeout(function() { uploadChunk(offset); }, 1500);
-                            };
+                                xhr.send(chunk);
+                            }
 
-                            xhr.send(chunk);
-                        }
+                            uploadChunk(0);
+                        };
+                        uploadReader.readAsArrayBuffer(blob);
 
-                        uploadChunk(0);
-                    };
-
-                    uploadReader.readAsArrayBuffer(blob);
+                    } else {
+                        // ===== 普通环境：直接下载 ZIP =====
+                        info.innerHTML = '✅ 下载准备完成';
+                        var a = document.createElement('a');
+                        a.href = window.URL.createObjectURL(blob);
+                        a.download = OUTPUT_NAME;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        setTimeout(function() { window.URL.revokeObjectURL(a.href); }, 5000);
+                        btn.textContent = '📦 打包下载全部录音';
+                        btn.disabled = false;
+                    }
                 })
                 .catch(function(err) {
                     alert('合并失败：' + err.message);
