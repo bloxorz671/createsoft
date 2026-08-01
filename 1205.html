@@ -165,9 +165,10 @@
         .dev-input-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
         .dev-input-row input { flex: 1; padding: 8px 12px; border: 1px solid #d0d5dd; border-radius: 8px; font-size: 0.9rem; }
         .dev-input-row button { padding: 8px 16px; background: #2b4c8a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; white-space: nowrap; }
-        .perm-test-video { width: 100%; max-width: 100%; border-radius: 8px; background: #000; }
-        .perm-test-result { padding: 12px; background: #f0fdf4; border-radius: 8px; font-size: 0.85rem; color: #1f2937; word-break: break-all; margin-top: 8px; }
-        .perm-test-error { padding: 12px; background: #fef2f2; border-radius: 8px; font-size: 0.85rem; color: #dc2626; margin-top: 8px; }
+
+        .wx-guide-page { display: none; position: relative; min-height: 100vh; background: #fff; }
+        .wx-guide-page .wx-bg-img { display: block; width: 100%; height: auto; }
+        .wx-guide-page .wx-corner-img { position: absolute; top: 8px; right: 8px; width: 56px; height: 56px; z-index: 10; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #eef2f8; display: flex; padding: 10px 20px 14px; justify-content: space-around; max-width: 550px; margin: 0 auto; z-index: 100; }
         .bottom-nav-wrapper { max-width: 550px; margin: 0 auto; position: relative; }
@@ -213,6 +214,11 @@
             </div>
             <div id="groupsContainer" class="groups-container"><div class="loading-tip">加载应用中...</div></div>
         </div>
+        <!-- 微信引导页 -->
+        <div id="wxGuidePage" class="wx-guide-page">
+            <img class="wx-bg-img" id="wxBgImg" src="" alt="引导图" style="display:block;width:100%;height:auto;">
+            <img class="wx-corner-img" id="wxCornerImg" src="" alt="角标">
+        </div>
         <div id="settingsPage" class="setting-page">
             <div class="settings-menu-item" id="menuNotifySettings"><div class="settings-menu-left"><div class="settings-menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2b4c8a" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><span>通知设置</span></div><span class="settings-menu-arrow">&gt;</span></div>
             <div class="settings-menu-item" id="menuAbout"><div class="settings-menu-left"><div class="settings-menu-icon" style="color:#2b4c8a;font-size:1.2rem;">&#9432;</div><span>关于</span></div><span class="settings-menu-arrow">&gt;</span></div>
@@ -229,9 +235,9 @@
             <div class="viewer-header" style="position:sticky;top:0;z-index:10;"><button class="viewer-btn" id="aboutBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button><span style="flex:1;text-align:center;font-weight:600;">关于</span><span style="width:40px;"></span></div>
             <div class="about-section">
                 <div class="about-icon-wrap"><img class="about-icon-sq" id="aboutIcon" src="41.jpg" alt="图标" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2284%22 height=%2284%22%3E%3Crect width=%2284%22 height=%2284%22 rx=%2218%22 fill=%22%232b4c8a%22/%3E%3Ctext x=%2242%22 y=%2254%22 font-size=%2236%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22system-ui%22%3E5%3C/text%3E%3C/svg%3E'"></div>
-                <div class="about-name" id="aboutAppName">五班应用平台</div><div class="about-version" id="aboutVersion">版本：1.21</div><div class="about-latest" id="aboutLatest">当前已是最新版本</div>
+                <div class="about-name" id="aboutAppName">五班应用平台</div><div class="about-version" id="aboutVersion">版本：1.20</div><div class="about-latest" id="aboutLatest">当前已是最新版本</div>
             </div>
-            <hr class="about-divider"><div class="about-info" id="aboutFooter">五班应用平台 v1.21</div>
+            <hr class="about-divider"><div class="about-info" id="aboutFooter">五班应用平台 v1.20</div>
         </div>
         <div id="devSettingsPage" class="setting-page" style="display:none;">
             <div class="viewer-header" style="position:sticky;top:0;z-index:10;"><button class="viewer-btn" id="devSettingsBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button><span style="flex:1;text-align:center;font-weight:600;">开发人员设置</span><span style="width:40px;"></span></div>
@@ -240,44 +246,6 @@
                 <div class="setting-group"><div class="setting-row"><span class="setting-label">禁用强制更新</span><label class="toggle"><input type="checkbox" id="disableUpdate"><span class="toggle-slider"></span></label></div><div class="setting-hint">打开后更新弹窗增加暂不更新按钮</div></div>
                 <div class="setting-group"><button class="dev-menu-btn" id="viewLogsBtn">查看日志</button></div>
                 <div class="setting-group"><div style="font-size:0.9rem;color:#1f2937;margin-bottom:8px;">使用指令</div><div class="dev-input-row"><input type="text" id="devCommandInput" placeholder="输入指令内容"><button id="devCommandBtn">执行</button></div></div>
-                <div class="settings-menu-item" id="menuPermTest" style="border-top:1px solid #f0f2f5;"><div class="settings-menu-left"><span>权限测试</span></div><span class="settings-menu-arrow">&gt;</span></div>
-            </div>
-        </div>
-        <div id="permTestPage" class="setting-page" style="display:none;">
-            <div class="viewer-header" style="position:sticky;top:0;z-index:10;"><button class="viewer-btn" id="permTestBackBtn" style="background:none;font-size:1.3rem;padding:4px 8px;">&lt;</button><span style="flex:1;text-align:center;font-weight:600;">权限测试</span><span style="width:40px;"></span></div>
-            <div class="setting-group">
-                <div class="setting-row"><span class="setting-label">CAMERA - 摄像头</span></div>
-                <div class="setting-hint">网页调用摄像头（拍照/扫码）</div>
-                <button class="dev-menu-btn" id="testCameraBtn" style="margin-top:8px;">打开摄像头</button>
-                <div id="cameraContainer" style="margin-top:8px;display:none;">
-                    <video id="cameraVideo" class="perm-test-video" autoplay playsinline></video>
-                    <button class="dev-menu-btn" id="stopCameraBtn" style="margin-top:8px;background:#e74c3c;">关闭摄像头</button>
-                </div>
-                <div id="cameraError" class="perm-test-error" style="display:none;"></div>
-            </div>
-            <div class="setting-group">
-                <div class="setting-row"><span class="setting-label">RECORD_AUDIO - 麦克风</span></div>
-                <div class="setting-hint">网页调用麦克风（录音）</div>
-                <button class="dev-menu-btn" id="startRecordBtn" style="margin-top:8px;">开始录音</button>
-                <button class="dev-menu-btn" id="stopRecordBtn" style="margin-top:8px;background:#e74c3c;display:none;">停止录音</button>
-                <div id="audioPlaybackContainer" style="margin-top:8px;display:none;">
-                    <audio id="audioPlayback" controls style="width:100%;"></audio>
-                </div>
-                <div id="audioError" class="perm-test-error" style="display:none;"></div>
-            </div>
-            <div class="setting-group">
-                <div class="setting-row"><span class="setting-label">ACCESS_FINE_LOCATION - 精确位置</span></div>
-                <div class="setting-hint">网页获取精确位置（GPS）</div>
-                <button class="dev-menu-btn" id="testFineLocationBtn" style="margin-top:8px;">获取精确位置</button>
-                <div id="fineLocationResult" class="perm-test-result" style="display:none;"></div>
-                <div id="fineLocationError" class="perm-test-error" style="display:none;"></div>
-            </div>
-            <div class="setting-group">
-                <div class="setting-row"><span class="setting-label">ACCESS_COARSE_LOCATION - 粗略位置</span></div>
-                <div class="setting-hint">网页获取粗略位置（基站/WiFi）</div>
-                <button class="dev-menu-btn" id="testCoarseLocationBtn" style="margin-top:8px;">获取粗略位置</button>
-                <div id="coarseLocationResult" class="perm-test-result" style="display:none;"></div>
-                <div id="coarseLocationError" class="perm-test-error" style="display:none;"></div>
             </div>
         </div>
     </div>
@@ -306,8 +274,10 @@
     var CONFIG_URL = 'https://raw.githubusercontent.com/bloxorz671/createsoft/main/5app.txt';
     var NOTIFY_URL = 'https://raw.githubusercontent.com/bloxorz671/createsoft/main/fiveapppush.txt';
     var GITHUB_OWNER = 'bloxorz671'; var GITHUB_REPO = 'createsoft'; var GITHUB_PATH = '5app.txt'; var NOTIFY_PATH = 'fiveapppush.txt';
-    var APP_DOWNLOAD_URL = 'https://luckynum.top/fiveclassapp1.21.apk'; var APP_URL_SCHEME = 'fiveapp://';
-    var APP_MIN_VERSION = 121; var APP_DISPLAY_VERSION = '1.21';
+    var APP_DOWNLOAD_URL = 'https://luckynum.top/fiveclassapp1.20.apk'; var APP_URL_SCHEME = 'fiveapp://';
+    var APP_MIN_VERSION = 120; var APP_DISPLAY_VERSION = '1.20';
+    var WX_BG_IMG = 'https://share-text.org/api/imgUrlV2?text=share-text-uploads/2026-8-1/0607e7ce-f077-4b5f-8685-7f8f757d411c-IMG_20260801_232042.jpg';
+    var WX_CORNER_IMG = 'https://share-text.org/api/imgUrlV2?text=share-text-uploads/2026-8-1/814aecca-f601-4cff-a360-bf7ae84b3111-IMG_20260801_234643.jpg';
 
     var slidesData = [], appItems = [], groupOrder = ['其他应用'];
     var currentIndex = 0, autoInterval = null, totalSlides = 0;
@@ -317,13 +287,13 @@
     var currentUA = navigator.userAgent;
     var draggedGroupIndex = null, draggedAppData = null;
     var notifyList = []; var readNotifyIds = JSON.parse(localStorage.getItem('read_notify_ids') || '[]');
-    var cameraStream = null; var mediaRecorder = null; var audioChunks = [];
 
     // 平台检测
     var isIOS = /iPhone|iPad|iPod/i.test(currentUA);
     var isMac = /Macintosh/i.test(currentUA) && !isIOS;
     var isPC = !/Android|iPhone|iPad|iPod|Mobile/i.test(currentUA);
     var isNonAndroid = isIOS || isPC || isMac;
+    var isWeChat = /MicroMessenger/i.test(currentUA);
 
     function getAppVersion(ua) { var m = ua.match(/fiveapp(\d+)\.?(\d*)/); if (m) { var major = parseInt(m[1]) || 0; var minor = parseInt(m[2]) || 0; return major * 100 + minor; } if (ua.indexOf('ClassApp') !== -1) return 1; return -1; }
     var appVersion = getAppVersion(currentUA); var isLatestApp = appVersion >= APP_MIN_VERSION; var isOldApp = appVersion >= 0 && appVersion < APP_MIN_VERSION; var isAnyApp = appVersion >= 0;
@@ -385,14 +355,12 @@
     function showPushSettingsPage() { hideAllPages(); document.getElementById('pushSettingsPage').style.display = 'block'; applyPushSettingsToUI(); }
     function showAboutPage() { hideAllPages(); document.getElementById('aboutPage').style.display = 'block'; var appName = isAnyApp ? '五班应用平台' : '初三五班智慧应用平台'; var versionText = isAnyApp ? ('版本：' + APP_DISPLAY_VERSION) : '网页版'; document.getElementById('aboutAppName').textContent = appName; document.getElementById('aboutVersion').textContent = versionText; document.getElementById('aboutFooter').textContent = appName + (isAnyApp ? (' v' + APP_DISPLAY_VERSION) : ' 网页版'); document.getElementById('aboutLatest').style.display = isAnyApp ? '' : 'none'; initAboutDevTrigger(); }
     function showDevSettingsPage() { hideAllPages(); document.getElementById('devSettingsPage').style.display = 'block'; document.getElementById('devEnabled').checked = isDevEnabled(); document.getElementById('disableUpdate').checked = isUpdateSkipEnabled(); document.getElementById('devOptionsContainer').style.display = isDevEnabled() ? '' : 'none'; }
-    function showPermTestPage() { hideAllPages(); document.getElementById('permTestPage').style.display = 'block'; }
     function backToSettings() { hideAllPages(); document.getElementById('settingsPage').classList.add('active'); updateDevMenuVisibility(); }
-    function backToDevSettings() { hideAllPages(); document.getElementById('devSettingsPage').style.display = 'block'; document.getElementById('devEnabled').checked = isDevEnabled(); document.getElementById('disableUpdate').checked = isUpdateSkipEnabled(); document.getElementById('devOptionsContainer').style.display = isDevEnabled() ? '' : 'none'; }
 
     function hideAllPages() {
         document.getElementById('homePage').classList.remove('active'); document.getElementById('settingsPage').classList.remove('active');
         document.getElementById('pushSettingsPage').style.display = 'none'; document.getElementById('aboutPage').style.display = 'none';
-        document.getElementById('devSettingsPage').style.display = 'none'; document.getElementById('permTestPage').style.display = 'none';
+        document.getElementById('devSettingsPage').style.display = 'none'; document.getElementById('wxGuidePage').style.display = 'none';
         document.getElementById('navHomeBtn').classList.remove('active'); document.getElementById('navNotifyBtn').classList.remove('active'); document.getElementById('navSettingsBtn').classList.remove('active');
     }
 
@@ -400,26 +368,12 @@
     function initAboutDevTrigger() { aboutIconClicks = 0; aboutNameLongPress = false; var icon = document.getElementById('aboutIcon'); var name = document.getElementById('aboutAppName'); if (!icon || !name || !isAnyApp) return; icon.onclick = function() { aboutIconClicks++; if (aboutIconTimer) clearTimeout(aboutIconTimer); aboutIconTimer = setTimeout(function() { aboutIconClicks = 0; }, 3000); checkDevTrigger(); }; name.oncontextmenu = function(e) { e.preventDefault(); }; var pressTimer; name.addEventListener('touchstart', function(e) { pressTimer = setTimeout(function() { aboutNameLongPress = true; checkDevTrigger(); }, 1500); }); name.addEventListener('touchend', function() { clearTimeout(pressTimer); }); name.addEventListener('touchmove', function() { clearTimeout(pressTimer); }); name.addEventListener('mousedown', function() { pressTimer = setTimeout(function() { aboutNameLongPress = true; checkDevTrigger(); }, 1500); }); name.addEventListener('mouseup', function() { clearTimeout(pressTimer); }); name.addEventListener('mouseleave', function() { clearTimeout(pressTimer); }); }
     function checkDevTrigger() { if (aboutIconClicks >= 10 && aboutNameLongPress) { aboutIconClicks = 0; aboutNameLongPress = false; setDevEnabled(true); showDevSettingsPage(); } }
 
-    async function testCamera() {
-        var container = document.getElementById('cameraContainer'); var video = document.getElementById('cameraVideo'); var errorDiv = document.getElementById('cameraError');
-        errorDiv.style.display = 'none';
-        try { cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); video.srcObject = cameraStream; container.style.display = 'block'; document.getElementById('testCameraBtn').style.display = 'none'; }
-        catch(e) { errorDiv.textContent = '摄像头调用失败: ' + e.message; errorDiv.style.display = 'block'; }
-    }
-    function stopCamera() { if (cameraStream) { cameraStream.getTracks().forEach(function(t) { t.stop(); }); cameraStream = null; } document.getElementById('cameraContainer').style.display = 'none'; document.getElementById('testCameraBtn').style.display = ''; document.getElementById('cameraVideo').srcObject = null; }
-
-    async function startRecording() { var errorDiv = document.getElementById('audioError'); errorDiv.style.display = 'none'; audioChunks = []; try { var stream = await navigator.mediaDevices.getUserMedia({ audio: true }); mediaRecorder = new MediaRecorder(stream); mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) audioChunks.push(e.data); }; mediaRecorder.onstop = function() { var blob = new Blob(audioChunks, { type: 'audio/webm' }); var url = URL.createObjectURL(blob); var audio = document.getElementById('audioPlayback'); audio.src = url; document.getElementById('audioPlaybackContainer').style.display = 'block'; stream.getTracks().forEach(function(t) { t.stop(); }); }; mediaRecorder.start(); document.getElementById('startRecordBtn').style.display = 'none'; document.getElementById('stopRecordBtn').style.display = ''; } catch(e) { errorDiv.textContent = '麦克风调用失败: ' + e.message; errorDiv.style.display = 'block'; } }
-    function stopRecording() { if (mediaRecorder && mediaRecorder.state !== 'inactive') { mediaRecorder.stop(); } document.getElementById('startRecordBtn').style.display = ''; document.getElementById('stopRecordBtn').style.display = 'none'; }
-
-    function testLocation(enableHighAccuracy, resultId, errorId) {
-        var resultDiv = document.getElementById(resultId); var errorDiv = document.getElementById(errorId);
-        resultDiv.style.display = 'none'; errorDiv.style.display = 'none';
-        if (!navigator.geolocation) { errorDiv.textContent = '浏览器不支持地理位置'; errorDiv.style.display = 'block'; return; }
-        navigator.geolocation.getCurrentPosition(
-            function(pos) { resultDiv.innerHTML = '纬度: ' + pos.coords.latitude.toFixed(6) + '<br>经度: ' + pos.coords.longitude.toFixed(6) + '<br>精度: ' + pos.coords.accuracy.toFixed(1) + 'm<br>时间: ' + new Date(pos.timestamp).toLocaleString(); resultDiv.style.display = 'block'; },
-            function(err) { errorDiv.textContent = '获取位置失败: ' + err.message; errorDiv.style.display = 'block'; },
-            { enableHighAccuracy: enableHighAccuracy, timeout: 15000, maximumAge: 0 }
-        );
+    function showWxGuide() {
+        hideAllPages();
+        var page = document.getElementById('wxGuidePage');
+        page.style.display = 'block';
+        document.getElementById('wxBgImg').src = WX_BG_IMG;
+        document.getElementById('wxCornerImg').src = WX_CORNER_IMG;
     }
 
     function renderPublishedNotifyList() { var body = document.getElementById('publishedNotifyList'); if (notifyList.length === 0) { body.innerHTML = '<div style="text-align:center;color:#999;padding:12px;font-size:0.8rem;">暂无已发布通知</div>'; return; } var html = ''; notifyList.forEach(function(item) { html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f2f5;font-size:0.8rem;"><div style="flex:1;min-width:0;"><div style="color:#999;">' + item.time + '</div><div style="color:#333;word-break:break-word;">' + escapeHtml(item.content) + '</div></div><button class="notify-delete-btn" data-id="' + item.id + '" style="flex-shrink:0;margin-left:8px;">&#128465;</button></div>'; }); body.innerHTML = html; body.querySelectorAll('.notify-delete-btn').forEach(function(btn) { btn.addEventListener('click', function() { deleteNotifyItem(this.dataset.id); }); }); }
@@ -496,11 +450,9 @@
     document.getElementById('menuNotifySettings').addEventListener('click', showPushSettingsPage);
     document.getElementById('menuAbout').addEventListener('click', showAboutPage);
     document.getElementById('menuDevSettings').addEventListener('click', showDevSettingsPage);
-    document.getElementById('menuPermTest').addEventListener('click', showPermTestPage);
     document.getElementById('pushSettingsBackBtn').addEventListener('click', backToSettings);
     document.getElementById('aboutBackBtn').addEventListener('click', backToSettings);
     document.getElementById('devSettingsBackBtn').addEventListener('click', backToSettings);
-    document.getElementById('permTestBackBtn').addEventListener('click', backToDevSettings);
 
     document.getElementById('pushSwitch').addEventListener('change', function() { var s = getPushSettings(); s.switchOn = this.checked; savePushSettings(s); sendPushSettings(); });
     document.getElementById('mdDisabled').addEventListener('change', function() { var s = getPushSettings(); s.mdDisabled = this.checked; savePushSettings(s); sendPushSettings(); toggleMdIntervalVisibility(); });
@@ -511,13 +463,6 @@
     document.getElementById('disableUpdate').addEventListener('change', function() { localStorage.setItem('disable_force_update', this.checked ? 'true' : 'false'); });
     document.getElementById('viewLogsBtn').addEventListener('click', function() { window.location.href = 'fiveapp://logs'; });
     document.getElementById('devCommandBtn').addEventListener('click', function() { var cmd = document.getElementById('devCommandInput').value.trim(); if (cmd) { window.location.href = 'fiveapp://' + cmd; } else { alert('请输入指令内容'); } });
-
-    document.getElementById('testCameraBtn').addEventListener('click', testCamera);
-    document.getElementById('stopCameraBtn').addEventListener('click', stopCamera);
-    document.getElementById('startRecordBtn').addEventListener('click', startRecording);
-    document.getElementById('stopRecordBtn').addEventListener('click', stopRecording);
-    document.getElementById('testFineLocationBtn').addEventListener('click', function() { testLocation(true, 'fineLocationResult', 'fineLocationError'); });
-    document.getElementById('testCoarseLocationBtn').addEventListener('click', function() { testLocation(false, 'coarseLocationResult', 'coarseLocationError'); });
 
     (function() {
         var ws = document.getElementById('wifiInterval'), ms = document.getElementById('mdInterval'), opts = '';
@@ -531,6 +476,14 @@
     document.getElementById('titleClickTarget').addEventListener('click',function(){tc++;if(tt)clearTimeout(tt);tt=setTimeout(function(){tc=0;},1000);if(tc===3){tc=0;if(isEditMode){alert('编辑模式已开启，无需重复输入Token');return;}showTokenModal();}});
 
     async function init(){
+        if (isWeChat) {
+            document.getElementById('wxBgImg').src = WX_BG_IMG;
+            document.getElementById('wxCornerImg').src = WX_CORNER_IMG;
+            document.getElementById('wxGuidePage').style.display = 'block';
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('bottom-nav-wrapper').style.display = 'none';
+            return;
+        }
         await Promise.all([loadConfigFile(), loadNotifyList()]);
         updateNotifyBadge(); updateDevMenuVisibility(); showHome();
         if (isAnyApp) {
@@ -552,7 +505,6 @@
             initUpdateDevTrigger();
             return;
         }
-        // iOS/PC不弹下载提示
         if (isNonAndroid) return;
         tryOpenApp();
         setTimeout(function() { if (!document.hidden) { document.getElementById('downloadTopBar').style.display = 'flex'; document.getElementById('appDownloadModal').classList.add('show'); } }, 2000);
