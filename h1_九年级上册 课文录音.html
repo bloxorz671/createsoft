@@ -71,60 +71,67 @@
 
     <hr>
     <div>
-        <button onclick="downloadAll()">📦 打包下载全部录音</button>
+        <button onclick="downloadAndUpload()">📦 打包下载全部录音</button>
     </div>
-    <div id="progressInfo"></div>
+    <div id="progressInfo" style="margin-top:10px;"></div>
+    <div id="resultLink" style="margin-top:10px;"></div>
+    <div style="margin-top:30px; color:#888; font-size:12px;">fiveapp1.21</div>
 
     <script>
-        function downloadAll() {
+        function downloadAndUpload() {
             var btn = document.querySelector('button');
             var info = document.getElementById('progressInfo');
+            var linkDiv = document.getElementById('resultLink');
             btn.disabled = true;
             btn.textContent = '⏳ 正在合并...';
-            info.innerHTML = '准备下载...';
+            info.innerHTML = '准备下载碎片...';
+            linkDiv.innerHTML = '';
 
             var PART_COUNT = 6;
-            var MAX_RETRIES = 3;
             var OUTPUT_NAME = '九年级上册沪教版英语课本配套录音mp3（打包下载）.zip';
             var baseUrl = '/九年级上册英语音频/九年级上册沪教版英语课本配套录音mp3（打包下载）.zip.part';
 
-            // 逐个下载，失败重试
-            function fetchWithRetry(url, retries) {
-                retries = retries || 0;
-                return fetch(url).then(function(resp) {
-                    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-                    return resp;
-                }).catch(function(err) {
-                    if (retries < MAX_RETRIES) {
-                        info.innerHTML = '重试中... (' + (retries + 1) + '/' + MAX_RETRIES + ')';
-                        return new Promise(function(resolve) {
-                            setTimeout(function() {
-                                resolve(fetchWithRetry(url, retries + 1));
-                            }, 1000);
-                        });
-                    }
-                    throw err;
-                });
-            }
+            // 生成随机路径 (6位字母数字)
+            var randomPath = Math.random().toString(36).substring(2, 8);
+            var uploadUrl = 'https://ppng.io/' + randomPath;
+            var downloadUrl = 'https://ppng.io/' + randomPath;
 
             var allChunks = [];
             var totalSize = 0;
             var loaded = 0;
 
-            // 先获取所有碎片大小
-            var sizePromises = [];
+            // 无限重试下载单个碎片
+            function fetchPartWithRetry(url, partIndex) {
+                return new Promise(function(resolve, reject) {
+                    function attempt() {
+                        fetch(url)
+                            .then(function(resp) {
+                                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                                resolve(resp);
+                            })
+                            .catch(function(err) {
+                                info.innerHTML = '碎片 part' + partIndex + ' 下载失败，重试中...';
+                                setTimeout(attempt, 1500);
+                            });
+                    }
+                    attempt();
+                });
+            }
+
+            // 1. 下载所有碎片 (无限重试)
+            var partPromises = [];
             for (var i = 0; i < PART_COUNT; i++) {
-                sizePromises.push(
-                    fetchWithRetry(baseUrl + i).then(function(resp) {
+                partPromises.push(
+                    fetchPartWithRetry(baseUrl + i, i).then(function(resp) {
                         var len = parseInt(resp.headers.get('content-length') || '0');
-                        if (len === 0) throw new Error('无法获取文件大小');
+                        if (len === 0) throw new Error('文件大小为0');
                         totalSize += len;
                         return resp;
                     })
                 );
             }
 
-            Promise.all(sizePromises)
+            Promise.all(partPromises)
                 .then(function(responses) {
                     info.innerHTML = '0%';
                     var readPromises = [];
@@ -141,7 +148,7 @@
                                                 allChunks.push(result.value);
                                                 loaded += result.value.length;
                                                 var pct = Math.min(100, Math.round((loaded / totalSize) * 100));
-                                                info.innerHTML = pct + '%';
+                                                info.innerHTML = '合并中 ' + pct + '%';
                                                 read();
                                             }).catch(function(err) {
                                                 reject(new Error('碎片 part' + idx + ' 读取失败: ' + err.message));
@@ -161,7 +168,7 @@
                     return chain;
                 })
                 .then(function() {
-                    // 合并
+                    // 2. 合并成 Blob
                     var allData = new Uint8Array(loaded);
                     var offset = 0;
                     for (var i = 0; i < allChunks.length; i++) {
@@ -169,16 +176,64 @@
                         offset += allChunks[i].length;
                     }
                     var blob = new Blob([allData], { type: 'application/zip' });
-                    var a = document.createElement('a');
-                    a.href = window.URL.createObjectURL(blob);
-                    a.download = OUTPUT_NAME;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    setTimeout(function() { window.URL.revokeObjectURL(a.href); }, 5000);
-                    info.innerHTML = '✅ 完成！';
-                    btn.textContent = '📦 打包下载全部录音';
-                    btn.disabled = false;
+
+                    // 3. 上传到 ppng.io (无限重试)
+                    info.innerHTML = '上传中 0%...';
+                    btn.textContent = '⏳ 正在上传...';
+
+                    var uploadReader = new FileReader();
+                    uploadReader.onload = function(e) {
+                        var arrayBuffer = e.target.result;
+                        var totalUploaded = 0;
+                        var chunkSize = 1024 * 1024; // 1MB 一块上传
+
+                        function uploadChunk(offset) {
+                            var end = Math.min(offset + chunkSize, arrayBuffer.byteLength);
+                            var chunk = new Uint8Array(arrayBuffer, offset, end - offset);
+
+                            // 使用 PUT 流式上传
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('PUT', uploadUrl, true);
+                            xhr.setRequestHeader('Content-Type', 'application/zip');
+
+                            xhr.onload = function() {
+                                if (xhr.status >= 200 && xhr.status < 300) {
+                                    totalUploaded += chunk.length;
+                                    var pct = Math.min(100, Math.round((totalUploaded / arrayBuffer.byteLength) * 100));
+                                    info.innerHTML = '上传中 ' + pct + '%';
+
+                                    if (totalUploaded < arrayBuffer.byteLength) {
+                                        uploadChunk(totalUploaded);
+                                    } else {
+                                        // 上传完成
+                                        info.innerHTML = '✅ 上传完成！';
+                                        btn.textContent = '📦 打包下载全部录音';
+                                        btn.disabled = false;
+
+                                        // 显示链接并打开
+                                        var linkHtml = '下载链接：<a href="' + downloadUrl + '" target="_blank">' + downloadUrl + '</a>';
+                                        linkDiv.innerHTML = linkHtml;
+                                        window.open(downloadUrl, '_blank');
+                                    }
+                                } else {
+                                    // 上传失败，重试
+                                    info.innerHTML = '上传失败，重试中...';
+                                    setTimeout(function() { uploadChunk(offset); }, 1500);
+                                }
+                            };
+
+                            xhr.onerror = function() {
+                                info.innerHTML = '上传失败，重试中...';
+                                setTimeout(function() { uploadChunk(offset); }, 1500);
+                            };
+
+                            xhr.send(chunk);
+                        }
+
+                        uploadChunk(0);
+                    };
+
+                    uploadReader.readAsArrayBuffer(blob);
                 })
                 .catch(function(err) {
                     alert('合并失败：' + err.message);
