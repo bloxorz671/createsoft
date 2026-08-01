@@ -81,41 +81,58 @@
             var info = document.getElementById('progressInfo');
             btn.disabled = true;
             btn.textContent = '⏳ 正在合并...';
-            info.innerHTML = '0%';
+            info.innerHTML = '准备下载...';
 
             var PART_COUNT = 6;
+            var MAX_RETRIES = 3;
             var OUTPUT_NAME = '九年级上册沪教版英语课本配套录音mp3（打包下载）.zip';
             var baseUrl = '/九年级上册英语音频/九年级上册沪教版英语课本配套录音mp3（打包下载）.zip.part';
 
-            var fetchPromises = [];
-            for (var i = 0; i < PART_COUNT; i++) {
-                fetchPromises.push(fetch(baseUrl + i));
+            // 逐个下载，失败重试
+            function fetchWithRetry(url, retries) {
+                retries = retries || 0;
+                return fetch(url).then(function(resp) {
+                    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                    return resp;
+                }).catch(function(err) {
+                    if (retries < MAX_RETRIES) {
+                        info.innerHTML = '重试中... (' + (retries + 1) + '/' + MAX_RETRIES + ')';
+                        return new Promise(function(resolve) {
+                            setTimeout(function() {
+                                resolve(fetchWithRetry(url, retries + 1));
+                            }, 1000);
+                        });
+                    }
+                    throw err;
+                });
             }
 
-            Promise.all(fetchPromises)
-                .then(function(responses) {
-                    for (var i = 0; i < responses.length; i++) {
-                        if (!responses[i].ok) {
-                            throw new Error('碎片 part' + i + ' 下载失败');
-                        }
-                    }
+            var allChunks = [];
+            var totalSize = 0;
+            var loaded = 0;
 
-                    var totalSize = 0;
-                    var sizePromises = [];
-                    for (var i = 0; i < responses.length; i++) {
-                        var len = parseInt(responses[i].headers.get('content-length') || '0');
+            // 先获取所有碎片大小
+            var sizePromises = [];
+            for (var i = 0; i < PART_COUNT; i++) {
+                sizePromises.push(
+                    fetchWithRetry(baseUrl + i).then(function(resp) {
+                        var len = parseInt(resp.headers.get('content-length') || '0');
                         if (len === 0) throw new Error('无法获取文件大小');
                         totalSize += len;
-                    }
+                        return resp;
+                    })
+                );
+            }
 
-                    var loaded = 0;
-                    var allChunks = [];
+            Promise.all(sizePromises)
+                .then(function(responses) {
+                    info.innerHTML = '0%';
                     var readPromises = [];
 
                     for (var i = 0; i < responses.length; i++) {
                         var reader = responses[i].body.getReader();
                         readPromises.push(
-                            (function(r) {
+                            (function(r, idx) {
                                 return function() {
                                     return new Promise(function(resolve, reject) {
                                         function read() {
@@ -126,12 +143,14 @@
                                                 var pct = Math.min(100, Math.round((loaded / totalSize) * 100));
                                                 info.innerHTML = pct + '%';
                                                 read();
-                                            }).catch(reject);
+                                            }).catch(function(err) {
+                                                reject(new Error('碎片 part' + idx + ' 读取失败: ' + err.message));
+                                            });
                                         }
                                         read();
                                     });
                                 };
-                            })(reader)
+                            })(reader, i)
                         );
                     }
 
@@ -139,30 +158,31 @@
                     for (var i = 0; i < readPromises.length; i++) {
                         chain = chain.then(readPromises[i]);
                     }
-
-                    return chain.then(function() {
-                        var allData = new Uint8Array(loaded);
-                        var offset = 0;
-                        for (var i = 0; i < allChunks.length; i++) {
-                            allData.set(allChunks[i], offset);
-                            offset += allChunks[i].length;
-                        }
-                        var blob = new Blob([allData], { type: 'application/zip' });
-                        var a = document.createElement('a');
-                        a.href = window.URL.createObjectURL(blob);
-                        a.download = OUTPUT_NAME;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        setTimeout(function() { window.URL.revokeObjectURL(a.href); }, 5000);
-                        info.innerHTML = '✅ 完成！';
-                        btn.textContent = '📦 打包下载全部录音';
-                        btn.disabled = false;
-                    });
+                    return chain;
+                })
+                .then(function() {
+                    // 合并
+                    var allData = new Uint8Array(loaded);
+                    var offset = 0;
+                    for (var i = 0; i < allChunks.length; i++) {
+                        allData.set(allChunks[i], offset);
+                        offset += allChunks[i].length;
+                    }
+                    var blob = new Blob([allData], { type: 'application/zip' });
+                    var a = document.createElement('a');
+                    a.href = window.URL.createObjectURL(blob);
+                    a.download = OUTPUT_NAME;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    setTimeout(function() { window.URL.revokeObjectURL(a.href); }, 5000);
+                    info.innerHTML = '✅ 完成！';
+                    btn.textContent = '📦 打包下载全部录音';
+                    btn.disabled = false;
                 })
                 .catch(function(err) {
                     alert('合并失败：' + err.message);
-                    info.innerHTML = '❌ 失败';
+                    info.innerHTML = '❌ 失败：' + err.message;
                     btn.textContent = '📦 打包下载全部录音';
                     btn.disabled = false;
                 });
