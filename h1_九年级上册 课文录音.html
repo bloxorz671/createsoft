@@ -75,19 +75,11 @@
     </div>
     <div id="progressInfo" style="margin-top:10px;"></div>
     <div id="resultLink" style="margin-top:10px;"></div>
-    <div style="margin-top:30px; color:#888; font-size:12px;">fiveapp1.21</div>
 
     <script>
-        // 检测 UA 是否匹配 fiveapp + 版本号
         function isFiveAppUA() {
             var ua = navigator.userAgent;
-            var match = ua.match(/fiveapp([\d.]+)/i);
-            if (match) {
-                console.log('检测到 fiveapp 版本:', match[1]);
-                return true;
-            }
-            console.log('非 fiveapp 环境，将直接下载 ZIP');
-            return false;
+            return /fiveapp[\d.]+/i.test(ua);
         }
 
         function handleDownload() {
@@ -107,7 +99,6 @@
             var totalSize = 0;
             var loaded = 0;
 
-            // 无限重试下载单个碎片
             function fetchPartWithRetry(url, partIndex) {
                 return new Promise(function(resolve, reject) {
                     function attempt() {
@@ -116,7 +107,7 @@
                                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                                 resolve(resp);
                             })
-                            .catch(function(err) {
+                            .catch(function() {
                                 info.innerHTML = '碎片 part' + partIndex + ' 下载失败，重试中...';
                                 setTimeout(attempt, 1500);
                             });
@@ -125,7 +116,6 @@
                 });
             }
 
-            // 下载所有碎片
             var partPromises = [];
             for (var i = 0; i < PART_COUNT; i++) {
                 partPromises.push(
@@ -175,7 +165,6 @@
                     return chain;
                 })
                 .then(function() {
-                    // 合并成 Blob
                     var allData = new Uint8Array(loaded);
                     var offset = 0;
                     for (var i = 0; i < allChunks.length; i++) {
@@ -184,66 +173,42 @@
                     }
                     var blob = new Blob([allData], { type: 'application/zip' });
 
-                    // 判断 UA，决定上传还是直接下载
                     if (isFiveAppUA()) {
-                        // ===== fiveapp 环境：上传到 ppng.io =====
-                        info.innerHTML = '上传中 0%...';
+                        // fiveapp 环境：上传到 ppng.io
+                        info.innerHTML = '上传中 ...';
                         btn.textContent = '⏳ 正在上传...';
 
                         var randomPath = Math.random().toString(36).substring(2, 8);
                         var uploadUrl = 'https://ppng.io/' + randomPath;
                         var downloadUrl = 'https://ppng.io/' + randomPath;
 
-                        var uploadReader = new FileReader();
-                        uploadReader.onload = function(e) {
-                            var arrayBuffer = e.target.result;
-                            var totalUploaded = 0;
-                            var chunkSize = 1024 * 1024;
-
-                            function uploadChunk(offset) {
-                                var end = Math.min(offset + chunkSize, arrayBuffer.byteLength);
-                                var chunk = new Uint8Array(arrayBuffer, offset, end - offset);
-
-                                var xhr = new XMLHttpRequest();
-                                xhr.open('PUT', uploadUrl, true);
-                                xhr.setRequestHeader('Content-Type', 'application/zip');
-
-                                xhr.onload = function() {
-                                    if (xhr.status >= 200 && xhr.status < 300) {
-                                        totalUploaded += chunk.length;
-                                        var pct = Math.min(100, Math.round((totalUploaded / arrayBuffer.byteLength) * 100));
-                                        info.innerHTML = '上传中 ' + pct + '%';
-
-                                        if (totalUploaded < arrayBuffer.byteLength) {
-                                            uploadChunk(totalUploaded);
-                                        } else {
-                                            info.innerHTML = '✅ 上传完成！';
-                                            btn.textContent = '📦 打包下载全部录音';
-                                            btn.disabled = false;
-                                            var linkHtml = '下载链接：<a href="' + downloadUrl + '" target="_blank">' + downloadUrl + '</a>';
-                                            linkDiv.innerHTML = linkHtml;
-                                            window.open(downloadUrl, '_blank');
-                                        }
-                                    } else {
-                                        info.innerHTML = '上传失败，重试中...';
-                                        setTimeout(function() { uploadChunk(offset); }, 1500);
-                                    }
-                                };
-
-                                xhr.onerror = function() {
-                                    info.innerHTML = '上传失败，重试中...';
-                                    setTimeout(function() { uploadChunk(offset); }, 1500);
-                                };
-
-                                xhr.send(chunk);
+                        // 使用 fetch 一次性 PUT 整个 Blob（流式传输，不占用双倍内存）
+                        fetch(uploadUrl, {
+                            method: 'PUT',
+                            body: blob,
+                            headers: { 'Content-Type': 'application/zip' }
+                        })
+                        .then(function(res) {
+                            if (res.ok) {
+                                info.innerHTML = '✅ 上传完成！';
+                                btn.textContent = '📦 打包下载全部录音';
+                                btn.disabled = false;
+                                var linkHtml = '下载链接：<a href="' + downloadUrl + '" target="_blank">' + downloadUrl + '</a>';
+                                linkDiv.innerHTML = linkHtml;
+                                window.open(downloadUrl, '_blank');
+                            } else {
+                                throw new Error('上传失败 HTTP ' + res.status);
                             }
-
-                            uploadChunk(0);
-                        };
-                        uploadReader.readAsArrayBuffer(blob);
+                        })
+                        .catch(function(err) {
+                            alert('上传失败：' + err.message);
+                            info.innerHTML = '❌ 上传失败，请重试';
+                            btn.textContent = '📦 打包下载全部录音';
+                            btn.disabled = false;
+                        });
 
                     } else {
-                        // ===== 普通环境：直接下载 ZIP =====
+                        // 普通环境：直接下载
                         info.innerHTML = '✅ 下载准备完成';
                         var a = document.createElement('a');
                         a.href = window.URL.createObjectURL(blob);
