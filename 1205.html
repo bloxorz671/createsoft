@@ -25,7 +25,7 @@
         * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
         input, textarea, [contenteditable] { -webkit-touch-callout: default; -webkit-user-select: text; user-select: text; }
         img { -webkit-touch-callout: default; }
-        body { background: #f5f7fc; font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; min-height: 100vh; padding-bottom: 70px; }
+        body { background: #ffffff; font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; min-height: 100vh; padding-bottom: 70px; }
         .platform-container { max-width: 550px; margin: 0 auto; background: #ffffff; min-height: calc(100vh - 70px); }
         .main-header { position: relative; text-align: center; padding: 20px 16px 12px; background: white; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; }
         .main-header h1 { font-size: 1.9rem; font-weight: 700; color: #1e3c72; letter-spacing: -0.3px; cursor: pointer; display: inline-block; padding: 0 16px; flex: 1; text-align: center; }
@@ -166,10 +166,6 @@
         .dev-input-row input { flex: 1; padding: 8px 12px; border: 1px solid #d0d5dd; border-radius: 8px; font-size: 0.9rem; }
         .dev-input-row button { padding: 8px 16px; background: #2b4c8a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; white-space: nowrap; }
 
-        .wx-guide-page { display: none; position: relative; min-height: 100vh; background: #fff; }
-        .wx-guide-page .wx-bg-img { display: block; width: 100%; height: auto; }
-        .wx-guide-page .wx-corner-img { position: absolute; top: 8px; right: 8px; width: 56px; height: 56px; z-index: 10; }
-
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #eef2f8; display: flex; padding: 10px 20px 14px; justify-content: space-around; max-width: 550px; margin: 0 auto; z-index: 100; }
         .bottom-nav-wrapper { max-width: 550px; margin: 0 auto; position: relative; }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; padding: 4px 12px; border-radius: 30px; transition: all 0.2s; position: relative; }
@@ -199,8 +195,8 @@
         <div class="warning-banner" id="warningBanner" style="display: none;">正在加载平台数据...</div>
         <div class="main-header">
             <h1 id="titleClickTarget">初三五班智慧应用平台</h1>
-            <button class="save-btn" id="saveBtn" title="保存并退出编辑模式">💾</button>
-            <button class="refresh-btn" id="refreshBtn" title="刷新应用配置">⟳</button>
+            <button class="save-btn" id="saveBtn" title="保存并退出编辑模式">&#128190;</button>
+            <button class="refresh-btn" id="refreshBtn" title="刷新应用配置">&#8635;</button>
         </div>
         <div class="download-top-bar" id="downloadTopBar" style="display: none;">
             <img class="bar-icon" src="41.jpg" alt="图标" onerror="this.style.display='none'">
@@ -215,9 +211,11 @@
             <div id="groupsContainer" class="groups-container"><div class="loading-tip">加载应用中...</div></div>
         </div>
         <!-- 微信引导页 -->
-        <div id="wxGuidePage" class="wx-guide-page">
-            <img class="wx-bg-img" id="wxBgImg" src="" alt="引导图" style="display:block;width:100%;height:auto;">
-            <img class="wx-corner-img" id="wxCornerImg" src="" alt="角标">
+        <div id="wxGuidePage" style="display:none;position:relative;width:100%;height:100vh;background:#fff;overflow:hidden;">
+            <div id="wxGuideContent" style="position:absolute;bottom:0;left:0;right:0;text-align:center;">
+                <img id="wxBgImg" src="" alt="" style="max-width:100%;height:auto;display:block;margin:0 auto;">
+            </div>
+            <img id="wxCornerImg" src="" alt="" style="position:absolute;top:0;right:0;width:56px;height:56px;z-index:10;">
         </div>
         <div id="settingsPage" class="setting-page">
             <div class="settings-menu-item" id="menuNotifySettings"><div class="settings-menu-left"><div class="settings-menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2b4c8a" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><span>通知设置</span></div><span class="settings-menu-arrow">&gt;</span></div>
@@ -249,26 +247,26 @@
             </div>
         </div>
     </div>
-    <div class="bottom-nav-wrapper">
+    <div class="bottom-nav-wrapper" id="bottomNavWrapper">
         <div class="bottom-nav">
-            <button class="nav-item active" id="navHomeBtn"><div class="nav-icon">🏠</div><span class="nav-label">主页</span></button>
-            <button class="nav-item" id="navNotifyBtn" style="position:relative;"><div class="nav-icon">📧</div><span class="nav-label">通知</span><span class="notify-badge" id="notifyBadge" style="display:none;">0</span></button>
-            <button class="nav-item" id="navSettingsBtn"><div class="nav-icon">⚙</div><span class="nav-label">设置</span></button>
+            <button class="nav-item active" id="navHomeBtn"><div class="nav-icon">&#127968;</div><span class="nav-label">主页</span></button>
+            <button class="nav-item" id="navNotifyBtn" style="position:relative;"><div class="nav-icon">&#128231;</div><span class="nav-label">通知</span><span class="notify-badge" id="notifyBadge" style="display:none;">0</span></button>
+            <button class="nav-item" id="navSettingsBtn"><div class="nav-icon">&#9881;</div><span class="nav-label">设置</span></button>
         </div>
     </div>
     <div class="add-fab" id="fabGroup" style="display: none;">
-        <button class="push-notify-btn" id="pushNotifyFab" title="发布通知">📢</button>
-        <button class="file-manager-btn" id="fileManagerBtn" title="文件管理器">📁</button>
-        <button class="upload-only-btn" id="uploadOnlyBtn" title="上传文件">📤</button>
-        <button class="add-carousel-btn" id="addCarouselFab" title="添加轮播图">🖼️</button>
+        <button class="push-notify-btn" id="pushNotifyFab" title="发布通知">&#128226;</button>
+        <button class="file-manager-btn" id="fileManagerBtn" title="文件管理器">&#128193;</button>
+        <button class="upload-only-btn" id="uploadOnlyBtn" title="上传文件">&#128228;</button>
+        <button class="add-carousel-btn" id="addCarouselFab" title="添加轮播图">&#127912;</button>
         <button class="add-btn" id="addAppFab" title="添加应用">+</button>
-        <button class="add-btn" id="addGroupFab" title="添加分组" style="background:#9b59b6;">📂</button>
+        <button class="add-btn" id="addGroupFab" title="添加分组" style="background:#9b59b6;">&#128194;</button>
     </div>
 
     <div id="forceUpdateModal" class="modal-overlay force-update-modal" style="z-index:40000;"><div class="modal-content"><img class="update-icon-img" id="updateIcon" src="41.jpg" alt="图标" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2272%22 height=%2272%22%3E%3Crect width=%2272%22 height=%2272%22 rx=%2216%22 fill=%22%232b4c8a%22/%3E%3Ctext x=%2236%22 y=%2246%22 font-size=%2230%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22system-ui%22%3E5%3C/text%3E%3C/svg%3E'"><div class="update-title">已推出新版本</div><button class="update-btn" id="forceUpdateBtn">立即更新</button><button class="skip-btn" id="skipUpdateBtn">暂不更新</button></div></div>
     <div id="appDownloadModal" class="modal-overlay app-download-modal" style="z-index:40001;"><div class="modal-content"><img class="app-icon-large" src="41.jpg" alt="图标" onerror="this.style.display='none'"><div class="app-name">五班应用平台</div><div class="app-subtitle">推荐下载APP</div><button class="download-btn" id="appDownloadBtn">立即下载</button><button class="later-btn" id="laterBtn">以后再说</button></div></div>
-    <div id="notifyModal" class="modal-overlay" style="z-index:40002;"><div class="modal-content" style="max-width:500px;"><div class="notify-header-bar"><h3 style="margin:0;">📧 通知中心</h3><button class="notify-mark-all" id="markAllReadBtn">全部已读</button></div><div id="notifyListBody" style="max-height:60vh;overflow-y:auto;"></div></div></div>
-    <div id="pushNotifyModal" class="modal-overlay" style="z-index:40003;"><div class="modal-content" style="max-width:500px;"><h3>📢 发布通知</h3><label style="font-size:0.85rem;color:#666;">通知内容</label><textarea id="pushContent" placeholder="请输入通知内容"></textarea><label style="font-size:0.85rem;color:#666;">跳转网址</label><input id="pushLink" placeholder="https://..." value=""><div class="modal-buttons"><button class="confirm-btn" id="pushConfirmBtn">发布</button><button class="cancel-btn" id="pushCancelBtn">取消</button></div><div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px;"><h4 style="font-size:0.9rem;color:#666;margin-bottom:8px;">已发布的通知</h4><div id="publishedNotifyList" style="max-height:200px;overflow-y:auto;"></div></div></div></div>
+    <div id="notifyModal" class="modal-overlay" style="z-index:40002;"><div class="modal-content" style="max-width:500px;"><div class="notify-header-bar"><h3 style="margin:0;">&#128231; 通知中心</h3><button class="notify-mark-all" id="markAllReadBtn">全部已读</button></div><div id="notifyListBody" style="max-height:60vh;overflow-y:auto;"></div></div></div>
+    <div id="pushNotifyModal" class="modal-overlay" style="z-index:40003;"><div class="modal-content" style="max-width:500px;"><h3>&#128226; 发布通知</h3><label style="font-size:0.85rem;color:#666;">通知内容</label><textarea id="pushContent" placeholder="请输入通知内容"></textarea><label style="font-size:0.85rem;color:#666;">跳转网址</label><input id="pushLink" placeholder="https://..." value=""><div class="modal-buttons"><button class="confirm-btn" id="pushConfirmBtn">发布</button><button class="cancel-btn" id="pushCancelBtn">取消</button></div><div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px;"><h4 style="font-size:0.9rem;color:#666;margin-bottom:8px;">已发布的通知</h4><div id="publishedNotifyList" style="max-height:200px;overflow-y:auto;"></div></div></div></div>
 
     <script>
     var CONFIG_URL = 'https://raw.githubusercontent.com/bloxorz671/createsoft/main/5app.txt';
@@ -288,7 +286,6 @@
     var draggedGroupIndex = null, draggedAppData = null;
     var notifyList = []; var readNotifyIds = JSON.parse(localStorage.getItem('read_notify_ids') || '[]');
 
-    // 平台检测
     var isIOS = /iPhone|iPad|iPod/i.test(currentUA);
     var isMac = /Macintosh/i.test(currentUA) && !isIOS;
     var isPC = !/Android|iPhone|iPad|iPod|Mobile/i.test(currentUA);
@@ -360,21 +357,13 @@
     function hideAllPages() {
         document.getElementById('homePage').classList.remove('active'); document.getElementById('settingsPage').classList.remove('active');
         document.getElementById('pushSettingsPage').style.display = 'none'; document.getElementById('aboutPage').style.display = 'none';
-        document.getElementById('devSettingsPage').style.display = 'none'; document.getElementById('wxGuidePage').style.display = 'none';
+        document.getElementById('devSettingsPage').style.display = 'none';
         document.getElementById('navHomeBtn').classList.remove('active'); document.getElementById('navNotifyBtn').classList.remove('active'); document.getElementById('navSettingsBtn').classList.remove('active');
     }
 
     var aboutIconClicks = 0; var aboutIconTimer = null; var aboutNameLongPress = false;
     function initAboutDevTrigger() { aboutIconClicks = 0; aboutNameLongPress = false; var icon = document.getElementById('aboutIcon'); var name = document.getElementById('aboutAppName'); if (!icon || !name || !isAnyApp) return; icon.onclick = function() { aboutIconClicks++; if (aboutIconTimer) clearTimeout(aboutIconTimer); aboutIconTimer = setTimeout(function() { aboutIconClicks = 0; }, 3000); checkDevTrigger(); }; name.oncontextmenu = function(e) { e.preventDefault(); }; var pressTimer; name.addEventListener('touchstart', function(e) { pressTimer = setTimeout(function() { aboutNameLongPress = true; checkDevTrigger(); }, 1500); }); name.addEventListener('touchend', function() { clearTimeout(pressTimer); }); name.addEventListener('touchmove', function() { clearTimeout(pressTimer); }); name.addEventListener('mousedown', function() { pressTimer = setTimeout(function() { aboutNameLongPress = true; checkDevTrigger(); }, 1500); }); name.addEventListener('mouseup', function() { clearTimeout(pressTimer); }); name.addEventListener('mouseleave', function() { clearTimeout(pressTimer); }); }
     function checkDevTrigger() { if (aboutIconClicks >= 10 && aboutNameLongPress) { aboutIconClicks = 0; aboutNameLongPress = false; setDevEnabled(true); showDevSettingsPage(); } }
-
-    function showWxGuide() {
-        hideAllPages();
-        var page = document.getElementById('wxGuidePage');
-        page.style.display = 'block';
-        document.getElementById('wxBgImg').src = WX_BG_IMG;
-        document.getElementById('wxCornerImg').src = WX_CORNER_IMG;
-    }
 
     function renderPublishedNotifyList() { var body = document.getElementById('publishedNotifyList'); if (notifyList.length === 0) { body.innerHTML = '<div style="text-align:center;color:#999;padding:12px;font-size:0.8rem;">暂无已发布通知</div>'; return; } var html = ''; notifyList.forEach(function(item) { html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f2f5;font-size:0.8rem;"><div style="flex:1;min-width:0;"><div style="color:#999;">' + item.time + '</div><div style="color:#333;word-break:break-word;">' + escapeHtml(item.content) + '</div></div><button class="notify-delete-btn" data-id="' + item.id + '" style="flex-shrink:0;margin-left:8px;">&#128465;</button></div>'; }); body.innerHTML = html; body.querySelectorAll('.notify-delete-btn').forEach(function(btn) { btn.addEventListener('click', function() { deleteNotifyItem(this.dataset.id); }); }); }
     function showPushNotifyModal() { renderPublishedNotifyList(); document.getElementById('pushContent').value = ''; document.getElementById('pushLink').value = ''; document.getElementById('pushNotifyModal').classList.add('show'); }
@@ -477,11 +466,16 @@
 
     async function init(){
         if (isWeChat) {
+            document.getElementById('main-header').style.display = 'none';
+            document.getElementById('bottomNavWrapper').style.display = 'none';
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('fabGroup').style.display = 'none';
+            document.getElementById('warningBanner').style.display = 'none';
+            document.getElementById('downloadTopBar').style.display = 'none';
+            document.getElementById('wxGuidePage').style.display = 'block';
             document.getElementById('wxBgImg').src = WX_BG_IMG;
             document.getElementById('wxCornerImg').src = WX_CORNER_IMG;
-            document.getElementById('wxGuidePage').style.display = 'block';
-            document.getElementById('homePage').style.display = 'none';
-            document.getElementById('bottom-nav-wrapper').style.display = 'none';
+            document.body.style.paddingBottom = '0';
             return;
         }
         await Promise.all([loadConfigFile(), loadNotifyList()]);
