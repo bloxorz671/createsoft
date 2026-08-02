@@ -176,11 +176,10 @@
         .page { display: none; }
         .page.active { display: block; }
 
-        /* 微信引导页 */
         .wx-container { position: relative; width: 100%; height: 100vh; background: #ffffff; overflow: hidden; display: none; }
-        .wx-bottom-img-wrap { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; }
-        .wx-bottom-img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
         .wx-corner-img { position: absolute; top: 8px; right: 8px; width: 64px; height: 64px; z-index: 10; }
+        .wx-bottom-wrap { position: absolute; left: 0; right: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .wx-bottom-img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
 
         @media (max-width: 768px) {
             .apps-grid { gap: 12px; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
@@ -198,15 +197,13 @@
 </head>
 
 <body>
-    <!-- 微信引导页 -->
     <div class="wx-container" id="wxContainer">
         <img class="wx-corner-img" id="wxCornerImg" src="" alt="角标" onerror="this.style.display='none'">
-        <div class="wx-bottom-img-wrap">
+        <div class="wx-bottom-wrap" id="wxBottomWrap">
             <img class="wx-bottom-img" id="wxBgImg" src="" alt="引导图" onerror="this.style.display='none'">
         </div>
     </div>
 
-    <!-- 正常页面 -->
     <div id="normalContainer">
         <div class="platform-container">
             <div class="warning-banner" id="warningBanner" style="display: none;">正在加载平台数据...</div>
@@ -422,6 +419,82 @@
 
     async function handleUrlAppParameter(){var p=new URLSearchParams(window.location.search);var ap=p.get('app');if(!ap)return;try{ap=decodeURIComponent(ap);}catch(e){}var rc=0;while(appItems.length===0&&rc<30){await new Promise(function(r){setTimeout(r,200);});rc++;}var ta=appItems.find(function(a){return a.name===ap;});if(!ta)ta=appItems.find(function(a){return a.name.toLowerCase().indexOf(ap.toLowerCase())!==-1;});if(ta){setTimeout(function(){handleAppClick(ta.link,ta.name);},500);return;}if(!isWebLink(ap)){if(isAudioFile(ap)){var fu=ap.indexOf('http')===0?ap:'https://luckynum.top/'+ap;var fn=ap.split('/').pop();var sf=await findSeriesFiles(fn);openAudioViewer(fu,fn,sf);return;}openFileWithFilehelper(ap);return;}var fu=ap.indexOf('http')===0?ap:'https://luckynum.top/'+ap;window.open(fu,'_blank');}
 
+    // 微信布局计算
+    function layoutWxImages() {
+        var container = document.getElementById('wxContainer');
+        var bottomWrap = document.getElementById('wxBottomWrap');
+        var bottomImg = document.getElementById('wxBgImg');
+        var cornerImg = document.getElementById('wxCornerImg');
+        if (!container || !bottomImg || !cornerImg) return;
+        
+        var sw = window.innerWidth;
+        var sh = window.innerHeight;
+        var cornerW = 64;
+        var cornerH = 64;
+        var cornerTop = 8;
+        var cornerRight = 8;
+        
+        // 底部图可用区域：整个屏幕宽度，高度需要避开右上角小图
+        // 右上角小图占用的区域：从顶部 cornerTop 到 cornerTop+cornerH
+        var cornerBottom = cornerTop + cornerH;
+        
+        // 底部图原始比例
+        var bw = bottomImg.naturalWidth || bottomImg.width || sw;
+        var bh = bottomImg.naturalHeight || bottomImg.height || sh;
+        if (!bw || !bh) { bw = sw; bh = sh * 0.6; }
+        var bRatio = bw / bh;
+        
+        // 屏幕比例
+        var sRatio = sw / sh;
+        
+        // 先尝试情况1：底部贴底，宽度撑满
+        var fitW = sw;
+        var fitH = fitW / bRatio;
+        
+        // 检查是否会和小图重叠
+        var bottomTop = sh - fitH;
+        if (bottomTop < cornerBottom && fitH < sh) {
+            // 情况2：会重叠，缩小底部图直到不重叠
+            fitH = sh - cornerBottom;
+            fitW = fitH * bRatio;
+            if (fitW > sw) { fitW = sw; fitH = fitW / bRatio; }
+            bottomTop = sh - fitH;
+        }
+        
+        // 情况3/4：横屏，底部图顶天立地
+        if (sRatio > 1.2) {
+            // 横屏：先尝试顶天立地
+            fitH = sh;
+            fitW = fitH * bRatio;
+            if (fitW > sw) { fitW = sw; fitH = fitW / bRatio; }
+            
+            // 检查是否和小图重叠
+            var imgLeft = (sw - fitW) / 2;
+            var imgRight = imgLeft + fitW;
+            var cornerLeft = sw - cornerRight - cornerW;
+            var cornerRightEdge = sw - cornerRight;
+            
+            // 如果右上角小图和底部图水平重叠且垂直重叠
+            if (imgRight > cornerLeft && 0 < cornerBottom) {
+                // 情况4：缩小底部图，保持底边贴底
+                fitH = sh - cornerBottom;
+                fitW = fitH * bRatio;
+                if (fitW > sw) { fitW = sw; fitH = fitW / bRatio; }
+            }
+        }
+        
+        bottomWrap.style.top = (sh - fitH) + 'px';
+        bottomWrap.style.bottom = '0';
+        bottomWrap.style.left = '0';
+        bottomWrap.style.right = '0';
+        bottomWrap.style.width = '100%';
+        bottomWrap.style.height = fitH + 'px';
+        bottomImg.style.width = fitW + 'px';
+        bottomImg.style.height = fitH + 'px';
+        bottomImg.style.maxWidth = '100%';
+        bottomImg.style.maxHeight = '100%';
+    }
+
     document.addEventListener('contextmenu', function(e) { var target = e.target; if (!target.closest('input') && !target.closest('textarea') && !target.closest('[contenteditable]')) { e.preventDefault(); return false; } });
 
     document.getElementById('refreshBtn').addEventListener('click',refreshConfig);
@@ -476,13 +549,25 @@
     document.getElementById('titleClickTarget').addEventListener('click',function(){tc++;if(tt)clearTimeout(tt);tt=setTimeout(function(){tc=0;},1000);if(tc===3){tc=0;if(isEditMode){alert('编辑模式已开启，无需重复输入Token');return;}showTokenModal();}});
 
     async function init(){
-        // 微信访问：只显示引导页，隐藏所有正常页面
         if (isWeChat) {
             document.getElementById('wxContainer').style.display = 'block';
-            document.getElementById('wxBgImg').src = WX_BG_IMG;
-            document.getElementById('wxCornerImg').src = WX_CORNER_IMG;
             document.getElementById('normalContainer').style.display = 'none';
             document.body.style.paddingBottom = '0';
+            
+            var bgImg = document.getElementById('wxBgImg');
+            var cornerImg = document.getElementById('wxCornerImg');
+            bgImg.src = WX_BG_IMG;
+            cornerImg.src = WX_CORNER_IMG;
+            
+            // 等图片加载后计算布局
+            var loaded = 0;
+            function onLoad() { loaded++; if (loaded >= 2) { layoutWxImages(); } }
+            bgImg.onload = onLoad;
+            cornerImg.onload = onLoad;
+            // 兜底
+            setTimeout(function() { if (loaded < 2) layoutWxImages(); }, 2000);
+            window.addEventListener('resize', layoutWxImages);
+            window.addEventListener('orientationchange', function() { setTimeout(layoutWxImages, 300); });
             return;
         }
         
