@@ -151,6 +151,23 @@
             justify-content: center;
             align-items: center;
             background: #ffffff;
+            position: relative;
+        }
+
+        /* 中转页右上角分享按钮 */
+        .transfer-share-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 8px 14px;
+            border-radius: 16px;
+            border: 1px solid #d0d0d0;
+            background: white;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            color: #333;
+            z-index: 10;
         }
 
         .transfer-container {
@@ -235,6 +252,15 @@
         .btn-download {
             background-color: #e8e8e8;
             color: #000000;
+        }
+
+        /* iOS 提示 */
+        .ios-warning {
+            color: #E74C3C;
+            font-size: 14px;
+            text-align: center;
+            font-weight: 500;
+            padding: 10px;
         }
 
         .audio-player {
@@ -638,6 +664,7 @@
 
             const BASE_DOMAIN = 'https://luckynum.top';
             const IS_FIVEAPP = /fiveapp/i.test(navigator.userAgent);
+            const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
             if (IS_FIVEAPP) {
                 shareCopyBtn.textContent = '📤 分享';
@@ -710,21 +737,31 @@
                 const decodedName = decodeURIComponent(fileName);
                 document.title = decodedName;
 
+                const isIOSPDF = IS_IOS && type === 'pdf';
+
+                const shareBtnLabel = IS_FIVEAPP ? '📤 分享' : '🔗 复制链接';
+
                 previewWrapper.innerHTML = `
-                    <div class="transfer-page"><div class="transfer-container">
-                        <div class="section-top">
-                            <div class="transfer-icon-wrapper"><img src="${iconFile}" alt="文件图标" onerror="this.src='null.jpg'"></div>
-                            <div class="transfer-file-name">${decodedName}</div>
-                            <div class="transfer-file-size">文件大小：${fileSize}</div>
+                    <div class="transfer-page">
+                        <button class="transfer-share-btn" id="btnTransferShare">${shareBtnLabel}</button>
+                        <div class="transfer-container">
+                            <div class="section-top">
+                                <div class="transfer-icon-wrapper"><img src="${iconFile}" alt="文件图标" onerror="this.src='null.jpg'"></div>
+                                <div class="transfer-file-name">${decodedName}</div>
+                                <div class="transfer-file-size">文件大小：${fileSize}</div>
+                            </div>
+                            <div class="spacer"></div>
+                            <div class="section-bottom">
+                                ${isIOSPDF ? '<div class="ios-warning">当前设备暂时无法预览该文件</div>' : '<button class="btn-preview" id="btnTransferPreview">预览</button>'}
+                                <button class="btn-download" id="btnTransferDownload">下载</button>
+                            </div>
                         </div>
-                        <div class="spacer"></div>
-                        <div class="section-bottom">
-                            <button class="btn-preview" id="btnTransferPreview">预览</button>
-                            <button class="btn-download" id="btnTransferDownload">下载</button>
-                        </div>
-                    </div></div>`;
-                document.getElementById('btnTransferPreview').addEventListener('click', () => doPreview(sourceURL, fileName));
+                    </div>`;
                 document.getElementById('btnTransferDownload').addEventListener('click', () => window.open(toAbsoluteURL(sourceURL), '_blank'));
+                document.getElementById('btnTransferShare').addEventListener('click', handleShareOrCopy);
+                if (!isIOSPDF) {
+                    document.getElementById('btnTransferPreview').addEventListener('click', () => doPreview(sourceURL, fileName));
+                }
             }
 
             function showErrorPage(errorMessage) {
@@ -842,7 +879,6 @@
                         </text>
                     </svg>`;
                 previewWrapper.appendChild(overlay);
-                // 5秒后自动消失
                 setTimeout(() => { hidePDFLoadingOverlay(); }, 5000);
             }
 
