@@ -614,9 +614,9 @@
         if (isIOS) {
             var bar = document.getElementById('downloadTopBar');
             bar.classList.add('ios-bar'); bar.classList.remove('android-bar');
-            document.getElementById('downloadBarText').textContent = '当前设备上使用该平台会导致功能不完整 了解详情';
+            document.getElementById('downloadBarText').textContent = '当前设备上使用该平台会导致功能不完整';
             document.getElementById('topDownloadBtn').textContent = '了解详情';
-            bar.style.display = 'flex';
+            bar.style.display = 'none';
             return;
         }
         if (isPC) {
