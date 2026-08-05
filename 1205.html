@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>302</title>
   <style>
-    /* 极简白底，无任何可见UI */
     * {
       margin: 0;
       padding: 0;
@@ -22,16 +21,15 @@
 <body>
   <script>
     (function() {
-      // 目标基础域名
+      // 目标基础域名（干净，无多余斜杠）
       const targetBase = 'https://class.luckynum.top';
       
-      // 拼接完整跳转地址：保留当前路径、参数、哈希
+      // 拼接跳转地址：仅使用域名 + 查询参数 + 哈希，完全抹除路径
       function buildRedirectUrl() {
         try {
           let base = targetBase.replace(/\/+$/, '');
-          let path = window.location.pathname;
-          if (!path.startsWith('/')) path = '/' + path;
-          return base + path + window.location.search + window.location.hash;
+          // 只拼接 search (?参数) 和 hash (#锚点)，忽略 pathname
+          return base + window.location.search + window.location.hash;
         } catch (e) {
           return targetBase;
         }
@@ -39,8 +37,7 @@
       
       const redirectUrl = buildRedirectUrl();
       
-      // 尽快执行重定向——使用 replace 避免留下历史记录
-      // 直接将浏览器导向目标地址，省略任何延迟和UI渲染
+      // 立即执行静默重定向
       window.location.replace(redirectUrl);
     })();
   </script>
