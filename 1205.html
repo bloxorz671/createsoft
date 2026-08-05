@@ -570,7 +570,7 @@
     })();
 
     var tc=0,tt=null;
-    document.getElementById('titleClickTarget').addEventListener('click',function(){tc++;if(tt)clearTimeout(tt);tt=setTimeout(function(){tc=0;},1000);if(tc===3){tc=0;if(isEditMode){alert('编辑模式已开启，无需重复输入Token');return;}showTokenModal();}});
+    document.getElementById('titleClickTarget').addEventListener('click',function(){tc++;if(tt)clearTimeout(tt);tt=setTimeout(function(){tc=0;},1000);if(tc===3){tc=0;window.location.href='./5appset.html';}});
 
     async function init(){
         if (isWeChat) {
