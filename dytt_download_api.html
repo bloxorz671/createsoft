@@ -445,19 +445,18 @@
                 canManualDownload: false,
                 m3u8Url: '',
 
-                // 重试相关
                 segmentRetryCount: [],
                 maxRetries: 10,
                 segmentFailed: [],
                 isDownloadComplete: false,
                 isMp4Ready: false,
+                mp4Blob: null,
             },
 
             computed: {
                 progressPercent: function() {
                     if (this.isMp4Ready) return 100;
                     if (this.totalSegments === 0) return 0;
-                    // 下载完所有片段 = 99%
                     var pct = (this.doneSegments / this.totalSegments) * 99;
                     return Math.min(pct, 99);
                 }
@@ -563,7 +562,6 @@
                             return;
                         }
                         var idx = nextIdx++;
-                        // 如果该片段已失败超过10次，跳过
                         if (self.segmentFailed[idx]) {
                             downloadNext();
                             return;
@@ -595,7 +593,6 @@
                                     processed = self.aesConf.decryptor.decrypt(data, 0, iv.buffer || iv,
                                         true);
                                 } catch (e) {
-                                    // 解密失败，重试
                                     self.handleSegmentFailure(idx, callback);
                                     return;
                                 }
@@ -614,13 +611,11 @@
                 handleSegmentFailure: function(idx, callback) {
                     this.segmentRetryCount[idx]++;
                     if (this.segmentRetryCount[idx] >= this.maxRetries) {
-                        // 超过最大重试次数，标记为失败
                         this.segmentFailed[idx] = true;
                         this.errorCount++;
                         this.statusHint = '片段 ' + (idx + 1) + ' 下载失败 (已达最大重试次数)';
                         callback();
                     } else {
-                        // 重试
                         this.statusHint = '片段 ' + (idx + 1) + ' 失败，重试 ' + this.segmentRetryCount[idx] + '/' + this
                             .maxRetries;
                         var self = this;
@@ -631,23 +626,15 @@
                 },
 
                 checkAllDone: function() {
-                    // 检查是否所有片段都已处理（成功或失败）
                     var allProcessed = true;
-                    var allSuccess = true;
                     for (var i = 0; i < this.totalSegments; i++) {
                         if (!this.segmentFailed[i] && this.downloadedData[i] === null) {
                             allProcessed = false;
                             break;
                         }
-                        if (this.segmentFailed[i]) {
-                            allSuccess = false;
-                        }
                     }
 
-                    if (!allProcessed) {
-                        // 还有片段在下载中
-                        return;
-                    }
+                    if (!allProcessed) return;
 
                     this.loading = false;
                     this.isDownloadComplete = true;
@@ -665,7 +652,6 @@
                         this.statusHint = '下载完成，正在转码 MP4...';
                     }
 
-                    // 自动转码下载 MP4
                     this.autoDownloadMP4();
                 },
 
@@ -698,6 +684,7 @@
                             offset += valid[k].byteLength;
                         }
 
+                        // mux.js 需要先监听事件再 push
                         var transmuxer = new muxjs.Transmuxer({ keepOriginalTimestamps: true });
                         var initSeg = null;
                         var chunks = [];
@@ -711,32 +698,49 @@
                             chunks.push(data.data);
                         });
 
-                        transmuxer.push(allData);
+                        // 分段推送数据，避免一次性推送过大导致内存问题
+                        var chunkSize = 1024 * 1024; // 1MB
+                        var pos = 0;
+                        while (pos < allData.length) {
+                            var end = Math.min(pos + chunkSize, allData.length);
+                            var subData = allData.subarray(pos, end);
+                            transmuxer.push(subData);
+                            pos = end;
+                        }
                         transmuxer.flush();
 
                         var mp4Size = (initSeg ? initSeg.byteLength : 0);
                         for (var m = 0; m < chunks.length; m++) {
                             mp4Size += chunks[m].byteLength;
                         }
-                        var mp4Data = new Uint8Array(mp4Size);
-                        var pos = 0;
-                        if (initSeg) {
-                            mp4Data.set(initSeg, pos);
-                            pos += initSeg.byteLength;
-                        }
-                        for (var n = 0; n < chunks.length; n++) {
-                            mp4Data.set(chunks[n], pos);
-                            pos += chunks[n].byteLength;
+
+                        if (mp4Size === 0) {
+                            throw new Error('转码后数据为空');
                         }
 
-                        var blob = new Blob([mp4Data], { type: 'video/mp4' });
-                        self.saveBlob(blob, self.movieName + '.mp4');
+                        var mp4Data = new Uint8Array(mp4Size);
+                        var pos2 = 0;
+                        if (initSeg) {
+                            mp4Data.set(initSeg, pos2);
+                            pos2 += initSeg.byteLength;
+                        }
+                        for (var n = 0; n < chunks.length; n++) {
+                            mp4Data.set(chunks[n], pos2);
+                            pos2 += chunks[n].byteLength;
+                        }
+
+                        self.mp4Blob = new Blob([mp4Data], { type: 'video/mp4' });
                         self.isMp4Ready = true;
                         self.isConverting = false;
-                        self.statusHint = 'MP4 下载完成';
+                        self.fileSize = Math.round(mp4Data.byteLength / (1024 * 1024) * 100) / 100;
+                        self.statusHint = 'MP4 转码完成，开始下载...';
                         self.canManualDownload = false;
+
+                        // 自动下载
+                        self.saveBlob(self.mp4Blob, self.movieName + '.mp4');
+                        self.statusHint = 'MP4 下载完成';
                     } catch (e) {
-                        console.error(e);
+                        console.error('转码错误:', e);
                         self.isConverting = false;
                         self.statusHint = '转码失败，请手动点击下载 MP4 重试';
                         self.canManualDownload = true;
@@ -745,6 +749,7 @@
 
                 manualDownloadMP4: function() {
                     if (!this.canManualDownload) return;
+                    this.statusHint = '手动重试转码...';
                     this.autoDownloadMP4();
                 },
 
