@@ -246,7 +246,7 @@
 
         <div class="actions">
             <button class="btn-preview" @click="preview">预览</button>
-            <button class="btn-download" @click="downloadMP4" :disabled="!canDownload">下载 MP4</button>
+            <button class="btn-download" @click="manualDownloadMP4" :disabled="!canManualDownload">下载 MP4</button>
         </div>
 
         <div class="footer">
@@ -428,6 +428,7 @@
                 downloadedData: [],
                 loading: false,
                 finished: false,
+                isConverting: false,
 
                 aesConf: {
                     method: '',
@@ -441,14 +442,24 @@
                 statusHint: '准备下载...',
                 fileSize: 0,
                 showLicense: false,
-                canDownload: false,
+                canManualDownload: false,
                 m3u8Url: '',
+
+                // 重试相关
+                segmentRetryCount: [],
+                maxRetries: 10,
+                segmentFailed: [],
+                isDownloadComplete: false,
+                isMp4Ready: false,
             },
 
             computed: {
                 progressPercent: function() {
+                    if (this.isMp4Ready) return 100;
                     if (this.totalSegments === 0) return 0;
-                    return (this.doneSegments / this.totalSegments) * 100;
+                    // 下载完所有片段 = 99%
+                    var pct = (this.doneSegments / this.totalSegments) * 99;
+                    return Math.min(pct, 99);
                 }
             },
 
@@ -500,6 +511,8 @@
                     this.tsUrls = tsList;
                     this.totalSegments = tsList.length;
                     this.downloadedData = new Array(this.totalSegments);
+                    this.segmentRetryCount = new Array(this.totalSegments).fill(0);
+                    this.segmentFailed = new Array(this.totalSegments).fill(false);
 
                     var keyMatch = text.match(/METHOD=([^,\s]+)/);
                     var uriMatch = text.match(/URI="([^"]+)"/);
@@ -550,6 +563,11 @@
                             return;
                         }
                         var idx = nextIdx++;
+                        // 如果该片段已失败超过10次，跳过
+                        if (self.segmentFailed[idx]) {
+                            downloadNext();
+                            return;
+                        }
                         active++;
                         self.downloadSegment(idx, function() {
                             active--;
@@ -577,8 +595,8 @@
                                     processed = self.aesConf.decryptor.decrypt(data, 0, iv.buffer || iv,
                                         true);
                                 } catch (e) {
-                                    self.errorCount++;
-                                    callback();
+                                    // 解密失败，重试
+                                    self.handleSegmentFailure(idx, callback);
                                     return;
                                 }
                             }
@@ -588,107 +606,152 @@
                             callback();
                         }.bind(this),
                         fail: function() {
-                            self.errorCount++;
-                            callback();
+                            self.handleSegmentFailure(idx, callback);
                         }
                     });
                 },
 
-                checkAllDone: function() {
-                    this.loading = false;
-                    this.finished = true;
-                    var valid = this.downloadedData.filter(function(d) { return d !== null && d !== undefined; });
-                    var totalSize = 0;
-                    for (var i = 0; i < valid.length; i++) {
-                        totalSize += valid[i].byteLength;
-                    }
-                    this.fileSize = Math.round(totalSize / (1024 * 1024) * 100) / 100;
-
-                    if (this.errorCount === 0 && this.doneSegments === this.totalSegments) {
-                        this.statusHint = '下载完成';
-                        this.canDownload = true;
-                    } else if (this.doneSegments === this.totalSegments) {
-                        this.statusHint = '下载完成（部分片段错误）';
-                        this.canDownload = true;
+                handleSegmentFailure: function(idx, callback) {
+                    this.segmentRetryCount[idx]++;
+                    if (this.segmentRetryCount[idx] >= this.maxRetries) {
+                        // 超过最大重试次数，标记为失败
+                        this.segmentFailed[idx] = true;
+                        this.errorCount++;
+                        this.statusHint = '片段 ' + (idx + 1) + ' 下载失败 (已达最大重试次数)';
+                        callback();
                     } else {
-                        this.statusHint = '完成 ' + this.doneSegments + '/' + this.totalSegments + '，' + this
-                            .errorCount + ' 个片段失败';
-                        this.canDownload = this.doneSegments > 0;
+                        // 重试
+                        this.statusHint = '片段 ' + (idx + 1) + ' 失败，重试 ' + this.segmentRetryCount[idx] + '/' + this
+                            .maxRetries;
+                        var self = this;
+                        setTimeout(function() {
+                            self.downloadSegment(idx, callback);
+                        }, 500);
                     }
+                },
+
+                checkAllDone: function() {
+                    // 检查是否所有片段都已处理（成功或失败）
+                    var allProcessed = true;
+                    var allSuccess = true;
+                    for (var i = 0; i < this.totalSegments; i++) {
+                        if (!this.segmentFailed[i] && this.downloadedData[i] === null) {
+                            allProcessed = false;
+                            break;
+                        }
+                        if (this.segmentFailed[i]) {
+                            allSuccess = false;
+                        }
+                    }
+
+                    if (!allProcessed) {
+                        // 还有片段在下载中
+                        return;
+                    }
+
+                    this.loading = false;
+                    this.isDownloadComplete = true;
+                    this.canManualDownload = true;
+
+                    var validCount = this.doneSegments;
+                    if (validCount === 0) {
+                        this.statusHint = '下载失败，所有片段均无法获取';
+                        return;
+                    }
+
+                    if (this.errorCount > 0) {
+                        this.statusHint = '下载完成，' + this.errorCount + ' 个片段失败，正在转码可用片段...';
+                    } else {
+                        this.statusHint = '下载完成，正在转码 MP4...';
+                    }
+
+                    // 自动转码下载 MP4
+                    this.autoDownloadMP4();
+                },
+
+                autoDownloadMP4: function() {
+                    var valid = [];
+                    for (var i = 0; i < this.downloadedData.length; i++) {
+                        if (this.downloadedData[i] !== null && this.downloadedData[i] !== undefined) {
+                            valid.push(this.downloadedData[i]);
+                        }
+                    }
+
+                    if (valid.length === 0) {
+                        this.statusHint = '没有可用的视频数据';
+                        return;
+                    }
+
+                    this.isConverting = true;
+                    this.canManualDownload = false;
+                    var self = this;
+
+                    try {
+                        var totalLen = 0;
+                        for (var j = 0; j < valid.length; j++) {
+                            totalLen += valid[j].byteLength;
+                        }
+                        var allData = new Uint8Array(totalLen);
+                        var offset = 0;
+                        for (var k = 0; k < valid.length; k++) {
+                            allData.set(new Uint8Array(valid[k]), offset);
+                            offset += valid[k].byteLength;
+                        }
+
+                        var transmuxer = new muxjs.Transmuxer({ keepOriginalTimestamps: true });
+                        var initSeg = null;
+                        var chunks = [];
+                        var hasInit = false;
+
+                        transmuxer.on('data', function(data) {
+                            if (!hasInit) {
+                                initSeg = data.initSegment;
+                                hasInit = true;
+                            }
+                            chunks.push(data.data);
+                        });
+
+                        transmuxer.push(allData);
+                        transmuxer.flush();
+
+                        var mp4Size = (initSeg ? initSeg.byteLength : 0);
+                        for (var m = 0; m < chunks.length; m++) {
+                            mp4Size += chunks[m].byteLength;
+                        }
+                        var mp4Data = new Uint8Array(mp4Size);
+                        var pos = 0;
+                        if (initSeg) {
+                            mp4Data.set(initSeg, pos);
+                            pos += initSeg.byteLength;
+                        }
+                        for (var n = 0; n < chunks.length; n++) {
+                            mp4Data.set(chunks[n], pos);
+                            pos += chunks[n].byteLength;
+                        }
+
+                        var blob = new Blob([mp4Data], { type: 'video/mp4' });
+                        self.saveBlob(blob, self.movieName + '.mp4');
+                        self.isMp4Ready = true;
+                        self.isConverting = false;
+                        self.statusHint = 'MP4 下载完成';
+                        self.canManualDownload = false;
+                    } catch (e) {
+                        console.error(e);
+                        self.isConverting = false;
+                        self.statusHint = '转码失败，请手动点击下载 MP4 重试';
+                        self.canManualDownload = true;
+                    }
+                },
+
+                manualDownloadMP4: function() {
+                    if (!this.canManualDownload) return;
+                    this.autoDownloadMP4();
                 },
 
                 preview: function() {
                     if (this.m3u8Url) {
                         window.open(this.m3u8Url, '_blank');
                     }
-                },
-
-                downloadMP4: function() {
-                    var valid = this.downloadedData.filter(function(d) { return d !== null && d !== undefined; });
-                    if (valid.length === 0) {
-                        alert('没有可下载的数据');
-                        return;
-                    }
-
-                    this.statusHint = '转码 MP4...';
-                    this.canDownload = false;
-                    var self = this;
-
-                    setTimeout(function() {
-                        try {
-                            var totalLen = 0;
-                            for (var i = 0; i < valid.length; i++) {
-                                totalLen += valid[i].byteLength;
-                            }
-                            var allData = new Uint8Array(totalLen);
-                            var offset = 0;
-                            for (var j = 0; j < valid.length; j++) {
-                                allData.set(new Uint8Array(valid[j]), offset);
-                                offset += valid[j].byteLength;
-                            }
-
-                            var transmuxer = new muxjs.Transmuxer({ keepOriginalTimestamps: true });
-                            var initSeg = null;
-                            var chunks = [];
-                            var hasInit = false;
-
-                            transmuxer.on('data', function(data) {
-                                if (!hasInit) {
-                                    initSeg = data.initSegment;
-                                    hasInit = true;
-                                }
-                                chunks.push(data.data);
-                            });
-
-                            transmuxer.push(allData);
-                            transmuxer.flush();
-
-                            var mp4Size = (initSeg ? initSeg.byteLength : 0);
-                            for (var k = 0; k < chunks.length; k++) {
-                                mp4Size += chunks[k].byteLength;
-                            }
-                            var mp4Data = new Uint8Array(mp4Size);
-                            var pos = 0;
-                            if (initSeg) {
-                                mp4Data.set(initSeg, pos);
-                                pos += initSeg.byteLength;
-                            }
-                            for (var m = 0; m < chunks.length; m++) {
-                                mp4Data.set(chunks[m], pos);
-                                pos += chunks[m].byteLength;
-                            }
-
-                            var blob = new Blob([mp4Data], { type: 'video/mp4' });
-                            self.saveBlob(blob, self.movieName + '.mp4');
-                            self.statusHint = 'MP4 下载完成';
-                            self.canDownload = true;
-                        } catch (e) {
-                            console.error(e);
-                            self.statusHint = '转码失败，请重试';
-                            self.canDownload = true;
-                            alert('转码失败: ' + e.message);
-                        }
-                    }, 200);
                 },
 
                 saveBlob: function(blob, filename) {
