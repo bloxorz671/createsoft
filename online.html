@@ -833,7 +833,7 @@
     <div id="update-modal" class="modal">
         <div class="update-modal-content">
             <div class="update-title">发现新版本</div>
-            <div id="version-display" class="version-info">3.1.0 → 3.1.1</div>
+            <div id="version-display" class="version-info">3.1.2 → 3.1.3</div>
             <p class="update-message">是否前往官网下载最新版本？</p>
             <div class="update-checkbox-container">
                 <input type="checkbox" id="ignore-update-checkbox">
@@ -988,7 +988,7 @@
     </div>
 
     <script>
-        const CURRENT_VERSION = "3.1.1";
+        const CURRENT_VERSION = "3.1.2";
         let classSize = 0;
         let noRepeatMode = true;
         let scrollMode = true;
@@ -1243,9 +1243,21 @@
                 const sizeData = localStorage.getItem('randomDraw_classSize');
                 if (sizeData) classSize = parseInt(sizeData);
                 const noRepeatData = localStorage.getItem('randomDraw_noRepeatRecords');
-                if (noRepeatData) { const parsed = JSON.parse(noRepeatData); if (Array.isArray(parsed)) noRepeatRecords = parsed; }
+                if (noRepeatData) { 
+                    const parsed = JSON.parse(noRepeatData); 
+                    if (Array.isArray(parsed)) {
+                        // 数据完整性检查：过滤无效记录
+                        noRepeatRecords = parsed.filter(item => item && item.value && item.timestamp);
+                    }
+                }
                 const allRecordsData = localStorage.getItem('randomDraw_allDrawRecords');
-                if (allRecordsData) { const parsed = JSON.parse(allRecordsData); if (Array.isArray(parsed)) allDrawRecords = parsed; checkAndCleanAllDrawRecords(); }
+                if (allRecordsData) { 
+                    const parsed = JSON.parse(allRecordsData); 
+                    if (Array.isArray(parsed)) {
+                        allDrawRecords = parsed.filter(item => item && item.value && item.timestamp);
+                        checkAndCleanAllDrawRecords(); 
+                    }
+                }
                 const repeatData = localStorage.getItem('randomDraw_noRepeatMode');
                 if (repeatData !== null) noRepeatMode = repeatData === 'true';
                 settingsNoRepeatSwitch.checked = noRepeatMode;
@@ -1256,11 +1268,18 @@
                 if (modeData === 'number' || modeData === 'name') pickMode = modeData;
                 modeSelect.value = pickMode;
                 const nameListData = localStorage.getItem('randomDraw_nameList');
-                if (nameListData) { try { nameList = JSON.parse(nameListData); } catch { nameList = []; } }
+                if (nameListData) { 
+                    try { 
+                        const parsed = JSON.parse(nameListData);
+                        if (Array.isArray(parsed)) nameList = parsed.filter(item => item && item.trim());
+                    } catch { nameList = []; } 
+                }
                 else nameList = [];
                 const ignoreUpdate = localStorage.getItem('randomDraw_ignoreUpdate');
                 if (ignoreUpdate === 'true') ignoreUpdateFlag = true;
-            } catch (error) { console.error('加载数据出错:', error); }
+            } catch (error) { 
+                console.error('加载数据出错:', error); 
+            }
         }
         
         function saveToLocalStorage() {
@@ -1273,7 +1292,9 @@
                 localStorage.setItem('randomDraw_pickMode', pickMode);
                 localStorage.setItem('randomDraw_nameList', JSON.stringify(nameList));
                 localStorage.setItem('randomDraw_ignoreUpdate', ignoreUpdateFlag);
-            } catch (error) { console.error('保存数据出错:', error); }
+            } catch (error) { 
+                console.error('保存数据出错:', error); 
+            }
         }
         
         function updateDisplay() {
@@ -1295,114 +1316,283 @@
                 classSizeDisplay.textContent = (pickMode === 'number' && classSize > 0) ? classSize : '?';
                 drawBtn.disabled = (pickMode === 'number' && classSize <= 0) || (pickMode === 'name' && nameList.length === 0);
             }
-            if (pickMode === 'number' && noRepeatMode && noRepeatRecords.length >= classSize && classSize > 0) { noRepeatRecords = []; saveToLocalStorage(); }
-            if (pickMode === 'name' && noRepeatMode && noRepeatRecords.length >= nameList.length && nameList.length > 0) { noRepeatRecords = []; saveToLocalStorage(); }
+            if (pickMode === 'number' && noRepeatMode && noRepeatRecords.length >= classSize && classSize > 0) { 
+                noRepeatRecords = []; 
+                saveToLocalStorage(); 
+            }
+            if (pickMode === 'name' && noRepeatMode && noRepeatRecords.length >= nameList.length && nameList.length > 0) { 
+                noRepeatRecords = []; 
+                saveToLocalStorage(); 
+            }
             if (pickMode === 'name') editNameListBtn.classList.remove('hidden');
             else editNameListBtn.classList.add('hidden');
             modeIndicator.textContent = noRepeatMode ? '不重复抽选已开启' : '';
         }
         
         function checkFirstTimeUse() {
-            if (pickMode === 'number' && (!classSize || classSize <= 0)) { setupModal.style.display = 'block'; setupClassSizeInput.focus(); }
-            else if (pickMode === 'name' && nameList.length === 0) { firstNameModal.style.display = 'block'; firstNameTextarea.focus(); }
+            if (pickMode === 'number' && (!classSize || classSize <= 0)) { 
+                setupModal.style.display = 'block'; 
+                setupClassSizeInput.focus(); 
+            }
+            else if (pickMode === 'name' && nameList.length === 0) { 
+                firstNameModal.style.display = 'block'; 
+                firstNameTextarea.focus(); 
+            }
+        }
+        
+        // 获取可用值列表（不重复模式下）
+        function getAvailableValues() {
+            if (!noRepeatMode) {
+                if (pickMode === 'number') {
+                    return Array.from({length: classSize}, (_, i) => (i + 1).toString());
+                } else {
+                    return [...nameList];
+                }
+            }
+            
+            const drawnSet = new Set(noRepeatRecords.map(r => r.value));
+            if (pickMode === 'number') {
+                const available = [];
+                for (let i = 1; i <= classSize; i++) {
+                    if (!drawnSet.has(i.toString())) {
+                        available.push(i.toString());
+                    }
+                }
+                return available;
+            } else {
+                return nameList.filter(name => !drawnSet.has(name));
+            }
         }
         
         async function scrollDraw() {
             const scrollCount = 10, scrollInterval = 80;
-            let max = (pickMode === 'number') ? classSize : nameList.length;
+            const availableValues = getAvailableValues();
+            
+            // 如果不重复模式下没有可用值，提示并重置
+            if (noRepeatMode && availableValues.length === 0) {
+                if (confirm('所有号码/姓名已抽完，是否重置不重复记录？')) {
+                    noRepeatRecords = [];
+                    saveToLocalStorage();
+                    return drawNumber();
+                } else {
+                    return null;
+                }
+            }
+            
             for (let i = 0; i < scrollCount; i++) {
-                if (pickMode === 'number') resultDisplay.textContent = Math.floor(Math.random() * max) + 1;
-                else resultDisplay.textContent = nameList[Math.floor(Math.random() * max)];
+                const randomValue = availableValues[Math.floor(Math.random() * availableValues.length)];
+                resultDisplay.textContent = randomValue;
                 await new Promise(resolve => setTimeout(resolve, scrollInterval));
             }
-            if (pickMode === 'number') return Math.floor(Math.random() * max) + 1;
-            else return { value: nameList[Math.floor(Math.random() * max)], index: -1 };
+            
+            return availableValues[Math.floor(Math.random() * availableValues.length)];
         }
         
         async function drawNumber() {
-            if (pickMode === 'number' && classSize <= 0) { alert('请先设置班级人数！'); setupModal.style.display = 'block'; return; }
-            if (pickMode === 'name' && nameList.length === 0) { alert('请先输入姓名名单！'); firstNameModal.style.display = 'block'; return; }
-            let finalValue;
-            let finalIndex = -1;
-            if (scrollMode) {
-                const result = await scrollDraw();
-                if (pickMode === 'number') finalValue = result.toString();
-                else { finalValue = result.value; finalIndex = -1; }
-            } else {
-                if (pickMode === 'number') finalValue = (Math.floor(Math.random() * classSize) + 1).toString();
-                else { finalValue = nameList[Math.floor(Math.random() * nameList.length)]; }
+            if (pickMode === 'number' && classSize <= 0) { 
+                alert('请先设置班级人数！'); 
+                setupModal.style.display = 'block'; 
+                return; 
             }
+            if (pickMode === 'name' && nameList.length === 0) { 
+                alert('请先输入姓名名单！'); 
+                firstNameModal.style.display = 'block'; 
+                return; 
+            }
+            
+            let finalValue;
+            
+            if (scrollMode) {
+                finalValue = await scrollDraw();
+                if (finalValue === null) return; // 用户取消重置
+            } else {
+                const availableValues = getAvailableValues();
+                if (noRepeatMode && availableValues.length === 0) {
+                    if (confirm('所有号码/姓名已抽完，是否重置不重复记录？')) {
+                        noRepeatRecords = [];
+                        saveToLocalStorage();
+                        const newAvailable = getAvailableValues();
+                        finalValue = newAvailable[Math.floor(Math.random() * newAvailable.length)];
+                    } else {
+                        return;
+                    }
+                } else {
+                    finalValue = availableValues[Math.floor(Math.random() * availableValues.length)];
+                }
+            }
+            
+            // 记录抽选结果
+            if (noRepeatMode && finalValue) {
+                noRepeatRecords.push({ value: finalValue, timestamp: Date.now() });
+            }
+            
+            // 保存所有抽选记录
             allDrawRecords.push({ value: finalValue, timestamp: Date.now() });
             checkAndCleanAllDrawRecords();
             saveToLocalStorage();
-            if (noRepeatMode) {
-                if (pickMode === 'number') {
-                    const drawnValues = noRepeatRecords.map(r => r.value);
-                    if (drawnValues.length >= classSize) noRepeatRecords = [];
-                    const available = [];
-                    for (let i = 1; i <= classSize; i++) if (!drawnValues.includes(i.toString())) available.push(i.toString());
-                    if (available.length > 0 && !available.includes(finalValue)) finalValue = available[Math.floor(Math.random() * available.length)];
-                    noRepeatRecords.push({ value: finalValue, timestamp: Date.now() });
-                } else {
-                    const drawnIndices = noRepeatRecords.map(r => nameList.indexOf(r.value)).filter(idx => idx !== -1);
-                    if (drawnIndices.length >= nameList.length) noRepeatRecords = [];
-                    const availableIndices = [];
-                    for (let i = 0; i < nameList.length; i++) if (!drawnIndices.includes(i)) availableIndices.push(i);
-                    if (availableIndices.length > 0) finalValue = nameList[availableIndices[Math.floor(Math.random() * availableIndices.length)]];
-                    noRepeatRecords.push({ value: finalValue, timestamp: Date.now() });
-                }
-                saveToLocalStorage();
-            }
+            
+            // 显示结果
             resultDisplay.textContent = finalValue;
         }
         
         function isLocked() { return Date.now() < lockUntil; }
         function updateLockMessage() {
-            if (isLocked()) { const remaining = Math.ceil((lockUntil - Date.now()) / 1000); debugLock.textContent = `系统已锁定，请等待${remaining}秒`; debugSubmitBtn.disabled = true; debugPasswordInput.disabled = true; }
-            else { debugLock.textContent = ''; debugSubmitBtn.disabled = false; debugPasswordInput.disabled = false; }
+            if (isLocked()) { 
+                const remaining = Math.ceil((lockUntil - Date.now()) / 1000); 
+                debugLock.textContent = `系统已锁定，请等待${remaining}秒`; 
+                debugSubmitBtn.disabled = true; 
+                debugPasswordInput.disabled = true; 
+            }
+            else { 
+                debugLock.textContent = ''; 
+                debugSubmitBtn.disabled = false; 
+                debugPasswordInput.disabled = false; 
+            }
         }
-        function startLockTimer() { if (lockTimer) clearInterval(lockTimer); lockTimer = setInterval(() => { if (!isLocked()) { clearInterval(lockTimer); updateLockMessage(); updateAttemptsInfo(); } else updateLockMessage(); }, 1000); }
-        function loadLockState() { try { const attempts = localStorage.getItem('randomDraw_wrongAttempts'); const lock = localStorage.getItem('randomDraw_lockUntil'); if (attempts) wrongAttempts = parseInt(attempts); if (lock) { lockUntil = parseInt(lock); if (isLocked()) startLockTimer(); } } catch (error) {} }
-        function saveLockState() { localStorage.setItem('randomDraw_wrongAttempts', wrongAttempts); localStorage.setItem('randomDraw_lockUntil', lockUntil); }
-        function updateAttemptsInfo() { debugAttempts.textContent = wrongAttempts > 0 ? `错误尝试: ${wrongAttempts}/5` : ''; }
-        function showDebugModal() { if (isLocked()) updateLockMessage(); debugModal.style.display = 'block'; debugPasswordInput.focus(); updatePasswordMask(); updateAttemptsInfo(); updateLockMessage(); }
-        function resetDeveloperTrigger() { titleClickCount = 0; urlClickCount = 0; titleReady = false; if (titleClickTimer) clearTimeout(titleClickTimer); if (urlClickTimer) clearTimeout(urlClickTimer); }
+        function startLockTimer() { 
+            if (lockTimer) clearInterval(lockTimer); 
+            lockTimer = setInterval(() => { 
+                if (!isLocked()) { 
+                    clearInterval(lockTimer); 
+                    updateLockMessage(); 
+                    updateAttemptsInfo(); 
+                } else updateLockMessage(); 
+            }, 1000); 
+        }
+        function loadLockState() { 
+            try { 
+                const attempts = localStorage.getItem('randomDraw_wrongAttempts'); 
+                const lock = localStorage.getItem('randomDraw_lockUntil'); 
+                if (attempts) wrongAttempts = parseInt(attempts); 
+                if (lock) { 
+                    lockUntil = parseInt(lock); 
+                    if (isLocked()) startLockTimer(); 
+                } 
+            } catch (error) {} 
+        }
+        function saveLockState() { 
+            localStorage.setItem('randomDraw_wrongAttempts', wrongAttempts); 
+            localStorage.setItem('randomDraw_lockUntil', lockUntil); 
+        }
+        function updateAttemptsInfo() { 
+            debugAttempts.textContent = wrongAttempts > 0 ? `错误尝试: ${wrongAttempts}/5` : ''; 
+        }
+        function showDebugModal() { 
+            if (isLocked()) updateLockMessage(); 
+            debugModal.style.display = 'block'; 
+            debugPasswordInput.focus(); 
+            updatePasswordMask(); 
+            updateAttemptsInfo(); 
+            updateLockMessage(); 
+        }
+        function resetDeveloperTrigger() { 
+            titleClickCount = 0; 
+            urlClickCount = 0; 
+            titleReady = false; 
+            if (titleClickTimer) clearTimeout(titleClickTimer); 
+            if (urlClickTimer) clearTimeout(urlClickTimer); 
+        }
         
         function toggleEditMode() {
             if (classSizeInput.style.display === 'none') {
-                classSizeInput.style.display = 'inline-block'; classSizeDisplay.style.display = 'none'; editBtn.textContent = '保存'; classSizeInput.value = classSize; classSizeInput.focus(); drawBtn.disabled = true;
+                classSizeInput.style.display = 'inline-block'; 
+                classSizeDisplay.style.display = 'none'; 
+                editBtn.textContent = '保存'; 
+                classSizeInput.value = classSize; 
+                classSizeInput.focus(); 
+                drawBtn.disabled = true;
             } else saveClassSize();
         }
         function saveClassSize() {
             let newSize = parseInt(classSizeInput.value);
-            if (isNaN(newSize) || newSize < 1) { alert('请输入有效的班级人数！'); classSizeInput.value = classSize; return; }
+            if (isNaN(newSize) || newSize < 1) { 
+                alert('请输入有效的班级人数！'); 
+                classSizeInput.value = classSize; 
+                return; 
+            }
             classSize = newSize;
-            if (pickMode === 'number' && noRepeatMode && noRepeatRecords.length > 0) noRepeatRecords = noRepeatRecords.filter(item => parseInt(item.value) <= classSize);
-            classSizeInput.style.display = 'none'; classSizeDisplay.style.display = 'inline-block'; editBtn.textContent = '编辑'; drawBtn.disabled = false; saveToLocalStorage(); updateDisplay();
+            if (pickMode === 'number' && noRepeatMode && noRepeatRecords.length > 0) 
+                noRepeatRecords = noRepeatRecords.filter(item => parseInt(item.value) <= classSize);
+            classSizeInput.style.display = 'none'; 
+            classSizeDisplay.style.display = 'inline-block'; 
+            editBtn.textContent = '编辑'; 
+            drawBtn.disabled = false; 
+            saveToLocalStorage(); 
+            updateDisplay();
         }
         
         function setupEventListeners() {
             noticeCloseBtn.addEventListener('click', () => noticeModal.style.display = 'none');
             updateNowBtn.addEventListener('click', () => { window.open('https://www.luckynum.top', '_blank'); updateModal.style.display = 'none'; });
-            updateLaterBtn.addEventListener('click', () => { if (ignoreUpdateCheckbox.checked) { ignoreUpdateFlag = true; saveToLocalStorage(); } updateModal.style.display = 'none'; });
-            setupSaveBtn.addEventListener('click', () => { const newSize = parseInt(setupClassSizeInput.value); if (isNaN(newSize) || newSize < 1 || newSize > 999) { alert('请输入有效的班级人数（1-999）！'); return; } classSize = newSize; saveToLocalStorage(); setupModal.style.display = 'none'; updateDisplay(); });
+            updateLaterBtn.addEventListener('click', () => { 
+                if (ignoreUpdateCheckbox.checked) { 
+                    ignoreUpdateFlag = true; 
+                    saveToLocalStorage(); 
+                } 
+                updateModal.style.display = 'none'; 
+            });
+            setupSaveBtn.addEventListener('click', () => { 
+                const newSize = parseInt(setupClassSizeInput.value); 
+                if (isNaN(newSize) || newSize < 1 || newSize > 999) { 
+                    alert('请输入有效的班级人数（1-999）！'); 
+                    return; 
+                } 
+                classSize = newSize; 
+                saveToLocalStorage(); 
+                setupModal.style.display = 'none'; 
+                updateDisplay(); 
+            });
             setupClassSizeInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') setupSaveBtn.click(); });
-            firstNameSaveBtn.addEventListener('click', () => { const raw = firstNameTextarea.value; const lines = raw.split('\n').map(l => l.trim()).filter(l => l); if (lines.length === 0) { alert('请输入至少一个姓名！'); return; } nameList = lines; saveToLocalStorage(); firstNameModal.style.display = 'none'; firstNameTextarea.value = ''; updateDisplay(); });
+            firstNameSaveBtn.addEventListener('click', () => { 
+                const raw = firstNameTextarea.value; 
+                const lines = raw.split('\n').map(l => l.trim()).filter(l => l); 
+                if (lines.length === 0) { 
+                    alert('请输入至少一个姓名！'); 
+                    return; 
+                } 
+                nameList = lines; 
+                saveToLocalStorage(); 
+                firstNameModal.style.display = 'none'; 
+                firstNameTextarea.value = ''; 
+                updateDisplay(); 
+            });
             editBtn.addEventListener('click', toggleEditMode);
             classSizeInput.addEventListener('blur', saveClassSize);
             classSizeInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') saveClassSize(); });
             drawBtn.addEventListener('click', drawNumber);
             settingsBtn.addEventListener('click', () => settingsModal.style.display = 'block');
             settingsClose.addEventListener('click', () => settingsModal.style.display = 'none');
-            modeSelect.addEventListener('change', () => { pickMode = modeSelect.value; saveToLocalStorage(); updateDisplay(); checkFirstTimeUse(); });
-            settingsNoRepeatSwitch.addEventListener('change', () => { noRepeatMode = settingsNoRepeatSwitch.checked; saveToLocalStorage(); updateDisplay(); });
-            settingsScrollSwitch.addEventListener('change', () => { scrollMode = settingsScrollSwitch.checked; saveToLocalStorage(); });
-            editNameListBtn.addEventListener('click', () => { nameListTextarea.value = nameList.join('\n'); nameListModal.style.display = 'block'; });
+            modeSelect.addEventListener('change', () => { 
+                pickMode = modeSelect.value; 
+                saveToLocalStorage(); 
+                updateDisplay(); 
+                checkFirstTimeUse(); 
+            });
+            settingsNoRepeatSwitch.addEventListener('change', () => { 
+                noRepeatMode = settingsNoRepeatSwitch.checked; 
+                saveToLocalStorage(); 
+                updateDisplay(); 
+            });
+            settingsScrollSwitch.addEventListener('change', () => { 
+                scrollMode = settingsScrollSwitch.checked; 
+                saveToLocalStorage(); 
+            });
+            editNameListBtn.addEventListener('click', () => { 
+                nameListTextarea.value = nameList.join('\n'); 
+                nameListModal.style.display = 'block'; 
+            });
             setupExcelReader(excelFileInput, nameListTextarea);
             setupExcelReader(firstExcelFileInput, firstNameTextarea);
             excelUploadBtn.addEventListener('click', () => excelFileInput.click());
             firstExcelUploadBtn.addEventListener('click', () => firstExcelFileInput.click());
-            nameListSave.addEventListener('click', () => { const raw = nameListTextarea.value; const lines = raw.split('\n').map(l => l.trim()).filter(l => l); nameList = lines; saveToLocalStorage(); nameListModal.style.display = 'none'; updateDisplay(); });
+            nameListSave.addEventListener('click', () => { 
+                const raw = nameListTextarea.value; 
+                const lines = raw.split('\n').map(l => l.trim()).filter(l => l); 
+                nameList = lines; 
+                saveToLocalStorage(); 
+                nameListModal.style.display = 'none'; 
+                updateDisplay(); 
+            });
             nameListCancel.addEventListener('click', () => nameListModal.style.display = 'none');
             nameListClose.addEventListener('click', () => nameListModal.style.display = 'none');
             checkUpdateInSettings.addEventListener('click', () => checkForUpdates(true));
@@ -1424,15 +1614,98 @@
                     showNoRepeatHistory();
                 }
             });
-            document.addEventListener('click', (e) => { if (e.target !== title && e.target !== urlText) resetDeveloperTrigger(); });
-            title.addEventListener('click', (e) => { e.stopPropagation(); if (titleClickTimer) clearTimeout(titleClickTimer); titleClickCount++; titleClickTimer = setTimeout(() => { titleClickCount = 0; titleReady = false; }, 5000); if (titleClickCount >= 10) { titleReady = true; titleClickCount = 0; } });
-            urlText.addEventListener('click', (e) => { e.stopPropagation(); if (!titleReady) return; if (urlClickTimer) clearTimeout(urlClickTimer); urlClickCount++; urlClickTimer = setTimeout(() => { urlClickCount = 0; titleReady = false; }, 5000); if (urlClickCount >= 3) { showDebugModal(); urlClickCount = 0; titleReady = false; if (urlClickTimer) clearTimeout(urlClickTimer); if (titleClickTimer) clearTimeout(titleClickTimer); } });
-            debugPasswordInput.addEventListener('input', function() { this.value = this.value.replace(/\D/g, ''); if (this.value.length > 4) this.value = this.value.slice(0, 4); updatePasswordMask(); });
-            debugPasswordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') debugSubmitBtn.click(); });
-            debugSubmitBtn.addEventListener('click', () => { if (isLocked()) { updateLockMessage(); return; } if (debugPasswordInput.value === CORRECT_PASSWORD) { wrongAttempts = 0; saveLockState(); debugModal.style.display = 'none'; debugPasswordInput.value = ''; updatePasswordMask(); debugError.textContent = ''; debugLock.textContent = ''; showNoRepeatHistory(); } else { wrongAttempts++; if (wrongAttempts >= 5) { lockUntil = Date.now() + 60 * 1000; saveLockState(); startLockTimer(); } saveLockState(); updateAttemptsInfo(); debugError.textContent = '密码错误'; debugPasswordInput.value = ''; updatePasswordMask(); debugPasswordInput.focus(); updateLockMessage(); } });
-            debugCloseBtn.addEventListener('click', () => { debugModal.style.display = 'none'; debugPasswordInput.value = ''; updatePasswordMask(); debugError.textContent = ''; debugLock.textContent = ''; });
-            window.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.style.display = 'none'; if (e.target === nameListModal) nameListModal.style.display = 'none'; if (e.target === firstNameModal) firstNameTextarea.focus(); if (e.target === updateModal) updateModal.style.display = 'none'; if (e.target === noticeModal) noticeModal.style.display = 'none'; if (e.target === allRecordsModal) allRecordsModal.style.display = 'none'; if (e.target === noRepeatHistoryModal) noRepeatHistoryModal.style.display = 'none'; });
-            window.addEventListener('beforeunload', () => { if (titleClickTimer) clearTimeout(titleClickTimer); if (urlClickTimer) clearTimeout(urlClickTimer); if (lockTimer) clearInterval(lockTimer); });
+            document.addEventListener('click', (e) => { 
+                if (e.target !== title && e.target !== urlText) resetDeveloperTrigger(); 
+            });
+            title.addEventListener('click', (e) => { 
+                e.stopPropagation(); 
+                if (titleClickTimer) clearTimeout(titleClickTimer); 
+                titleClickCount++; 
+                titleClickTimer = setTimeout(() => { 
+                    titleClickCount = 0; 
+                    titleReady = false; 
+                }, 5000); 
+                if (titleClickCount >= 10) { 
+                    titleReady = true; 
+                    titleClickCount = 0; 
+                } 
+            });
+            urlText.addEventListener('click', (e) => { 
+                e.stopPropagation(); 
+                if (!titleReady) return; 
+                if (urlClickTimer) clearTimeout(urlClickTimer); 
+                urlClickCount++; 
+                urlClickTimer = setTimeout(() => { 
+                    urlClickCount = 0; 
+                    titleReady = false; 
+                }, 5000); 
+                if (urlClickCount >= 3) { 
+                    showDebugModal(); 
+                    urlClickCount = 0; 
+                    titleReady = false; 
+                    if (urlClickTimer) clearTimeout(urlClickTimer); 
+                    if (titleClickTimer) clearTimeout(titleClickTimer); 
+                } 
+            });
+            debugPasswordInput.addEventListener('input', function() { 
+                this.value = this.value.replace(/\D/g, ''); 
+                if (this.value.length > 4) this.value = this.value.slice(0, 4); 
+                updatePasswordMask(); 
+            });
+            debugPasswordInput.addEventListener('keypress', (e) => { 
+                if (e.key === 'Enter') debugSubmitBtn.click(); 
+            });
+            debugSubmitBtn.addEventListener('click', () => { 
+                if (isLocked()) { 
+                    updateLockMessage(); 
+                    return; 
+                } 
+                if (debugPasswordInput.value === CORRECT_PASSWORD) { 
+                    wrongAttempts = 0; 
+                    saveLockState(); 
+                    debugModal.style.display = 'none'; 
+                    debugPasswordInput.value = ''; 
+                    updatePasswordMask(); 
+                    debugError.textContent = ''; 
+                    debugLock.textContent = ''; 
+                    showNoRepeatHistory(); 
+                } else { 
+                    wrongAttempts++; 
+                    if (wrongAttempts >= 5) { 
+                        lockUntil = Date.now() + 60 * 1000; 
+                        saveLockState(); 
+                        startLockTimer(); 
+                    } 
+                    saveLockState(); 
+                    updateAttemptsInfo(); 
+                    debugError.textContent = '密码错误'; 
+                    debugPasswordInput.value = ''; 
+                    updatePasswordMask(); 
+                    debugPasswordInput.focus(); 
+                    updateLockMessage(); 
+                } 
+            });
+            debugCloseBtn.addEventListener('click', () => { 
+                debugModal.style.display = 'none'; 
+                debugPasswordInput.value = ''; 
+                updatePasswordMask(); 
+                debugError.textContent = ''; 
+                debugLock.textContent = ''; 
+            });
+            window.addEventListener('click', (e) => { 
+                if (e.target === settingsModal) settingsModal.style.display = 'none'; 
+                if (e.target === nameListModal) nameListModal.style.display = 'none'; 
+                if (e.target === firstNameModal) firstNameTextarea.focus(); 
+                if (e.target === updateModal) updateModal.style.display = 'none'; 
+                if (e.target === noticeModal) noticeModal.style.display = 'none'; 
+                if (e.target === allRecordsModal) allRecordsModal.style.display = 'none'; 
+                if (e.target === noRepeatHistoryModal) noRepeatHistoryModal.style.display = 'none'; 
+            });
+            window.addEventListener('beforeunload', () => { 
+                if (titleClickTimer) clearTimeout(titleClickTimer); 
+                if (urlClickTimer) clearTimeout(urlClickTimer); 
+                if (lockTimer) clearInterval(lockTimer); 
+            });
         }
         
         window.addEventListener('load', () => {
